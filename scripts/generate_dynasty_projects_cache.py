@@ -761,17 +761,31 @@ class DynastyProjectsCacheGenerator:
             elif district_municipalities:
                 print(f"✅ {display_name}: Loaded {len(district_municipalities)} municipalities for {config_district_number}: {district_municipalities[:3]}...")
             
-            # Get barangays if needed
+            # Get barangays for city districts from districts.json (single source of truth)
             barangays = []
-            if congressman_id == 5:  # Mannix Dalipe
-                barangays_file = Path(__file__).parent.parent / '2nd-district-zamboanga-city.json'
-                if barangays_file.exists():
-                    with open(barangays_file, 'r', encoding='utf-8') as f:
-                        barangays_data = json.load(f)
-                        if isinstance(barangays_data, list):
-                            barangays = barangays_data
-                        elif isinstance(barangays_data, dict):
-                            barangays = barangays_data.get('barangays', barangays_data.get('2nd_district_barangays', []))
+            if config_is_city_district:
+                try:
+                    districts_block = (districts_data or {}).get('districts', {})
+                    brgy_list = []
+                    for prov in provinces:
+                        if not prov:
+                            continue
+                        prov_key = str(prov).strip()
+                        prov_entry = districts_block.get(prov_key)
+                        if not prov_entry:
+                            prov_lower = prov_key.lower().strip()
+                            for k, v in districts_block.items():
+                                if str(k).lower().strip() == prov_lower:
+                                    prov_entry = v
+                                    break
+                        if prov_entry:
+                            brgy_map = prov_entry.get('barangays', {}) or {}
+                            brgy_list = brgy_map.get(config_district_number, []) or []
+                            if brgy_list:
+                                break
+                    barangays = brgy_list
+                except Exception:
+                    barangays = []
             
             congressmen_data[display_name] = {
                 "name": display_name,
@@ -1902,4 +1916,3 @@ async def main():
 
 if __name__ == '__main__':
     asyncio.run(main())
-

@@ -89,7 +89,7 @@
       "district_type": "barangays",
       "district_data": {
         "barangays_count": 60,
-        "note": "60 barangays from 2nd-district-zamboanga-city.json"
+        "note": "Barangays sourced from static/data/districts.json (single source of truth)"
       },
       "contractors": [],
       "matching_logic": "Barangay-based (2nd district barangays = score 100, no barangay info = score 1, barangay mentioned but not in 2nd district = excluded)",

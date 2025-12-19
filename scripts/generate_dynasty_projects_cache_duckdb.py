@@ -15,6 +15,7 @@ import os
 import re
 import subprocess
 import sys
+import unicodedata
 from collections import defaultdict
 import concurrent.futures
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -72,20 +73,20 @@ class LocationMatcher:
         self.location_entries = []
         self.token_map = defaultdict(set)
         self.loaded = False
-        # Disambiguation patterns for tricky provinces
-        self.disambiguation_patterns = [
-            (re.compile(r'davao\s+de\s+oro', re.I), 'DAVAO DE ORO'),
-            (re.compile(r'davao\s+del\s+sur', re.I), 'DAVAO DEL SUR'),
-            (re.compile(r'davao\s+del\s+norte', re.I), 'DAVAO DEL NORTE'),
-            (re.compile(r'davao\s+oriental', re.I), 'DAVAO ORIENTAL'),
-            (re.compile(r'davao\s+occidental', re.I), 'DAVAO OCCIDENTAL'),
-            (re.compile(r'cebu\s+city', re.I), 'CEBU CITY'),
-            (re.compile(r'cagayan\s+de\s+oro', re.I), 'CITY OF CAGAYAN DE ORO'),
-            (re.compile(r'quezon\s+city', re.I), 'QUEZON CITY'),
-            (re.compile(r'zamboanga\s+del\s+norte', re.I), 'ZAMBOANGA DEL NORTE'),
-            (re.compile(r'zamboanga\s+del\s+sur', re.I), 'ZAMBOANGA DEL SUR'),
-            (re.compile(r'zamboanga\s+sibugay', re.I), 'ZAMBOANGA SIBUGAY'),
-        ]
+        self.safe_lone_municipalities = set()
+        self.safe_single_district_municipalities = set()
+        # province_suffix_token -> set(province_phrase_norm)
+        # Used to avoid counting municipality matches that only occur inside a province phrase
+        # (e.g., "metro manila" should not trigger municipality="manila" by itself).
+        self.province_phrase_by_suffix = defaultdict(set)
+        # region_suffix_token -> set(region_phrase_norm)
+        # Used similarly for region phrases (e.g., region="metro manila" should not trigger municipality="manila").
+        self.region_phrase_by_suffix = defaultdict(set)
+        # Data-driven province phrase patterns (built from unified location hierarchy).
+        # Used to disambiguate/strengthen province matching without hardcoded lists.
+        self.province_phrase_patterns = []
+        # Data-driven region phrase patterns (built from unified location hierarchy).
+        self.region_phrase_patterns = []
 
     def load(self):
         if self.loaded: return
@@ -98,39 +99,130 @@ class LocationMatcher:
             import duckdb
             con = duckdb.connect()
             con.execute(f"CREATE TABLE ul AS SELECT * FROM read_parquet('{self.parquet_path}')")
-            # Select relevant columns: prov, muni, brgy, dist, cong
-            rows = con.execute("SELECT province, municipality, barangay, district, congressman FROM ul WHERE congressman IS NOT NULL AND congressman != 'TBD' AND congressman != 'Unknown'").fetchall()
+            # Select relevant columns: region, prov, muni, brgy, dist, cong
+            # Include entries even when congressman is TBD; district-history matching can still resolve.
+            rows = con.execute("SELECT region, province, municipality, barangay, district, congressman FROM ul WHERE congressman IS NOT NULL").fetchall()
             con.close()
             
+            muni_provinces = defaultdict(set)  # muni_norm -> set(prov_norm)
+            muni_districts = defaultdict(set)  # muni_norm -> set(dist_lower)
+
             for idx, row in enumerate(rows):
-                prov, muni, brgy, dist, cong = row
+                region, prov, muni, brgy, dist, cong = row
                 entry = {
                     'id': idx,
+                    'region': region,
                     'prov': prov, 'muni': muni, 'brgy': brgy,
                     'dist': dist, 'cong': cong,
+                    'region_norm': self._normalize(region),
                     'prov_norm': self._normalize(prov),
                     'muni_norm': self._normalize(muni),
                     'brgy_norm': self._normalize(brgy)
                 }
                 self.location_entries.append(entry)
+
+                if entry['muni_norm'] and entry['prov_norm']:
+                    muni_provinces[entry['muni_norm']].add(entry['prov_norm'])
+                if entry['muni_norm'] and dist:
+                    muni_districts[entry['muni_norm']].add(str(dist).strip().lower())
                 
                 # Index tokens
                 # Index Province (careful with common words, maybe index full prov string too)
                 self._index_tokens(entry['prov_norm'], idx)
                 self._index_tokens(entry['muni_norm'], idx)
                 self._index_tokens(entry['brgy_norm'], idx)
+
+            # Municipality-only matching is allowed only for municipalities/cities that:
+            # - exist in exactly one province across the country, and
+            # - map to exactly one district, and that district is a "Lone District"
+            safe = set()
+            safe_single = set()
+            for muni_norm, provs in muni_provinces.items():
+                if len(provs) != 1:
+                    continue
+                dists = muni_districts.get(muni_norm) or set()
+                if len(dists) != 1:
+                    continue
+                only_dist = next(iter(dists))
+                safe_single.add(muni_norm)
+                if "lone district" not in only_dist:
+                    continue
+                safe.add(muni_norm)
+            self.safe_lone_municipalities = safe
+            self.safe_single_district_municipalities = safe_single
+
+            # Build province phrase index to avoid nested matches (data-driven; no hardcoded names).
+            suffix_map = defaultdict(set)
+            for entry in self.location_entries:
+                prov_norm = entry.get("prov_norm") or ""
+                tokens = prov_norm.split()
+                if len(tokens) >= 2:
+                    suffix_map[tokens[-1]].add(prov_norm)
+            self.province_phrase_by_suffix = suffix_map
+            
+            # Build region phrase index to avoid nested matches (data-driven; no hardcoded names).
+            region_suffix_map = defaultdict(set)
+            for entry in self.location_entries:
+                reg_norm = entry.get("region_norm") or ""
+                tokens = reg_norm.split()
+                if len(tokens) >= 2:
+                    region_suffix_map[tokens[-1]].add(reg_norm)
+            self.region_phrase_by_suffix = region_suffix_map
+
+            # Build multi-word province phrase patterns (most-specific first).
+            phrase_patterns = []
+            seen = set()
+            for entry in self.location_entries:
+                prov_norm = entry.get("prov_norm") or ""
+                if not prov_norm:
+                    continue
+                if prov_norm in seen:
+                    continue
+                seen.add(prov_norm)
+                tokens = prov_norm.split()
+                if len(tokens) < 2:
+                    continue
+                pat = r"\b" + r"\s+".join(re.escape(t) for t in tokens) + r"\b"
+                phrase_patterns.append((re.compile(pat, re.IGNORECASE), prov_norm, len(tokens), len(prov_norm)))
+            phrase_patterns.sort(key=lambda t: (t[2], t[3]), reverse=True)
+            self.province_phrase_patterns = [(p, prov) for (p, prov, _tc, _lc) in phrase_patterns]
+            
+            # Build multi-word region phrase patterns (most-specific first).
+            region_patterns = []
+            seen_regions = set()
+            for entry in self.location_entries:
+                reg_norm = entry.get("region_norm") or ""
+                if not reg_norm:
+                    continue
+                if reg_norm in seen_regions:
+                    continue
+                seen_regions.add(reg_norm)
+                tokens = reg_norm.split()
+                if len(tokens) < 2:
+                    continue
+                pat = r"\b" + r"\s+".join(re.escape(t) for t in tokens) + r"\b"
+                region_patterns.append((re.compile(pat, re.IGNORECASE), reg_norm, len(tokens), len(reg_norm)))
+            region_patterns.sort(key=lambda t: (t[2], t[3]), reverse=True)
+            self.region_phrase_patterns = [(p, reg) for (p, reg, _tc, _lc) in region_patterns]
             
             self.loaded = True
             print(f"✅ Indexed {len(self.location_entries)} locations.")
+            print(f"✅ Safe lone-district municipalities: {len(self.safe_lone_municipalities)}")
+            print(f"✅ Safe single-district municipalities: {len(self.safe_single_district_municipalities)}")
             
         except Exception as e:
             print(f"⚠️ Failed to build location index: {e}")
 
     def _normalize(self, text):
         if not text: return ""
-        # Keep it simple: lowercase, strip, remove 'city of', 'municipality of'
-        text = str(text).lower().strip()
+        # Accent-fold (ñ -> n), lowercase, strip, remove common prefixes.
+        text = str(text).strip()
+        text = unicodedata.normalize("NFKD", text)
+        text = "".join(ch for ch in text if not unicodedata.combining(ch))
+        text = text.lower().strip()
         text = text.replace("city of ", "").replace("municipality of ", "")
+        text = re.sub(r"[^a-z0-9\s]", " ", text)
+        text = " ".join(text.split()).strip()
         return text
 
     def _index_tokens(self, text, idx):
@@ -146,15 +238,14 @@ class LocationMatcher:
         
         text_norm = self._normalize(text)
         
-        # 1. Disambiguate Province Hint from Text
-        target_prov = None
-        for pattern, prov_name in self.disambiguation_patterns:
-            if pattern.search(text):
-                target_prov = prov_name
+        # 1. Data-driven province phrase detection from text (strong hint).
+        target_prov_norm = None
+        for pat, prov_norm in self.province_phrase_patterns:
+            if pat.search(text_norm):
+                target_prov_norm = prov_norm
                 break
-        
-        if not target_prov and province_hint:
-             target_prov = province_hint
+        if not target_prov_norm and province_hint:
+            target_prov_norm = self._normalize(province_hint)
 
         # 2. Get Candidate IDs
         # Gather candidates based on tokens in the text
@@ -175,8 +266,7 @@ class LocationMatcher:
         # 3. Score Candidates (Subset only!)
         best_entry = None
         best_score = 0
-        
-        target_prov_norm = self._normalize(target_prov) if target_prov else None
+        best_flags = (False, False, False, "", "", False)
 
         for idx in candidates:
             entry = self.location_entries[idx]
@@ -188,25 +278,33 @@ class LocationMatcher:
 
             score = 0
             match_length_bonus = 0
+            has_muni = False
+            has_brgy = False
+            has_prov = False
             
-            # Municipality Match - +4 weight + length bonus
+            # Municipality Match - strong (but avoid nested-in-province matches like "metro manila")
             if entry['muni_norm'] and len(entry['muni_norm']) > 3:
-                if self._word_boundary_match(entry['muni_norm'], text_norm):
-                    score += 4
+                if self._word_boundary_match(entry['muni_norm'], text_norm) and self._is_standalone_location_match(
+                    entry['muni_norm'], text_norm
+                ):
+                    score += 5
                     match_length_bonus += len(entry['muni_norm']) * 2
+                    has_muni = True
             
-            # Barangay Match - +2 weight + length bonus
+            # Barangay Match - highest priority
             if entry['brgy_norm'] and len(entry['brgy_norm']) > 3:
                 if self._word_boundary_match(entry['brgy_norm'], text_norm):
-                    score += 2
+                    score += 7
                     match_length_bonus += len(entry['brgy_norm'])
+                    has_brgy = True
                       
-            # Province Match - +3 weight + length bonus
+            # Province Match - weaker than municipality/barangay
             # Skip short ambiguous province names if project contains longer version
             if entry['prov_norm'] and len(entry['prov_norm']) > 3:
                 if self._word_boundary_match(entry['prov_norm'], text_norm):
                      score += 3
                      match_length_bonus += len(entry['prov_norm'])
+                     has_prov = True
             
             # Total score
             total_score = score * 100 + match_length_bonus
@@ -214,10 +312,24 @@ class LocationMatcher:
             if total_score > best_score:
                 best_score = total_score
                 best_entry = entry
+                muni_norm = entry.get('muni_norm') or ""
+                prov_norm = entry.get('prov_norm') or ""
+                same_muni_prov = bool(muni_norm and prov_norm and muni_norm == prov_norm)
+                best_flags = (has_muni, has_brgy, has_prov, muni_norm, prov_norm, same_muni_prov)
         
-        # Threshold - require at least one substantial match (approx 200+)
-        if best_score >= 200:
-             return (best_entry['prov'], best_entry['dist'], best_entry['cong'])
+        # Require at least two levels:
+        # - municipality + province, or
+        # - barangay + (municipality or province).
+        # Municipality-only is allowed only for safe lone districts.
+        if best_entry and best_score >= 200:
+            has_muni, has_brgy, has_prov, muni_norm, _prov_norm, same_muni_prov = best_flags
+            muni_and_prov = (has_muni and has_prov and not same_muni_prov)
+            brgy_plus = (has_brgy and (has_muni or has_prov))
+            lone_muni = (has_muni and muni_norm in self.safe_lone_municipalities)
+            safe_single_muni = (has_muni and muni_norm in self.safe_single_district_municipalities)
+
+            if muni_and_prov or brgy_plus or lone_muni or safe_single_muni:
+                return (best_entry['prov'], best_entry['dist'], best_entry['cong'])
         
         return None
 
@@ -243,6 +355,51 @@ class LocationMatcher:
         pattern = r'\b' + re.escape(needle) + r'\b'
         return bool(re.search(pattern, haystack))
 
+    def _is_standalone_location_match(self, needle: str, haystack: str) -> bool:
+        """True if `needle` appears outside any matching province phrase that contains it as a suffix token.
+
+        This prevents treating province phrases like "X Y" as evidence that municipality == "Y".
+        Example: if province "metro manila" exists in the location DB, then "manila" inside
+        "metro manila" is not a municipality hit unless "manila" also appears elsewhere standalone.
+        """
+        if not needle or not haystack:
+            return False
+
+        phrases = set()
+        phrases.update(self.province_phrase_by_suffix.get(needle) or set())
+        phrases.update(self.region_phrase_by_suffix.get(needle) or set())
+        if not phrases:
+            return True
+
+        needle_pat = re.compile(rf"\b{re.escape(needle)}\b", re.IGNORECASE)
+        needle_spans = [m.span() for m in needle_pat.finditer(haystack)]
+        if not needle_spans:
+            return False
+
+        phrase_spans: List[tuple] = []
+        for phrase in phrases:
+            if not phrase or phrase == needle:
+                continue
+            phrase_pat = re.compile(rf"\b{re.escape(phrase)}\b", re.IGNORECASE)
+            for m in phrase_pat.finditer(haystack):
+                phrase_spans.append(m.span())
+
+        if not phrase_spans:
+            return True
+
+        def within_any(span: tuple, containers: List[tuple]) -> bool:
+            s0, s1 = span
+            for c0, c1 in containers:
+                if c0 <= s0 and s1 <= c1:
+                    return True
+            return False
+
+        # Accept if ANY occurrence of needle is outside all province-phrase spans.
+        for span in needle_spans:
+            if not within_any(span, phrase_spans):
+                return True
+        return False
+
 # --- Multiprocessing Support ---
 
 WORKER_STATE = {}
@@ -251,6 +408,10 @@ def init_worker(shared_data):
     """Initialize global state for worker processes"""
     global WORKER_STATE
     WORKER_STATE = shared_data
+    try:
+        WORKER_STATE['safe_single_district_municipalities'] = set(WORKER_STATE.get('safe_single_district_municipalities', []))
+    except Exception:
+        WORKER_STATE['safe_single_district_municipalities'] = set()
     
     # Debug: Print lookup sizes to verify data sharing
     import os
@@ -270,31 +431,62 @@ def init_worker(shared_data):
         pass
     
     
-    # Cache unique provinces for fast scanning in worker
+    # Cache unique provinces/regions for fast scanning in worker
     unique_provinces = set()
+    unique_regions = set()
     locations = WORKER_STATE.get('location_entries', [])
     for loc in locations:
         if loc:
              # Handle both dict (likely) and tuple (fallback) just in case
              if isinstance(loc, dict):
+                 r = loc.get('region')
+                 if r: unique_regions.add(str(r).strip().upper())
                  p = loc.get('prov')
                  if p: unique_provinces.add(str(p).strip().upper())
              elif isinstance(loc, (list, tuple)) and len(loc) > 0:
-                 p = loc[0]
+                 # tuple layout can be (prov, muni, brgy, dist, cong) or (region, prov, muni, brgy, dist, cong)
+                 if len(loc) >= 6:
+                     r = loc[0]
+                     p = loc[1]
+                     if r: unique_regions.add(str(r).strip().upper())
+                 else:
+                     p = loc[0]
                  if p: unique_provinces.add(str(p).strip().upper())
             
-    # Also add disambiguation targets
-    disambig = [
-        'DAVAO DE ORO', 'DAVAO DEL SUR', 'DAVAO DEL NORTE', 'DAVAO ORIENTAL', 'DAVAO OCCIDENTAL',
-        'CEBU CITY', 'AGUSAN DEL NORTE', 'AGUSAN DEL SUR', 'LANAO DEL NORTE', 'LANAO DEL SUR',
-        'MAGUINDANAO', 'ILOCOS NORTE', 'ILOCOS SUR', 'ZAMBOANGA DEL NORTE', 'ZAMBOANGA DEL SUR',
-        'ZAMBOANGA SIBUGAY', 'MISAMIS ORIENTAL', 'MISAMIS OCCIDENTAL', 'CAMARINES NORTE', 'CAMARINES SUR',
-        'NEGROS OCCIDENTAL', 'NEGROS ORIENTAL', 'MINDORO OCCIDENTAL', 'MINDORO ORIENTAL'
-    ]
-    for d in disambig:
-        unique_provinces.add(d)
-        
     WORKER_STATE['unique_provinces'] = list(unique_provinces)
+    WORKER_STATE['unique_regions'] = list(unique_regions)
+
+    # Data-driven phrase patterns for multi-word provinces (used to strengthen province detection).
+    phrase_patterns = []
+    for prov in unique_provinces:
+        prov_norm = normalize_for_match_worker(prov)
+        toks = prov_norm.split()
+        if len(toks) < 2:
+            continue
+        pat = r"\\b" + r"\\s+".join(re.escape(t) for t in toks) + r"\\b"
+        phrase_patterns.append((re.compile(pat, re.IGNORECASE), prov_norm, len(toks), len(prov_norm)))
+    phrase_patterns.sort(key=lambda t: (t[2], t[3]), reverse=True)
+    WORKER_STATE['province_phrase_patterns'] = [(p, prov_norm) for (p, prov_norm, _tc, _lc) in phrase_patterns]
+    
+    # Province phrase suffix map (data-driven), used to avoid nested municipality matches.
+    # Example: "metro manila" should not count as municipality="manila" by itself.
+    from collections import defaultdict
+    suffix_map = defaultdict(set)
+    for prov in unique_provinces:
+        prov_norm = normalize_for_match_worker(prov)
+        toks = prov_norm.split()
+        if len(toks) >= 2:
+            suffix_map[toks[-1]].add(prov_norm)
+    WORKER_STATE['province_phrase_by_suffix'] = suffix_map
+
+    # Region phrase suffix map (data-driven), used to avoid nested municipality matches.
+    region_suffix_map = defaultdict(set)
+    for reg in unique_regions:
+        reg_norm = normalize_for_match_worker(reg)
+        toks = reg_norm.split()
+        if len(toks) >= 2:
+            region_suffix_map[toks[-1]].add(reg_norm)
+    WORKER_STATE['region_phrase_by_suffix'] = region_suffix_map
 
 
 def normalize_for_match_worker(text: str) -> str:
@@ -302,6 +494,7 @@ def normalize_for_match_worker(text: str) -> str:
     if not text:
         return ""
     import unicodedata
+    import re
     text = str(text)
     try:
         text = unicodedata.normalize('NFKD', text).encode('ASCII', 'ignore').decode('ASCII')
@@ -309,11 +502,55 @@ def normalize_for_match_worker(text: str) -> str:
         pass
     text = text.lower().strip()
     text = text.replace("city of ", "").replace("municipality of ", "")
-    return text.strip()
+    text = re.sub(r"[^a-z0-9\\s]", " ", text)
+    text = " ".join(text.split()).strip()
+    return text
+
+def is_standalone_location_match_worker(needle: str, haystack: str) -> bool:
+    """True if `needle` appears outside any province-phrase match that contains it as a suffix token."""
+    if not needle or not haystack:
+        return False
+    import re
+
+    phrases = set()
+    phrases.update((WORKER_STATE.get('province_phrase_by_suffix', {}) or {}).get(needle) or set())
+    phrases.update((WORKER_STATE.get('region_phrase_by_suffix', {}) or {}).get(needle) or set())
+    if not phrases:
+        return True
+
+    needle_pat = re.compile(rf"\b{re.escape(needle)}\b", re.IGNORECASE)
+    needle_spans = [m.span() for m in needle_pat.finditer(haystack)]
+    if not needle_spans:
+        return False
+
+    phrase_spans = []
+    for phrase in phrases:
+        if not phrase or phrase == needle:
+            continue
+        phrase_pat = re.compile(rf"\b{re.escape(phrase)}\b", re.IGNORECASE)
+        for m in phrase_pat.finditer(haystack):
+            phrase_spans.append(m.span())
+
+    if not phrase_spans:
+        return True
+
+    def within_any(span, containers):
+        s0, s1 = span
+        for c0, c1 in containers:
+            if c0 <= s0 and s1 <= c1:
+                return True
+        return False
+
+    # Accept if ANY occurrence of needle is outside all province-phrase spans.
+    for span in needle_spans:
+        if not within_any(span, phrase_spans):
+            return True
+    return False
 
 def find_best_location_match_worker(project_name: str, project_province: Optional[str] = None) -> Optional[tuple]:
     """Worker version of _find_best_location_match using shared state"""
     location_entries = WORKER_STATE.get('location_entries', [])
+    token_map = WORKER_STATE.get('location_token_map', {})
     import re
     if not project_name or not location_entries:
         return None
@@ -342,6 +579,7 @@ def find_best_location_match_worker(project_name: str, project_province: Optiona
        detected_provinces.add(prov_norm)
 
     unique_provinces = WORKER_STATE.get('unique_provinces', [])
+    province_phrase_patterns = WORKER_STATE.get('province_phrase_patterns', [])
     
     # Quick scan for provinces in text
     if unique_provinces:
@@ -356,44 +594,21 @@ def find_best_location_match_worker(project_name: str, project_province: Optiona
                 # Normalize it to match prov_entry format usually
                 detected_provinces.add(normalize_for_match_worker(p))
 
-    # --- DISAMBIGUATION ---
-    disambiguation_patterns = [
-        (r'davao\s+de\s+oro', 'DAVAO DE ORO'),
-        (r'davao\s+del\s+sur', 'DAVAO DEL SUR'),
-        (r'davao\s+del\s+norte', 'DAVAO DEL NORTE'),
-        (r'davao\s+oriental', 'DAVAO ORIENTAL'),
-        (r'davao\s+occidental', 'DAVAO OCCIDENTAL'),
-        (r'cebu\s+city', 'CEBU CITY'),
-        (r'cagayan\s+de\s+oro', 'CITY OF CAGAYAN DE ORO'),
-        (r'quezon\s+city', 'QUEZON CITY'),
-        (r'zamboanga\s+del\s+norte', 'ZAMBOANGA DEL NORTE'),
-        (r'zamboanga\s+del\s+sur', 'ZAMBOANGA DEL SUR'),
-        (r'zamboanga\s+sibugay', 'ZAMBOANGA SIBUGAY'),
-    ]
-    
-    import re
-    for pattern, target_prov in disambiguation_patterns:
-        if re.search(pattern, name_lower):
-            # If disambiguated, this is a STRONG detected province
-            target_norm = normalize_for_match_worker(target_prov)
-            detected_provinces.add(target_norm)
-            
-            for entry in location_entries:
-                prov = entry.get('prov')
-                muni = entry.get('muni')
-                brgy = entry.get('brgy')
-                dist = entry.get('dist')
-                cong = entry.get('cong')
-                
-                if prov and target_prov.lower() in prov.lower():
-                    muni_norm = normalize_for_match_worker(muni)
-                    brgy_norm = normalize_for_match_worker(brgy)
-                    
-                    if muni_norm and len(muni_norm) > 3 and muni_norm in name_norm:
-                        return (prov, muni, brgy, dist, cong)
-                    if brgy_norm and len(brgy_norm) > 3 and brgy_norm in name_norm:
-                        return (prov, muni, brgy, dist, cong)
-    
+    # Stronger multi-word province detection (data-driven).
+    for pat, prov_norm in province_phrase_patterns:
+        if pat.search(name_norm):
+            detected_provinces.add(prov_norm)
+
+    # Candidate selection using inverted index when available (avoids O(N) scans).
+    candidates = None
+    if token_map:
+        candidates = set()
+        for tok in name_norm.split():
+            if len(tok) > 2 and tok in token_map:
+                candidates.update(token_map[tok])
+        if not candidates:
+            return None
+
     best_match = None
     best_score = 0
     
@@ -420,7 +635,8 @@ def find_best_location_match_worker(project_name: str, project_province: Optiona
         pattern = r'\b' + re.escape(needle) + r'\b'
         return bool(re.search(pattern, haystack))
     
-    for entry in location_entries:
+    entry_iter = (location_entries[i] for i in candidates) if candidates is not None else location_entries
+    for entry in entry_iter:
         prov = entry.get('prov')
         muni = entry.get('muni')
         brgy = entry.get('brgy')
@@ -429,9 +645,9 @@ def find_best_location_match_worker(project_name: str, project_province: Optiona
         score = 0
         match_length_bonus = 0
         
-        prov_entry = normalize_for_match_worker(prov)
-        muni_entry = normalize_for_match_worker(muni)
-        brgy_entry = normalize_for_match_worker(brgy)
+        prov_entry = entry.get('prov_norm') or normalize_for_match_worker(prov)
+        muni_entry = entry.get('muni_norm') or normalize_for_match_worker(muni)
+        brgy_entry = entry.get('brgy_norm') or normalize_for_match_worker(brgy)
         
         # Hierarchy: Barangay > Municipality > Province
         # Scores tailored to ensure specific matches outweigh broader ones
@@ -440,7 +656,7 @@ def find_best_location_match_worker(project_name: str, project_province: Optiona
         # If we have detected provinces (either from arg or text), enforce them.
         if detected_provinces:
              match_found = False
-             current_prov_norm = normalize_for_match_worker(prov)
+             current_prov_norm = prov_entry
              
              for dp in detected_provinces:
                  if dp in current_prov_norm or current_prov_norm in dp:
@@ -465,7 +681,7 @@ def find_best_location_match_worker(project_name: str, project_province: Optiona
                 prov_matched = True
         
         if muni_entry and len(muni_entry) > 3:
-            if word_boundary_match(muni_entry, name_norm):
+            if word_boundary_match(muni_entry, name_norm) and is_standalone_location_match_worker(muni_entry, name_norm):
                 score += 35 # Municipality > Province (tuned so Muni+Prov > Brgy)
                 match_length_bonus += len(muni_entry) * 2
                 muni_matched = True
@@ -476,10 +692,13 @@ def find_best_location_match_worker(project_name: str, project_province: Optiona
                 match_length_bonus += len(brgy_entry)
                 brgy_matched = True
         
-        # Count Matches
-        if prov_matched: matched_levels += 1
-        if muni_matched: matched_levels += 1
-        if brgy_matched: matched_levels += 1
+        # Count matched levels, but don't allow province==municipality to count as two levels.
+        if prov_matched:
+            matched_levels += 1
+        if muni_matched and (not prov_matched or muni_entry != prov_entry):
+            matched_levels += 1
+        if brgy_matched and (not muni_matched or brgy_entry != muni_entry) and (not prov_matched or brgy_entry != prov_entry):
+            matched_levels += 1
         
         # Requirement: At least 2 levels matches OR (Special Case check?)
         # User request: "at least 2 levels in a location heirachy should match"
@@ -502,6 +721,9 @@ def find_best_location_match_worker(project_name: str, project_province: Optiona
         elif matched_levels >= 1 and muni_matched and is_lone_district:
             # Special exemption for Lone District Cities
             # But ensure we matched the City Name, not just a random Barangay
+            pass_level_check = True
+        elif muni_matched and muni_entry in WORKER_STATE.get('safe_single_district_municipalities', set()):
+            # Safe exception: municipality/city maps to exactly one district nationwide (data-driven).
             pass_level_check = True
             
         if not pass_level_check:
@@ -1139,9 +1361,52 @@ def process_unified_chunk_worker(projects_chunk):
             
             # Combine name and location for better context resolution 
             # (e.g. "Construction of Building in Brgy X" + "City Y")
-            search_text = f"{project_name} {location_raw}"
-            
-            match_res = find_best_location_match_worker(search_text)
+            search_text = f"{project_name} {location_raw}".strip()
+
+            # Project name is the primary signal; location/enrich columns are secondary.
+            name_match_res = find_best_location_match_worker(project_name)
+            combined_match_res = None
+            if location_raw or not name_match_res:
+                combined_match_res = find_best_location_match_worker(search_text)
+
+            def _granularity(m):
+                if not m:
+                    return 0
+                _prov, _muni, _brgy, _dist, _cong = m
+                return (2 if _brgy else 0) + (1 if _muni else 0)
+
+            def _prov_norm(m):
+                if not m:
+                    return ""
+                _prov, _muni, _brgy, _dist, _cong = m
+                return normalize_for_match_worker(_prov)
+
+            pn_norm = normalize_for_match_worker(project_name)
+            loc_norm = normalize_for_match_worker(location_raw)
+            name_prov = _prov_norm(name_match_res)
+            comb_prov = _prov_norm(combined_match_res)
+
+            match_res = combined_match_res
+            if name_match_res and not combined_match_res:
+                match_res = name_match_res
+            elif name_match_res and combined_match_res:
+                # Prefer the match whose province is explicitly mentioned in the project name,
+                # then in the location column, else by match granularity (brgy > muni).
+                if name_prov and (name_prov in pn_norm) and (not comb_prov or comb_prov not in pn_norm):
+                    match_res = name_match_res
+                elif comb_prov and (comb_prov in pn_norm) and (not name_prov or name_prov not in pn_norm):
+                    match_res = combined_match_res
+                elif comb_prov and (comb_prov in loc_norm) and (not name_prov or name_prov not in loc_norm):
+                    match_res = combined_match_res
+                elif name_prov and (name_prov in loc_norm) and (not comb_prov or comb_prov not in loc_norm):
+                    match_res = name_match_res
+                else:
+                    if _granularity(name_match_res) > _granularity(combined_match_res):
+                        match_res = name_match_res
+                    elif _granularity(combined_match_res) > _granularity(name_match_res):
+                        match_res = combined_match_res
+                    else:
+                        match_res = name_match_res
             
             if stats['total'] <= 5:
                 import sys
@@ -1327,13 +1592,11 @@ class DynastyProjectsCacheGeneratorDuckDB:
             try:
                 # Use duckdb to read parquet efficiently
                 con = duckdb.connect()
-                # Select only entries with valid congressman
+                # Include entries even when congressman is TBD; downstream matching can still resolve.
                 query = """
                     SELECT province, municipality, barangay, district, congressman 
                     FROM read_parquet(?) 
                     WHERE congressman IS NOT NULL 
-                    AND congressman != 'TBD' 
-                    AND congressman != 'Unknown'
                 """
                 result = con.execute(query, [str(unified_path)]).fetchall()
                 for row in result:
@@ -1376,38 +1639,28 @@ class DynastyProjectsCacheGeneratorDuckDB:
             
         name_lower = project_name.lower()
         prov_norm = self._normalize_for_match(project_province) if project_province else ""
-        
-        # --- DISAMBIGUATION: Check for multi-word province names FIRST ---
-        # These are problematic because "davao" matches both "davao city" and "davao de oro"
-        disambiguation_patterns = [
-            (r'davao\s+de\s+oro', 'DAVAO DE ORO'),
-            (r'davao\s+del\s+sur', 'DAVAO DEL SUR'),
-            (r'davao\s+del\s+norte', 'DAVAO DEL NORTE'),
-            (r'davao\s+oriental', 'DAVAO ORIENTAL'),
-            (r'davao\s+occidental', 'DAVAO OCCIDENTAL'),
-            (r'cebu\s+city', 'CEBU CITY'),  # Cebu City vs Cebu Province
-            (r'cagayan\s+de\s+oro', 'CITY OF CAGAYAN DE ORO'),
-            (r'quezon\s+city', 'QUEZON CITY'),  # QC vs Quezon Province
-            (r'zamboanga\s+del\s+norte', 'ZAMBOANGA DEL NORTE'),
-            (r'zamboanga\s+del\s+sur', 'ZAMBOANGA DEL SUR'),
-            (r'zamboanga\s+sibugay', 'ZAMBOANGA SIBUGAY'),
-        ]
-        
-        for pattern, target_prov in disambiguation_patterns:
-            if re.search(pattern, name_lower):
-                # Find entries matching this specific province
-                for entry in self.location_entries:
-                    prov, muni, brgy, dist, cong = entry
-                    if prov and target_prov.lower() in prov.lower():
-                        # Also check municipality/barangay match for better accuracy
-                        muni_norm = self._normalize_for_match(muni)
-                        brgy_norm = self._normalize_for_match(brgy)
-                        
-                        # Check strictly for municipality or barangay presence
-                        if muni_norm and len(muni_norm) > 3 and muni_norm in name_norm:
-                            return entry
-                        if brgy_norm and len(brgy_norm) > 3 and brgy_norm in name_norm:
-                            return entry
+
+        # Data-driven province phrase detection (from loaded location hierarchy).
+        # If any multi-word province phrase appears in text, restrict candidates to those provinces.
+        if not hasattr(self, "_province_phrase_patterns"):
+            provs = set()
+            for entry in self.location_entries:
+                prov = entry[0]
+                prov_norm_entry = self._normalize_for_match(prov)
+                if prov_norm_entry and len(prov_norm_entry.split()) >= 2:
+                    provs.add(prov_norm_entry)
+            patterns = []
+            for prov_phrase in provs:
+                toks = prov_phrase.split()
+                pat = r"\\b" + r"\\s+".join(re.escape(t) for t in toks) + r"\\b"
+                patterns.append((re.compile(pat, re.IGNORECASE), prov_phrase, len(toks), len(prov_phrase)))
+            patterns.sort(key=lambda t: (t[2], t[3]), reverse=True)
+            self._province_phrase_patterns = [(p, prov_phrase) for (p, prov_phrase, _tc, _lc) in patterns]
+
+        detected_province_phrases = set()
+        for pat, prov_phrase in self._province_phrase_patterns:
+            if pat.search(name_norm):
+                detected_province_phrases.add(prov_phrase)
         
         best_match = None
         best_score = 0
@@ -1428,6 +1681,11 @@ class DynastyProjectsCacheGeneratorDuckDB:
             prov_entry = self._normalize_for_match(prov)
             muni_entry = self._normalize_for_match(muni)
             brgy_entry = self._normalize_for_match(brgy)
+
+            # If the text explicitly mentions a multi-word province phrase (often a region-like label),
+            # restrict to matching that province to avoid overmatching.
+            if detected_province_phrases and prov_entry not in detected_province_phrases:
+                continue
             
             # Province matching
             if prov_entry and len(prov_entry) > 3:
@@ -4143,18 +4401,20 @@ class DynastyProjectsCacheGeneratorDuckDB:
                  if district_municipalities:
                      print(f"✅ {display_name}: Loaded {len(district_municipalities)} municipalities for {config_district_number}")
             
-            # Barangays (Mannix Dalipe special case)
-            # Barangays (Mannix Dalipe special case)
+            # Barangays (City districts)
+            # For city districts, prefer barangays from districts.json so everything is loaded from the same hierarchy.
             barangays = []
-            if congressman_id == 5: 
-                 # Try to locate the file relative to the script
-                 try:
-                     barangays_file = Path(__file__).parent.parent / '2nd-district-zamboanga-city.json'
-                     if barangays_file.exists():
-                         with open(barangays_file, 'r', encoding='utf-8') as f:
-                             barangays = json.load(f)
-                 except Exception as e:
-                     print(f"⚠️ Error loading barangays for Mannix: {e}")
+            if districts_data and config_province and config_district_number and config_is_city_district and not is_nationwide:
+                province_key = None
+                for key in districts_data.get('districts', {}).keys():
+                    if key.upper() == config_province.upper():
+                        province_key = key
+                        break
+                if province_key:
+                    barangay_map = (districts_data.get('districts', {}).get(province_key, {}) or {}).get('barangays', {}) or {}
+                    barangays = barangay_map.get(str(config_district_number), []) or []
+                    if barangays:
+                        print(f"✅ {display_name}: Loaded {len(barangays)} barangays for {config_district_number}")
             
             terms = cm.get('terms', [])
             
@@ -6520,13 +6780,14 @@ class DynastyProjectsCacheGeneratorDuckDB:
                                 province_matches = True
                                 break
                     
-                    # CRITICAL: Prevent "MANILA" from matching "METRO MANILA"
-                    if province_upper == 'MANILA' and cm_prov_upper == 'METRO MANILA':
-                        # Don't match - Manila is not Metro Manila
-                        continue
-                    if province_upper == 'METRO MANILA' and cm_prov_upper == 'MANILA':
-                        # Don't match - Metro Manila is not just Manila
-                        continue
+                    # CRITICAL: Reject suffix-only containment (e.g., "METRO MANILA" should not match "MANILA").
+                    # Allow only when the shorter name is a prefix token/segment of the longer (e.g., "TAGUIG–PATEROS").
+                    if (province_upper in cm_prov_upper) or (cm_prov_upper in province_upper):
+                        shorter = province_upper if len(province_upper) <= len(cm_prov_upper) else cm_prov_upper
+                        longer = cm_prov_upper if shorter == province_upper else province_upper
+                        # Prefix can be followed by space, word-boundary, or dash separators.
+                        if not re.match(r'^' + re.escape(shorter) + r'(?:\\b|\\s|[–-])', longer):
+                            continue
                     
                     # Compound name match with word boundaries (e.g., "Taguig" matches "Taguig–Pateros")
                     # CRITICAL: Do NOT allow compound matches for directional provinces
@@ -7499,7 +7760,8 @@ class DynastyProjectsCacheGeneratorDuckDB:
 
     async def process_projects(self, congressmen_data: Dict, districts_data: Dict, 
                               district_lookup_dict: Dict, contractor_lookup_dict: Dict,
-                              contractor_inverted_index: Dict) -> List[Dict]:
+                              contractor_inverted_index: Dict,
+                              dry_run: bool = False) -> List[Dict]:
         """Process projects from integrated Parquet file using ProcessPoolExecutor"""
         all_projects = []
         
@@ -7513,6 +7775,8 @@ class DynastyProjectsCacheGeneratorDuckDB:
             'contractor_lookup': contractor_lookup_dict,
             'contractor_inverted_index': contractor_inverted_index,
             'location_entries': self.location_matcher.location_entries if hasattr(self, 'location_matcher') else [],
+            'location_token_map': dict(self.location_matcher.token_map) if hasattr(self, 'location_matcher') else {},
+            'safe_single_district_municipalities': list(self.location_matcher.safe_single_district_municipalities) if hasattr(self, 'location_matcher') else [],
             'location_dictionaries': getattr(self, 'location_dicts', {}),
             'substring_provinces': self.substring_provinces,
             'canonical_name_map': canonical_name_map,
@@ -7593,7 +7857,7 @@ class DynastyProjectsCacheGeneratorDuckDB:
 
                             projects_since_save += stats['total']
                             
-                            if projects_since_save >= SAVE_INTERVAL:
+                            if (not dry_run) and projects_since_save >= SAVE_INTERVAL:
                                 print(f"💾 Incremental Save Triggered: Saving {len(congressmen_dirty)} updated congressmen caches...")
                                 self._save_incremental_caches(projects_by_congressman_cumulative, congressmen_dirty)
                                 congressmen_dirty.clear()
@@ -7878,12 +8142,17 @@ class DynastyProjectsCacheGeneratorDuckDB:
         if count > 0:
             print(f"🗑️ Cleared {count} existing congressman cache directories")
 
-    async def generate_cache(self):
+    async def generate_cache(self, dry_run: bool = False, profile: bool = False):
         """Generate the cached JSON file using DuckDB"""
+        import time
         print("🚀 Starting dynasty-projects cache generation (DuckDB version - Parquet only)...")
+        if dry_run:
+            print("🧪 Dry-run mode: skipping cache deletion and file writes")
+        t0 = time.perf_counter()
         
         # Clear stale caches first!
-        self._clear_existing_caches()
+        if not dry_run:
+            self._clear_existing_caches()
         
         # Load Location Index
         self.location_matcher.load()
@@ -7991,13 +8260,20 @@ class DynastyProjectsCacheGeneratorDuckDB:
             print(f"   - {len(location_dicts['location_context_map'])} location contexts")
             
             # Process projects from Parquet files
+            t_process0 = time.perf_counter()
             all_projects = await self.process_projects(
                 congressmen_data,
                 districts_data,
                 district_lookup_dict,
                 contractor_lookup_dict,
-                contractor_inverted_index
+                contractor_inverted_index,
+                dry_run=dry_run,
             )
+            if profile:
+                dt = time.perf_counter() - t_process0
+                total = self.progress_counters.get('total_processed', 0) or 0
+                rate = (total / dt) if dt > 0 else 0
+                print(f"⏱️  process_projects: {dt:.2f}s ({rate:.1f} projects/sec)")
             print(f"✅ Processed {len(all_projects)} projects")
             
             # Skip saving to integrated_projects.parquet as it is the source of truth
@@ -8022,6 +8298,34 @@ class DynastyProjectsCacheGeneratorDuckDB:
             print(f"   👤 Unique congressmen: {len(self.progress_counters['congressmen_matched'])}")
             print(f"   ❌ Unmatched: {self.progress_counters['unmatched']}")
             print()
+
+            if dry_run:
+                match_type_counts = defaultdict(int)
+                for proj in all_projects:
+                    mt = (proj.get('match_type') or 'unknown').strip().lower()
+                    match_type_counts[mt] += 1
+                print("🧪 Dry-run validation summary:")
+                for k in sorted(match_type_counts.keys()):
+                    print(f"   - {k}: {match_type_counts[k]}")
+                
+                # Targeted overmatch check: Taguig projects assigned to any Manila representative
+                try:
+                    manila_reps = set()
+                    manila_block = (districts_data or {}).get('districts', {}).get('Manila', {})
+                    for rep in (manila_block.get('representatives', {}) or {}).values():
+                        if rep:
+                            manila_reps.add(str(rep).split('(')[0].strip())
+                    taguig_to_manila = 0
+                    for proj in all_projects:
+                        text = f"{proj.get('project_name','')} {proj.get('location','')}".lower()
+                        if "taguig" in text and proj.get('district_congressman') in manila_reps:
+                            taguig_to_manila += 1
+                    print(f"   - taguig_assigned_to_manila_reps: {taguig_to_manila}")
+                except Exception:
+                    pass
+                if profile:
+                    print(f"⏱️  total: {time.perf_counter() - t0:.2f}s")
+                return
             
             # Deduplicate and add cross-database bonus
             # Original logic: deduplicate by project key, track all sources and all congressmen
@@ -8531,11 +8835,6 @@ class DynastyProjectsCacheGeneratorDuckDB:
                         if cm_provinces:
                             cm_province = cm_provinces[0].upper()
                             
-                            # Special check: Prevent METRO MANILA from matching MANILA districts
-                            if cm_province == 'MANILA' and 'METRO MANILA' in location:
-                                should_include = False
-                                continue
-                            
                             # CRITICAL: Prevent directional variant mismatches (e.g., ILOCOS SUR vs ILOCOS NORTE)
                             # Get project's province from RAW data fields (not classification fields)
                             # Use the raw province field that was used for matching, not project_district
@@ -8959,6 +9258,16 @@ async def main():
         type=int,
         help='Process only N projects for debugging purposes'
     )
+    parser.add_argument(
+        '--dry-run',
+        action='store_true',
+        help='Run classification without writing outputs or clearing caches'
+    )
+    parser.add_argument(
+        '--profile',
+        action='store_true',
+        help='Print timing/throughput information'
+    )
     args = parser.parse_args()
     
     # User requested this to be default behavior
@@ -8973,7 +9282,7 @@ async def main():
         generator.sample_limit = args.sample
         print(f"🔬 DEBUG MODE: Processing only first {args.sample} projects")
     
-    await generator.generate_cache()
+    await generator.generate_cache(dry_run=args.dry_run, profile=args.profile)
 
 if __name__ == '__main__':
     asyncio.run(main())
