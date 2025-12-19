@@ -12085,6 +12085,23 @@ async def integrated_dashboard():
 async def integ2026_dpwh_districts_api():
     """District rollup for DPWH Annex A-5 (2026), requires district cache."""
     try:
+        import unicodedata
+
+        def _fold_label(value: Any) -> str:
+            text = str(value or "")
+            text = unicodedata.normalize("NFKD", text)
+            text = "".join(ch for ch in text if not unicodedata.combining(ch))
+            return " ".join(text.split()).strip().upper()
+
+        def _prefer_display(existing: str, candidate: str) -> str:
+            if not existing:
+                return candidate
+            if not candidate:
+                return existing
+            existing_non_ascii = sum(1 for ch in existing if ord(ch) > 127)
+            candidate_non_ascii = sum(1 for ch in candidate if ord(ch) > 127)
+            return candidate if candidate_non_ascii > existing_non_ascii else existing
+
         cache_path = DATA_ROOT / "dpwh_annex_a5_district_cache.json"
         if not cache_path.exists():
             return JSONResponse({
@@ -12139,14 +12156,18 @@ async def integ2026_dpwh_districts_api():
             pid = str(it.get("id"))
             meta = by_id.get(pid) or {}
             province = meta.get("province") or None
+            municipality = meta.get("municipality") or None
             dist = meta.get("district") or "Unknown"
             congressman = meta.get("congressman") or None
             if province and dist and dist != "Unknown":
                 label = f"{province} - {dist}"
+            elif municipality and dist and dist != "Unknown":
+                label = f"{municipality} - {dist}"
             else:
                 label = dist if dist else "Unknown"
 
-            bucket = rollup.setdefault(label, {
+            label_key = _fold_label(label)
+            bucket = rollup.setdefault(label_key, {
                 "district": label,
                 "congressman": None,
                 "_congressman_counts": {},
@@ -12154,6 +12175,7 @@ async def integ2026_dpwh_districts_api():
                 "total_amount": 0.0,
                 "top_projects": [],
             })
+            bucket["district"] = _prefer_display(bucket.get("district") or "", label)
             bucket["project_count"] += 1
             amt = coerce_amount(it.get("final_amount") or it.get("original_amount") or 0)
             if amt:
@@ -12193,6 +12215,14 @@ async def integ2026_dpwh_district_projects_api(
 ):
     """All DPWH Annex A-5 (2026) projects for a district label."""
     try:
+        import unicodedata
+
+        def _fold_label(value: Any) -> str:
+            text = str(value or "")
+            text = unicodedata.normalize("NFKD", text)
+            text = "".join(ch for ch in text if not unicodedata.combining(ch))
+            return " ".join(text.split()).strip().upper()
+
         cache_path = DATA_ROOT / "dpwh_annex_a5_district_cache.json"
         if not cache_path.exists():
             return JSONResponse({
@@ -12255,15 +12285,22 @@ async def integ2026_dpwh_district_projects_api(
                 return None
 
         results: List[Dict[str, Any]] = []
+        district_key = _fold_label(district)
         for it in a5:
             if is_header_row(it):
                 continue
             pid = str(it.get("id"))
             meta = by_id.get(pid) or {}
             province = meta.get("province") or None
+            municipality = meta.get("municipality") or None
             dist = meta.get("district") or "Unknown"
-            label = f"{province} - {dist}" if (province and dist and dist != "Unknown") else (dist or "Unknown")
-            if label != district:
+            if province and dist and dist != "Unknown":
+                label = f"{province} - {dist}"
+            elif municipality and dist and dist != "Unknown":
+                label = f"{municipality} - {dist}"
+            else:
+                label = dist or "Unknown"
+            if _fold_label(label) != district_key:
                 continue
 
             name = it.get("name") or it.get("description") or ""
@@ -12294,8 +12331,17 @@ async def get_integrated_matrix():
     if not path.exists():
         return {"error": "Matrix not generated yet", "metadata": {}, "ranking": []}
     
-    with open(path, "r") as f:
-        return json.load(f)
+    return FileResponse(path, media_type="application/json")
+
+@app.get("/api/integrated/matrix/strict")
+async def get_integrated_matrix_strict():
+    path = DATA_ROOT / "integrated_matrix_strict.json"
+    if not path.exists():
+        # Fallback to standard if strict not found
+        return await get_integrated_matrix()
+    
+    return FileResponse(path, media_type="application/json")
+
 
 @app.get("/api/integrated/locations")
 async def get_integrated_locations():
@@ -12440,6 +12486,442 @@ async def search_transparency_projects(
         return JSONResponse(
             {"success": False, "error": f"Search failed: {exc}"},
             status_code=500,
+        )
+
+
+@app.get("/api/integrated/projects")
+async def get_integrated_projects(
+    page: int = Query(default=1, ge=1, description="Page number (1-based)"),
+    limit: int = Query(default=50, ge=1, le=1000, description="Number of projects per page"),
+    project_name: Optional[str] = Query(default=None, description="Filter by project name/title"),
+    contractor: Optional[str] = Query(default=None, description="Filter by contractor name")
+) -> JSONResponse:
+    """Get integrated projects from parquet file using DuckDB with filtering and pagination"""
+    try:
+        # Get the parquet file path (use absolute path)
+        # CRITICAL: Use classified parquet (deduplicated) instead of integrated_projects.parquet
+        base_dir = Path(__file__).parent.absolute()
+        classified_file = base_dir / "data" / "parquet" / "integrated_projects_classified.parquet"
+        integrated_file = base_dir / "data" / "parquet" / "integrated_projects.parquet"
+        
+        # Prefer classified (deduplicated) over integrated (all projects)
+        if classified_file.exists():
+            parquet_file = classified_file
+            print(f"📊 Using classified parquet (deduplicated): {parquet_file.name}")
+        elif integrated_file.exists():
+            parquet_file = integrated_file
+            print(f"⚠️  Using integrated parquet (not deduplicated): {parquet_file.name}")
+        else:
+            parquet_file = None
+        
+        if not parquet_file or not parquet_file.exists():
+            return JSONResponse(
+                content={
+                    "success": False,
+                    "error": f"Parquet file not found: {parquet_file}",
+                    "projects": [],
+                    "total": 0,
+                    "total_pages": 0
+                },
+                status_code=404
+            )
+        
+        # Connect to DuckDB
+        conn = duckdb.connect()
+        
+        try:
+            # Build WHERE clause with proper SQL escaping
+            where_conditions = []
+            
+            def escape_sql_string(s: str) -> str:
+                """Escape single quotes for SQL"""
+                return s.replace("'", "''")
+            
+            if project_name:
+                escaped_name = escape_sql_string(project_name)
+                # Note: The parquet file has 'award_title' not 'philgeps_award_title'
+                where_conditions.append(
+                    f"(project_name ILIKE '%{escaped_name}%' OR "
+                    f"award_title ILIKE '%{escaped_name}%' OR "
+                    f"project_description ILIKE '%{escaped_name}%')"
+                )
+            
+            if contractor:
+                escaped_contractor = escape_sql_string(contractor)
+                # Note: The parquet file has 'contractor' not 'contractor_name'
+                # philgeps_awardee_name and organization_name don't exist in the parquet
+                # Only search in contractor column
+                where_conditions.append(
+                    f"contractor ILIKE '%{escaped_contractor}%'"
+                )
+            
+            where_clause = " AND ".join(where_conditions) if where_conditions else "1=1"
+            
+            # Calculate offset
+            offset = (page - 1) * limit
+            
+            # Convert path to string and escape single quotes
+            parquet_path_str = str(parquet_file).replace("'", "''")
+            
+            # Get total count
+            count_query = f"""
+                SELECT COUNT(*) as total
+                FROM read_parquet('{parquet_path_str}')
+                WHERE {where_clause}
+            """
+            
+            count_result = conn.execute(count_query).fetchone()
+            total = count_result[0] if count_result else 0
+            total_pages = max(1, (total + limit - 1) // limit)
+            
+            # Get projects with pagination
+            # Use SELECT * to get all columns, then filter/rename in Python
+            # This avoids BinderException for columns that don't exist
+            # Don't use ORDER BY in SQL - sort in Python after fetching to avoid column existence issues
+            # For proper sorting, we need to fetch all matching rows, sort, then paginate
+            # This is less efficient but avoids column existence errors
+            # Get projects with pagination
+            # Use SELECT * to get all columns, then filter/rename in Python
+            # This avoids BinderException for columns that don't exist
+            # Don't use ORDER BY in SQL - sort in Python after fetching to avoid column existence issues
+            # For proper sorting, we need to fetch all matching rows, sort, then paginate
+            # This is less efficient but avoids column existence errors
+            select_query = f"""
+                SELECT *
+                FROM read_parquet('{parquet_path_str}')
+                WHERE {where_clause}
+            """
+            
+            # Execute query (fetch all matching rows, we'll sort and paginate in Python)
+            results = conn.execute(select_query).fetchall()
+            columns = [desc[0] for desc in conn.description]
+            
+            # Convert to list of dictionaries
+            projects = []
+            for row in results:
+                project_dict = {}
+                for i, col in enumerate(columns):
+                    value = row[i]
+                    # Convert timestamp and other types to string if needed
+                    if value is not None:
+                        if isinstance(value, datetime):
+                            project_dict[col] = value.isoformat()
+                        elif hasattr(value, 'isoformat'):  # Handle other datetime-like objects
+                            project_dict[col] = value.isoformat()
+                        elif isinstance(value, list):
+                            # Handle list columns (like sources_list) - preserve as-is
+                            project_dict[col] = value
+                        elif col == 'sources_list':
+                            # sources_list might come as a string or other format from DuckDB
+                            # Try to parse it if it's a string representation of a list
+                            try:
+                                import ast
+                                if isinstance(value, str):
+                                    # Try to parse string representation of list
+                                    parsed = ast.literal_eval(value)
+                                    if isinstance(parsed, list):
+                                        project_dict[col] = parsed
+                                    else:
+                                        project_dict[col] = [parsed] if parsed else []
+                                else:
+                                    project_dict[col] = [value] if value else []
+                            except (ValueError, SyntaxError):
+                                # If parsing fails, treat as single value
+                                project_dict[col] = [value] if value else []
+                        else:
+                            project_dict[col] = value
+                    else:
+                        project_dict[col] = None
+                
+                # CRITICAL: Ensure sources_list is properly formatted as a list
+                # This is essential for showing multiple DBs for each project
+                if 'sources_list' in project_dict:
+                    sources_list = project_dict['sources_list']
+                    if not isinstance(sources_list, list):
+                        # Convert to list if it's not already
+                        if sources_list is not None and sources_list != '':
+                            sources_list = [sources_list] if not isinstance(sources_list, list) else sources_list
+                        else:
+                            sources_list = []
+                    project_dict['sources_list'] = sources_list
+                else:
+                    # If sources_list doesn't exist, try to create it from source field
+                    if 'source' in project_dict and project_dict['source']:
+                        project_dict['sources_list'] = [project_dict['source']]
+                    else:
+                        project_dict['sources_list'] = []
+                
+                # Source (for backward compatibility - use first source from sources_list)
+                if 'source' not in project_dict or not project_dict['source']:
+                    sources_list = project_dict.get('sources_list', [])
+                    project_dict['source'] = sources_list[0] if sources_list else 'N/A'
+                
+                # Map award_title to philgeps_award_title for frontend compatibility
+                if 'award_title' in project_dict and project_dict['award_title']:
+                    project_dict['philgeps_award_title'] = project_dict['award_title']
+                
+                # Map contractor to contractor_name for frontend compatibility
+                if 'contractor' in project_dict and project_dict['contractor']:
+                    project_dict['contractor_name'] = project_dict['contractor']
+                elif 'contractor_name' not in project_dict:
+                    # Set empty if contractor column doesn't exist
+                    project_dict['contractor_name'] = 'N/A'
+                
+                # Set philgeps_awardee_name and organization_name to N/A if not in parquet
+                # These columns don't exist in the parquet file, so always set to N/A
+                project_dict['philgeps_awardee_name'] = 'N/A'
+                project_dict['organization_name'] = 'N/A'
+                
+                projects.append(project_dict)
+            
+            # Sort projects by amount (descending) then by project_name (ascending) in Python
+            # This avoids SQL column existence issues
+            def sort_key(proj):
+                amount = proj.get('amount') or proj.get('dime_cost') or proj.get('infrawatch_contract_price') or 0
+                try:
+                    amount = float(amount) if amount else 0
+                except (ValueError, TypeError):
+                    amount = 0
+                project_name = str(proj.get('project_name', '')).lower()
+                return (-amount, project_name)  # Negative for descending amount
+            
+            projects.sort(key=sort_key)
+            
+            # Apply pagination after sorting
+            paginated_projects = projects[offset:offset + limit]
+            
+            return JSONResponse(content={
+                "success": True,
+                "projects": paginated_projects,
+                "total": total,
+                "page": page,
+                "limit": limit,
+                "total_pages": total_pages
+            })
+            
+        finally:
+            conn.close()
+            
+    except Exception as e:
+        import traceback
+        error_msg = str(e)
+        traceback.print_exc()
+        return JSONResponse(
+            content={
+                "success": False,
+                "error": error_msg,
+                "projects": [],
+                "total": 0,
+                "total_pages": 0
+            },
+            status_code=500
+        )
+# End of get_integrated_projects
+
+@app.get("/api/integrated/projects/csv")
+async def export_integrated_projects_csv(
+    project_name: Optional[str] = Query(default=None, description="Filter by project name/title"),
+    contractor: Optional[str] = Query(default=None, description="Filter by contractor name"),
+    green: bool = Query(default=False, description="Filter for green/clean projects"),
+    dpwh_all: bool = Query(default=False, description="Filter for ALL Annex A-5 projects (w/ flags)")
+) -> Response:
+    """Export integrated projects to CSV with filtering (all pages)"""
+    try:
+        import csv
+        import io
+        
+        # Get the parquet file path (use absolute path)
+        base_dir = Path(__file__).parent.absolute()
+        parquet_file = base_dir / "data" / "parquet" / "integrated_projects.parquet"
+        
+        # --- GREEN / DPWH ALL (ANNEX A-5 2026) CSV LOGIC ---
+        if green or dpwh_all:
+            import json
+            import re
+            
+            # 1. Load 2026 Data (Annex A-5)
+            json_path = base_dir / "static" / "data" / "budget_amendments_2026.json"
+            if not json_path.exists():
+                return JSONResponse({"error": "2026 Data not found"}, status_code=404)
+            
+            with open(json_path, 'r', encoding='utf-8') as f:
+                data_2026 = json.load(f)
+            
+            # Combine projects and line_items, filter for Annex A-5
+            raw_items = data_2026.get('projects', []) + data_2026.get('line_items', [])
+            annex_a5_items = [
+                item for item in raw_items 
+                if item.get('source_sheet') == 'Annex A-5'
+            ]
+            
+            def _coerce_amount(raw_amount: Any) -> Optional[float]:
+                if raw_amount is None:
+                    return None
+                try:
+                    return float(raw_amount)
+                except (TypeError, ValueError):
+                    return None
+
+            # 2. Load Bad IDs (Resurrected & Flagged)
+            resurrected_ids = set()
+            flagged_ids = set()
+            historical_amounts_by_pid: Dict[str, List[float]] = {}
+            flagged_meta_by_pid: Dict[str, Dict[str, Any]] = {}
+            
+            # Resurrected
+            res_path = base_dir / "static" / "data" / "resurrected_projects_dpwh.json"
+            if res_path.exists():
+                with open(res_path, 'r', encoding='utf-8') as f:
+                    res_data = json.load(f)
+                    for match in res_data.get('matches', []):
+                        y2026 = match.get('year_2026') or {}
+                        pid = y2026.get('id')
+                        if pid:
+                            pid_str = str(pid)
+                            resurrected_ids.add(pid_str)
+                            hist = match.get('historical')
+                            if isinstance(hist, dict):
+                                amt = _coerce_amount(hist.get('amount'))
+                                if amt:
+                                    historical_amounts_by_pid.setdefault(pid_str, []).append(amt)
+                            elif isinstance(hist, list):
+                                for entry in hist:
+                                    if isinstance(entry, dict):
+                                        amt = _coerce_amount(entry.get('amount'))
+                                        if amt:
+                                            historical_amounts_by_pid.setdefault(pid_str, []).append(amt)
+                        
+            # Flagged
+            flagged_path = base_dir / "static" / "data" / "flagged_amount_projects_2026.json"
+            if flagged_path.exists():
+                try:
+                    with open(flagged_path, 'r', encoding='utf-8') as f:
+                        flagged_data = json.load(f)
+                        for item in flagged_data:
+                            # If list of dicts
+                            if isinstance(item, dict):
+                                pid = item.get('id')
+                                if pid:
+                                    pid_str = str(pid)
+                                    flagged_ids.add(pid_str)
+                                    flagged_meta_by_pid[pid_str] = item
+                except json.JSONDecodeError:
+                    pass
+
+            # 3. Filter items
+            filtered_items = []
+            for item in annex_a5_items:
+                pid = str(item.get('id', ''))
+                
+                is_res = pid in resurrected_ids
+                is_flag = pid in flagged_ids
+                
+                # Logic:
+                # If GREEN: Include ONLY if NOT resurrected AND NOT flagged
+                # If DPWH_ALL: Include EVERYTHING (just mark columns appropriately)
+                
+                if green:
+                    if not is_res and not is_flag:
+                        filtered_items.append(item)
+                else:
+                    # dpwh_all = True
+                    filtered_items.append(item)
+            
+            # 4. Generate CSV
+            output = io.StringIO()
+            writer = csv.writer(output)
+            
+            # CSV Headers
+            headers = [
+                'ID', 'Project Name', 'Amount', 'Location', 'Status', 
+                'Resurrected?', 'Flagged?', 'Historical Amounts'
+            ]
+            writer.writerow(headers)
+            
+            for item in filtered_items:
+                pid = str(item.get('id', ''))
+                is_res = "Yes" if pid in resurrected_ids else "No"
+                is_flag = "Yes" if pid in flagged_ids else "No"
+                
+                hist_amts = historical_amounts_by_pid.get(pid, [])
+                hist_str = "; ".join([f"{a:,.2f}" for a in hist_amts])
+                
+                row = [
+                    item.get('id', ''),
+                    item.get('project_name', ''),
+                    item.get('amount', ''),
+                    item.get('location', ''),
+                    item.get('status', ''),
+                    is_res,
+                    is_flag,
+                    hist_str
+                ]
+                writer.writerow(row)
+                
+            output.seek(0)
+            filename = f"projects_{'green' if green else 'all'}_annex_a5_2026.csv"
+            return Response(
+                content=output.getvalue(),
+                media_type="text/csv",
+                headers={"Content-Disposition": f"attachment; filename={filename}"}
+            )
+
+        # --- STANDARD INTEGRATED PROJECTS CSV LOGIC (EXISTING) ---
+        
+        if not parquet_file.exists():
+             return JSONResponse(
+                content={"success": False, "error": f"Parquet file not found: {parquet_file}"},
+                status_code=404
+            )
+            
+        # Connect to DuckDB
+        conn = duckdb.connect()
+        try:
+             # Build WHERE clause
+            where_conditions = []
+            def escape_sql_string(s: str) -> str:
+                return s.replace("'", "''")
+
+            if project_name:
+                escaped_name = escape_sql_string(project_name)
+                where_conditions.append(
+                    f"(project_name ILIKE '%{escaped_name}%' OR "
+                    f"award_title ILIKE '%{escaped_name}%' OR "
+                    f"project_description ILIKE '%{escaped_name}%')"
+                )
+            
+            if contractor:
+                escaped_contractor = escape_sql_string(contractor)
+                where_conditions.append(f"contractor ILIKE '%{escaped_contractor}%'")
+            
+            where_clause = " AND ".join(where_conditions) if where_conditions else "1=1"
+            parquet_path_str = str(parquet_file).replace("'", "''")
+            
+            # Select all matching rows
+            query = f"SELECT * FROM read_parquet('{parquet_path_str}') WHERE {where_clause}"
+            results = conn.execute(query).fetchall()
+            columns = [desc[0] for desc in conn.description]
+            
+            # Generate CSV
+            output = io.StringIO()
+            writer = csv.writer(output)
+            writer.writerow(columns)
+            writer.writerows(results)
+            
+            output.seek(0)
+            return Response(
+                content=output.getvalue(),
+                media_type="text/csv",
+                headers={"Content-Disposition": "attachment; filename=integrated_projects.csv"}
+            )
+            
+        finally:
+            conn.close()
+            
+    except Exception as e:
+        return JSONResponse(
+            content={"success": False, "error": str(e)},
+            status_code=500
         )
 
 

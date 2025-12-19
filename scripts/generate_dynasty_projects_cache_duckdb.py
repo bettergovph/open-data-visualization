@@ -9,6 +9,7 @@ import argparse
 import asyncio
 import functools
 import json
+import decimal
 import math
 import os
 import re
@@ -59,6 +60,7 @@ POLITICAL_DYNASTIES_PARQUET = PARQUET_DIR / 'political_dynasties.parquet'
 RELATIONSHIPS_PARQUET = PARQUET_DIR / 'relationships.parquet'
 CONNECTION_TYPES_PARQUET = PARQUET_DIR / 'connection_types.parquet'
 UNIFIED_LOCATIONS_PARQUET = Path(__file__).parent.parent / 'static' / 'data' / 'unified_locations.parquet'
+INTEGRATED_JSON = Path(__file__).parent.parent / 'static' / 'data' / 'integrated_projects.json'
 
 class LocationMatcher:
     """
@@ -1465,8 +1467,18 @@ class DynastyProjectsCacheGeneratorDuckDB:
     def _atomic_write_json(self, path: Path, payload: Dict[str, Any]) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
         temp_path = path.with_suffix(path.suffix + '.tmp')
+
+        def decimal_default(obj):
+            import decimal
+            from datetime import date, datetime
+            if isinstance(obj, decimal.Decimal):
+                return float(obj)
+            if isinstance(obj, (date, datetime)):
+                return obj.isoformat()
+            raise TypeError(f'Object of type {obj.__class__.__name__} is not JSON serializable')
+
         with open(temp_path, 'w', encoding='utf-8') as f:
-            json.dump(payload, f, indent=2, ensure_ascii=False)
+            json.dump(payload, f, indent=2, ensure_ascii=False, default=decimal_default)
         os.replace(temp_path, path)
 
     def _regenerate_top_congressmen_cache(self) -> None:
@@ -8400,6 +8412,14 @@ class DynastyProjectsCacheGeneratorDuckDB:
                     file_size_mb = CLASSIFIED_PARQUET.stat().st_size / (1024 * 1024)
                     print(f"✅ Saved {len(unique_projects)} unique projects to {CLASSIFIED_PARQUET}")
                     print(f"   File size: {file_size_mb:.2f} MB")
+
+                    # Save to JSON for API serving
+                    print(f"💾 Saving to JSON {INTEGRATED_JSON}...")
+                    try:
+                        df.to_json(str(INTEGRATED_JSON), orient='records', default_handler=str, date_format='iso')
+                        print(f"✅ Saved JSON to {INTEGRATED_JSON}")
+                    except Exception as e:
+                        print(f"⚠️ Failed to save JSON: {e}")
                     
                     # Quick verification: read back a few rows
                     try:

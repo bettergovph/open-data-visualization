@@ -3527,13 +3527,13 @@
             const congressmanFilter = document.getElementById('congressman-filter');
             if (congressmanFilter) {
                 congressmanFilter.value = entry.name;
-                
+
                 // Force mode to 'All' to ensure the congressman is found regardless of current filter
                 const allRadio = document.querySelector('input[name="congressman-filter-mode"][value="All"]');
                 if (allRadio) {
                     allRadio.checked = true;
                 }
-                
+
                 handleCongressmanFilterChange();
             }
         }
@@ -6407,8 +6407,27 @@
 
             container.innerHTML = '';
 
-            const data = integrationData.venn_counts;
+            const rawData = integrationData.venn_counts;
             const totals = integrationData.source_totals;
+
+            // Project 5-source data (w/ Transparency) down to 4-source Venn (SSP, DIME, PhilGEPS, Microsite)
+            // We sum up counts: e.g. "SSP" becomes "SSP" + "SSP,Transparency"
+            const data = {};
+
+            Object.keys(rawData).forEach(key => {
+                const parts = key.split(',').map(s => s.trim());
+                // Filter out Transparency for the visual mapping
+                const mappedParts = parts.filter(p => p !== 'Transparency').sort();
+
+                if (mappedParts.length > 0) {
+                    const mappedKey = mappedParts.join(',');
+                    data[mappedKey] = (data[mappedKey] || 0) + rawData[key];
+                }
+            });
+
+            // Add back raw Transparency counts for specific logic if needed, 
+            // but the diagram uses 'data' which is now the 4-source projection.
+            // note: 'totals' is already correct for each source.
 
             // Create SVG for 4 overlapping ellipses
             const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -6721,41 +6740,41 @@
                 <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; border-left: 4px solid #1565c0;">
                     <div style="font-weight: bold; color: #1565c0; margin-bottom: 5px;">SSP</div>
                     <div style="font-size: 24px; font-weight: bold;">${(totals.SSP || 0).toLocaleString()}</div>
-                    <div style="font-size: 12px; color: #666;">Unique: ${(data.SSP || 0).toLocaleString()}</div>
+                    <div style="font-size: 12px; color: #666;">Unique: ${(rawData.SSP || 0).toLocaleString()}</div>
                 </div>
                 <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; border-left: 4px solid #7b1fa2;">
                     <div style="font-weight: bold; color: #7b1fa2; margin-bottom: 5px;">DIME</div>
                     <div style="font-size: 24px; font-weight: bold;">${(totals.DIME || 0).toLocaleString()}</div>
-                    <div style="font-size: 12px; color: #666;">Unique: ${(data.DIME || 0).toLocaleString()}</div>
+                    <div style="font-size: 12px; color: #666;">Unique: ${(rawData.DIME || 0).toLocaleString()}</div>
                 </div>
                 <div style="background: #fff3e0; padding: 15px; border-radius: 8px; border-left: 4px solid #e65100;">
                     <div style="font-weight: bold; color: #e65100; margin-bottom: 5px;">PhilGEPS</div>
                     <div style="font-size: 24px; font-weight: bold;">${(totals.PhilGEPS || 0).toLocaleString()}</div>
-                    <div style="font-size: 12px; color: #666;">Unique: ${(data.PhilGEPS || 0).toLocaleString()}</div>
+                    <div style="font-size: 12px; color: #666;">Unique: ${(rawData.PhilGEPS || 0).toLocaleString()}</div>
                 </div>
                 <div style="background: #fff4e6; padding: 15px; border-radius: 8px; border-left: 4px solid #d97706;">
                     <div style="font-weight: bold; color: #d97706; margin-bottom: 5px;">Microsite</div>
                     <div style="font-size: 24px; font-weight: bold;">${(totals.Microsite || 0).toLocaleString()}</div>
-                    <div style="font-size: 12px; color: #666;">Unique: ${(data.Microsite || 0).toLocaleString()}</div>
+                    <div style="font-size: 12px; color: #666;">Unique: ${(rawData.Microsite || 0).toLocaleString()}</div>
                 </div>
                 <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; border-left: 4px solid #6f42c1;">
                     <div style="font-weight: bold; color: #6f42c1; margin-bottom: 5px;">Transparency</div>
                     <div style="font-size: 24px; font-weight: bold;">${(totals.Transparency || 0).toLocaleString()}</div>
-                    <div style="font-size: 12px; color: #666;">Unique: ${(data.Transparency || 0).toLocaleString()}</div>
+                    <div style="font-size: 12px; color: #666;">Unique: ${(rawData.Transparency || 0).toLocaleString()}</div>
                 </div>
             </div>
             <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-top: 20px;">
                 <h5 style="margin-bottom: 15px; font-weight: bold;">Intersection Counts</h5>
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; font-size: 14px;">
-                    <div><strong>All 5 Sources:</strong> ${(data['DIME,Microsite,PhilGEPS,SSP,Transparency'] || data['DIME,Microsite,PhilGEPS,SSP'] || 0).toLocaleString()}</div>
-                    <div><strong>All 4 Sources (SSP+DIME+PhilGEPS+Microsite):</strong> ${(data['DIME,Microsite,PhilGEPS,SSP'] || 0).toLocaleString()}</div>
-                    <div><strong>DIME + PhilGEPS + SSP:</strong> ${(data['DIME,PhilGEPS,SSP'] || 0).toLocaleString()}</div>
-                    <div><strong>DIME + Microsite + PhilGEPS:</strong> ${(data['DIME,Microsite,PhilGEPS'] || 0).toLocaleString()}</div>
-                    <div><strong>Microsite + PhilGEPS + SSP:</strong> ${(data['Microsite,PhilGEPS,SSP'] || 0).toLocaleString()}</div>
-                    <div><strong>PhilGEPS + SSP:</strong> ${(data['PhilGEPS,SSP'] || 0).toLocaleString()}</div>
-                    <div><strong>DIME + PhilGEPS:</strong> ${(data['DIME,PhilGEPS'] || 0).toLocaleString()}</div>
-                    <div><strong>DIME + Microsite:</strong> ${(data['DIME,Microsite'] || 0).toLocaleString()}</div>
-                    <div><strong>Microsite + PhilGEPS:</strong> ${(data['Microsite,PhilGEPS'] || 0).toLocaleString()}</div>
+                    <div><strong>All 5 Sources:</strong> ${(rawData['DIME,Microsite,PhilGEPS,SSP,Transparency'] || rawData['DIME,Microsite,PhilGEPS,SSP'] || 0).toLocaleString()}</div>
+                    <div><strong>All 4 Sources (SSP+DIME+PhilGEPS+Microsite):</strong> ${(rawData['DIME,Microsite,PhilGEPS,SSP'] || 0).toLocaleString()}</div>
+                    <div><strong>DIME + PhilGEPS + SSP:</strong> ${(rawData['DIME,PhilGEPS,SSP'] || 0).toLocaleString()}</div>
+                    <div><strong>DIME + Microsite + PhilGEPS:</strong> ${(rawData['DIME,Microsite,PhilGEPS'] || 0).toLocaleString()}</div>
+                    <div><strong>Microsite + PhilGEPS + SSP:</strong> ${(rawData['Microsite,PhilGEPS,SSP'] || 0).toLocaleString()}</div>
+                    <div><strong>PhilGEPS + SSP:</strong> ${(rawData['PhilGEPS,SSP'] || 0).toLocaleString()}</div>
+                    <div><strong>DIME + PhilGEPS:</strong> ${(rawData['DIME,PhilGEPS'] || 0).toLocaleString()}</div>
+                    <div><strong>DIME + Microsite:</strong> ${(rawData['DIME,Microsite'] || 0).toLocaleString()}</div>
+                    <div><strong>Microsite + PhilGEPS:</strong> ${(rawData['Microsite,PhilGEPS'] || 0).toLocaleString()}</div>
                 </div>
             </div>
             <div style="margin-top: 20px; padding: 15px; background: #e8f5e9; border-radius: 8px; border-left: 4px solid #4caf50;">
