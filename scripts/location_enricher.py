@@ -156,7 +156,7 @@ class LocationEnricher:
         con.execute(f"CREATE OR REPLACE TABLE unified_locations AS SELECT * FROM read_parquet('{self.db_path}')")
 
         rows = con.execute(
-            "SELECT province, municipality, barangay, district, congressman FROM unified_locations"
+            "SELECT DISTINCT province, municipality, barangay, district, congressman FROM unified_locations"
         ).fetchall()
         con.close()
 

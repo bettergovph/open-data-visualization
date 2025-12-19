@@ -188,8 +188,26 @@ def get_congressman_from_districts(districts_data, province, district):
     return rep_name or "TBD"
 
 def get_district_from_json(districts_data, province, municipality, barangay=None):
+    return get_district_from_json_with_key(districts_data, province, municipality, barangay)[0]
+
+def get_district_from_json_with_key(districts_data, province, municipality, barangay=None):
+    """
+    Resolve district using districts.json plus fallbacks, returning:
+      (district_name, resolved_top_level_key)
+
+    The resolved_top_level_key is the key in districts.json that provided the match.
+    This is needed for cases where the input 'province' is not a districts.json key
+    (e.g., NCR rows, HUC handling, or combined entries like Taguig–Pateros).
+    """
+    resolved_key = None
+
+    def _ret(val: str):
+        return val, resolved_key
+
     # 1. Lookup Province
     prov_data = districts_data.get(province)
+    if prov_data:
+        resolved_key = province
     
     # Priority 1: Case-Insensitive Match
     if not prov_data:
@@ -197,6 +215,7 @@ def get_district_from_json(districts_data, province, municipality, barangay=None
         for k, v in districts_data.items():
             if k.lower().strip() == province_lower:
                 prov_data = v
+                resolved_key = k
                 break
                 
     # Priority 2: Normalized lookup
@@ -207,6 +226,7 @@ def get_district_from_json(districts_data, province, municipality, barangay=None
         for k, v in districts_data.items():
             if normalize_location_name(k) == norm_prov:
                 prov_data = v
+                resolved_key = k
                 found = True
                 break
         
@@ -214,6 +234,7 @@ def get_district_from_json(districts_data, province, municipality, barangay=None
         # It might be an HUC listed as a province.
         if not found:
              prov_data = None 
+             resolved_key = None
     
     # NEW: Check if Municipality exists as a top-level key (for HUCs like Quezon City, Manila in NCR)
     if not prov_data:
@@ -221,11 +242,13 @@ def get_district_from_json(districts_data, province, municipality, barangay=None
         # Try direct, case-insensitive, normalized
         if municipality in districts_data:
              prov_data = districts_data[municipality]
+             resolved_key = municipality
         else:
              mun_lower = str(municipality).lower().strip()
              for k, v in districts_data.items():
                  if k.lower().strip() == mun_lower:
                      prov_data = v
+                     resolved_key = k
                      break
         
         if not prov_data:
@@ -233,7 +256,23 @@ def get_district_from_json(districts_data, province, municipality, barangay=None
              for k, v in districts_data.items():
                  if normalize_location_name(k) == norm_mun_key:
                      prov_data = v
+                     resolved_key = k
                      break 
+
+    # NEW: Global municipality scan (handles combined keys like Taguig–Pateros)
+    # If we still don't have a province/city entry, find any top-level key whose
+    # municipalities map contains this municipality.
+    if not prov_data:
+        target_mun_norm = normalize_location_name(municipality)
+        for k, v in districts_data.items():
+            munis = v.get('municipalities', {}) if isinstance(v, dict) else {}
+            for mk in munis.keys():
+                if normalize_location_name(mk) == target_mun_norm:
+                    prov_data = v
+                    resolved_key = k
+                    break
+            if prov_data:
+                break
              
     # 2. Lookup Municipality
     district_info = None
@@ -283,13 +322,14 @@ def get_district_from_json(districts_data, province, municipality, barangay=None
                         res = v
                         break
             
-            if res: return res
+            if res:
+                return _ret(res)
             
         # Fallback if barangay not found in mixed map
-        return "Unknown" # Or "Mixed"?
+        return _ret("Unknown") # Or "Mixed"?
             
     if district_info:
-        return district_info
+        return _ret(district_info)
         
 
     # 3.5. Check for specific Barangay mappings (Classic districts.json style)
@@ -302,7 +342,7 @@ def get_district_from_json(districts_data, province, municipality, barangay=None
             for dist_name, brgy_list in brgy_map.items():
                 for b in brgy_list:
                     if normalize_location_name(b) in norm_brgy: # "Barangay 76" vs "76"
-                        return dist_name
+                        return _ret(dist_name)
 
     # 4. HUC Fallback: DILG sometimes lists HUC (highly urbanized city) as the Province
     # e.g. Province="CITY OF DAVAO", Municipality="CITY OF DAVAO"
@@ -330,6 +370,7 @@ def get_district_from_json(districts_data, province, municipality, barangay=None
             # If match found, this is our data
             if found_huc_key:
                 huc_data = p_munis[found_huc_key]
+                resolved_key = prov_key
                 
                 # Now resolve district within this HUC data
                 # If it's a dict (mixed), check barangay
@@ -340,11 +381,11 @@ def get_district_from_json(districts_data, province, municipality, barangay=None
                         target_brgy_norm = normalize_location_name(barangay)
                         for k, v in brgy_map.items():
                              if normalize_location_name(k) == target_brgy_norm:
-                                 return v
+                                 return _ret(v)
                                  
                 elif huc_data:
                     # Single district city
-                    return huc_data
+                    return _ret(huc_data)
                     
                 # If we matched the city but failed to match barangay, 
                 # we should probably return "Unknown" here but stop searching other provinces
@@ -355,9 +396,9 @@ def get_district_from_json(districts_data, province, municipality, barangay=None
     if prov_data:
         all_dists = prov_data.get('all_districts', [])
         if len(all_dists) == 1:
-            return all_dists[0]
+            return _ret(all_dists[0])
         
-    return "Unknown"
+    return _ret("Unknown")
 
 def main():
     # 1. Load DILG Data (Master Barangay List)
@@ -365,6 +406,24 @@ def main():
     if df.empty:
         print("Failed to load DILG data. Exiting.")
         return
+    
+    
+    # NCR region aliases:
+    # Add common textual variants so matching can treat "Metro Manila" as a region-level hint
+    # (and avoid confusing it with "Manila" the city).
+    try:
+        region_norm = df['region'].astype(str).str.upper().str.strip()
+        ncr_mask = region_norm.eq('NCR')
+        if ncr_mask.any():
+            aliases = ['METRO MANILA', 'NATIONAL CAPITAL REGION']
+            frames = [df]
+            for alias in aliases:
+                extra = df.loc[ncr_mask].copy()
+                extra['region'] = alias
+                frames.append(extra)
+            df = pd.concat(frames, ignore_index=True).drop_duplicates()
+    except Exception:
+        pass
 
     # 2. Load Districts JSON
     districts_data = load_districts_json()
@@ -389,8 +448,8 @@ def main():
         mun = row['municipality']
         brgy = row.get('barangay')
         
-        dist = get_district_from_json(districts_data, prov, mun, brgy)
-        cong = get_congressman_from_districts(districts_data, prov, dist)
+        dist, prov_key = get_district_from_json_with_key(districts_data, prov, mun, brgy)
+        cong = get_congressman_from_districts(districts_data, prov_key or prov, dist)
         
         # Strip name to just the name part usually (format: "Name (Year-Year)")
         if cong and cong != "TBD":

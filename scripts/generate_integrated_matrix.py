@@ -332,7 +332,7 @@ def generate_integrated_matrix():
     unified_locations_path = os.path.join(DATA_DIR, "unified_locations.parquet")
     con = duckdb.connect()
     con.execute(f"CREATE TABLE ul AS SELECT * FROM read_parquet('{unified_locations_path}')")
-    result = con.execute("SELECT province, municipality, barangay, district, congressman FROM ul WHERE congressman IS NOT NULL AND congressman != 'TBD' AND congressman != 'Unknown'").fetchall()
+    result = con.execute("SELECT DISTINCT province, municipality, barangay, district, congressman FROM ul WHERE congressman IS NOT NULL AND congressman != 'TBD' AND congressman != 'Unknown'").fetchall()
     for row in result:
         prov, muni, brgy, dist, cong = row
         if cong: location_entries.append((prov, muni, brgy, dist, cong))
