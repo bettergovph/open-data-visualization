@@ -499,6 +499,25 @@ async def get_integrated_coverage(refresh: bool = Query(False)) -> JSONResponse:
     snapshot = _cached_integrated_coverage_snapshot()
     return JSONResponse(content=snapshot)
 
+@app.get("/api/mpb/top-buildings")
+async def get_mpb_top_buildings() -> JSONResponse:
+    """Return the list of top MPB buildings filtered and saved to `static/data/mpb_top_buildings.json`."""
+    path = DATA_ROOT / "mpb_top_buildings.json"
+    if not path.exists():
+        return JSONResponse(content={"success": False, "error": "MPB data file not found", "buildings": []}, status_code=404)
+
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        # Ensure we return a list for `buildings` key
+        if not isinstance(data, list):
+            return JSONResponse(content={"success": False, "error": "MPB data malformed", "buildings": []}, status_code=500)
+        return JSONResponse(content={"success": True, "buildings": data})
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JSONResponse(content={"success": False, "error": str(e), "buildings": []}, status_code=500)
+
 # @app.get("/api/integrated/projects")
 async def _deprecated_get_integrated_projects(
     page: int = Query(default=1, ge=1, description="Page number (1-based)"),
