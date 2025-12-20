@@ -156,6 +156,29 @@ async fn map(req: HttpRequest) -> Result<HttpResponse, ActixError> {
     Ok(HttpResponse::Ok().content_type("text/html").body(rendered))
 }
 
+// Multi-Purpose Buildings Page
+async fn mpb(req: HttpRequest) -> Result<HttpResponse, ActixError> {
+    let tera = Tera::new("templates/**/*").map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
+    let mut context = Context::new();
+
+    add_frontend_env_to_context(&mut context);
+
+    context.insert("title", "Multi-Purpose Buildings - BetterGovPH");
+    context.insert("company_name", "BetterGovPH");
+    context.insert("platform", "BetterGovPH");
+    context.insert("SITE_NAME", "BetterGovPH Data Visualizations");
+    context.insert("SITE_URL", "https://visualizations.bettergov.ph");
+
+    let template_name = if is_mobile(&req) {
+        "mobile/mpb.html"
+    } else {
+        "mpb.html"
+    };
+
+    let rendered = tera.render(template_name, &context).map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
+    Ok(HttpResponse::Ok().content_type("text/html").body(rendered))
+}
+
 
 // Budget-NEP Correlation Page
 async fn budget_nep_correlation(req: HttpRequest) -> Result<HttpResponse, ActixError> {
@@ -613,6 +636,35 @@ async fn api_dynasty_congressman(query: web::Query<CongressmanQuery>) -> Result<
     }
 }
 
+// MPB Top Buildings proxy to Python service
+async fn api_mpb_top_buildings_proxy() -> Result<HttpResponse, ActixError> {
+    let client = reqwest::Client::new();
+
+    // Proxy to Python service using env var or default
+    let base_url = std::env::var("PYTHON_API_URL").unwrap_or_else(|_| "http://127.0.0.1:8000".to_string());
+    let base_url = base_url.trim_end_matches('/');
+    let url = format!("{}/api/mpb/top-buildings", base_url);
+
+    match client.get(&url).send().await {
+        Ok(resp) => {
+            let status = actix_web::http::StatusCode::from_u16(resp.status().as_u16())
+                .unwrap_or(actix_web::http::StatusCode::INTERNAL_SERVER_ERROR);
+
+            match resp.json::<serde_json::Value>().await {
+                Ok(json) => Ok(HttpResponse::build(status).json(json)),
+                Err(e) => Ok(HttpResponse::InternalServerError().json(serde_json::json!({
+                    "success": false,
+                    "error": format!("Failed to parse upstream response: {}", e)
+                })))
+            }
+        },
+        Err(e) => Ok(HttpResponse::BadGateway().json(serde_json::json!({
+            "success": false,
+            "error": format!("Failed to connect to upstream service '{}': {}", url, e)
+        })))
+    }
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     // Load environment variables from .env file
@@ -650,6 +702,7 @@ async fn main() -> std::io::Result<()> {
             .service(web::resource("/dime").to(dime))
             .service(web::resource("/nep").to(nep))
             .service(web::resource("/map").to(map))
+            .service(web::resource("/mpb").to(mpb))
         .service(web::resource("/philgeps").to(contractors))
         .service(web::resource("/dynasty").to(dynasty))
         .service(web::resource("/dynasty-projects").to(dynasty_projects))
@@ -669,6 +722,7 @@ async fn main() -> std::io::Result<()> {
             .service(web::resource("/integ2026").to(integ2026))
             .service(web::resource("/api/integrated/matrix").route(web::get().to(api_integrated_matrix)))
             .service(web::resource("/api/integrated/projects").route(web::get().to(api_integrated_projects)))
+            .service(web::resource("/api/mpb/top-buildings").route(web::get().to(api_mpb_top_buildings_proxy)))
             .service(web::resource("/api/dynasty-projects/congressman").route(web::get().to(api_dynasty_congressman)))
     })
     .bind(&bind_address)?
