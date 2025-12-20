@@ -1,0 +1,84 @@
+{% extends "mobile/base_visualizations.html" %}
+
+{% block title %}Multi-Purpose Buildings - BetterGovPH{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="/static/css/tailwind.css">
+<style>
+.mobile-mpb-list { display:flex; flex-direction:column; gap:8px; }
+.mobile-mpb-item { background:white; padding:10px; border-radius:8px; box-shadow:0 1px 3px rgba(0,0,0,0.06); }
+.mobile-mpb-amount { color:#0d9488; font-weight:700; }
+.mobile-mpb-meta { font-size:12px; color:#666; margin-top:6px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<section style="padding:1rem;">
+    <h1 style="font-size:1.25rem; font-weight:700; color:#0f172a; margin-bottom:6px;">🏷️ MPB 2026</h1>
+    <p style="color:#6b7280; font-size:0.9rem; margin-bottom:12px;">Compact mobile view — tap a project to open full details on the desktop MPB page.</p>
+
+    <div id="mobile-mpb-loading" style="text-align:center; padding:1rem;">
+        <div class="inline-block w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+        <div style="margin-top:8px; color:#666; font-size:0.9rem;">Loading MPB data…</div>
+    </div>
+
+    <div id="mobile-mpb-list" class="mobile-mpb-list" style="display:none;"></div>
+
+    <div id="mobile-mpb-source" style="margin-top:10px; font-size:12px; color:#666; text-align:center; display:none;"></div>
+
+    <div style="margin-top:12px; text-align:center;">
+        <a href="/mpb" style="display:inline-block; padding:8px 12px; background:#0d9488; color:white; border-radius:8px; text-decoration:none;">Open full MPB page</a>
+    </div>
+</section>
+
+<script>
+async function loadMobileMPBs(){
+    try{
+        const res = await fetch('/api/mpb/top-buildings');
+        const data = await res.json();
+        const list = document.getElementById('mobile-mpb-list');
+        document.getElementById('mobile-mpb-loading').style.display = 'none';
+        if(!res.ok || !data || !Array.isArray(data.buildings)){
+            list.innerHTML = '<div style="color:#c53030; padding:8px;">Unable to load data.</div>';
+            list.style.display = 'block';
+            return;
+        }
+        // Show source file if provided by API
+        if (data.source_file) {
+            const srcEl = document.getElementById('mobile-mpb-source');
+            srcEl.textContent = 'Data source: ' + data.source_file;
+            srcEl.style.display = 'block';
+        }
+
+        const items = data.buildings.slice(0, 12);
+        list.innerHTML = '';
+        items.forEach(b => {
+            const el = document.createElement('div');
+            el.className = 'mobile-mpb-item';
+            const loc = b.psgc || b.municipality || b.province || '';
+            const matchesCount = (b.matches || []).length;
+            const matchesHTML = matchesCount > 0
+                ? `<a href="/mpb#top" style="background:#e8f5e9; color:#2e7d32; padding:4px 8px; border-radius:6px; font-weight:600; text-decoration:none;">${matchesCount} match${matchesCount>1? 'es':''}</a>`
+                : `<span style="color:#999;">0</span>`;
+
+            el.innerHTML = `
+                <div style="font-weight:600;">${b.project_name}</div>
+                <div class="mobile-mpb-meta">ID: ${b.project_id}${loc ? ' • ' + loc : ''} • Matches: ${matchesHTML}</div>
+                <div style="margin-top:8px;" class="mobile-mpb-amount">₱${(b.amount||0).toLocaleString('en-US',{maximumFractionDigits:0})}</div>
+            `;
+            el.addEventListener('click', ()=>{ window.location.href = '/mpb#top'; });
+            list.appendChild(el);
+        });
+        list.style.display = 'block';
+    }catch(e){
+        document.getElementById('mobile-mpb-loading').style.display = 'none';
+        const list = document.getElementById('mobile-mpb-list');
+        list.innerHTML = '<div style="color:#c53030; padding:8px;">Error loading data.</div>';
+        list.style.display = 'block';
+    }
+}
+
+window.addEventListener('DOMContentLoaded', loadMobileMPBs);
+</script>
+
+{% endblock %}

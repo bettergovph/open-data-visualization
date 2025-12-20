@@ -501,18 +501,135 @@ async def get_integrated_coverage(refresh: bool = Query(False)) -> JSONResponse:
 
 @app.get("/api/mpb/top-buildings")
 async def get_mpb_top_buildings() -> JSONResponse:
-    """Return the list of top MPB buildings filtered and saved to `static/data/mpb_top_buildings.json`."""
-    path = DATA_ROOT / "mpb_top_buildings.json"
+    """Return the list of MPB buildings.
+
+    Prefer `all_mpb_targets.json` (full-run) if it exists; otherwise fall back to
+    `mpb_top_buildings.json` (filtered/shortlist).
+    """
+    preferred = DATA_ROOT / "all_mpb_targets.json"
+    fallback = DATA_ROOT / "mpb_top_buildings.json"
+
+    if preferred.exists():
+        path = preferred
+    else:
+        path = fallback
+
     if not path.exists():
         return JSONResponse(content={"success": False, "error": "MPB data file not found", "buildings": []}, status_code=404)
 
     try:
         with open(path, "r", encoding="utf-8") as f:
             data = json.load(f)
+        # Filter out aggregate/program-level entries (e.g., DPWH-LINE IDs like SIPAG)
+        def is_aggregate(entry):
+            try:
+                pid = (entry.get('project_id') or '').upper()
+                pname = (entry.get('project_name') or '').upper()
+            except Exception:
+                return False
+            if pid.startswith('DPWH-LINE-'):
+                return True
+            if 'SUSTAINABLE INFRASTRUCTURE PROJECTS' in pname:
+                return True
+            # Exclude obvious consolidated/program labels
+            if pname.startswith('PROGRAM') or pname.startswith('PROJECTS'):
+                return True
+            return False
+
+        # Apply aggregate filter
+        if isinstance(data, list):
+            filtered = [d for d in data if not is_aggregate(d)]
+        else:
+            filtered = data
         # Ensure we return a list for `buildings` key
-        if not isinstance(data, list):
+        if not isinstance(filtered, list):
             return JSONResponse(content={"success": False, "error": "MPB data malformed", "buildings": []}, status_code=500)
-        return JSONResponse(content={"success": True, "buildings": data})
+
+        # Ensure we include MPB projects that have zero transparency matches by
+        # merging with the 2026 budget MPB list (from parquet). This lets the
+        # frontend show 0-match buildings as requested.
+        try:
+            import duckdb
+            base_dir = Path(__file__).resolve().parent
+            # prefer amendments parquet if present
+            parquet_candidates = [
+                base_dir / 'data' / 'parquet' / 'budget_2026_amendments.parquet',
+                base_dir / 'data' / 'parquet' / 'budget_2026.parquet',
+                base_dir / 'data' / 'parquet' / 'budget_2025.parquet'
+            ]
+            parquet_path = None
+            for p in parquet_candidates:
+                if p.exists():
+                    parquet_path = p
+                    break
+
+            all_mpbs = []
+            if parquet_path:
+                # read MPB rows from parquet
+                q = "SELECT DISTINCT project_id, project_name, amount, psgc, municipality, province FROM read_parquet('%s') WHERE project_name IS NOT NULL AND (project_name ILIKE '%multi-purpose%' OR project_name ILIKE '%multipurpose%' OR project_name ILIKE '%multi purpose%')" % str(parquet_path)
+                try:
+                    rows = duckdb.connect().execute(q).fetchall()
+                    for r in rows:
+                        proj_id = r[0] or ''
+                        proj_name = r[1] or ''
+                        amt = float(r[2]) if r[2] is not None else 0.0
+                        psgc = r[3] if len(r) > 3 else None
+                        municipality = r[4] if len(r) > 4 else None
+                        province = r[5] if len(r) > 5 else None
+                        all_mpbs.append({
+                            'project_id': proj_id,
+                            'project_name': proj_name,
+                            'amount': amt,
+                            'psgc': psgc,
+                            'municipality': municipality,
+                            'province': province,
+                        })
+                except Exception:
+                    all_mpbs = []
+
+            # build a map of matches by project_id
+            matches_map = { (d.get('project_id') or '').upper(): d for d in filtered }
+
+            merged = []
+            seen = set()
+
+            # include all MPBs from budget parquet first (so we have exhaustive list)
+            for m in all_mpbs:
+                pid = (m.get('project_id') or '').upper()
+                if pid in seen:
+                    continue
+                seen.add(pid)
+                entry = {
+                    'project_id': m.get('project_id'),
+                    'project_name': m.get('project_name'),
+                    'amount': m.get('amount') or 0,
+                    'matches': []
+                }
+                if pid in matches_map:
+                    # preserve matches from matched dataset
+                    entry['matches'] = matches_map[pid].get('matches') or []
+                merged.append(entry)
+
+            # include any matched entries not present in the budget parquet (fallback)
+            for d in filtered:
+                pid = (d.get('project_id') or '').upper()
+                if pid in seen:
+                    continue
+                seen.add(pid)
+                merged.append({
+                    'project_id': d.get('project_id'),
+                    'project_name': d.get('project_name'),
+                    'amount': d.get('amount') or 0,
+                    'matches': d.get('matches') or []
+                })
+
+            # sort merged list by amount desc
+            merged.sort(key=lambda x: (x.get('amount') or 0), reverse=True)
+
+            return JSONResponse(content={"success": True, "buildings": merged, "source_file": path.name})
+        except Exception:
+            # if anything fails, fall back to returning filtered list
+            return JSONResponse(content={"success": True, "buildings": filtered, "source_file": path.name})
     except Exception as e:
         import traceback
         traceback.print_exc()
