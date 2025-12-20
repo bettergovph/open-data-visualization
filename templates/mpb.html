@@ -159,6 +159,20 @@
             font-size: 14px;
         }
 
+        /* Responsive table wrapper for mobile */
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        @media (max-width: 640px) {
+            .data-table th, .data-table td {
+                padding: 10px 8px;
+                font-size: 13px;
+            }
+            .page-title { font-size: 1.6rem; }
+        }
+
         .data-table thead {
             background: #f8f9fa;
             border-bottom: 2px solid #dee2e6;
@@ -301,7 +315,7 @@
                 <strong>About this list:</strong> The top multi-purpose building (MPB) projects from the 2026 DPWH budget, ordered by budget amount. Each building is cross-referenced against historical DPWH projects in the Transparency Procurement System to identify matches with similar scopes and locations. Buildings with transparency matches indicate potential recurring or related procurement activity across budget cycles.
             </p>
             <p class="info-box-text">
-                <strong>Why MPBs:</strong> Of the 5,053 total MPBs budgeted in 2026, 1,602 are flagged for potential overpricing concerns—representing ₱106.4B in aggregate budgets and 5,053 historical project matches. <a href="/budget#cat" style="color:#0d9488; font-weight:600; text-decoration:none;">View detailed budget analysis →</a>
+                <strong>Why MPBs:</strong> Of the 5,053 total MPBs budgeted in 2026, 1,602 are flagged for potential overpricing concerns—representing ₱106.4B in aggregate budgets for the flagged MPBs. In our transparency matching we found <span id="info-total-matches">285</span> historical procurement matches across MPBs. <a href="/budget#cat" style="color:#0d9488; font-weight:600; text-decoration:none;">View detailed budget analysis →</a>
             </p>
         </div>
 
@@ -309,15 +323,15 @@
             <!-- Tabs -->
             <div class="budget-tabs">
                 <div class="budget-tab-nav">
-                    <a href="#top" class="budget-tab-btn active" data-tab="top">💰 Top Buildings</a>
+                    <a href="#top" class="budget-tab-btn active" data-tab="top">🏷️ MPB 2026</a>
                     <a href="#summary" class="budget-tab-btn" data-tab="summary">📊 Summary Statistics</a>
                 </div>
 
                 <div class="budget-tab-content">
                     <!-- Top Buildings Tab -->
                     <div id="tab-top" class="budget-tab-panel active">
-                        <h3 class="section-title">💰 Most Expensive Multi-Purpose Buildings</h3>
-                        <p class="section-desc">Complete list of buildings with at least 2 transparency procurement matches, sorted by budget amount (highest first)</p>
+                        <h3 class="section-title">🏷️ MPB 2026</h3>
+                        <p class="section-desc">Complete list of buildings with transparency procurement matches, sorted by budget amount (highest first)</p>
 
                         <div id="loading-indicator" style="display: flex; align-items: center; gap: 10px; margin: 20px 0;">
                             <div class="loading-spinner"></div>
@@ -327,10 +341,10 @@
                         <!-- Pagination Controls (Top) -->
                         <div id="mpb-pagination-top" style="margin-bottom: 20px;"></div>
 
-                        <table class="data-table" id="mpb-table" style="display: none;">
+                        <div class="table-wrapper">
+                            <table class="data-table" id="mpb-table" style="display: none;">
                             <thead>
                                 <tr>
-                                    <th>#</th>
                                     <th>Project Name</th>
                                     <th id="th-amount" style="width: 150px; cursor: pointer; text-align: right;">Budget Amount <span class="sort-indicator" id="sort-amount"></span></th>
                                     <th id="th-matches" style="width: 120px; cursor: pointer; text-align: center;">Matches <span class="sort-indicator" id="sort-matches"></span></th>
@@ -339,7 +353,8 @@
                             </thead>
                             <tbody id="mpb-table-body">
                             </tbody>
-                        </table>
+                            </table>
+                        </div>
 
                         <!-- Pagination Controls -->
                         <div id="mpb-pagination" style="margin-top: 30px;"></div>
@@ -505,11 +520,23 @@
                 }
             });
 
+            // Deduplicate by project_id to avoid duplicate rows
+            const deduped = [];
+            const seen = new Set();
+            for (const b of sorted) {
+                const id = (b && (b.project_id || b.project_name)) ? (b.project_id || b.project_name) : JSON.stringify(b);
+                if (!seen.has(id)) {
+                    seen.add(id);
+                    deduped.push(b);
+                }
+            }
+
             // Display all buildings (paginated)
-            window.sortedData = sorted;
+            window.sortedData = deduped;
             window.currentPage = 1;
             displayPaginatedData();
-            updateSummaryStats(sorted);
+            // Update summary from the deduplicated full dataset
+            updateSummaryStats(window.sortedData);
         }
 
         function displayPaginatedData() {
@@ -635,36 +662,34 @@
             const tbody = document.getElementById('mpb-table-body');
             tbody.innerHTML = '';
 
-            buildings.forEach((building, index) => {
-                const totalMatchValue = building.matches.reduce((sum, m) => sum + (m.amount || 0), 0);
-                
+            buildings.forEach((building) => {
+                const totalMatchValue = (building.matches || []).reduce((sum, m) => sum + (m.amount || 0), 0);
+
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td><strong>${index + 1}</strong></td>
                     <td>
                         <div style="font-weight: 600; margin-bottom: 4px;">${building.project_name}</div>
                         <div style="font-size: 13px; color: #666;">ID: ${building.project_id}</div>
                     </td>
-                    <td class="amount">₱${building.amount.toLocaleString('en-US', { maximumFractionDigits: 0 })}</td>
+                    <td class="amount">₱${(building.amount || 0).toLocaleString('en-US', { maximumFractionDigits: 0 })}</td>
                     <td>
                         ${building.matches && building.matches.length > 0 
-                            ? `<a href="#" class="match-count" data-index="${index}" title="View matches">${building.matches.length}</a>` 
+                            ? `<a href="#" class="match-count" title="View matches">${building.matches.length}</a>` 
                             : '<span style="color: #999;">0</span>'
                         }
                     </td>
                     <td class="amount">₱${totalMatchValue.toLocaleString('en-US', { maximumFractionDigits: 0 })}</td>
                 `;
                 tbody.appendChild(row);
-            });
 
-            // Attach click handlers for match-count links
-            document.querySelectorAll('.match-count').forEach(el => {
-                el.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const idx = parseInt(el.getAttribute('data-index'));
-                    const building = window.mpbData && window.mpbData[idx];
-                    if (building) openMatchesModal(building);
-                });
+                // Attach click handler for this row's match link if present
+                const matchLink = row.querySelector('.match-count');
+                if (matchLink) {
+                    matchLink.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        openMatchesModal(building);
+                    });
+                }
             });
         }
 
@@ -678,6 +703,12 @@
             document.getElementById('stat-total-budget').textContent = `₱${(totalBudget / 1000000000).toFixed(1)}B`;
             document.getElementById('stat-avg-budget').textContent = `₱${(avgBudget / 1000000).toFixed(0)}M`;
             document.getElementById('stat-total-matches').textContent = totalMatches.toLocaleString();
+
+            // Update info box matches count if present
+            const infoMatchesEl = document.getElementById('info-total-matches');
+            if (infoMatchesEl) {
+                infoMatchesEl.textContent = totalMatches.toLocaleString();
+            }
 
             // Store data for chart rendering
             window.mpbData = buildings;
@@ -756,7 +787,10 @@
             const list = document.getElementById('matches-modal-list');
 
             title.textContent = `Matches for ${building.project_name}`;
-            sub.textContent = `Project ID: ${building.project_id} — ${building.matches.length} match(es)`;
+            // Include PSGC/location info in the modal subtitle if available
+            const loc = building.psgc || building.location || building.city || building.municipality || building.province || '';
+            const locPart = loc ? ` | Location: ${loc}` : '';
+            sub.textContent = `Project ID: ${building.project_id}${locPart} — ${building.matches.length} match(es)`;
             list.innerHTML = '';
 
             building.matches.forEach(m => {
