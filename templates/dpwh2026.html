@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title | default(value=SITE_NAME) }}</title>
+
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <link rel="stylesheet" href="/static/css/tailwind.css">
+
+    <script src="/static/js/chart.js"></script>
+
+    <!-- BetterGovPH Metadata -->
+    <meta name="description"
+        content="DPWH 2026 Budget Proposal Analysis - Detailed breakdown of the National Expenditure Program for 2026.">
+    <meta name="keywords" content="DPWH, budget 2026, infrastructure, government spending, Philippines, transparency">
+    <meta name="author" content="BetterGovPH">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif !important;
+            margin: 0;
+            padding: 0;
+            color: #0f172a !important;
+            min-height: 100vh;
+            background-color: #f8fafc;
+            overflow-y: auto !important;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Navbar logo sizing override to match mpb.html */
+        .visualizations-logo-img {
+            height: 34px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        /* Tabs Styles */
+        .budget-tabs {
+            margin: 1rem 0;
+        }
+
+        .budget-tab-nav {
+            display: flex;
+            border-bottom: 2px solid #e9ecef;
+            margin-bottom: 1rem;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .budget-tab-btn {
+            text-decoration: none;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-bottom: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s ease;
+            position: relative;
+            display: inline-block;
+        }
+
+        .budget-tab-btn:hover:not(.disabled) {
+            background: #e9ecef;
+            color: #333;
+            text-decoration: none;
+        }
+
+        .budget-tab-btn.active {
+            background: white;
+            color: #333;
+            border-color: #333;
+            border-bottom: 2px solid white;
+            margin-bottom: -2px;
+            z-index: 1;
+            text-decoration: none;
+        }
+
+        .budget-tab-content {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-top: none;
+            padding: 20px;
+            border-radius: 0 8px 8px 8px;
+        }
+
+        .budget-tab-panel {
+            display: none;
+        }
+
+        .budget-tab-panel.active {
+            display: block;
+        }
+
+        /* Table Styles */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        /* Responsive table wrapper */
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .data-table thead {
+            background: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .data-table th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 700;
+            color: #333;
+            border-right: 1px solid #dee2e6;
+            white-space: nowrap;
+        }
+
+        .data-table td {
+            padding: 12px 15px;
+            border-right: 1px solid #e9ecef;
+            border-bottom: 1px solid #e9ecef;
+            vertical-align: top;
+        }
+
+        .data-table tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .amount {
+            font-weight: 600;
+            color: #0d9488;
+            font-family: 'Monaco', 'Courier New', monospace;
+            text-align: right;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin: 30px 0 15px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .section-desc {
+            color: #666;
+            margin: 0 0 20px 0;
+            font-size: 15px;
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, rgba(13, 148, 136, 0.08) 0%, rgba(20, 184, 166, 0.12) 100%);
+            border: 1px solid rgba(13, 148, 136, 0.25);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(13, 148, 136, 0.1);
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #333;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .search-input {
+            width: 100%;
+            max-width: 400px;
+            padding: 10px 15px;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .search-input:focus {
+            border-color: #0d9488;
+            box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+        }
+
+        .badge-type {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            background: #e2e8f0;
+            color: #475569;
+            margin-right: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    {% include "navbar.html" %}
+
+    <main class="max-w-7xl mx-auto px-6 py-8">
+        <div class="mb-6">
+            <h1 class="text-2xl font-bold text-slate-900">DPWH 2026 Budget Proposal <small
+                    class="text-slate-400 font-normal">(Parsed)</small></h1>
+            <p class="text-sm text-slate-500">Visualization of the FY 2026 DPWH Details Enrolled Copy.</p>
+        </div>
+
+        <div class="info-box" style="max-width:980px;">
+            <p class="text-sm text-teal-800 leading-relaxed">
+                <strong>About this dataset:</strong> This visualization displays the parsed line items from the 2026
+                DPWH detailed budget proposal.
+                Data is sourced from <code>parsed_dpwh_2026.parquet</code> (converted to JSON).
+            </p>
+        </div>
+
+        <div class="budget-content mt-6">
+            <!-- Tabs -->
+            <div class="budget-tabs">
+                <div class="budget-tab-nav">
+                    <a href="#projects" class="budget-tab-btn active" data-tab="projects">📑 All Projects</a>
+                    <a href="#hierarchy" class="budget-tab-btn" data-tab="hierarchy">📂 Hierarchy</a>
+                    <a href="#uniform" class="budget-tab-btn" data-tab="uniform">⚠️ Uniform Risks</a>
+                </div>
+
+                <div class="budget-tab-content">
+
+                    <div id="loading-indicator"
+                        style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px;">
+                        <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                            <div class="loading-spinner"></div>
+                            <span class="font-semibold text-slate-700">Loading DPWH 2026 Data...</span>
+                        </div>
+                        <p class="text-xs text-slate-500">This may take a few seconds (approx. 25MB)</p>
+                    </div>
+
+                    <div id="error-message"
+                        style="display: none; padding: 20px; background: #fee2e2; color: #b91c1c; border-radius: 8px; border: 1px solid #fca5a5; margin: 20px 0;">
+                    </div>
+
+                    <!-- All Projects Tab -->
+                    <div id="tab-projects" class="budget-tab-panel active" style="display: none;">
+                        <!-- Hidden initally until load -->
+                        <div class="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
+                            <h3 class="section-title" style="margin: 0; border: none; padding: 0;">Line Items</h3>
+                            <input type="text" id="project-search" class="search-input"
+                                placeholder="Search projects (min 3 chars)...">
+                        </div>
+
+                        <div class="table-wrapper">
+                            <table class="data-table" id="projects-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 35%">Project Name</th>
+                                        <th style="width: 15%">Program</th>
+                                        <th style="width: 15%">Region</th>
+                                        <th style="width: 15%">District / DEO</th>
+                                        <th style="text-align: right; width: 20%">Amount (PHP)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="projects-tbody">
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div id="projects-pagination" class="mt-6 flex justify-center gap-2"></div>
+                        <div class="text-center mt-2 text-xs text-slate-400" id="projects-info"></div>
+                    </div>
+
+                    <!-- Hierarchy Tab -->
+                    <div id="tab-hierarchy" class="budget-tab-panel">
+                        <h3 class="section-title">Hierarchy Overview</h3>
+                        <p class="section-desc">View non-project summaries and categories.</p>
+                        <div class="table-wrapper">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Type</th>
+                                        <th>Region</th>
+                                        <th>District</th>
+                                        <th>Program</th>
+                                        <th style="text-align: right;">Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="hierarchy-tbody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Uniform Risks Tab -->
+                    <div id="tab-uniform" class="budget-tab-panel">
+                        <div class="flex justify-between items-center mb-4">
+                            <div>
+                                <h3 class="section-title text-red-700">Uniform Pricing Risks</h3>
+                                <p class="section-desc">
+                                    Clusters of projects with <strong>identical amounts</strong> appearing sequentially
+                                    (Min: 10 items).
+                                    This pattern often indicates non-specific budgeting or copy-paste anomalies.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div id="loading-risks" style="display:none;" class="py-12 text-center text-slate-500">
+                            <div class="loading-spinner"></div> Analyzing patterns...
+                        </div>
+
+                        <div id="risks-container" class="space-y-8">
+                            <!-- Risk clusters injected here -->
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // State
+        window.currentPage = 1;
+        window.itemsPerPage = 20;
+        window.totalItems = 0;
+        window.currentSearch = "";
+
+        // Init
+        document.addEventListener('DOMContentLoaded', () => {
+            initTabs();
+            // Load initial data
+            fetchProjects(1);
+            fetchProjects(1);
+            // fetchSummary call removed
+
+            // Search debounce
+            let timeout = null;
+            document.getElementById('project-search').addEventListener('input', (e) => {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => {
+                    window.currentSearch = e.target.value.trim();
+                    window.currentPage = 1;
+                    fetchProjects(1);
+                }, 300);
+            });
+        });
+
+        function initTabs() {
+            document.querySelectorAll('.budget-tab-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const tabName = btn.getAttribute('data-tab');
+
+                    document.querySelectorAll('.budget-tab-btn').forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('.budget-tab-panel').forEach(p => {
+                        p.classList.remove('active');
+                        p.style.display = 'none';
+                    });
+
+                    btn.classList.add('active');
+                    const panel = document.getElementById(`tab-${tabName}`);
+                    panel.classList.add('active');
+                    panel.style.display = 'block';
+
+                    // Lazy load data
+                    if (tabName === 'hierarchy') {
+                        fetchHierarchy();
+                    } else if (tabName === 'uniform') {
+                        fetchUniformRisks();
+                    }
+                });
+            });
+        }
+
+        async function fetchProjects(page) {
+            const loadingIndicator = document.getElementById('loading-indicator');
+            const tbody = document.getElementById('projects-tbody');
+
+            // Show loading state
+            loadingIndicator.style.display = 'flex';
+            document.getElementById('tab-projects').style.display = 'none';
+
+            try {
+                let url = `/api/dpwh2026/projects?page=${page}&limit=${window.itemsPerPage}`;
+                if (window.currentSearch) {
+                    url += `&search=${encodeURIComponent(window.currentSearch)}`;
+                }
+
+                const response = await fetch(url);
+                if (!response.ok) throw new Error("Failed to fetch data");
+                const res = await response.json();
+
+                window.currentPage = res.page;
+                window.totalItems = res.total;
+
+                renderProjects(res.data);
+                renderPagination(res.total_pages);
+
+                loadingIndicator.style.display = 'none';
+                document.getElementById('tab-projects').style.display = 'block';
+
+            } catch (err) {
+                console.error(err);
+                document.getElementById('error-message').textContent = "Error loading data: " + err.message;
+                document.getElementById('error-message').style.display = 'block';
+                loadingIndicator.style.display = 'none';
+            }
+        }
+
+        function formatCurrency(amount) {
+            if (amount === undefined || amount === null || amount === '') return '-';
+            return new Intl.NumberFormat('en-PH', {
+                style: 'currency',
+                currency: 'PHP',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(amount);
+        }
+
+        function renderProjects(data) {
+            const tbody = document.getElementById('projects-tbody');
+            tbody.innerHTML = '';
+
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding: 20px; color: #666;">No projects found.</td></tr>';
+                return;
+            }
+
+            data.forEach(item => {
+                const row = document.createElement('tr');
+
+                // Content Logic
+                let name = item.project_name || item.latest_qualifier_value || "N/A";
+                let amount = item.amount || 0;
+
+                let region = item.region || "";
+                let district = item.district || "";
+
+                // Program / Funding
+                let program = item.program || "";
+                let funding = item.funding_source ? `<div class="text-[10px] font-bold text-teal-600 uppercase tracking-wider mb-1">${item.funding_source}</div>` : '';
+
+                row.innerHTML = `
+                    <td>
+                        ${funding}
+                        <div class="font-semibold text-slate-800 text-sm leading-snug">${name}</div>
+                        ${item._excel_row ? `<div class="text-[10px] text-slate-400 mt-1">Row: ${item._excel_row}</div>` : ''}
+                    </td>
+                    <td><div class="text-xs text-slate-600 font-medium">${program}</div></td>
+                    <td><div class="text-xs text-slate-600">${region}</div></td>
+                    <td><div class="text-xs text-slate-600">${district}</div></td>
+                    <td class="amount">${formatCurrency(amount)}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function renderPagination(totalPages) {
+            const container = document.getElementById('projects-pagination');
+            container.innerHTML = '';
+
+            // Info text
+            const start = (window.currentPage - 1) * window.itemsPerPage + 1;
+            const end = Math.min(window.currentPage * window.itemsPerPage, window.totalItems);
+            document.getElementById('projects-info').textContent = `Showing items ${start} to ${end} of ${window.totalItems.toLocaleString()}`;
+
+            if (totalPages <= 1) return;
+
+            const maxButtons = 5;
+            const createBtn = (text, page, isActive = false, isDisabled = false) => {
+                const btn = document.createElement('button');
+                btn.textContent = text;
+                btn.className = `px-3 py-1 rounded border text-sm font-medium transition-colors ${isActive
+                    ? 'bg-teal-600 text-white border-teal-600'
+                    : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50'
+                    }`;
+                if (isDisabled) {
+                    btn.disabled = true;
+                    btn.classList.add('opacity-50', 'cursor-not-allowed');
+                } else {
+                    btn.onclick = () => {
+                        fetchProjects(page);
+                        document.querySelector('.table-wrapper').scrollIntoView({ behavior: 'smooth' });
+                    };
+                }
+                return btn;
+            };
+
+            // Prev
+            container.appendChild(createBtn('←', window.currentPage - 1, false, window.currentPage === 1));
+
+            // Logic
+            let startPage = Math.max(1, window.currentPage - 2);
+            let endPage = Math.min(totalPages, startPage + maxButtons - 1);
+
+            if (endPage - startPage < maxButtons - 1) {
+                startPage = Math.max(1, endPage - maxButtons + 1);
+            }
+
+            if (startPage > 1) {
+                container.appendChild(createBtn('1', 1, false));
+                if (startPage > 2) container.appendChild(document.createTextNode('...'));
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                container.appendChild(createBtn(i.toString(), i, i === window.currentPage));
+            }
+
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) container.appendChild(document.createTextNode('...'));
+                container.appendChild(createBtn(totalPages.toString(), totalPages, false));
+            }
+
+            // Next
+            container.appendChild(createBtn('→', window.currentPage + 1, false, window.currentPage === totalPages));
+        }
+
+        // Hierarchy Fetching
+        async function fetchHierarchy(page) {
+            const loading = document.getElementById('loading-hierarchy');
+            const tbody = document.getElementById('hierarchy-tbody');
+
+            loading.style.display = 'flex';
+            tbody.innerHTML = '';
+
+            try {
+                let url = `/api/dpwh2026/hierarchy?page=${page}&limit=${window.itemsPerPage}`;
+                if (window.currentSearch) {
+                    url += `&search=${encodeURIComponent(window.currentSearch)}`;
+                }
+
+                const response = await fetch(url);
+                if (!response.ok) throw new Error("Failed to fetch hierarchy");
+                const res = await response.json();
+
+                renderHierarchy(res.data);
+
+                // Simple pagination for hierarchy
+                renderSimplePagination('hierarchy-pagination', res.page, res.total_pages, (p) => fetchHierarchy(p));
+
+                loading.style.display = 'none';
+
+            } catch (err) {
+                console.error(err);
+                loading.style.display = 'none';
+            }
+        }
+
+        function renderHierarchy(data) {
+            const tbody = document.getElementById('hierarchy-tbody');
+            tbody.innerHTML = '';
+
+            data.forEach(item => {
+                const row = document.createElement('tr');
+
+                // Map column codes to readable types
+                const typeMap = {
+                    'C': 'Program',
+                    'H': 'Region',
+                    'I': 'District',
+                    'G': 'Sub-Region',
+                    'B': 'Category'
+                };
+                const typeLabel = typeMap[item.type] || `Level ${item.type}`;
+
+                // Style based on level
+                let nameClass = "font-medium text-slate-800";
+                if (item.type === 'H') nameClass = "font-bold text-teal-700";
+                if (item.type === 'C') nameClass = "font-bold text-slate-900 upercase";
+
+                row.innerHTML = `
+                    <td>
+                        <div class="${nameClass}">${item.name || 'Unknown'}</div>
+                        ${item.program && item.type !== 'C' ? `<div class="text-xs text-slate-400">Under: ${item.program}</div>` : ''}
+                    </td>
+                    <td>
+                        <span class="text-xs font-mono bg-slate-100 px-2 py-1 rounded">${typeLabel}</span>
+                    </td>
+                    <td class="amount font-mono">${formatCurrency(item.amount)}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Shared Pagination Helper
+        function renderSimplePagination(containerId, currentPage, totalPages, callback) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+
+            if (totalPages <= 1) return;
+
+            const prevBtn = document.createElement('button');
+            prevBtn.textContent = "Previous";
+            prevBtn.className = "px-3 py-1 bg-white border rounded hover:bg-slate-50 disabled:opacity-50";
+            prevBtn.disabled = currentPage === 1;
+            prevBtn.onclick = () => callback(currentPage - 1);
+
+            const nextBtn = document.createElement('button');
+            nextBtn.textContent = "Next";
+            nextBtn.className = "px-3 py-1 bg-white border rounded hover:bg-slate-50 disabled:opacity-50 ml-2";
+            nextBtn.disabled = currentPage >= totalPages;
+            nextBtn.onclick = () => callback(currentPage + 1);
+
+            const info = document.createElement('span');
+            info.className = "mx-3 text-sm text-slate-500";
+            info.textContent = `Page ${currentPage} of ${totalPages}`;
+
+            container.appendChild(prevBtn);
+            container.appendChild(info);
+            container.appendChild(nextBtn);
+        }
+
+        // Hierarchy Fetching
+        async function fetchHierarchy() {
+            const tbody = document.getElementById('hierarchy-tbody');
+            if (tbody.children.length > 0) return; // Loaded already
+
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4"><div class="loading-spinner"></div> Loading...</td></tr>';
+
+            try {
+                const res = await fetch('/api/dpwh2026/hierarchy');
+                const data = await res.json();
+
+                tbody.innerHTML = '';
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4">No summary data found.</td></tr>';
+                    return;
+                }
+
+                data.data.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td class="font-medium text-slate-700">${item.name || 'Unknown'}</td>
+                        <td class="text-xs text-slate-500 uppercase">${item.type}</td>
+                        <td class="text-sm">${item.region || '-'}</td>
+                        <td class="text-sm">${item.district || '-'}</td>
+                        <td class="text-sm">${item.program || '-'}</td>
+                        <td class="amount font-mono">${formatCurrency(item.amount)}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+
+            } catch (e) {
+                console.error(e);
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-red-500">Failed to load hierarchy.</td></tr>';
+            }
+        }
+
+        // Uniform Risks Fetching
+        async function fetchUniformRisks() {
+            const container = document.getElementById('risks-container');
+            const loading = document.getElementById('loading-risks');
+            const minSize = 10;
+
+            loading.style.display = 'block';
+            container.innerHTML = '';
+
+            try {
+                const response = await fetch(`/api/dpwh2026/risks/uniform?min_cluster_size=${minSize}`);
+                const json = await response.json();
+                const rows = json.data;
+
+                loading.style.display = 'none';
+
+                if (!rows || rows.length === 0) {
+                    container.innerHTML = '<div class="text-center py-8 text-slate-500">No uniform pricing clusters found with this criteria.</div>';
+                    return;
+                }
+
+                // Group by run_id
+                const clusters = {};
+                rows.forEach(r => {
+                    if (!clusters[r.run_id]) clusters[r.run_id] = [];
+                    clusters[r.run_id].push(r);
+                });
+
+                // Render Clusters
+                Object.values(clusters).forEach(cluster => {
+                    const first = cluster[0];
+                    const count = cluster.length;
+
+                    const card = document.createElement('div');
+                    card.className = "bg-white border border-red-200 rounded-lg shadow-sm overflow-hidden";
+
+                    // Card Header
+                    const header = document.createElement('div');
+                    header.className = "bg-red-50 px-4 py-3 border-b border-red-100 flex justify-between items-center cursor-pointer hover:bg-red-100 transition-colors select-none";
+                    header.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <svg class="w-5 h-5 text-red-700 transform transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                            <div>
+                                <span class="font-bold text-red-800 text-lg mr-3">${formatCurrency(first.amount)}</span>
+                                <span class="text-xs font-semibold text-red-600 bg-red-100 px-2 py-1 rounded-full border border-red-200">
+                                    Repeats ${count} times
+                                </span>
+                            </div>
+                        </div>
+                         <div class="text-xs text-slate-500 text-right">
+                            <div>Run ID: ${first.run_id}</div>
+                            <div>Region: <strong>${first.region || 'Mixed'}</strong></div>
+                        </div>
+                    `;
+                    card.appendChild(header);
+
+                    // Table Container (Hidden by default)
+                    const tableContainer = document.createElement('div');
+                    tableContainer.style.display = 'none';
+                    tableContainer.className = "border-t border-slate-100";
+
+                    const table = document.createElement('table');
+                    table.className = "w-full text-sm text-left";
+                    table.innerHTML = `
+                        <thead class="bg-slate-50 text-slate-500 border-b">
+                            <tr>
+                                <th class="px-4 py-2 font-medium w-24">Row</th>
+                                <th class="px-4 py-2 font-medium">Project Name</th>
+                                <th class="px-4 py-2 font-medium w-1/4">District</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100"></tbody>
+                    `;
+
+                    const tbody = table.querySelector('tbody');
+                    cluster.forEach(item => {
+                        const tr = document.createElement('tr');
+                        tr.className = "hover:bg-slate-50";
+                        tr.innerHTML = `
+                            <td class="px-4 py-2 text-xs text-slate-400 font-mono">${item._excel_row}</td>
+                            <td class="px-4 py-2 text-slate-700">${item.project_name}</td>
+                            <td class="px-4 py-2 text-xs text-slate-500">${item.district || '-'}</td>
+                         `;
+                        tbody.appendChild(tr);
+                    });
+
+                    tableContainer.appendChild(table);
+                    card.appendChild(tableContainer);
+                    container.appendChild(card);
+
+                    // Toggle Logic
+                    header.addEventListener('click', () => {
+                        const isHidden = tableContainer.style.display === 'none';
+                        tableContainer.style.display = isHidden ? 'block' : 'none';
+
+                        // Rotate Chevron
+                        const svg = header.querySelector('svg');
+                        if (isHidden) {
+                            svg.style.transform = 'rotate(90deg)';
+                        } else {
+                            svg.style.transform = 'rotate(0deg)';
+                        }
+                    });
+                });
+
+            } catch (err) {
+                console.error(err);
+                loading.style.display = 'none';
+                container.innerHTML = '<div class="text-center text-red-500">Error loading risk data.</div>';
+            }
+        }
+
+        // Deep linking hash handler
+        function handleHashChange() {
+            const hash = window.location.hash.substring(1); // remove #
+            if (['projects', 'hierarchy', 'uniform', 'summary'].includes(hash)) {
+                document.querySelector(`.budget-tab-btn[data-tab="${hash}"]`).click();
+            }
+        }
+
+    </script>
+</body>
+
+</html>
