@@ -13061,5 +13061,334 @@ async def export_integrated_projects_csv(
         )
 
 
+
+@app.get("/api/dpwh2026/projects")
+async def get_dpwh_2026_projects(
+    page: int = Query(default=1, ge=1, description="Page number"),
+    limit: int = Query(default=20, ge=1, le=1000, description="Items per page"),
+    search: Optional[str] = Query(default=None, description="Search term")
+) -> JSONResponse:
+    try:
+        parquet_file = DATA_ROOT.parent.parent / "data" / "parquet" / "parsed_dpwh_2026.parquet"
+        if not parquet_file.exists():
+            return JSONResponse(content={"success": False, "error": f"File not found: {parquet_file}"}, status_code=404)
+
+        conn = duckdb.connect()
+        try:
+            parquet_path_str = str(parquet_file).replace("'", "''")
+            
+            # Use CTE to fill down categories (B to I) and Funding Source
+            # We use PARTITION BY logic to ensure child levels are RESET when a parent level changes.
+            # E.g. A new Program (Col C) must clear the previous Region (Col H).
+            base_cte = f"""
+                WITH params AS (
+                    SELECT 
+                        _excel_row,
+                        amount,
+                        latest_qualifier_column,
+                        latest_qualifier_value,
+                        col_J,
+                        
+                        -- Identify Funding Source Rows
+                        CASE 
+                            WHEN col_J ILIKE 'GOP' THEN 'GOP'
+                            WHEN col_J ILIKE 'Loan Proceeds' THEN 'Loan Proceeds'
+                            ELSE NULL 
+                        END as raw_funding,
+
+                        col_B, col_C, 
+                        
+                        -- Clean H and I to remove list markers (e.g. "a.", "1", "1.")
+                        -- If length is small (< 3) or matches pattern, treat as NULL so we fill from above
+                        CASE WHEN LENGTH(col_H) > 3 THEN col_H ELSE NULL END as clean_H,
+                        CASE WHEN LENGTH(col_I) > 3 THEN col_I ELSE NULL END as clean_I
+                    FROM read_parquet('{parquet_path_str}')
+                ),
+                groups AS (
+                    SELECT 
+                        *,
+                        -- Generate grouping IDs for each level (running count of non-nulls)
+                        COUNT(col_B) OVER (ORDER BY _excel_row) as grp_B,
+                        COUNT(col_C) OVER (ORDER BY _excel_row) as grp_C,
+                        COUNT(clean_H) OVER (ORDER BY _excel_row) as grp_H,
+                        COUNT(clean_I) OVER (ORDER BY _excel_row) as grp_I
+                    FROM params
+                ),
+                filled_data AS (
+                    SELECT 
+                        _excel_row,
+                        amount,
+                        latest_qualifier_column,
+                        latest_qualifier_value,
+                        col_J,
+                        
+                        -- Fill down using partitions to effectively "reset" when parent changes
+                        LAST_VALUE(col_B IGNORE NULLS) OVER (ORDER BY _excel_row) as cat_B,
+                        
+                        -- C resets if B changes? (Usually global C count is safe, but let's be strict if needed. 
+                        -- Actually C is dominantly its own stream. Partitioning by grp_B is safer)
+                        LAST_VALUE(col_C IGNORE NULLS) OVER (PARTITION BY grp_B ORDER BY _excel_row) as cat_C,
+                        
+                        -- Region (H) MUST reset if Program (C) changes
+                        -- Use clean_H as source
+                        LAST_VALUE(clean_H IGNORE NULLS) OVER (PARTITION BY grp_C ORDER BY _excel_row) as cat_H,
+                        
+                        -- District (I) MUST reset if Region (H) changes
+                        -- Use clean_I as source
+                        LAST_VALUE(clean_I IGNORE NULLS) OVER (PARTITION BY grp_H ORDER BY _excel_row) as cat_I,
+                        
+                        -- Funding (J) MUST reset if District (I) changes (or Project context changes)
+                        -- Funding is usually tight to the project list.
+                        LAST_VALUE(raw_funding IGNORE NULLS) OVER (PARTITION BY grp_I ORDER BY _excel_row) as funding_source
+                    FROM groups
+                )
+            """
+
+            # Filter for projects only (Column J)
+            where_clause = """
+                latest_qualifier_column = 'J' 
+                AND col_J NOT ILIKE 'GOP' 
+                AND col_J NOT ILIKE 'Loan Proceeds'
+                AND col_J NOT ILIKE '%Sub-Total%'
+                AND col_J NOT ILIKE '%Grand Total%'
+            """
+            
+            if search:
+                safe_search = search
+                safe_search = safe_search.replace("'", "''")
+                where_clause += f""" AND (
+                        col_J ILIKE '%{safe_search}%' OR
+                        cat_H ILIKE '%{safe_search}%' OR 
+                        cat_I ILIKE '%{safe_search}%' OR
+                        cat_C ILIKE '%{safe_search}%'
+                    )
+                """
+
+            # Count Query
+            count_q = f"{base_cte} SELECT COUNT(*) FROM filled_data WHERE {where_clause}"
+            total = conn.execute(count_q).fetchone()[0]
+
+            # Data Query
+            offset = (page - 1) * limit
+            query = f"""
+                {base_cte}
+                SELECT 
+                    _excel_row, 
+                    col_J as project_name, 
+                    amount, 
+                    cat_H as region,
+                    cat_I as district,
+                    cat_C as program,
+                    cat_B as category,
+                    funding_source
+                FROM filled_data 
+                WHERE {where_clause} 
+                ORDER BY _excel_row
+                OFFSET {offset} LIMIT {limit}
+            """
+            
+            rows = conn.execute(query).fetchall()
+            cols = [desc[0] for desc in conn.description]
+            
+            data = []
+            for r in rows:
+                item = dict(zip(cols, r))
+                data.append(item)
+
+            return JSONResponse(content={
+                "data": data,
+                "total": total,
+                "page": page,
+                "limit": limit,
+                "total_pages": (total + limit - 1) // limit
+            })
+            
+        finally:
+            conn.close()
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JSONResponse(content={"success": False, "error": str(e)}, status_code=500)
+
+
+@app.get("/api/dpwh2026/hierarchy")
+async def get_dpwh_2026_hierarchy() -> JSONResponse:
+    try:
+        parquet_file = DATA_ROOT.parent.parent / "data" / "parquet" / "parsed_dpwh_2026.parquet"
+        if not parquet_file.exists():
+            return JSONResponse(content={"success": False, "error": f"File not found: {parquet_file}"}, status_code=404)
+
+        conn = duckdb.connect()
+        try:
+            parquet_path_str = str(parquet_file).replace("'", "''")
+            
+            base_cte = f"""
+                WITH params AS (
+                    SELECT 
+                        _excel_row, 
+                        col_J, 
+                        amount, 
+                        latest_qualifier_column,
+                        latest_qualifier_value,
+                        col_B, col_C,
+                        CASE WHEN LENGTH(col_H) > 3 THEN col_H ELSE NULL END as clean_H,
+                        CASE WHEN LENGTH(col_I) > 3 THEN col_I ELSE NULL END as clean_I
+                    FROM read_parquet('{parquet_path_str}')
+                ),
+                groups AS (
+                    SELECT 
+                        *,
+                        COUNT(col_B) OVER (ORDER BY _excel_row) as grp_B,
+                        COUNT(col_C) OVER (ORDER BY _excel_row) as grp_C,
+                        COUNT(clean_H) OVER (ORDER BY _excel_row) as grp_H,
+                        COUNT(clean_I) OVER (ORDER BY _excel_row) as grp_I
+                    FROM params
+                ),
+                filled_data AS (
+                   SELECT
+                        *,
+                        LAST_VALUE(col_C IGNORE NULLS) OVER (PARTITION BY grp_B ORDER BY _excel_row) as cat_C,
+                        LAST_VALUE(clean_H IGNORE NULLS) OVER (PARTITION BY grp_C ORDER BY _excel_row) as cat_H,
+                        LAST_VALUE(clean_I IGNORE NULLS) OVER (PARTITION BY grp_H ORDER BY _excel_row) as cat_I
+                   FROM groups
+                )
+            """
+
+            query = f"""
+                {base_cte}
+                SELECT 
+                    _excel_row, 
+                    latest_qualifier_value as name,
+                    latest_qualifier_column as type,
+                    amount, 
+                    cat_H as region,
+                    cat_I as district,
+                    cat_C as program
+                FROM filled_data 
+                WHERE latest_qualifier_column != 'J'
+                ORDER BY _excel_row
+                LIMIT 2000
+            """
+            
+            rows = conn.execute(query).fetchall()
+            cols = [desc[0] for desc in conn.description]
+            data = [dict(zip(cols, r)) for r in rows]
+            
+            return JSONResponse(content={"data": data})
+            
+        finally:
+            conn.close()
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JSONResponse(content={"success": False, "error": str(e)}, status_code=500)
+
+
+@app.get("/api/dpwh2026/risks/uniform")
+async def get_dpwh_2026_uniform_risks(
+    min_cluster_size: int = Query(default=10, ge=3, description="Minimum size of uniform cluster")
+) -> JSONResponse:
+    try:
+        parquet_file = DATA_ROOT.parent.parent / "data" / "parquet" / "parsed_dpwh_2026.parquet"
+        if not parquet_file.exists():
+            return JSONResponse(content={"success": False, "error": "Data file not found"}, status_code=404)
+
+        conn = duckdb.connect()
+        try:
+            parquet_path_str = str(parquet_file).replace("'", "''")
+            
+            # Gap/Island Logic to find sequential identical amounts
+            # We first find the runs, then filter for size >= N, then return ALL rows in those runs.
+            query = f"""
+                WITH params AS (
+                    SELECT 
+                        _excel_row, 
+                        col_J, 
+                        amount, 
+                        latest_qualifier_column,
+                        col_B, col_C,
+                        -- Clean H and I (ignore markers)
+                        CASE WHEN LENGTH(col_H) > 3 THEN col_H ELSE NULL END as clean_H,
+                        CASE WHEN LENGTH(col_I) > 3 THEN col_I ELSE NULL END as clean_I
+                    FROM read_parquet('{parquet_path_str}')
+                ),
+                groups AS (
+                    SELECT 
+                        *,
+                        COUNT(col_B) OVER (ORDER BY _excel_row) as grp_B,
+                        COUNT(col_C) OVER (ORDER BY _excel_row) as grp_C,
+                        COUNT(clean_H) OVER (ORDER BY _excel_row) as grp_H,
+                        COUNT(clean_I) OVER (ORDER BY _excel_row) as grp_I
+                    FROM params
+                ),
+                filled_context AS (
+                   SELECT
+                        _excel_row, col_J, amount, latest_qualifier_column,
+                        -- Fill down context
+                        LAST_VALUE(col_C IGNORE NULLS) OVER (PARTITION BY grp_B ORDER BY _excel_row) as cat_C,
+                        LAST_VALUE(clean_H IGNORE NULLS) OVER (PARTITION BY grp_C ORDER BY _excel_row) as cat_H,
+                        LAST_VALUE(clean_I IGNORE NULLS) OVER (PARTITION BY grp_H ORDER BY _excel_row) as cat_I
+                   FROM groups
+                ),
+                marked AS (
+                    SELECT *,
+                        amount = LAG(amount) OVER (ORDER BY _excel_row) as match_prev,
+                        amount = LEAD(amount) OVER (ORDER BY _excel_row) as match_next
+                    FROM filled_context
+                    WHERE latest_qualifier_column = 'J' 
+                    AND col_J NOT ILIKE 'GOP' 
+                    AND col_J NOT ILIKE 'Loan Proceeds'
+                    AND col_J NOT ILIKE '%Sub-Total%'
+                ),
+                runs AS (
+                    SELECT *,
+                         -- A new run starts if the previous item didn't match (match_prev is false)
+                        CASE WHEN match_prev THEN 0 ELSE 1 END as is_new_run
+                    FROM marked
+                    WHERE match_prev OR match_next
+                ),
+                grouped_runs AS (
+                    SELECT *,
+                        SUM(is_new_run) OVER (ORDER BY _excel_row) as run_id
+                    FROM runs
+                ),
+                cluster_stats AS (
+                    SELECT run_id, COUNT(*) as cnt 
+                    FROM grouped_runs 
+                    GROUP BY run_id 
+                    HAVING COUNT(*) >= {min_cluster_size}
+                )
+                SELECT 
+                    r._excel_row,
+                    r.amount,
+                    r.col_J as project_name,
+                    r.cat_C as program,
+                    r.cat_H as region,
+                    r.cat_I as district,
+                    r.run_id,
+                    cs.cnt as cluster_size
+                FROM grouped_runs r
+                JOIN cluster_stats cs ON r.run_id = cs.run_id
+                ORDER BY cs.cnt DESC, r.run_id, r._excel_row
+                LIMIT 10000
+            """
+            
+            rows = conn.execute(query).fetchall()
+            cols = [desc[0] for desc in conn.description]
+            data = [dict(zip(cols, r)) for r in rows]
+            
+            return JSONResponse(content={"data": data})
+            
+        finally:
+            conn.close()
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JSONResponse(content={"success": False, "error": str(e)}, status_code=500)
+
+
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8000)
