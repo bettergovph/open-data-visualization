@@ -23,13 +23,12 @@ async fn home(req: HttpRequest) -> Result<HttpResponse, ActixError> {
     let tera = Tera::new("templates/**/*").map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
     let mut context = Context::new();
     
-    add_frontend_env_to_context(&mut context);
+    add_frontend_env_to_context(&mut context, &req);
     
-    context.insert("title", "BetterGovPH Data Visualizations");
+    let (site_name, _) = get_site_branding(&req);
+    context.insert("title", &site_name);
     context.insert("company_name", "BetterGovPH");
     context.insert("platform", "BetterGovPH");
-    context.insert("SITE_NAME", "BetterGovPH Data Visualizations");
-    context.insert("SITE_URL", "https://visualizations.bettergov.ph");
     
     let template_name = if is_mobile(&req) {
         "mobile/visualizations_home.html"
@@ -46,13 +45,11 @@ async fn budget(req: HttpRequest) -> Result<HttpResponse, ActixError> {
     let tera = Tera::new("templates/**/*").map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
     let mut context = Context::new();
     
-    add_frontend_env_to_context(&mut context);
+    add_frontend_env_to_context(&mut context, &req);
     
     context.insert("title", "Budget Analysis - BetterGovPH");
     context.insert("company_name", "BetterGovPH");
     context.insert("platform", "BetterGovPH");
-    context.insert("SITE_NAME", "BetterGovPH Data Visualizations");
-    context.insert("SITE_URL", "https://visualizations.bettergov.ph");
     
     let template_name = if is_mobile(&req) {
         "mobile/budget.html"
@@ -69,13 +66,11 @@ async fn flood(req: HttpRequest) -> Result<HttpResponse, ActixError> {
     let tera = Tera::new("templates/**/*").map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
     let mut context = Context::new();
     
-    add_frontend_env_to_context(&mut context);
+    add_frontend_env_to_context(&mut context, &req);
     
     context.insert("title", "Flood Control Projects - BetterGovPH");
     context.insert("company_name", "BetterGovPH");
     context.insert("platform", "BetterGovPH");
-    context.insert("SITE_NAME", "BetterGovPH Data Visualizations");
-    context.insert("SITE_URL", "https://visualizations.bettergov.ph");
     
     let template_name = if is_mobile(&req) {
         "mobile/flood.html"
@@ -92,13 +87,11 @@ async fn dime(req: HttpRequest) -> Result<HttpResponse, ActixError> {
     let tera = Tera::new("templates/**/*").map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
     let mut context = Context::new();
     
-    add_frontend_env_to_context(&mut context);
+    add_frontend_env_to_context(&mut context, &req);
     
     context.insert("title", "DIME Infrastructure Projects - BetterGovPH");
     context.insert("company_name", "BetterGovPH");
     context.insert("platform", "BetterGovPH");
-    context.insert("SITE_NAME", "BetterGovPH Data Visualizations");
-    context.insert("SITE_URL", "https://visualizations.bettergov.ph");
     
     let template_name = if is_mobile(&req) {
         "mobile/dime.html"
@@ -115,13 +108,11 @@ async fn nep(req: HttpRequest) -> Result<HttpResponse, ActixError> {
     let tera = Tera::new("templates/**/*").map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
     let mut context = Context::new();
 
-    add_frontend_env_to_context(&mut context);
+    add_frontend_env_to_context(&mut context, &req);
 
     context.insert("title", "NEP Analysis - BetterGovPH");
     context.insert("company_name", "BetterGovPH");
     context.insert("platform", "BetterGovPH");
-    context.insert("SITE_NAME", "BetterGovPH Data Visualizations");
-    context.insert("SITE_URL", "https://visualizations.bettergov.ph");
 
     let template_name = if is_mobile(&req) {
         "mobile/nep.html"
@@ -138,13 +129,11 @@ async fn map(req: HttpRequest) -> Result<HttpResponse, ActixError> {
     let tera = Tera::new("templates/**/*").map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
     let mut context = Context::new();
 
-    add_frontend_env_to_context(&mut context);
+    add_frontend_env_to_context(&mut context, &req);
 
     context.insert("title", "Interactive Map - BetterGovPH");
     context.insert("company_name", "BetterGovPH");
     context.insert("platform", "BetterGovPH");
-    context.insert("SITE_NAME", "BetterGovPH Data Visualizations");
-    context.insert("SITE_URL", "https://visualizations.bettergov.ph");
 
     let template_name = if is_mobile(&req) {
         "mobile/map.html"
@@ -161,13 +150,11 @@ async fn mpb(req: HttpRequest) -> Result<HttpResponse, ActixError> {
     let tera = Tera::new("templates/**/*").map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
     let mut context = Context::new();
 
-    add_frontend_env_to_context(&mut context);
+    add_frontend_env_to_context(&mut context, &req);
 
     context.insert("title", "Multi-Purpose Buildings - BetterGovPH");
     context.insert("company_name", "BetterGovPH");
     context.insert("platform", "BetterGovPH");
-    context.insert("SITE_NAME", "BetterGovPH Data Visualizations");
-    context.insert("SITE_URL", "https://visualizations.bettergov.ph");
 
     let template_name = if is_mobile(&req) {
         "mobile/mpb.html"
@@ -185,13 +172,11 @@ async fn budget_nep_correlation(req: HttpRequest) -> Result<HttpResponse, ActixE
     let tera = Tera::new("templates/**/*").map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
     let mut context = Context::new();
 
-    add_frontend_env_to_context(&mut context);
+    add_frontend_env_to_context(&mut context, &req);
 
     context.insert("title", "Budget-NEP Correlation - BetterGovPH");
     context.insert("company_name", "BetterGovPH");
     context.insert("platform", "BetterGovPH");
-    context.insert("SITE_NAME", "BetterGovPH Data Visualizations");
-    context.insert("SITE_URL", "https://visualizations.bettergov.ph");
 
     let template_name = if is_mobile(&req) {
         "mobile/budget_nep_correlation.html"
@@ -208,13 +193,11 @@ async fn budget_flood_correlation(req: HttpRequest) -> Result<HttpResponse, Acti
     let tera = Tera::new("templates/**/*").map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
     let mut context = Context::new();
 
-    add_frontend_env_to_context(&mut context);
+    add_frontend_env_to_context(&mut context, &req);
 
     context.insert("title", "Budget-Flood Correlation - BetterGovPH");
     context.insert("company_name", "BetterGovPH");
     context.insert("platform", "BetterGovPH");
-    context.insert("SITE_NAME", "BetterGovPH Data Visualizations");
-    context.insert("SITE_URL", "https://visualizations.bettergov.ph");
 
     let template_name = if is_mobile(&req) {
         "mobile/budget_flood_correlation.html"
@@ -231,13 +214,11 @@ async fn flood_dime_correlation(req: HttpRequest) -> Result<HttpResponse, ActixE
     let tera = Tera::new("templates/**/*").map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
     let mut context = Context::new();
 
-    add_frontend_env_to_context(&mut context);
+    add_frontend_env_to_context(&mut context, &req);
 
     context.insert("title", "Flood-DIME Correlation - BetterGovPH");
     context.insert("company_name", "BetterGovPH");
     context.insert("platform", "BetterGovPH");
-    context.insert("SITE_NAME", "BetterGovPH Data Visualizations");
-    context.insert("SITE_URL", "https://visualizations.bettergov.ph");
 
     let template_name = if is_mobile(&req) {
         "mobile/flood_dime_correlation.html"
@@ -254,13 +235,11 @@ async fn contractor_district_correlation(req: HttpRequest) -> Result<HttpRespons
     let tera = Tera::new("templates/**/*").map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
     let mut context = Context::new();
 
-    add_frontend_env_to_context(&mut context);
+    add_frontend_env_to_context(&mut context, &req);
 
     context.insert("title", "Contractor-District Correlation Analysis - BetterGovPH");
     context.insert("company_name", "BetterGovPH");
     context.insert("platform", "BetterGovPH");
-    context.insert("SITE_NAME", "BetterGovPH Data Visualizations");
-    context.insert("SITE_URL", "https://visualizations.bettergov.ph");
 
     let template_name = if is_mobile(&req) {
         "mobile/contractor_district_correlation.html"
@@ -273,17 +252,15 @@ async fn contractor_district_correlation(req: HttpRequest) -> Result<HttpRespons
 }
 
 // Dynasty-Poverty Correlation Page
-async fn dynasty_poverty_correlation(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
+async fn dynasty_poverty_correlation(req: HttpRequest) -> Result<HttpResponse, ActixError> {
     let tera = Tera::new("templates/**/*").map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
     let mut context = Context::new();
 
-    add_frontend_env_to_context(&mut context);
+    add_frontend_env_to_context(&mut context, &req);
 
     context.insert("title", "Dynasty-Poverty Correlation Analysis - BetterGovPH");
     context.insert("company_name", "BetterGovPH");
     context.insert("platform", "BetterGovPH");
-    context.insert("SITE_NAME", "BetterGovPH Data Visualizations");
-    context.insert("SITE_URL", "https://visualizations.bettergov.ph");
 
     let template_name = "dynasty_poverty_correlation.html";
 
@@ -296,13 +273,11 @@ async fn contractors(req: HttpRequest) -> Result<HttpResponse, ActixError> {
     let tera = Tera::new("templates/**/*").map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
     let mut context = Context::new();
 
-    add_frontend_env_to_context(&mut context);
+    add_frontend_env_to_context(&mut context, &req);
 
     context.insert("title", "SEC Contractors - BetterGovPH");
     context.insert("company_name", "BetterGovPH");
     context.insert("platform", "BetterGovPH");
-    context.insert("SITE_NAME", "BetterGovPH Data Visualizations");
-    context.insert("SITE_URL", "https://visualizations.bettergov.ph");
 
     let template_name = if is_mobile(&req) {
         "mobile/philgeps.html"
@@ -317,17 +292,15 @@ async fn contractors(req: HttpRequest) -> Result<HttpResponse, ActixError> {
 
 
 // Circles Page (unpublished - data quality analysis)
-async fn circles(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
+async fn circles(req: HttpRequest) -> Result<HttpResponse, ActixError> {
     let tera = Tera::new("templates/**/*").map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
     let mut context = Context::new();
 
-    add_frontend_env_to_context(&mut context);
+    add_frontend_env_to_context(&mut context, &req);
 
     context.insert("title", "Coordinate Circles - Data Quality Analysis");
     context.insert("company_name", "BetterGovPH");
     context.insert("platform", "BetterGovPH");
-    context.insert("SITE_NAME", "BetterGovPH Data Visualizations");
-    context.insert("SITE_URL", "https://visualizations.bettergov.ph");
 
     let template_name = "circles.html";
 
@@ -336,17 +309,15 @@ async fn circles(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
 }
 
 // EOGO Corruption Risk Analysis Page
-async fn eogo(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
+async fn eogo(req: HttpRequest) -> Result<HttpResponse, ActixError> {
     let tera = Tera::new("templates/**/*").map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
     let mut context = Context::new();
 
-    add_frontend_env_to_context(&mut context);
+    add_frontend_env_to_context(&mut context, &req);
 
     context.insert("title", "EOGO Corruption Risk Analysis - BetterGovPH");
     context.insert("company_name", "BetterGovPH");
     context.insert("platform", "BetterGovPH");
-    context.insert("SITE_NAME", "BetterGovPH Data Visualizations");
-    context.insert("SITE_URL", "https://visualizations.bettergov.ph");
 
     let template_name = "eogo.html";
 
@@ -355,19 +326,17 @@ async fn eogo(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
 }
 
 // Sources Page
-async fn sources(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
+async fn sources(req: HttpRequest) -> Result<HttpResponse, ActixError> {
     let tera = Tera::new("templates/**/*").map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
     let mut context = Context::new();
 
-    add_frontend_env_to_context(&mut context);
+    add_frontend_env_to_context(&mut context, &req);
 
     context.insert("title", "Data Sources - BetterGovPH");
     context.insert("company_name", "BetterGovPH");
     context.insert("platform", "BetterGovPH");
-    context.insert("SITE_NAME", "BetterGovPH Data Visualizations");
-    context.insert("SITE_URL", "https://visualizations.bettergov.ph");
 
-    let template_name = if is_mobile(&_req) {
+    let template_name = if is_mobile(&req) {
         "mobile/sources.html"
     } else {
         "sources.html"
@@ -382,13 +351,11 @@ async fn dynasty(req: HttpRequest) -> Result<HttpResponse, ActixError> {
     let tera = Tera::new("templates/**/*").map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
     let mut context = Context::new();
 
-    add_frontend_env_to_context(&mut context);
+    add_frontend_env_to_context(&mut context, &req);
 
     context.insert("title", "Political Dynasties - BetterGovPH");
     context.insert("company_name", "BetterGovPH");
     context.insert("platform", "BetterGovPH");
-    context.insert("SITE_NAME", "BetterGovPH Data Visualizations");
-    context.insert("SITE_URL", "https://visualizations.bettergov.ph");
 
     let template_name = if is_mobile(&req) {
         "mobile/dynasty.html"
@@ -401,17 +368,15 @@ async fn dynasty(req: HttpRequest) -> Result<HttpResponse, ActixError> {
 }
 
 // Dynasty Projects Page
-async fn dynasty_projects(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
+async fn dynasty_projects(req: HttpRequest) -> Result<HttpResponse, ActixError> {
     let tera = Tera::new("templates/**/*").map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
     let mut context = Context::new();
 
-    add_frontend_env_to_context(&mut context);
+    add_frontend_env_to_context(&mut context, &req);
 
     context.insert("title", "Dynasty Projects - BetterGovPH");
     context.insert("company_name", "BetterGovPH");
     context.insert("platform", "BetterGovPH");
-    context.insert("SITE_NAME", "BetterGovPH Data Visualizations");
-    context.insert("SITE_URL", "https://visualizations.bettergov.ph");
 
     let template_name = "dynasty-projects.html";
 
@@ -420,17 +385,15 @@ async fn dynasty_projects(_req: HttpRequest) -> Result<HttpResponse, ActixError>
 }
 
 // Zaldy DPWH Projects Page
-async fn zaldy(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
+async fn zaldy(req: HttpRequest) -> Result<HttpResponse, ActixError> {
     let tera = Tera::new("templates/**/*").map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
     let mut context = Context::new();
 
-    add_frontend_env_to_context(&mut context);
+    add_frontend_env_to_context(&mut context, &req);
 
     context.insert("title", "DPWH Projects Database Tags - BetterGovPH");
     context.insert("company_name", "BetterGovPH");
     context.insert("platform", "BetterGovPH");
-    context.insert("SITE_NAME", "BetterGovPH Data Visualizations");
-    context.insert("SITE_URL", "https://visualizations.bettergov.ph");
 
     let template_name = "zaldy.html";
 
@@ -439,17 +402,15 @@ async fn zaldy(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
 }
 
 // Zarah Companies Investigation Page
-async fn zarah(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
+async fn zarah(req: HttpRequest) -> Result<HttpResponse, ActixError> {
     let tera = Tera::new("templates/**/*").map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
     let mut context = Context::new();
 
-    add_frontend_env_to_context(&mut context);
+    add_frontend_env_to_context(&mut context, &req);
 
     context.insert("title", "Zarah Companies Investigation - BetterGovPH");
     context.insert("company_name", "BetterGovPH");
     context.insert("platform", "BetterGovPH");
-    context.insert("SITE_NAME", "BetterGovPH Data Visualizations");
-    context.insert("SITE_URL", "https://visualizations.bettergov.ph");
 
     let template_name = "zarah.html";
 
@@ -462,13 +423,11 @@ async fn integrated(req: HttpRequest) -> Result<HttpResponse, ActixError> {
     let tera = Tera::new("templates/**/*").map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
     let mut context = Context::new();
 
-    add_frontend_env_to_context(&mut context);
+    add_frontend_env_to_context(&mut context, &req);
 
     context.insert("title", "Integrated Projects - BetterGovPH");
     context.insert("company_name", "BetterGovPH");
     context.insert("platform", "BetterGovPH");
-    context.insert("SITE_NAME", "BetterGovPH Data Visualizations");
-    context.insert("SITE_URL", "https://visualizations.bettergov.ph");
 
     let template_name = if is_mobile(&req) {
         "mobile/integrated.html"
@@ -485,7 +444,7 @@ async fn family(req: HttpRequest) -> Result<HttpResponse, ActixError> {
     let tera = Tera::new("templates/**/*").map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
     let mut context = Context::new();
 
-    add_frontend_env_to_context(&mut context);
+    add_frontend_env_to_context(&mut context, &req);
 
     // Get surname and province parameters from query string
     let query = web::Query::<std::collections::HashMap<String, String>>::from_query(req.query_string());
@@ -497,8 +456,6 @@ async fn family(req: HttpRequest) -> Result<HttpResponse, ActixError> {
     context.insert("province", &province);
     context.insert("company_name", "BetterGovPH");
     context.insert("platform", "BetterGovPH");
-    context.insert("SITE_NAME", "BetterGovPH Data Visualizations");
-    context.insert("SITE_URL", "https://visualizations.bettergov.ph");
 
     let template_name = "family.html";
 
@@ -507,17 +464,15 @@ async fn family(req: HttpRequest) -> Result<HttpResponse, ActixError> {
 }
 
 // Hours Tracking Page (Secret)
-async fn hours(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
+async fn hours(req: HttpRequest) -> Result<HttpResponse, ActixError> {
     let tera = Tera::new("templates/**/*").map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
     let mut context = Context::new();
 
-    add_frontend_env_to_context(&mut context);
+    add_frontend_env_to_context(&mut context, &req);
 
     context.insert("title", "Hours Tracking - BetterGovPH");
     context.insert("company_name", "BetterGovPH");
     context.insert("platform", "BetterGovPH");
-    context.insert("SITE_NAME", "BetterGovPH Data Visualizations");
-    context.insert("SITE_URL", "https://visualizations.bettergov.ph");
 
     let template_name = "hours.html";
 
@@ -526,17 +481,15 @@ async fn hours(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
 }
 
 // Integrated Matrix 2026 Dashboard
-async fn integ2026(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
+async fn integ2026(req: HttpRequest) -> Result<HttpResponse, ActixError> {
     let tera = Tera::new("templates/**/*").map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
     let mut context = Context::new();
 
-    add_frontend_env_to_context(&mut context);
+    add_frontend_env_to_context(&mut context, &req);
 
     context.insert("title", "Integrated Matrix 2026 - BetterGovPH");
     context.insert("company_name", "BetterGovPH");
     context.insert("platform", "BetterGovPH");
-    context.insert("SITE_NAME", "BetterGovPH Data Visualizations");
-    context.insert("SITE_URL", "https://visualizations.bettergov.ph");
 
     let template_name = "integrated_matrix.html";
 
@@ -665,6 +618,72 @@ async fn api_mpb_top_buildings_proxy() -> Result<HttpResponse, ActixError> {
     }
 }
 
+// Proxies for DPWH 2026
+async fn api_dpwh2026_projects_proxy(req: HttpRequest) -> Result<HttpResponse, ActixError> {
+    let client = reqwest::Client::new();
+    // Default to 8001 to bypass ghost process on 8000
+    let base_url = std::env::var("PYTHON_API_URL").unwrap_or_else(|_| "http://127.0.0.1:8001".to_string());
+    let base_url = base_url.trim_end_matches('/');
+    
+    // Preserve query string
+    let query_string = req.query_string();
+    let url = if query_string.is_empty() {
+        format!("{}/api/dpwh2026/projects", base_url)
+    } else {
+        format!("{}/api/dpwh2026/projects?{}", base_url, query_string)
+    };
+
+    match client.get(&url).send().await {
+        Ok(resp) => {
+            let status = actix_web::http::StatusCode::from_u16(resp.status().as_u16())
+                .unwrap_or(actix_web::http::StatusCode::INTERNAL_SERVER_ERROR);
+            match resp.json::<serde_json::Value>().await {
+                Ok(json) => Ok(HttpResponse::build(status).json(json)),
+                Err(e) => Ok(HttpResponse::InternalServerError().json(serde_json::json!({"success": false, "error": format!("Failed: {}", e)})))
+            }
+        },
+        Err(e) => Ok(HttpResponse::BadGateway().json(serde_json::json!({"success": false, "error": format!("Upstream error: {}", e)})))
+    }
+}
+
+async fn api_dpwh2026_summary_proxy() -> Result<HttpResponse, ActixError> {
+    let client = reqwest::Client::new();
+    // Default to 8001 to bypass ghost process on 8000
+    let base_url = std::env::var("PYTHON_API_URL").unwrap_or_else(|_| "http://127.0.0.1:8001".to_string());
+    let base_url = base_url.trim_end_matches('/');
+    let url = format!("{}/api/dpwh2026/summary", base_url);
+
+    match client.get(&url).send().await {
+        Ok(resp) => {
+            let status = actix_web::http::StatusCode::from_u16(resp.status().as_u16()).unwrap_or(actix_web::http::StatusCode::INTERNAL_SERVER_ERROR);
+            match resp.json::<serde_json::Value>().await {
+                Ok(json) => Ok(HttpResponse::build(status).json(json)),
+                Err(e) => Ok(HttpResponse::InternalServerError().json(serde_json::json!({"success": false, "error": format!("Failed: {}", e)})))
+            }
+        },
+        Err(e) => Ok(HttpResponse::BadGateway().json(serde_json::json!({"success": false, "error": format!("Upstream error: {}", e)})))
+    }
+}
+
+
+
+// DPWH 2026 Page
+async fn dpwh2026(req: HttpRequest) -> Result<HttpResponse, ActixError> {
+    let tera = Tera::new("templates/**/*").map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
+    let mut context = Context::new();
+
+    add_frontend_env_to_context(&mut context, &req);
+
+    context.insert("title", "DPWH 2026 Budget Proposal - BetterGovPH");
+    context.insert("company_name", "BetterGovPH");
+    context.insert("platform", "BetterGovPH");
+
+    let template_name = "dpwh2026.html";
+
+    let rendered = tera.render(template_name, &context).map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
+    Ok(HttpResponse::Ok().content_type("text/html").body(rendered))
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     // Load environment variables from .env file
@@ -720,12 +739,16 @@ async fn main() -> std::io::Result<()> {
             .service(web::resource("/circles").to(circles))
             .service(web::resource("/hours").to(hours))
             .service(web::resource("/integ2026").to(integ2026))
+            .service(web::resource("/dpwh2026").to(dpwh2026))
             .service(web::resource("/api/integrated/matrix").route(web::get().to(api_integrated_matrix)))
             .service(web::resource("/api/integrated/projects").route(web::get().to(api_integrated_projects)))
             .service(web::resource("/api/mpb/top-buildings").route(web::get().to(api_mpb_top_buildings_proxy)))
             .service(web::resource("/api/dynasty-projects/congressman").route(web::get().to(api_dynasty_congressman)))
+            .service(web::resource("/api/dpwh2026/projects").route(web::get().to(api_dpwh2026_projects_proxy)))
+            .service(web::resource("/api/dpwh2026/summary").route(web::get().to(api_dpwh2026_summary_proxy)))
     })
     .bind(&bind_address)?
     .run()
     .await
 }
+
