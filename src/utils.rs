@@ -2,13 +2,28 @@
 
 use std::collections::HashMap;
 
+// Function: get_site_branding
+pub fn get_site_branding(req: &actix_web::HttpRequest) -> (String, String) {
+    let host = req.headers().get("host")
+        .and_then(|h| h.to_str().ok())
+        .unwrap_or("visualizations.bettergov.ph");
+
+    if host.contains("research.bettergov.ph") {
+        ("BetterGovPH Research".to_string(), "https://research.bettergov.ph".to_string())
+    } else {
+        ("BetterGovPH Data Visualizations".to_string(), "https://visualizations.bettergov.ph".to_string())
+    }
+}
+
 // Function: load_frontend_env
-pub fn load_frontend_env() -> HashMap<String, String> {
+pub fn load_frontend_env(req: &actix_web::HttpRequest) -> HashMap<String, String> {
     let mut env_vars = HashMap::new();
 
-    // Default values for BetterGovPH
-    env_vars.insert("SITE_NAME".to_string(), "BetterGovPH Data Visualizations".to_string());
-    env_vars.insert("SITE_URL".to_string(), "https://visualizations.bettergov.ph".to_string());
+    let (site_name, site_url) = get_site_branding(req);
+
+    // Dynamic values based on host
+    env_vars.insert("SITE_NAME".to_string(), site_name);
+    env_vars.insert("SITE_URL".to_string(), site_url);
 
     // Add other environment variables as needed
     env_vars.insert("GOOGLE_CLIENT_ID".to_string(), std::env::var("GOOGLE_CLIENT_ID").unwrap_or_default());
@@ -17,11 +32,9 @@ pub fn load_frontend_env() -> HashMap<String, String> {
     env_vars
 }
 
-
-
 // Function: add_frontend_env_to_context
-pub fn add_frontend_env_to_context(context: &mut tera::Context) {
-    let env_vars = load_frontend_env();
+pub fn add_frontend_env_to_context(context: &mut tera::Context, req: &actix_web::HttpRequest) {
+    let env_vars = load_frontend_env(req);
     for (key, value) in env_vars {
         context.insert(key, &value);
     }
