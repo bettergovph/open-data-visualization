@@ -477,7 +477,7 @@ def generate_diff_cache():
     
     stats = {
         "ref_count": len(ref_map),
-        "target_count": len(target_projects),
+        "target_count": len(target_projects) + target_skipped_count,
         "added_count": len(added),
         "removed_count": len(removed),
         "modified_count": len(modified),
@@ -506,7 +506,7 @@ def generate_diff_cache():
         "status": "ok",
         "stats": {
             "ref_count": len(ref_map),
-            "target_count": len(target_projects),
+            "target_count": len(target_projects) + target_skipped_count,
             "added_count": len(added),
             "removed_count": len(removed),
             "modified_count": len(modified),
