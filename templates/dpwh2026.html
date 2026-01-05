@@ -1405,7 +1405,7 @@
             if (['projects', 'hierarchy', 'uniform', 'summary', 'dist', 'diff'].includes(hash)) {
 
                 // Special handling for Diff tab loading
-                if (hash === 'diff' && !diffDataCache) {
+                if (hash === 'diff' && !diffDataCache.stats) {
                     loadDiffData();
                 }
 
