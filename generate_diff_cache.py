@@ -8,8 +8,141 @@ Usage:
 """
 
 import json
+import re
 import duckdb
 from pathlib import Path
+
+def normalize_project_name(name):
+    """
+    Normalize project name by removing location coordinates, chainage, and station markers.
+    """
+    if not name:
+        return ""
+    
+    normalized = name
+    
+    # 1. Remove coordinate patterns: (lat, lon) or (lon, lat)
+    normalized = re.sub(r'\(\s*-?\d+\.\d+\s*,\s*-?\d+\.\d+\s*\)', '', normalized)
+    
+    # 2. Remove station/chainage markers: Sta. 1+400
+    normalized = re.sub(
+        r'[S][Tt][Aa]\.\s*\d+\s*\+\s*\d+(?:\.\d+)?(?:\s*-\s*(?:[S][Tt][Aa]\.\s*)?\d+\s*\+\s*\d+(?:\.\d+)?)?',
+        '', 
+        normalized,
+        flags=re.IGNORECASE
+    )
+    
+    # 3. Remove K-markers (kilometer markers): K0 578+755 - K0579+295
+    # Also handles k0483 + 000 with spaces
+    normalized = re.sub(
+        r',?\s*K\d*\s*\d+\s*\+\s*\d+(?:\s*-\s*K\d*\s*\d+\s*\+\s*\d+)?',
+        '',
+        normalized,
+        flags=re.IGNORECASE
+    )
+    
+    # 4. Remove loan notations
+    normalized = re.sub(
+        r',\s*(?:ADB|AIIB|WB|JICA|KfW)\s+(?:L/A|Loan)\s+No\..*$',
+        '',
+        normalized,
+        flags=re.IGNORECASE
+    )
+
+    # 5. Remove miscellaneous parentheticals that aren't coordinates (e.g., "(tuguegarao sect)")
+    normalized = re.sub(r'\([^)]*\)', '', normalized)
+    
+    # 6. Final cleanup of whitespace and commas
+    normalized = re.sub(r'\s*,\s*,\s*', ', ', normalized)
+    normalized = re.sub(r',\s+', ', ', normalized)
+    normalized = re.sub(r'\s+', ' ', normalized)
+    normalized = re.sub(r',\s*$', '', normalized)
+    normalized = re.sub(r'^\s*,\s*', '', normalized)
+    
+    return normalized.strip()
+
+def clean_tokens(text):
+    """Extract clean tokens from text, removing punctuation and common words."""
+    if not text:
+        return set()
+    # Normalize: lower case and remove punctuation
+    text = text.lower()
+    # Replace common delimiters with spaces to ensure tokens are split correctly
+    text = re.sub(r'[,\-./()]+', ' ', text)
+    words = text.split()
+    
+    # Words to ignore (very common structural words)
+    common_words = {
+        'along', 'road', 'bridge', 'construction', 'rehabilitation', 'improvement', 
+        'project', 'with', 'from', 'near', 'across', 
+        'section', 'phase', 'series', 'going', 'toward',
+        'roadway', 'network', 'system',
+        'multi', 'purpose', 'building', 'structure'
+    }
+    
+    # Only keep words > 3 chars that are not common
+    tokens = set(w for w in words if len(w) > 3 and w not in common_words)
+    return tokens
+
+def find_similar_match(ref_normalized, target_token_index, target_by_normalized):
+    """
+    Find a similar match in target using a pre-built token index for speed.
+    Uses stricter thresholds to prevent false positives while allowing minor variations.
+    """
+    ref_lower = ref_normalized.lower()
+    ref_tokens = clean_tokens(ref_normalized)
+    
+    if not ref_tokens:
+        return None
+        
+    # Find candidates that share at least one token
+    candidates = {} # target_norm_lower -> count of shared tokens
+    for token in ref_tokens:
+        if token in target_token_index:
+            for target_norm_lower in target_token_index[token]:
+                candidates[target_norm_lower] = candidates.get(target_norm_lower, 0) + 1
+                
+    best_match = None
+    best_match_score = 0
+    
+    # Only check candidates that share at least one token
+    for target_norm_lower, shared_count in candidates.items():
+        # Safely get target items (they might have been consumed in 1-to-1 matching)
+        target_items = target_by_normalized.get(target_norm_lower)
+        if not target_items:
+            continue
+            
+        target_lower = target_norm_lower.lower()
+        
+        # 1. Substring match (very high confidence)
+        if ref_lower in target_lower or target_lower in ref_lower:
+            shorter_len = min(len(ref_lower), len(target_lower))
+            longer_len = max(len(ref_lower), len(target_lower))
+            # Require 80% length similarity for substring matches
+            if shorter_len / longer_len >= 0.8:
+                return target_items
+
+        # 2. Token-based similarity
+        target_tokens = clean_tokens(target_norm_lower)
+        if not target_tokens:
+            continue
+            
+        intersection = len(ref_tokens & target_tokens)
+        union = len(ref_tokens | target_tokens)
+        similarity = intersection / union if union > 0 else 0
+        
+        shorter_set_len = min(len(ref_tokens), len(target_tokens))
+        coverage = intersection / shorter_set_len if shorter_set_len > 0 else 0
+        
+        # Stricter thresholds based on user feedback:
+        # - High Jaccard similarity (>= 0.7) OR
+        # - Very high coverage (>= 0.9) of the shorter token set
+        if similarity >= 0.7 or coverage >= 0.9:
+            if similarity > best_match_score:
+                best_match_score = similarity
+                best_match = target_items
+                
+    return best_match
 
 def generate_diff_cache():
     print("🔄 Generating DPWH 2026 Diff cache...")
@@ -34,8 +167,8 @@ def generate_diff_cache():
         if name_stripped.startswith(hierarchy_prefixes):
             return False
         
-        # Exclude funding source headers
-        if any(keyword in name_stripped for keyword in ['GOP', 'Loan Proceeds', 'Loan proceeds', 'Sub-Total', 'Grand Total']):
+        # Exclude funding source headers and known summary items
+        if any(keyword in name_stripped for keyword in ['GOP', 'Loan Proceeds', 'Loan proceeds', 'Sub-Total', 'Grand Total', 'Rehabilitation of Disaster-Related Infrastructure']):
             return False
         
         return True
@@ -64,6 +197,7 @@ def generate_diff_cache():
 
     # Normalize Reference
     ref_map = {}
+    ref_by_normalized = {}  # Map normalized name -> list of ref items
     skipped_count = 0
     for p in ref_projects:
         name = (p.get("name") or p.get("description") or "").strip()
@@ -76,12 +210,22 @@ def generate_diff_cache():
             continue
         
         amt = p.get("final_amount") or p.get("original_amount") or 0.0
-        key = f"{name.lower()}|{float(amt):.2f}"
+        normalized_name = normalize_project_name(name)
+        
+        # Use normalized name for key to enable fuzzy matching
+        key = f"{normalized_name.lower()}|{float(amt):.2f}"
         ref_map[key] = {
-            "name": name,
+            "name": name,  # Keep original name for display
+            "normalized_name": normalized_name,
             "amount": amt,
             "original": p
         }
+        
+        # Also index by normalized name only
+        norm_lower = normalized_name.lower()
+        if norm_lower not in ref_by_normalized:
+            ref_by_normalized[norm_lower] = []
+        ref_by_normalized[norm_lower].append(ref_map[key])
 
     print(f"   ✅ Loaded {len(ref_map)} line items from reference (filtered out {skipped_count} non-line items)")
 
@@ -144,9 +288,15 @@ def generate_diff_cache():
             
             rows = conn.execute(query).fetchall()
             
+            target_skipped_count = 0
             for r in rows:
                 name = str(r[0] or "").strip()
                 if not name:
+                    continue
+                
+                # Filter out non-line-items (hierarchy headers, funding sources, etc.)
+                if not is_line_item(name):
+                    target_skipped_count += 1
                     continue
                 
                 amt = float(r[1] or 0.0)
@@ -165,113 +315,187 @@ def generate_diff_cache():
         print(f"   ❌ Error: Target data not found at {target_parquet}")
         return False
 
-    print(f"   ✅ Loaded {len(target_projects)} target projects")
+    print(f"   ✅ Loaded {len(target_projects)} target projects (filtered out {target_skipped_count} non-line items)")
 
     # Normalize Target
     target_map = {}
     target_keys = set()
-    target_by_name = {}  # Map by name only for detecting modifications
+    target_by_normalized = {}  # Map by normalized name only for detecting modifications
     
     for p in target_projects:
         name = p["name"]
         amt = p["amount"]
-        key = f"{name.lower()}|{amt:.2f}"
-        target_keys.add(key)
-        target_map[key] = p
+        normalized_name = normalize_project_name(name)
         
-        # Also index by name only
-        name_lower = name.lower()
-        if name_lower not in target_by_name:
-            target_by_name[name_lower] = []
-        target_by_name[name_lower].append(p)
+        # Use normalized name for key to enable fuzzy matching
+        key = f"{normalized_name.lower()}|{amt:.2f}"
+        target_keys.add(key)
+        target_map[key] = {
+            "name": name,  # Keep original name for display
+            "normalized_name": normalized_name,
+            "amount": amt,
+            "region": p.get("region"),
+            "district": p.get("district"),
+            "program": p.get("program")
+        }
+        
+        # Also index by normalized name only
+        norm_lower = normalized_name.lower()
+        if norm_lower not in target_by_normalized:
+            target_by_normalized[norm_lower] = []
+        target_by_normalized[norm_lower].append(target_map[key])
 
-    # 3. Calculate Diff
-    print("   🔍 Computing differences...")
+    # Pre-build token index for fast similarity matching
+    print("   🏗️ Building token index for faster matching...")
+    target_token_index = {}
+    for target_norm_lower in target_by_normalized:
+        tokens = clean_tokens(target_norm_lower)
+        for token in tokens:
+            if token not in target_token_index:
+                target_token_index[token] = []
+            target_token_index[token].append(target_norm_lower)
+
+    # Pre-build name -> normalized map for ref for faster added lookup
+    ref_name_to_norm = {v["name"].lower(): v["normalized_name"].lower() for v in ref_map.values()}
+
+    # 3. Calculate Diff using 1-to-1 Matching
+    print("   🔍 Computing differences with 1-to-1 matching...")
     removed = []
     added = []
     modified = []
+    matched_count = 0
     
-    # Build ref_by_name for modification detection
-    ref_by_name = {}
-    for k, v in ref_map.items():
-        name_lower = v["name"].lower()
-        if name_lower not in ref_by_name:
-            ref_by_name[name_lower] = []
-        ref_by_name[name_lower].append(v)
+    # Track which target items are still available for matching
+    # key: normalized_name -> list of target_map[key] items
+    available_targets_by_norm = {}
+    for norm_name, items in target_by_normalized.items():
+        available_targets_by_norm[norm_name] = list(items) # shallow copy list
+        
+    # Track which ref items are matched
+    ref_items_to_match = list(ref_map.values())
     
-    # Removed/Modified: In Ref but not in Target (exact match) or Modified (name match, amount diff)
-    for k, v in ref_map.items():
-        if k not in target_keys:
-            # Not an exact match - check if it's a modification
-            name_lower = v["name"].lower()
-            if name_lower in target_by_name:
-                # Same name exists in target with different amount - it's modified
-                target_versions = target_by_name[name_lower]
-                # For simplicity, take the first matching target item
-                # (In reality, there might be multiple, but usually it's 1:1)
-                if len(target_versions) == 1:
-                    modified.append({
-                        "name": v["name"],
-                        "ref_amount": v["amount"],
-                        "target_amount": target_versions[0]["amount"],
-                        "program": target_versions[0].get("program")
-                    })
-                else:
-                    # Multiple targets with same name - ambiguous, treat as removed
-                    removed.append({
-                        "name": v["name"],
-                        "amount": v["amount"],
-                        "program": v["original"].get("program_id")
-                    })
-            else:
-                # Truly removed
-                removed.append({
-                    "name": v["name"],
-                    "amount": v["amount"],
-                    "program": v["original"].get("program_id")
-                })
+    # Level 1: Match Exact normalized name AND amount (Matched items)
+    remaining_ref = []
+    for v in ref_items_to_match:
+        norm_name = v["normalized_name"].lower()
+        amt = float(v["amount"])
+        
+        found_exact = False
+        if norm_name in available_targets_by_norm:
+            # Look for item with same amount
+            for i, target_item in enumerate(available_targets_by_norm[norm_name]):
+                if abs(float(target_item["amount"]) - amt) < 0.01:
+                    available_targets_by_norm[norm_name].pop(i)
+                    matched_count += 1
+                    found_exact = True
+                    break
+        
+        if not found_exact:
+            remaining_ref.append(v)
+            
+    # Level 2: Match Exact normalized name but different amount (Modified items)
+    still_remaining_ref = []
+    for v in remaining_ref:
+        norm_name = v["normalized_name"].lower()
+        
+        if norm_name in available_targets_by_norm and available_targets_by_norm[norm_name]:
+            # Take the first available target item with this name
+            target_item = available_targets_by_norm[norm_name].pop(0)
+            modified.append({
+                "name": v["name"],
+                "ref_amount": v["amount"],
+                "target_amount": target_item["amount"],
+                "program": target_item.get("program") or v["original"].get("program_id")
+            })
+        else:
+            still_remaining_ref.append(v)
+            
+    # Level 3: Match by similarity (Fuzzy Modified items)
+    # Re-build token index for remaining targets
+    remaining_target_pool = []
+    for items in available_targets_by_norm.values():
+        remaining_target_pool.extend(items)
+        
+    # Map for fuzzy lookup
+    fuzzy_target_by_norm = {}
+    fuzzy_token_index = {}
+    for target_item in remaining_target_pool:
+        norm_lower = target_item["normalized_name"].lower()
+        if norm_lower not in fuzzy_target_by_norm:
+            fuzzy_target_by_norm[norm_lower] = []
+        fuzzy_target_by_norm[norm_lower].append(target_item)
+        
+        tokens = clean_tokens(norm_lower)
+        for token in tokens:
+            if token not in fuzzy_token_index:
+                fuzzy_token_index[token] = []
+            fuzzy_token_index[token].append(norm_lower)
+            
+    # Final match loop
+    final_remaining_ref = []
+    for v in still_remaining_ref:
+        match_items = find_similar_match(v["normalized_name"], fuzzy_token_index, fuzzy_target_by_norm)
+        if match_items and match_items:
+            # Match found! Consume the first one
+            target_item = match_items.pop(0)
+            modified.append({
+                "name": v["name"],
+                "ref_amount": v["amount"],
+                "target_amount": target_item["amount"],
+                "program": target_item.get("program") or v["original"].get("program_id")
+            })
+            # If that was the last one for that name, remove it from the pool
+            if not match_items:
+                del fuzzy_target_by_norm[target_item["normalized_name"].lower()]
+                # Optimization: we don't strictly need to clean fuzzy_token_index
+        else:
+            final_remaining_ref.append(v)
+            
+    # Results
+    removed = [{
+        "name": v["name"],
+        "amount": v["amount"],
+        "program": v["original"].get("program_id")
+    } for v in final_remaining_ref]
     
-    # Added: In Target but not in Ref (exact match) and not already counted as Modified
-    modified_names = set(m["name"].lower() for m in modified)
-    for k in target_keys:
-        if k not in ref_map:
-            p = target_map[k]
-            name_lower = p["name"].lower()
-            # Don't count as added if it's already in modified list
-            if name_lower not in modified_names or name_lower not in ref_by_name:
-                added.append({
-                    "name": p["name"],
-                    "amount": p["amount"],
-                    "region": p.get("region"),
-                    "district": p.get("district"),
-                    "program": p.get("program")
-                })
-    
-    # Sort by Amount Descending
+    # Added items are those remaining in available_targets_by_norm
+    added = []
+    for norm_name, items in fuzzy_target_by_norm.items():
+        for p in items:
+            added.append({
+                "name": p["name"],
+                "amount": p["amount"],
+                "region": p.get("region"),
+                "district": p.get("district"),
+                "program": p.get("program")
+            })
+            
+    # Sort for consistent output
     removed.sort(key=lambda x: x["amount"], reverse=True)
     added.sort(key=lambda x: x["amount"], reverse=True)
     modified.sort(key=lambda x: x["target_amount"], reverse=True)
     
-    match_count = len(ref_projects) - len(removed) - len(modified)
+    stats = {
+        "ref_count": len(ref_map),
+        "target_count": len(target_projects) + target_skipped_count,
+        "added_count": len(added),
+        "removed_count": len(removed),
+        "modified_count": len(modified),
+        "match_count": matched_count
+    }
     
+    print(f"   ✅ Stats: {len(added)} added, {len(removed)} removed, {len(modified)} modified, {matched_count} matches")
+    
+    # Response Data
     response_data = {
         "status": "ok",
         "data": {
-            "stats": {
-                "ref_count": len(ref_map),
-                "target_count": len(target_projects),
-                "added_count": len(added),
-                "removed_count": len(removed),
-                "modified_count": len(modified),
-                "match_count": match_count
-            },
+            "stats": stats,
             "removed": removed,
             "added": added,
             "modified": modified
         }
     }
-    
-    print(f"   ✅ Found {len(added)} added, {len(removed)} removed, {len(modified)} modified, {match_count} matches")
     
     # 4. Save to cache files (7 files: stats + 3 previews + 3 full)
     cache_dir.mkdir(parents=True, exist_ok=True)
@@ -282,11 +506,11 @@ def generate_diff_cache():
         "status": "ok",
         "stats": {
             "ref_count": len(ref_map),
-            "target_count": len(target_projects),
+            "target_count": len(target_projects) + target_skipped_count,
             "added_count": len(added),
             "removed_count": len(removed),
             "modified_count": len(modified),
-            "match_count": match_count
+            "match_count": matched_count
         }
     }
     
