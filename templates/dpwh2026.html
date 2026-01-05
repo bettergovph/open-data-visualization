@@ -1316,7 +1316,7 @@
                         </div>
                         <div class="flex justify-between items-center text-xs flex-wrap gap-1">
                             <span class="font-mono text-green-700 font-bold px-1.5 py-0.5 bg-green-50 rounded border border-green-100">
-                                ₱${formatCurrency(item.amount)}
+                                ${formatCurrency(item.amount)}
                             </span>
                             ${item.program ? `<span class="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded border border-indigo-100 truncate max-w-[200px]" title="${item.program}">${item.program}</span>` : ''}
                         </div>
@@ -1346,7 +1346,7 @@
                         </div>
                         <div class="flex justify-between items-center text-xs flex-wrap gap-1">
                             <span class="font-mono text-red-700 font-bold px-1.5 py-0.5 bg-red-50 rounded border border-red-100">
-                                ₱${formatCurrency(item.amount)}
+                                ${formatCurrency(item.amount)}
                             </span>
                             ${item.program ? `<span class="bg-slate-100 px-2 py-0.5 rounded text-slate-500 truncate max-w-[200px]" title="${item.program}">${item.program}</span>` : ''}
                         </div>
@@ -1376,11 +1376,11 @@
                         <div class="space-y-1">
                             <div class="flex justify-between items-center text-xs">
                                 <span class="text-slate-500">Before:</span>
-                                <span class="font-mono text-slate-600">₱${formatCurrency(item.ref_amount)}</span>
+                                <span class="font-mono text-slate-600">${formatCurrency(item.ref_amount)}</span>
                             </div>
                             <div class="flex justify-between items-center text-xs">
                                 <span class="text-slate-500">After:</span>
-                                <span class="font-mono font-bold ${isIncrease ? 'text-green-700' : 'text-red-700'}">₱${formatCurrency(item.target_amount)}</span>
+                                <span class="font-mono font-bold ${isIncrease ? 'text-green-700' : 'text-red-700'}">${formatCurrency(item.target_amount)}</span>
                             </div>
                             <div class="flex justify-between items-center text-xs pt-1 border-t border-slate-100">
                                 <span class="text-slate-500">Change:</span>
