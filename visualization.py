@@ -13215,70 +13215,37 @@ async def get_dpwh_2026_projects(
 @app.get("/api/dpwh2026/hierarchy")
 async def get_dpwh_2026_hierarchy() -> JSONResponse:
     try:
-        parquet_file = DATA_ROOT.parent.parent / "data" / "parquet" / "parsed_dpwh_2026.parquet"
-        if not parquet_file.exists():
-            return JSONResponse(content={"success": False, "error": f"File not found: {parquet_file}"}, status_code=404)
+        # Define path to the JSON hierarchy file
+        json_path = Path("/home/joebert/dpwh-2026-hierarchy-analysis/data/FY 2026_DPWH DETAILS ENROLLED COPY (Final)_hierarchy.json")
+        
+        if not json_path.exists():
+            # Fallback to local data/ if not found (for dev/test)
+            json_path = DATA_ROOT / "FY 2026_DPWH DETAILS ENROLLED COPY (Final)_hierarchy.json"
+        
+        if not json_path.exists():
+             return JSONResponse(content={"success": False, "error": f"Hierarchy data file not found at {json_path}"}, status_code=404)
 
-        conn = duckdb.connect()
-        try:
-            parquet_path_str = str(parquet_file).replace("'", "''")
-            
-            base_cte = f"""
-                WITH params AS (
-                    SELECT 
-                        _excel_row, 
-                        col_J, 
-                        amount, 
-                        latest_qualifier_column,
-                        latest_qualifier_value,
-                        col_B, col_C,
-                        CASE WHEN LENGTH(col_H) > 3 THEN col_H ELSE NULL END as clean_H,
-                        CASE WHEN LENGTH(col_I) > 3 THEN col_I ELSE NULL END as clean_I
-                    FROM read_parquet('{parquet_path_str}')
-                ),
-                groups AS (
-                    SELECT 
-                        *,
-                        COUNT(col_B) OVER (ORDER BY _excel_row) as grp_B,
-                        COUNT(col_C) OVER (ORDER BY _excel_row) as grp_C,
-                        COUNT(clean_H) OVER (ORDER BY _excel_row) as grp_H,
-                        COUNT(clean_I) OVER (ORDER BY _excel_row) as grp_I
-                    FROM params
-                ),
-                filled_data AS (
-                   SELECT
-                        *,
-                        LAST_VALUE(col_C IGNORE NULLS) OVER (PARTITION BY grp_B ORDER BY _excel_row) as cat_C,
-                        LAST_VALUE(clean_H IGNORE NULLS) OVER (PARTITION BY grp_C ORDER BY _excel_row) as cat_H,
-                        LAST_VALUE(clean_I IGNORE NULLS) OVER (PARTITION BY grp_H ORDER BY _excel_row) as cat_I
-                   FROM groups
-                )
-            """
+        # Read the JSON file
+        with open(json_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
 
-            query = f"""
-                {base_cte}
-                SELECT 
-                    _excel_row, 
-                    latest_qualifier_value as name,
-                    latest_qualifier_column as type,
-                    amount, 
-                    cat_H as region,
-                    cat_I as district,
-                    cat_C as program
-                FROM filled_data 
-                WHERE latest_qualifier_column != 'J'
-                ORDER BY _excel_row
-                LIMIT 2000
-            """
-            
-            rows = conn.execute(query).fetchall()
-            cols = [desc[0] for desc in conn.description]
-            data = [dict(zip(cols, r)) for r in rows]
-            
-            return JSONResponse(content={"data": data})
-            
-        finally:
-            conn.close()
+        # The frontend expects a specific structure. The JSON is a tree.
+        # If the frontend adapter (renderHierarchy) expects a flat list with types,
+        # we might need to flatten it or serve it as is and update the frontend.
+        #
+        # Current Frontend `renderHierarchy` expects: array of objects with {name, type, amount, region, district, program}
+        # New JSON is: array of objects with {value, amount, children: []}
+        #
+        # WE WILL SERVE THE RAW TREE and update the frontend to render a recursive tree or a flattened version.
+        # PROPOSAL: Let's flatten a bit for the table (e.g. top 2-3 levels) OR better yet,
+        # Update the frontend to handle this tree structure properly (drill down).
+        #
+        # VALIDATION: The prompt says "augment our /dpwh2006 with proper heirarchy from this repo".
+        # It's safest to serve the full tree and let the frontend decide how to show it.
+        # BUT, the current endpoint returns a flat list of 2000 items. 
+        # Let's wrap it in a structure that indicates it's the new format.
+        
+        return JSONResponse(content={"data": data, "format": "tree"})
 
     except Exception as e:
         import traceback
@@ -13291,6 +13258,17 @@ async def get_dpwh_2026_uniform_risks(
     min_cluster_size: int = Query(default=10, ge=3, description="Minimum size of uniform cluster")
 ) -> JSONResponse:
     try:
+        # Check cache first
+        cache_file = DATA_ROOT / "api_cache" / f"uniform_risks_cache_size{min_cluster_size}.json"
+        if cache_file.exists():
+            try:
+                with open(cache_file, 'r', encoding='utf-8') as f:
+                    cache_data = json.load(f)
+                print(f"✅ [Uniform Risks] Using cached data from {cache_file.name}")
+                return JSONResponse(cache_data)
+            except Exception as cache_err:
+                print(f"⚠️ [Uniform Risks] Error reading cache, falling back to processing: {cache_err}")
+        
         parquet_file = DATA_ROOT.parent.parent / "data" / "parquet" / "parsed_dpwh_2026.parquet"
         if not parquet_file.exists():
             return JSONResponse(content={"success": False, "error": "Data file not found"}, status_code=404)
@@ -13375,20 +13353,660 @@ async def get_dpwh_2026_uniform_risks(
                 LIMIT 10000
             """
             
+
+            
             rows = conn.execute(query).fetchall()
             cols = [desc[0] for desc in conn.description]
             data = [dict(zip(cols, r)) for r in rows]
+
+            # ---------------------------------------------------------
+            # LABEL FIX: Cross-reference with Hierarchy JSON
+            # ---------------------------------------------------------
+            try:
+                hierarchy_path = Path('../dpwh-2026-hierarchy-analysis/data/FY 2026_DPWH DETAILS ENROLLED COPY (Final)_hierarchy.json')
+                if hierarchy_path.exists():
+                    print("   ✅ Loading Hierarchy JSON to fix labels...")
+                    with open(hierarchy_path, 'r', encoding='utf-8') as f:
+                        h_data = json.load(f)
+                    
+                    # 1. Bucket by amount for fuzzy matching
+                    # amount (rounded) -> list of {name, region, district, program}
+                    correction_map = {}
+                    
+                    # Compile regex for performance and reuse
+                    rgx_region = re.compile(r'\b(REGION|NCR|CAR|BARMM|MIMAROPA|REGIONWIDE|NATIONWIDE)\b', re.IGNORECASE)
+                    rgx_district = re.compile(r'\b(DISTRICT|DEO|CENTRAL OFFICE)\b', re.IGNORECASE)
+                    rgx_not_region = re.compile(r'^(CONSTRUCTION|IMPROVEMENT|CONCRETING|REHABILITATION|MAINTENANCE|ASSET)', re.IGNORECASE)
+
+                    def traverse(nodes, current_region=None, current_district=None, current_program=None):
+                        if not nodes:
+                            return
+                        
+                        node_list = nodes if isinstance(nodes, list) else [nodes]
+                        
+                        for node in node_list:
+                            raw_val = str(node.get('value') or node.get('name') or '').strip()
+                            amt = node.get('amount')
+                            
+                            # Heuristics
+                            new_region = current_region
+                            new_district = current_district
+                            new_program = current_program
+                            
+                            val_upper = raw_val.upper()
+                            
+                            # Simplified Heuristics per User Request
+                            # "if it says district in the words then it is district, same for region"
+                            
+                            # --- 1. Region Detection ---
+                            is_region_match = rgx_region.search(raw_val)
+                            is_excluded = rgx_not_region.match(raw_val)
+                            is_region = (is_region_match is not None) and (not is_excluded)
+                            
+                            # Length check: Region headers are usually short (< 50 chars).
+                            if is_region and len(raw_val) < 50: 
+                                new_region = raw_val
+                                new_district = None 
+                                # Do NOT reset Program (Program -> Region -> Item is possible)
+                            
+                            # --- 2. District Detection ---
+                            is_district_match = rgx_district.search(raw_val)
+                            is_district = (is_district_match is not None)
+                            
+                            if is_district:
+                                new_district = raw_val
+                                # Do NOT reset Program
+
+                            # --- 3. Program Detection ---
+                            # Any node with children that is NOT a Region or District
+                            has_children = 'children' in node and node['children']
+                            if has_children and not is_region and not is_district:
+                                # If it's a container and NOT a region/district, treat as Program.
+                                # Heuristic: Programs usually have longer names or distinct codes.
+                                if "PROGRAMS" not in val_upper or len(val_upper) > 30:
+                                     new_program = raw_val
+
+                            # Map Item
+                            if raw_val and amt is not None:
+                                try:
+                                    f_amt = float(amt)
+                                    r_amt = round(f_amt, 2)
+                                    if r_amt not in correction_map:
+                                        correction_map[r_amt] = []
+                                    
+                                    correction_map[r_amt].append({
+                                        'name_clean': raw_val.lower().replace('.', '').strip(),
+                                        'region': new_region,
+                                        'district': new_district,
+                                        'program': new_program 
+                                    })
+                                except:
+                                    pass
+                            
+                            # Recurse
+                            if 'children' in node and node['children']:
+                                traverse(node['children'], new_region, new_district, new_program)
+
+                    # Start traversal if data exists
+                    if isinstance(h_data, list):
+                        traverse(h_data)
+                    elif isinstance(h_data, dict) and h_data.get('data'):
+                        traverse(h_data['data'])
+                        
+                    # 2. Iterate data and apply fixes
+                    fixes_applied = 0
+                    for row in data:
+                        p_name = str(row.get('project_name', '')).strip().lower().replace('.', '')
+                        try:
+                            p_amt = float(row.get('amount', 0))
+                            r_amt = round(p_amt, 2)
+                        except:
+                            continue
+                        
+                        candidates = correction_map.get(r_amt)
+                        if candidates:
+                            # Find best name match
+                            matches = []
+                            for cand in candidates:
+                                if cand['name_clean'] in p_name or p_name in cand['name_clean']:
+                                    matches.append(cand)
+                            
+                            best_match = None
+                            if matches:
+                                # Check if matches map to DIFFERENT regions
+                                match_regions = set(m['region'] for m in matches if m.get('region'))
+                                if len(match_regions) > 1:
+                                     # Generic name matched multiple regions (e.g. "Project X" in NCR and Region I)
+                                     # This is a Nationwide/Mixed cluster.
+                                     common_programs = sorted(list(set(m['program'] for m in matches if m.get('program'))))
+                                     best_program = " / ".join(common_programs) if common_programs else None
+                                     
+                                     best_match = {
+                                        'region': 'Mixed / Nationwide',
+                                        'district': 'Various Districts',
+                                        'program': best_program
+                                     }
+                                else:
+                                     # All matches point to same region, or just 1 match.
+                                     best_match = matches[0]
+                            
+                            # START OF CHANGE: Handle ambiguous cases (Same Amount, Multiple Regions)
+                            # If we didn't find a direct name match, but we have candidates...
+                            if not best_match and candidates:
+                                # Check if candidates map to DIFFERENT regions
+                                distinct_regions = set(c['region'] for c in candidates if c.get('region'))
+                                
+                                if len(distinct_regions) > 1:
+                                    # It's a "Region-Wide" or "Nationwide" cluster where specific items have same price.
+                                    # We can't distinguish them by name (or name match failed).
+                                    # Safe fallback: Label as Mixed/Nationwide instead of leaving it as potentially wrong specific region.
+                                    # Try to find a common program if possible
+                                    common_programs = sorted(list(set(c['program'] for c in candidates if c.get('program'))))
+                                    best_program = " / ".join(common_programs) if common_programs else None
+                                    
+                                    best_match = {
+                                        'region': 'Mixed / Nationwide',
+                                        'district': 'Various Districts',
+                                        'program': best_program
+                                    }
+                                # REMOVED: elif len(candidates) == 1 check. 
+                                # Do NOT blindly accept single candidates without name match.
+                                # This caused "Batangas" (original) to be overwritten by "NCR" (candidate) just because of price collision.
+                            # END OF CHANGE
+                            
+                            # If no substring match, maybe just take the first one if it's unique?
+                            # For now, stick to substring/equality interaction
+                            if best_match:
+                                # Start with aggressive overwrite to clear bad fill-down data
+                                # If the hierarchy says Region is None/Program, but row has "Region X", we overwrite.
+                                
+                                # Overwrite strategy:
+                                # 1. Region: Inherit from hierarchy.
+                                #    If hierarchy is None, it implies Central/Nationwide context OR 
+                                #    that the original data might have been right. 
+                                #    BUT in this specific uniform risk dataset, the original labels are notoriously garbage (stuck fill-down).
+                                #    So we PREFER the hierarchy context.
+                                
+                                row['region'] = best_match.get('region')
+                                row['district'] = best_match.get('district')
+                                
+                                # For Program: ONLY overwrite if we found a Program in hierarchy. 
+                                # Otherwise keep original (Category C) which is usually okayish?
+                                # Actually, user wants correct program.
+                                if best_match.get('program'):
+                                    row['program'] = best_match['program']
+                                    
+                                fixes_applied += 1
+                            
+                    print(f"   ✅ Applied {fixes_applied} label corrections from Hierarchy JSON")
+                
+            except Exception as e:
+                print(f"   ⚠️ Failed to apply hierarchy label fixes: {str(e)}")
+            # ---------------------------------------------------------
+
+            response_data = {"data": data}
             
-            return JSONResponse(content={"data": data})
+            # Save to cache
+            try:
+                cache_file.parent.mkdir(parents=True, exist_ok=True)
+                with open(cache_file, 'w', encoding='utf-8') as f:
+                    json.dump(response_data, f, ensure_ascii=False, indent=2)
+                print(f"💾 [Uniform Risks] Cached data to {cache_file.name}")
+            except Exception as cache_err:
+                print(f"⚠️ [Uniform Risks] Failed to write cache: {cache_err}")
             
+            return JSONResponse(content=response_data)
+
         finally:
             conn.close()
 
     except Exception as e:
         import traceback
         traceback.print_exc()
-        return JSONResponse(content={"success": False, "error": str(e)}, status_code=500)
+        return JSONResponse(content={"error": str(e)}, status_code=500)
+
+
+@app.get("/api/dpwh2026/distribution")
+async def get_dpwh_2026_distribution():
+    """
+    Get distribution statistics and histogram for DPWH 2026 (Annex A-5).
+    Patterned after get_budget_distribution but for the specific parquet file.
+    """
+    try:
+        parquet_path_str = str(DATA_ROOT.parent.parent / "data" / "parquet" / "parsed_dpwh_2026.parquet")
+        if not os.path.exists(parquet_path_str):
+             return JSONResponse(content={"error": "Parquet file not found"}, status_code=404)
+        
+        conn = duckdb.connect()
+        
+        # 1. Scalar Stats
+        # Get Total Projects, Total Amount, Unique Amounts
+        stats_query = f"""
+            SELECT 
+                COUNT(*) as total_projects,
+                SUM(amount) as total_amount,
+                COUNT(DISTINCT amount) as unique_amounts
+            FROM read_parquet('{parquet_path_str}')
+            WHERE latest_qualifier_column = 'J'
+            AND col_J NOT ILIKE 'GOP'
+            AND col_J NOT ILIKE 'Loan Proceeds'
+            AND col_J NOT ILIKE '%Sub-Total%'
+        """
+        stats = conn.execute(stats_query).fetchone()
+        
+        result_stats = {
+            "total_projects": stats[0] or 0,
+            "total_amount": stats[1] or 0.0,
+            "unique_amounts": stats[2] or 0
+        }
+        
+        # 2. Histogram
+        # Generate histogram bins using `histogram` function or manual aggregation
+        # Using manual aggregation for control
+        hist_query = f"""
+            WITH raw_data AS (
+                SELECT amount
+                FROM read_parquet('{parquet_path_str}')
+                WHERE latest_qualifier_column = 'J'
+                AND col_J NOT ILIKE 'GOP'
+                AND col_J NOT ILIKE 'Loan Proceeds'
+                AND col_J NOT ILIKE '%Sub-Total%'
+                AND amount > 0
+            ),
+            stats AS (
+                SELECT 
+                    MIN(amount) as min_val,
+                    MAX(amount) as max_val
+                FROM raw_data
+            )
+            SELECT 
+                FLOOR((amount - (SELECT min_val FROM stats)) / 
+                      NULLIF((SELECT (max_val - min_val)/50 FROM stats), 0)) as bin_idx,
+                COUNT(*) as count,
+                MIN(amount) as bin_start,
+                MAX(amount) as bin_end
+            FROM raw_data
+            GROUP BY bin_idx
+            ORDER BY bin_idx
+        """
+        
+        hist_rows = conn.execute(hist_query).fetchall()
+        
+        # Format for Chart.js
+        histogram_data = []
+        labels = []
+        for r in hist_rows:
+            # r[2] is min matching this bin, r[3] is max.
+            # We can use avg or range as label
+            start_val = r[2]
+            end_val = r[3]
+            count = r[1]
+            if start_val is not None:
+                histogram_data.append(count)
+                labels.append(f"{start_val:,.0f}")
+
+        return JSONResponse(content={
+            "stats": result_stats,
+            "histogram": {
+                "labels": labels,
+                "data": histogram_data
+            }
+        })
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JSONResponse(content={"error": str(e)}, status_code=500)
+    finally:
+        if 'conn' in locals():
+            conn.close()
+            
+
 
 
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8000)
+@app.get("/api/dpwh2026/diff")
+async def dpwh_2026_diff_api():
+    """
+    Compare 'parsed_dpwh_2026.parquet' (Target) against 'budget_amendments_2026.json' (Reference/GAB Annex A-5).
+    Returns stats only. Use /diff/added, /diff/removed, /diff/modified for full data.
+    """
+    try:
+        # Check stats cache first  
+        stats_file = DATA_ROOT / "api_cache" / "dpwh_diff_stats.json"
+        if stats_file.exists():
+            try:
+                with open(stats_file, 'r', encoding='utf-8') as f:
+                    cache_data = json.load(f)
+                print(f"✅ [DPWH Diff Stats] Using cached data from {stats_file.name}")
+                return JSONResponse(cache_data)
+            except Exception as cache_err:
+                print(f"⚠️ [DPWH Diff Stats] Error reading cache, falling back to processing: {cache_err}")
+        
+        # 1. Load Reference (NEP Annex A-5)
+        # ------------------------------------------------------------------
+        # Helper function to filter line items only
+        def is_line_item(name):
+            """Filter out hierarchy items like region headers, funding sources, etc."""
+            if not name:
+                return False
+            name_stripped = name.strip()
+            hierarchy_prefixes = (
+                'a.', 'b.', 'c.', 'd.', 'e.', 'f.', 'g.', 'h.', 'i.', 'j.', 'k.', 'l.', 'm.', 
+                'n.', 'o.', 'p.', 'q.', 'r.', 's.', 't.', 'u.', 'v.', 'w.', 'x.', 'y.', 'z.',
+                'A.', 'B.', 'C.', 'D.', 'E.', 'F.', 'G.', 'H.', 'I.', 'J.', 'K.', 'L.', 'M.', 
+                'N.', 'O.', 'P.', 'Q.', 'R.', 'S.', 'T.', 'U.', 'V.', 'W.', 'X.', 'Y.', 'Z.',
+                '1.', '2.', '3.', '4.', '5.', '6.', '7.', '8.', '9.', '0.',
+                'I.', 'II.', 'III.', 'IV.', 'V.', 'VI.', 'VII.', 'VIII.', 'IX.', 'X.',
+                'XI.', 'XII.', 'XIII.', 'XIV.', 'XV.'
+            )
+            if name_stripped.startswith(hierarchy_prefixes):
+                return False
+            if any(keyword in name_stripped for keyword in ['GOP', 'Loan Proceeds', 'Loan proceeds', 'Sub-Total', 'Grand Total']):
+                return False
+            return True
+        
+        ref_path = Path("static/data/budget_amendments_2026.json")
+        ref_projects = []
+        if ref_path.exists():
+            with open(ref_path, "r", encoding="utf-8") as f:
+                ref_data = json.load(f)
+                # Filter for source_sheet == 'Annex A-5'
+                ref_projects = [
+                    p for p in ref_data.get("projects", [])
+                    if p.get("source_sheet") == "Annex A-5"
+                ]
+        else:
+            return JSONResponse({"status": "error", "message": "Reference data not found (budget_amendments_2026.json)"})
+
+        # Normalize Reference
+        # Use a tuple of (normalized_name, amount) as key, or just store list to diff
+        ref_map = {}
+        for p in ref_projects:
+            # normalization: lowercase, strip, remove extra spaces
+            # Keys in budget_amendments_2026.json: id, name, description, etc.
+            name = (p.get("name") or p.get("description") or "").strip()
+            # If name is empty, skip or use filler
+            if not name: continue
+            
+            # Filter out non-line-items (hierarchy headers, funding sources, etc.)
+            if not is_line_item(name):
+                continue
+            
+            amt = p.get("final_amount") or p.get("original_amount") or 0.0
+            
+            # Key: name|amount
+            key = f"{name.lower()}|{float(amt):.2f}"
+            ref_map[key] = {
+                "name": name,
+                "amount": amt,
+                "original": p
+            }
+
+        # 2. Load Target (DPWH 2026 Parquet)
+        # ------------------------------------------------------------------
+        target_path = DATA_ROOT.parent.parent / "data" / "parquet" / "parsed_dpwh_2026.parquet"
+        target_projects = []
+        
+        if target_path.exists():
+            import duckdb
+            conn = duckdb.connect()
+            try:
+                parquet_path_str = str(target_path).replace("'", "''")
+                
+                # Use same fill-down logic as projects endpoint
+                query = f"""
+                    WITH params AS (
+                        SELECT 
+                            _excel_row, 
+                            col_J, 
+                            amount, 
+                            latest_qualifier_column,
+                            col_B, col_C,
+                            -- Clean H and I (ignore markers)
+                            CASE WHEN LENGTH(col_H) > 3 THEN col_H ELSE NULL END as clean_H,
+                            CASE WHEN LENGTH(col_I) > 3 THEN col_I ELSE NULL END as clean_I
+                        FROM read_parquet('{parquet_path_str}')
+                    ),
+                    groups AS (
+                        SELECT 
+                            *,
+                            COUNT(col_B) OVER (ORDER BY _excel_row) as grp_B,
+                            COUNT(col_C) OVER (ORDER BY _excel_row) as grp_C,
+                            COUNT(clean_H) OVER (ORDER BY _excel_row) as grp_H,
+                            COUNT(clean_I) OVER (ORDER BY _excel_row) as grp_I
+                        FROM params
+                    ),
+                    filled_data AS (
+                        SELECT 
+                            _excel_row,
+                            amount,
+                            latest_qualifier_column,
+                            col_J,
+                            LAST_VALUE(col_C IGNORE NULLS) OVER (PARTITION BY grp_B ORDER BY _excel_row) as cat_C,
+                            LAST_VALUE(clean_H IGNORE NULLS) OVER (PARTITION BY grp_C ORDER BY _excel_row) as cat_H,
+                            LAST_VALUE(clean_I IGNORE NULLS) OVER (PARTITION BY grp_H ORDER BY _excel_row) as cat_I
+                        FROM groups
+                    )
+                    SELECT 
+                        col_J as project_name, 
+                        amount, 
+                        cat_H as region,
+                        cat_I as district,
+                        cat_C as program
+                    FROM filled_data 
+                    WHERE 
+                        latest_qualifier_column = 'J' 
+                        AND col_J NOT ILIKE 'GOP' 
+                        AND col_J NOT ILIKE 'Loan Proceeds'
+                        AND col_J NOT ILIKE '%Sub-Total%'
+                        AND col_J NOT ILIKE '%Grand Total%'
+                    ORDER BY _excel_row
+                """
+                
+                rows = conn.execute(query).fetchall()
+                # Row tuples: (project_name, amount, region, district, program)
+                
+                for r in rows:
+                    name = str(r[0] or "").strip()
+                    if not name: continue
+                    
+                    amt = float(r[1] or 0.0)
+                    
+                    target_projects.append({
+                        "name": name,
+                        "amount": amt,
+                        "region": r[2],
+                        "district": r[3],
+                        "program": r[4]
+                    })
+                    
+            finally:
+                conn.close()
+                
+        else:
+             return JSONResponse({"status": "error", "message": "Target data not found (parsed_dpwh_2026.parquet)"})
+
+        # Normalize Target
+        target_map = {}
+        target_keys = set()
+        target_by_name = {}  # Map by name only for detecting modifications
+        
+        for p in target_projects:
+            name = p["name"]
+            amt = p["amount"]
+            key = f"{name.lower()}|{amt:.2f}"
+            target_keys.add(key)
+            target_map[key] = p
+            
+            # Also index by name only
+            name_lower = name.lower()
+            if name_lower not in target_by_name:
+                target_by_name[name_lower] = []
+            target_by_name[name_lower].append(p)
+
+        # 3. Calculate Diff
+        # ------------------------------------------------------------------
+        removed = []
+        added = []
+        modified = []
+        
+        # Build ref_by_name for modification detection
+        ref_by_name = {}
+        for k, v in ref_map.items():
+            name_lower = v["name"].lower()
+            if name_lower not in ref_by_name:
+                ref_by_name[name_lower] = []
+            ref_by_name[name_lower].append(v)
+        
+        # Track Programs
+        ref_programs = set(p.get("program_id") for p in ref_projects)
+        
+        # Removed/Modified: In Ref but not in Target (exact match) or Modified (name match, amount diff)
+        for k, v in ref_map.items():
+            if k not in target_keys:
+                # Not an exact match - check if it's a modification
+                name_lower = v["name"].lower()
+                if name_lower in target_by_name:
+                    # Same name exists in target with different amount - it's modified
+                    target_versions = target_by_name[name_lower]
+                    if len(target_versions) == 1:
+                        modified.append({
+                            "name": v["name"],
+                            "ref_amount": v["amount"],
+                            "target_amount": target_versions[0]["amount"],
+                            "program": target_versions[0].get("program")
+                        })
+                    else:
+                        # Multiple targets with same name - ambiguous
+                        removed.append({
+                            "name": v["name"],
+                            "amount": v["amount"],
+                            "program": v["original"].get("program_id")
+                        })
+                else:
+                    # Truly removed
+                    removed.append({
+                        "name": v["name"],
+                        "amount": v["amount"],
+                        "program": v["original"].get("program_id")
+                    })
+        
+        # Added: In Target but not in Ref (exact match) and not already counted as Modified
+        modified_names = set(m["name"].lower() for m in modified)
+        for k in target_keys:
+            if k not in ref_map:
+                p = target_map[k]
+                name_lower = p["name"].lower()
+                # Don't count as added if it's already in modified list
+                if name_lower not in modified_names or name_lower not in ref_by_name:
+                    added.append({
+                        "name": p["name"],
+                        "amount": p["amount"],
+                        "region": p.get("region"),
+                        "district": p.get("district"),
+                        "program": p.get("program")
+                    })
+                
+        # Sort by Amount Descending
+        removed.sort(key=lambda x: x["amount"], reverse=True)
+        added.sort(key=lambda x: x["amount"], reverse=True)
+        modified.sort(key=lambda x: x["target_amount"], reverse=True)
+        
+        # Calculate matches
+        match_count = len(ref_projects) - len(removed) - len(modified)
+        
+        response_data = {
+            "status": "ok",
+            "data": {
+                "stats": {
+                    "ref_count": len(ref_map),
+                    "target_count": len(target_projects),
+                    "added_count": len(added),
+                    "removed_count": len(removed),
+                    "modified_count": len(modified),
+                    "match_count": match_count
+                },
+                "removed": removed,
+                "added": added,
+                "modified": modified
+            }
+        }
+        
+        # Save to cache
+        try:
+            cache_file.parent.mkdir(parents=True, exist_ok=True)
+            with open(cache_file, 'w', encoding='utf-8') as f:
+                json.dump(response_data, f, ensure_ascii=False, indent=2)
+            print(f"💾 [DPWH Diff] Cached data to {cache_file.name}")
+        except Exception as cache_err:
+            print(f"⚠️ [DPWH Diff] Failed to write cache: {cache_err}")
+        
+        return JSONResponse(response_data)
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JSONResponse({"status": "error", "message": str(e)}, status_code=500)
+
+
+@app.get("/api/dpwh2026/diff/removed")
+async def dpwh_2026_diff_removed():
+    """Serve removed items preview (first 50 items)"""
+    cache_file = DATA_ROOT / "api_cache" / "dpwh_diff_removed_preview.json"
+    if cache_file.exists():
+        with open(cache_file, 'r', encoding='utf-8') as f:
+            return JSONResponse(json.load(f))
+    return JSONResponse({"status": "error", "message": "Cache file not found"}, status_code=404)
+
+
+@app.get("/api/dpwh2026/diff/removed/full")
+async def dpwh_2026_diff_removed_full():
+    """Serve all removed items"""
+    cache_file = DATA_ROOT / "api_cache" / "dpwh_diff_removed_full.json"
+    if cache_file.exists():
+        with open(cache_file, 'r', encoding='utf-8') as f:
+            return JSONResponse(json.load(f))
+    return JSONResponse({"status": "error", "message": "Cache file not found"}, status_code=404)
+
+
+@app.get("/api/dpwh2026/diff/modified")
+async def dpwh_2026_diff_modified():
+    """Serve modified items preview (first 50 items)"""
+    cache_file = DATA_ROOT / "api_cache" / "dpwh_diff_modified_preview.json"
+    if cache_file.exists():
+        with open(cache_file, 'r', encoding='utf-8') as f:
+            return JSONResponse(json.load(f))
+    return JSONResponse({"status": "error", "message": "Cache file not found"}, status_code=404)
+
+
+@app.get("/api/dpwh2026/diff/modified/full")
+async def dpwh_2026_diff_modified_full():
+    """Serve all modified items"""
+    cache_file = DATA_ROOT / "api_cache" / "dpwh_diff_modified_full.json"
+    if cache_file.exists():
+        with open(cache_file, 'r', encoding='utf-8') as f:
+            return JSONResponse(json.load(f))
+    return JSONResponse({"status": "error", "message": "Cache file not found"}, status_code=404)
+
+
+@app.get("/api/dpwh2026/diff/added")
+async def dpwh_2026_diff_added():
+    """Serve added items preview (first 50 items)"""
+    cache_file = DATA_ROOT / "api_cache" / "dpwh_diff_added_preview.json"
+    if cache_file.exists():
+        with open(cache_file, 'r', encoding='utf-8') as f:
+            return JSONResponse(json.load(f))
+    return JSONResponse({"status": "error", "message": "Cache file not found"}, status_code=404)
+
+
+@app.get("/api/dpwh2026/diff/added/full")
+async def dpwh_2026_diff_added_full():
+    """Serve all added items"""
+    cache_file = DATA_ROOT / "api_cache" / "dpwh_diff_added_full.json"
+    if cache_file.exists():
+        with open(cache_file, 'r', encoding='utf-8') as f:
+            return JSONResponse(json.load(f))
+    return JSONResponse({"status": "error", "message": "Cache file not found"}, status_code=404)
+
