@@ -1278,14 +1278,7 @@
         }
 
         function renderDiff(data, filter = '') {
-            // Stats
-            document.getElementById('stats-ref-count').textContent = data.stats.ref_count.toLocaleString();
-            document.getElementById('stats-target-count').textContent = data.stats.target_count.toLocaleString();
-            document.getElementById('stats-added-count').textContent = data.stats.added_count.toLocaleString();
-            document.getElementById('stats-removed-count').textContent = data.stats.removed_count.toLocaleString();
-            document.getElementById('stats-modified-count').textContent = data.stats.modified_count.toLocaleString();
-            document.getElementById('stats-match-count').textContent = data.stats.match_count.toLocaleString();
-
+            // Stats are already displayed in loadDiffData, skip here
             const filterLower = filter.toLowerCase();
 
             // Helper to find clusters (naive: based on amount repetition > 2)
