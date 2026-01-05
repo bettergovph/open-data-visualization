@@ -13669,20 +13669,20 @@ if __name__ == "__main__":
 @app.get("/api/dpwh2026/diff")
 async def dpwh_2026_diff_api():
     """
-    Compare 'parsed_dpwh_2026.parquet' (Target) against 'budget_amendments_2026.json' (Reference/NEP Annex A-5).
-    Returns Added, Removed, and statistics.
+    Compare 'parsed_dpwh_2026.parquet' (Target) against 'budget_amendments_2026.json' (Reference/GAB Annex A-5).
+    Returns stats only. Use /diff/added, /diff/removed, /diff/modified for full data.
     """
     try:
-        # Check cache first
-        cache_file = DATA_ROOT / "api_cache" / "dpwh_diff_cache.json"
-        if cache_file.exists():
+        # Check stats cache first  
+        stats_file = DATA_ROOT / "api_cache" / "dpwh_diff_stats.json"
+        if stats_file.exists():
             try:
-                with open(cache_file, 'r', encoding='utf-8') as f:
+                with open(stats_file, 'r', encoding='utf-8') as f:
                     cache_data = json.load(f)
-                print(f"✅ [DPWH Diff] Using cached data from {cache_file.name}")
+                print(f"✅ [DPWH Diff Stats] Using cached data from {stats_file.name}")
                 return JSONResponse(cache_data)
             except Exception as cache_err:
-                print(f"⚠️ [DPWH Diff] Error reading cache, falling back to processing: {cache_err}")
+                print(f"⚠️ [DPWH Diff Stats] Error reading cache, falling back to processing: {cache_err}")
         
         # 1. Load Reference (NEP Annex A-5)
         # ------------------------------------------------------------------
@@ -13949,3 +13949,64 @@ async def dpwh_2026_diff_api():
         import traceback
         traceback.print_exc()
         return JSONResponse({"status": "error", "message": str(e)}, status_code=500)
+
+
+@app.get("/api/dpwh2026/diff/removed")
+async def dpwh_2026_diff_removed():
+    """Serve removed items preview (first 50 items)"""
+    cache_file = DATA_ROOT / "api_cache" / "dpwh_diff_removed_preview.json"
+    if cache_file.exists():
+        with open(cache_file, 'r', encoding='utf-8') as f:
+            return JSONResponse(json.load(f))
+    return JSONResponse({"status": "error", "message": "Cache file not found"}, status_code=404)
+
+
+@app.get("/api/dpwh2026/diff/removed/full")
+async def dpwh_2026_diff_removed_full():
+    """Serve all removed items"""
+    cache_file = DATA_ROOT / "api_cache" / "dpwh_diff_removed_full.json"
+    if cache_file.exists():
+        with open(cache_file, 'r', encoding='utf-8') as f:
+            return JSONResponse(json.load(f))
+    return JSONResponse({"status": "error", "message": "Cache file not found"}, status_code=404)
+
+
+@app.get("/api/dpwh2026/diff/modified")
+async def dpwh_2026_diff_modified():
+    """Serve modified items preview (first 50 items)"""
+    cache_file = DATA_ROOT / "api_cache" / "dpwh_diff_modified_preview.json"
+    if cache_file.exists():
+        with open(cache_file, 'r', encoding='utf-8') as f:
+            return JSONResponse(json.load(f))
+    return JSONResponse({"status": "error", "message": "Cache file not found"}, status_code=404)
+
+
+@app.get("/api/dpwh2026/diff/modified/full")
+async def dpwh_2026_diff_modified_full():
+    """Serve all modified items"""
+    cache_file = DATA_ROOT / "api_cache" / "dpwh_diff_modified_full.json"
+    if cache_file.exists():
+        with open(cache_file, 'r', encoding='utf-8') as f:
+            return JSONResponse(json.load(f))
+    return JSONResponse({"status": "error", "message": "Cache file not found"}, status_code=404)
+
+
+@app.get("/api/dpwh2026/diff/added")
+async def dpwh_2026_diff_added():
+    """Serve added items preview (first 50 items)"""
+    cache_file = DATA_ROOT / "api_cache" / "dpwh_diff_added_preview.json"
+    if cache_file.exists():
+        with open(cache_file, 'r', encoding='utf-8') as f:
+            return JSONResponse(json.load(f))
+    return JSONResponse({"status": "error", "message": "Cache file not found"}, status_code=404)
+
+
+@app.get("/api/dpwh2026/diff/added/full")
+async def dpwh_2026_diff_added_full():
+    """Serve all added items"""
+    cache_file = DATA_ROOT / "api_cache" / "dpwh_diff_added_full.json"
+    if cache_file.exists():
+        with open(cache_file, 'r', encoding='utf-8') as f:
+            return JSONResponse(json.load(f))
+    return JSONResponse({"status": "error", "message": "Cache file not found"}, status_code=404)
+

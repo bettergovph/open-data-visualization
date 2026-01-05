@@ -273,14 +273,69 @@ def generate_diff_cache():
     
     print(f"   ✅ Found {len(added)} added, {len(removed)} removed, {len(modified)} modified, {match_count} matches")
     
-    # 4. Save to cache
-    print("   💾 Saving cache to", cache_file)
+    # 4. Save to cache files (7 files: stats + 3 previews + 3 full)
     cache_dir.mkdir(parents=True, exist_ok=True)
-    with open(cache_file, 'w', encoding='utf-8') as f:
-        json.dump(response_data, f, ensure_ascii=False, indent=2)
     
-    print(f"   ✅ Cache file created successfully!")
-    print(f"   📊 File size: {cache_file.stat().st_size / 1024:.2f} KB")
+    # Stats only (tiny file)
+    stats_file = cache_dir / "dpwh_diff_stats.json"
+    stats_data = {
+        "status": "ok",
+        "stats": {
+            "ref_count": len(ref_map),
+            "target_count": len(target_projects),
+            "added_count": len(added),
+            "removed_count": len(removed),
+            "modified_count": len(modified),
+            "match_count": match_count
+        }
+    }
+    
+    print("   💾 Saving cache files...")
+    with open(stats_file, 'w', encoding='utf-8') as f:
+        json.dump(stats_data, f, ensure_ascii=False, indent=2)
+    print(f"   ✅ Stats: {stats_file.name} ({stats_file.stat().st_size / 1024:.2f} KB)")
+    
+    # Removed items (preview + full)
+    preview_limit = 50
+    removed_preview_file = cache_dir / "dpwh_diff_removed_preview.json"
+    with open(removed_preview_file, 'w', encoding='utf-8') as f:
+        json.dump({"data": removed[:preview_limit], "has_more": len(removed) > preview_limit}, f, ensure_ascii=False, indent=2)
+    print(f"   ✅ Removed Preview: {removed_preview_file.name} ({removed_preview_file.stat().st_size / 1024:.2f} KB)")
+    
+    removed_file = cache_dir / "dpwh_diff_removed_full.json"
+    with open(removed_file, 'w', encoding='utf-8') as f:
+        json.dump({"data": removed}, f, ensure_ascii=False, indent=2)
+    print(f"   ✅ Removed Full: {removed_file.name} ({removed_file.stat().st_size / 1024:.2f} KB)")
+    
+    # Modified items (preview + full)
+    modified_preview_file = cache_dir / "dpwh_diff_modified_preview.json"
+    with open(modified_preview_file, 'w', encoding='utf-8') as f:
+        json.dump({"data": modified[:preview_limit], "has_more": len(modified) > preview_limit}, f, ensure_ascii=False, indent=2)
+    print(f"   ✅ Modified Preview: {modified_preview_file.name} ({modified_preview_file.stat().st_size / 1024:.2f} KB)")
+    
+    modified_file = cache_dir / "dpwh_diff_modified_full.json"
+    with open(modified_file, 'w', encoding='utf-8') as f:
+        json.dump({"data": modified}, f, ensure_ascii=False, indent=2)
+    print(f"   ✅ Modified Full: {modified_file.name} ({modified_file.stat().st_size / 1024:.2f} KB)")
+    
+    # Added items (preview + full)
+    added_preview_file = cache_dir / "dpwh_diff_added_preview.json"
+    with open(added_preview_file, 'w', encoding='utf-8') as f:
+        json.dump({"data": added[:preview_limit], "has_more": len(added) > preview_limit}, f, ensure_ascii=False, indent=2)
+    print(f"   ✅ Added Preview: {added_preview_file.name} ({added_preview_file.stat().st_size / 1024:.2f} KB)")
+    
+    added_file = cache_dir / "dpwh_diff_added_full.json"
+    with open(added_file, 'w', encoding='utf-8') as f:
+        json.dump({"data": added}, f, ensure_ascii=False, indent=2)
+    print(f"   ✅ Added Full: {added_file.name} ({added_file.stat().st_size / 1024:.2f} KB)")
+    
+    total_preview_size = (stats_file.stat().st_size + removed_preview_file.stat().st_size + 
+                          modified_preview_file.stat().st_size + added_preview_file.stat().st_size) / 1024
+    total_full_size = (removed_file.stat().st_size + modified_file.stat().st_size + 
+                       added_file.stat().st_size) / 1024 / 1024
+    print(f"   📊 Initial load (stats + previews): {total_preview_size:.2f} KB")
+    print(f"   📊 Full data (on-demand): {total_full_size:.2f} MB")
+    
     return True
 
 if __name__ == "__main__":
