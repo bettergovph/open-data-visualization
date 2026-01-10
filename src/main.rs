@@ -678,7 +678,11 @@ async fn dpwh2026(req: HttpRequest) -> Result<HttpResponse, ActixError> {
     context.insert("company_name", "BetterGovPH");
     context.insert("platform", "BetterGovPH");
 
-    let template_name = "dpwh2026.html";
+    let template_name = if is_mobile(&req) {
+        "mobile/dpwh2026.html"
+    } else {
+        "dpwh2026.html"
+    };
 
     let rendered = tera.render(template_name, &context).map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
     Ok(HttpResponse::Ok().content_type("text/html").body(rendered))
