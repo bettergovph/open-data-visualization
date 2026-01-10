@@ -248,6 +248,8 @@
             <div class="budget-tabs">
                 <div class="budget-tab-nav">
                     <a href="#projects" class="budget-tab-btn active" data-tab="projects">📑 All Projects</a>
+                    <a href="#stats" class="budget-tab-btn" data-tab="stats">📊 Statistics</a>
+                    <a href="#repeated" class="budget-tab-btn" data-tab="repeated">🔄 Repeated</a>
                     <!-- <a href="#hierarchy" class="budget-tab-btn" data-tab="hierarchy">📂 Hierarchy</a> -->
                     <a href="#uniform" class="budget-tab-btn" data-tab="uniform">⚠️ Uniform Risks</a>
                     <a href="#dist" class="budget-tab-btn" data-tab="dist">📈 Distribution</a>
@@ -269,231 +271,481 @@
                         style="display: none; padding: 20px; background: #fee2e2; color: #b91c1c; border-radius: 8px; border: 1px solid #fca5a5; margin: 20px 0;">
                     </div>
 
-                    <!-- All Projects Tab -->
-                    <div id="tab-projects" class="budget-tab-panel active" style="display: none;">
-                        <!-- Hidden initally until load -->
-                        <div class="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
-                            <h3 class="section-title" style="margin: 0; border: none; padding: 0;">Line Items</h3>
-                            <input type="text" id="project-search" class="search-input"
-                                placeholder="Search projects (min 3 chars)...">
-                        </div>
+                </div>
 
-                        <div class="table-wrapper">
-                            <table class="data-table" id="projects-table">
-                                <thead>
-                                    <tr>
-                                        <th style="width: 35%">Project Name</th>
-                                        <th style="width: 15%">Program</th>
-                                        <th style="width: 15%">Region</th>
-                                        <th style="width: 15%">District / DEO</th>
-                                        <th style="text-align: right; width: 20%">Amount (PHP)</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="projects-tbody">
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <div id="projects-pagination" class="mt-6 flex justify-center gap-2"></div>
-                        <div class="text-center mt-2 text-xs text-slate-400" id="projects-info"></div>
+                <!-- All Projects Tab -->
+                <div id="tab-projects" class="budget-tab-panel active" style="display: none;">
+                    <!-- Hidden initally until load -->
+                    <div class="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
+                        <h3 class="section-title" style="margin: 0; border: none; padding: 0;">Line Items</h3>
+                        <input type="text" id="project-search" class="search-input"
+                            placeholder="Search projects (min 3 chars)...">
                     </div>
 
-                    <!-- Hierarchy Tab -->
-                    <div id="tab-hierarchy" class="budget-tab-panel">
-                        <h3 class="section-title">Hierarchy Overview</h3>
-                        <p class="section-desc">View non-project summaries and categories.</p>
-                        <div class="table-wrapper">
+                    <div class="table-wrapper">
+                        <table class="data-table" id="projects-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 35%">Project Name</th>
+                                    <th style="width: 15%">Program</th>
+                                    <th style="width: 15%">Region</th>
+                                    <th style="width: 15%">District / DEO</th>
+                                    <th style="text-align: right; width: 20%">Amount (PHP)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="projects-tbody">
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div id="projects-pagination" class="mt-6 flex justify-center gap-2"></div>
+                    <div class="text-center mt-2 text-xs text-slate-400" id="projects-info"></div>
+                </div>
+
+                <!-- Hierarchy Tab -->
+                <div id="tab-hierarchy" class="budget-tab-panel">
+                    <h3 class="section-title">Hierarchy Overview</h3>
+                    <p class="section-desc">View non-project summaries and categories.</p>
+                    <div class="table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Type</th>
+                                    <th>Region</th>
+                                    <th>District</th>
+                                    <th>Program</th>
+                                    <th style="text-align: right;">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody id="hierarchy-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="tab-uniform" class="budget-tab-panel">
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <h3 class="section-title text-red-700">Uniform Pricing Risks</h3>
+                            <p class="section-desc">
+                                Clusters of projects with <strong>identical amounts</strong> appearing sequentially
+                                (Min: 10 items).
+                                This pattern often indicates non-specific budgeting or copy-paste anomalies.
+                            </p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="downloadUniformRisksJSON()"
+                                class="px-4 py-2 bg-blue-50 text-blue-700 rounded hover:bg-blue-100 transition-colors text-sm font-semibold">
+                                📥 JSON
+                            </button>
+                            <button onclick="downloadUniformRisksCSV()"
+                                class="px-4 py-2 bg-green-50 text-green-700 rounded hover:bg-green-100 transition-colors text-sm font-semibold">
+                                📊 CSV
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="loading-risks" style="display:none;" class="py-12 text-center text-slate-500">
+                        <div class="loading-spinner"></div> Analyzing patterns...
+                    </div>
+
+                    <div id="risks-container" class="space-y-8">
+                        <!-- Risk clusters injected here -->
+                    </div>
+                </div>
+
+                <!-- Stats Tab -->
+                <div id="tab-stats" class="budget-tab-panel" style="display: none;">
+                    <div class="mb-4 flex flex-col md:flex-row md:justify-between md:items-start gap-4">
+                        <div>
+                            <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                                📊 Project Cost Analysis
+                                <span
+                                    class="text-sm font-normal text-slate-500 bg-slate-100 px-2 py-1 rounded-full">Based
+                                    on Cost per KM</span>
+                            </h2>
+                            <p class="text-slate-600 mt-1 text-sm">
+                                Analysis of <strong>project efficiency</strong> using statistical anomalies (MAD
+                                method).
+                                Projects flagged as "Red Flags" deviate significantly from the median cost for their
+                                category.
+                            </p>
+                        </div>
+                        <button onclick="downloadMasterRedFlagsCSV()"
+                            class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded shadow text-sm font-medium flex items-center gap-2 whitespace-nowrap">
+                            <svg class="w-4 h-4" width="16" height="16" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                                </path>
+                            </svg>
+                            Download Full Risk Report (CSV)
+                        </button>
+                    </div>
+
+                    <div id="stats-loading" class="hidden">
+                        <div class="flex items-center gap-2 text-slate-500">
+                            <div class="loading-spinner w-4 h-4 border-2"></div> Calculating statistics...
+                        </div>
+                    </div>
+
+                    <div id="stats-content">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <!-- Summary Card -->
+                            <div class="p-4 bg-blue-50 border border-blue-100 rounded shadow-sm">
+                                <div class="text-blue-800 font-bold mb-1">Total Analyzed</div>
+                                <div class="text-3xl font-mono font-bold text-blue-600" id="stat-total-parsed">-</div>
+                                <div class="text-xs text-blue-500 mt-1">Projects with parsable chainage/dimensions</div>
+                            </div>
+                            <div class="stat-card" data-cat="national_roads">
+                                <h3 class="font-bold text-slate-700 bg-slate-100 p-2 rounded-t border-b text-sm">🛣️
+                                    National Roads</h3>
+                                <div class="p-3 bg-white border border-t-0 rounded-b shadow-sm"
+                                    id="stats-national_roads">
+                                    Loading...</div>
+                            </div>
+
+                            <div class="stat-card" data-cat="secondary_roads">
+                                <h3 class="font-bold text-slate-700 bg-slate-100 p-2 rounded-t border-b text-sm">🛣️
+                                    Secondary Roads</h3>
+                                <div class="p-3 bg-white border border-t-0 rounded-b shadow-sm"
+                                    id="stats-secondary_roads">
+                                    Loading...</div>
+                            </div>
+
+                            <div class="stat-card" data-cat="bridges">
+                                <h3 class="font-bold text-slate-700 bg-slate-100 p-2 rounded-t border-b text-sm">🌉
+                                    Bridges
+                                </h3>
+                                <div class="p-3 bg-white border border-t-0 rounded-b shadow-sm" id="stats-bridges">
+                                    Loading...</div>
+                            </div>
+
+                            <div class="stat-card" data-cat="flood_control">
+                                <h3 class="font-bold text-slate-700 bg-slate-100 p-2 rounded-t border-b text-sm">🌊
+                                    Flood
+                                    Control</h3>
+                                <div class="p-3 bg-white border border-t-0 rounded-b shadow-sm"
+                                    id="stats-flood_control">
+                                    Loading...</div>
+                            </div>
+
+                            <div class="stat-card" data-cat="public_buildings">
+                                <h3 class="font-bold text-slate-700 bg-slate-100 p-2 rounded-t border-b text-sm">🏢
+                                    Public
+                                    Buildings</h3>
+                                <div class="p-3 bg-white border border-t-0 rounded-b shadow-sm"
+                                    id="stats-public_buildings">
+                                    Loading...</div>
+                            </div>
+
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Repeated Tab (Keeping it for full view) -->
+                <div id="tab-repeated" class="budget-tab-panel" style="display: none;">
+                    <div class="mb-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                        <div>
+                            <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                                🔄 Repeated Projects (Cross-Year)
+                                <span
+                                    class="text-sm font-normal text-slate-500 bg-slate-100 px-2 py-1 rounded-full">Comparison
+                                    vs 2024/2025</span>
+                            </h2>
+                            <p class="text-slate-600 mt-1 text-sm">
+                                Projects in 2026 that also appear in previous years (2024, 2025).
+                                Excludes generic names (e.g., Central Office, Region X).
+                            </p>
+                        </div>
+                        <div>
+                            <button onclick="downloadRepeatedCSV()"
+                                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow text-sm font-medium flex items-center gap-2">
+                                <svg class="w-4 h-4" width="16" height="16" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                </svg>
+                                Download CSV
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="repeated-summary" class="hidden mb-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div
+                                class="bg-white p-4 rounded-lg shadow-sm border border-slate-200 flex items-center gap-4">
+                                <div class="p-3 bg-blue-100 rounded-full text-blue-600">
+                                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
+                                        </path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="text-sm font-bold text-slate-500 uppercase">Total Repeated Projects</h3>
+                                    <div id="repeated-total-count" class="text-2xl font-bold text-slate-800">-</div>
+                                </div>
+                            </div>
+                            <div
+                                class="bg-white p-4 rounded-lg shadow-sm border border-slate-200 flex items-center gap-4">
+                                <div class="p-3 bg-green-100 rounded-full text-green-600">
+                                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                                        </path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="text-sm font-bold text-slate-500 uppercase">Total Cost Involved</h3>
+                                    <div id="repeated-total-amount" class="text-2xl font-bold text-green-700">-</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="repeated-loading" class="hidden">
+                        <div class="flex items-center gap-2 text-slate-500">
+                            <div class="loading-spinner w-4 h-4 border-2"></div> Finding duplicates...
+                        </div>
+                    </div>
+
+                    <div id="repeated-content">
+                        <div class="bg-white rounded-lg shadow border border-slate-200 overflow-hidden">
                             <table class="data-table">
-                                <thead>
+                                <thead class="bg-slate-50">
                                     <tr>
-                                        <th>Name</th>
-                                        <th>Type</th>
-                                        <th>Region</th>
-                                        <th>District</th>
-                                        <th>Program</th>
-                                        <th style="text-align: right;">Amount</th>
+                                        <th class="text-left w-1/2">Project Name</th>
+                                        <th class="text-center w-24">Yrs Found</th>
+                                        <th class="text-right">2026 Amount</th>
+                                        <th class="text-left pl-4">History</th>
                                     </tr>
                                 </thead>
-                                <tbody id="hierarchy-tbody"></tbody>
+                                <tbody id="repeated-tbody"></tbody>
                             </table>
                         </div>
-                    </div>
-
-                    <div id="tab-uniform" class="budget-tab-panel">
-                        <div class="flex justify-between items-center mb-4">
-                            <div>
-                                <h3 class="section-title text-red-700">Uniform Pricing Risks</h3>
-                                <p class="section-desc">
-                                    Clusters of projects with <strong>identical amounts</strong> appearing sequentially
-                                    (Min: 10 items).
-                                    This pattern often indicates non-specific budgeting or copy-paste anomalies.
-                                </p>
-                            </div>
+                        <!-- Pagination for Repeated Tab -->
+                        <div id="repeated-pagination"
+                            class="flex justify-between items-center mt-4 text-sm text-slate-600">
+                            <div id="repeated-page-info">Page 1</div>
                             <div class="flex gap-2">
-                                <button onclick="downloadUniformRisksJSON()"
-                                    class="px-4 py-2 bg-blue-50 text-blue-700 rounded hover:bg-blue-100 transition-colors text-sm font-semibold">
-                                    📥 JSON
-                                </button>
-                                <button onclick="downloadUniformRisksCSV()"
-                                    class="px-4 py-2 bg-green-50 text-green-700 rounded hover:bg-green-100 transition-colors text-sm font-semibold">
-                                    📊 CSV
-                                </button>
-                            </div>
-                        </div>
-
-                        <div id="loading-risks" style="display:none;" class="py-12 text-center text-slate-500">
-                            <div class="loading-spinner"></div> Analyzing patterns...
-                        </div>
-
-                        <div id="risks-container" class="space-y-8">
-                            <!-- Risk clusters injected here -->
-                        </div>
-                    </div>
-
-                    <!-- Changes Tab -->
-                    <div id="tab-diff" class="budget-tab-panel">
-                        <div class="flex justify-between items-center mb-6">
-                            <div>
-                                <h3 class="section-title text-indigo-700">Budget Changes (vs GAB Annex A-5)</h3>
-                                <p class="text-slate-500">
-                                    Comparing <strong>Parsed DPWH 2026</strong> (Target) against <strong>GAB Annex A-5
-                                        Baseline</strong> (Reference).
-                                </p>
-                            </div>
-                            <div class="text-sm text-right">
-                                <button onclick="loadDiffData()"
-                                    class="px-4 py-2 bg-indigo-50 text-indigo-700 rounded hover:bg-indigo-100 transition-colors">
-                                    🔄 Refresh Diff
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Diff Stats -->
-                        <div id="diff-stats" class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
-                            <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200">
-                                <div class="text-xs text-slate-500 uppercase font-bold">Ref Count</div>
-                                <div id="stats-ref-count" class="text-xl font-bold text-slate-700">-</div>
-                            </div>
-                            <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200">
-                                <div class="text-xs text-slate-500 uppercase font-bold">Target Count</div>
-                                <div id="stats-target-count" class="text-xl font-bold text-slate-700">-</div>
-                            </div>
-                            <div
-                                class="bg-white p-4 rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-green-500">
-                                <div class="text-xs text-green-600 uppercase font-bold">Items Added</div>
-                                <div id="stats-added-count" class="text-2xl font-bold text-green-700">-</div>
-                            </div>
-                            <div
-                                class="bg-white p-4 rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-red-500">
-                                <div class="text-xs text-red-600 uppercase font-bold">Items Removed</div>
-                                <div id="stats-removed-count" class="text-2xl font-bold text-red-700">-</div>
-                            </div>
-                            <div
-                                class="bg-white p-4 rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-orange-500">
-                                <div class="text-xs text-orange-600 uppercase font-bold">Modified Items</div>
-                                <div id="stats-modified-count" class="text-2xl font-bold text-orange-700">-</div>
-                            </div>
-                            <div
-                                class="bg-white p-4 rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-blue-500">
-                                <div class="text-xs text-blue-600 uppercase font-bold">Matches</div>
-                                <div id="stats-match-count" class="text-2xl font-bold text-blue-700">-</div>
-                            </div>
-                        </div>
-
-                        <!-- Search Filter -->
-                        <div class="mb-6">
-                            <input type="text" id="diff-search"
-                                class="w-full p-2 border border-slate-300 rounded focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-                                placeholder="Filter changes by Project Name or Program..."
-                                onkeyup="filterDiff(this.value)">
-                        </div>
-
-                        <!-- Diff Columns -->
-                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                            <!-- Removed Column -->
-                            <div class="flex flex-col h-full">
-                                <h4
-                                    class="flex items-center gap-2 text-lg font-bold text-red-700 mb-4 pb-2 border-b border-red-200">
-                                    <span>❌ Removed</span>
-                                </h4>
-                                <div id="diff-removed-list" class="space-y-3 overflow-y-auto max-h-[800px] pr-2">
-                                    <div class="py-8 text-center text-slate-400">Loading...</div>
-                                </div>
-                                <button id="load-more-removed" onclick="loadMoreRemoved()" style="display:none"
-                                    class="mt-4 px-4 py-2 bg-red-50 text-red-700 rounded hover:bg-red-100 transition-colors font-semibold">
-                                    Load All Removed Items
-                                </button>
-                            </div>
-
-                            <!-- Modified Column -->
-                            <div class="flex flex-col h-full">
-                                <h4
-                                    class="flex items-center gap-2 text-lg font-bold text-orange-700 mb-4 pb-2 border-b border-orange-200">
-                                    <span>🔄 Modified</span>
-                                </h4>
-                                <div id="diff-modified-list" class="space-y-3 overflow-y-auto max-h-[800px] pr-2">
-                                    <div class="py-8 text-center text-slate-400">Loading...</div>
-                                </div>
-                                <button id="load-more-modified" onclick="loadMoreModified()" style="display:none"
-                                    class="mt-4 px-4 py-2 bg-orange-50 text-orange-700 rounded hover:bg-orange-100 transition-colors font-semibold">
-                                    Load All Modified Items
-                                </button>
-                            </div>
-
-                            <!-- Added Column -->
-                            <div class="flex flex-col h-full">
-                                <h4
-                                    class="flex items-center gap-2 text-lg font-bold text-green-700 mb-4 pb-2 border-b border-green-200">
-                                    <span>✅ Added (In Target, Not Ref)</span>
-                                </h4>
-                                <div id="diff-added-list" class="space-y-3 overflow-y-auto max-h-[800px] pr-2">
-                                    <div class="py-8 text-center text-slate-400">Loading...</div>
-                                </div>
-                                <button id="load-more-added" onclick="loadMoreAdded()" style="display:none"
-                                    class="mt-4 px-4 py-2 bg-green-50 text-green-700 rounded hover:bg-green-100 transition-colors font-semibold">
-                                    Load All Added Items
-                                </button>
+                                <button id="btn-repeated-prev" onclick="changeRepeatedPage(-1)"
+                                    class="px-3 py-1 bg-white border rounded hover:bg-slate-50 disabled:opacity-50">Previous</button>
+                                <button id="btn-repeated-next" onclick="changeRepeatedPage(1)"
+                                    class="px-3 py-1 bg-white border rounded hover:bg-slate-50 disabled:opacity-50">Next</button>
                             </div>
                         </div>
                     </div>
-                    <div id="tab-dist" class="budget-tab-panel">
-                        <h3 class="section-title text-blue-700">Project Amount Distribution</h3>
-                        <p class="section-desc">Analysis of project amounts to identify clustering and pricing patterns.
-                        </p>
+                </div>
 
-                        <!-- Stats Cards -->
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                            <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200 text-center">
-                                <h3 class="text-slate-500 text-sm uppercase font-bold mb-2">Total Projects</h3>
-                                <p id="dist-total-projects" class="text-3xl font-bold text-blue-700">-</p>
-                            </div>
-                            <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200 text-center">
-                                <h3 class="text-slate-500 text-sm uppercase font-bold mb-2">Total Amount</h3>
-                                <p id="dist-total-amount" class="text-2xl font-bold text-teal-600">-</p>
-                            </div>
-                            <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200 text-center">
-                                <h3 class="text-slate-500 text-sm uppercase font-bold mb-2">Unique Amounts</h3>
-                                <p id="dist-unique-amounts" class="text-3xl font-bold text-purple-600">-</p>
-                            </div>
+                <!-- Changes Tab -->
+                <div id="tab-diff" class="budget-tab-panel">
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <h3 class="section-title text-indigo-700">Budget Changes (vs GAB Annex A-5)</h3>
+                            <p class="text-slate-500">
+                                Comparing <strong>Parsed DPWH 2026</strong> (Target) against <strong>GAB Annex A-5
+                                    Baseline</strong> (Reference).
+                            </p>
                         </div>
-
-                        <!-- Chart -->
-                        <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200"
-                            style="height: 500px; position: relative;">
-                            <canvas id="distChart"></canvas>
-                            <div id="dist-loading"
-                                class="absolute inset-0 flex flex-col items-center justify-center bg-white bg-opacity-90"
-                                style="display:none;">
-                                <div class="loading-spinner mb-2"></div>
-                                <p class="text-slate-500">Loading distribution data...</p>
-                            </div>
+                        <div class="text-sm text-right">
+                            <button onclick="loadDiffData()"
+                                class="px-4 py-2 bg-indigo-50 text-indigo-700 rounded hover:bg-indigo-100 transition-colors">
+                                🔄 Refresh Diff
+                            </button>
                         </div>
                     </div>
 
+                    <!-- Diff Stats -->
+                    <div id="diff-stats" class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+                        <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200">
+                            <div class="text-xs text-slate-500 uppercase font-bold">Ref Count</div>
+                            <div id="stats-ref-count" class="text-xl font-bold text-slate-700">-</div>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200">
+                            <div class="text-xs text-slate-500 uppercase font-bold">Target Count</div>
+                            <div id="stats-target-count" class="text-xl font-bold text-slate-700">-</div>
+                        </div>
+                        <div
+                            class="bg-white p-4 rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-green-500">
+                            <div class="text-xs text-green-600 uppercase font-bold">Items Added</div>
+                            <div id="stats-added-count" class="text-2xl font-bold text-green-700">-</div>
+                        </div>
+                        <div
+                            class="bg-white p-4 rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-red-500">
+                            <div class="text-xs text-red-600 uppercase font-bold">Items Removed</div>
+                            <div id="stats-removed-count" class="text-2xl font-bold text-red-700">-</div>
+                        </div>
+                        <div
+                            class="bg-white p-4 rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-orange-500">
+                            <div class="text-xs text-orange-600 uppercase font-bold">Modified Items</div>
+                            <div id="stats-modified-count" class="text-2xl font-bold text-orange-700">-</div>
+                        </div>
+                        <div
+                            class="bg-white p-4 rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-blue-500">
+                            <div class="text-xs text-blue-600 uppercase font-bold">Matches</div>
+                            <div id="stats-match-count" class="text-2xl font-bold text-blue-700">-</div>
+                        </div>
+                    </div>
+
+                    <!-- Search Filter -->
+                    <div class="mb-6">
+                        <input type="text" id="diff-search"
+                            class="w-full p-2 border border-slate-300 rounded focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                            placeholder="Filter changes by Project Name or Program..." onkeyup="filterDiff(this.value)">
+                    </div>
+
+                    <!-- Diff Columns -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- Removed Column -->
+                        <div class="flex flex-col h-full">
+                            <h4
+                                class="flex items-center gap-2 text-lg font-bold text-red-700 mb-4 pb-2 border-b border-red-200">
+                                <span>❌ Removed</span>
+                            </h4>
+                            <div id="diff-removed-list" class="space-y-3 overflow-y-auto max-h-[800px] pr-2">
+                                <div class="py-8 text-center text-slate-400">Loading...</div>
+                            </div>
+                            <button id="load-more-removed" onclick="loadMoreRemoved()" style="display:none"
+                                class="mt-4 px-4 py-2 bg-red-50 text-red-700 rounded hover:bg-red-100 transition-colors font-semibold">
+                                Load All Removed Items
+                            </button>
+                        </div>
+
+                        <!-- Modified Column -->
+                        <div class="flex flex-col h-full">
+                            <h4
+                                class="flex items-center gap-2 text-lg font-bold text-orange-700 mb-4 pb-2 border-b border-orange-200">
+                                <span>⚠️ Modified</span>
+                            </h4>
+                            <div id="diff-modified-list" class="space-y-3 overflow-y-auto max-h-[800px] pr-2">
+                                <div class="py-8 text-center text-slate-400">Loading...</div>
+                            </div>
+                            <button id="load-more-modified" onclick="loadMoreModified()" style="display:none"
+                                class="mt-4 px-4 py-2 bg-orange-50 text-orange-700 rounded hover:bg-orange-100 transition-colors font-semibold">
+                                Load All Modified Items
+                            </button>
+                        </div>
+
+                        <!-- Added Column -->
+                        <div class="flex flex-col h-full">
+                            <h4
+                                class="flex items-center gap-2 text-lg font-bold text-green-700 mb-4 pb-2 border-b border-green-200">
+                                <span>✅ Added (In Target, Not Ref)</span>
+                            </h4>
+                            <div id="diff-added-list" class="space-y-3 overflow-y-auto max-h-[800px] pr-2">
+                                <div class="py-8 text-center text-slate-400">Loading...</div>
+                            </div>
+                            <button id="load-more-added" onclick="loadMoreAdded()" style="display:none"
+                                class="mt-4 px-4 py-2 bg-green-50 text-green-700 rounded hover:bg-green-100 transition-colors font-semibold">
+                                Load All Added Items
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div id="tab-dist" class="budget-tab-panel">
+                    <h3 class="section-title text-blue-700">Project Amount Distribution</h3>
+                    <p class="section-desc">Analysis of project amounts to identify clustering and pricing patterns.
+                    </p>
+
+                    <!-- Stats Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200 text-center">
+                            <h3 class="text-slate-500 text-sm uppercase font-bold mb-2">Total Projects</h3>
+                            <p id="dist-total-projects" class="text-3xl font-bold text-blue-700">-</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200 text-center">
+                            <h3 class="text-slate-500 text-sm uppercase font-bold mb-2">Total Amount</h3>
+                            <p id="dist-total-amount" class="text-2xl font-bold text-teal-600">-</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200 text-center">
+                            <h3 class="text-slate-500 text-sm uppercase font-bold mb-2">Unique Amounts</h3>
+                            <p id="dist-unique-amounts" class="text-2xl font-bold text-purple-600">-</p>
+                        </div>
+                    </div>
+
+                    <!-- Chart -->
+                    <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200"
+                        style="height: 500px; position: relative;">
+                        <canvas id="distChart"></canvas>
+                        <div id="dist-loading"
+                            class="absolute inset-0 flex flex-col items-center justify-center bg-white bg-opacity-90"
+                            style="display:none;">
+                            <div class="loading-spinner mb-2"></div>
+                            <p class="text-slate-500">Loading distribution data...</p>
+                        </div>
+                    </div>
+                </div>
+
+
+
+
+
+
+
+
+                <!-- Changes Tab -->
+
+    </main>
+
+
+
+    <!-- Outlier Modal -->
+    <div id="outlier-modal" class="fixed inset-0 bg-black bg-opacity-50 z-[9999] flex items-center justify-center p-4"
+        style="display: none;">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[85vh] flex flex-col relative">
+            <div id="modal-header" class="flex justify-between items-center p-4 border-b">
+                <div>
+                    <h3 class="text-lg font-bold text-red-700 flex items-center gap-2">
+                        🚩 Red Flag Projects: <span id="modal-category-title" class="capitalize"></span>
+                    </h3>
+                    <p class="text-sm text-slate-500">
+                        Displaying <span id="modal-total-count" class="font-bold">0</span> projects.
+                        <span id="modal-threshold-container">Threshold: <span id="modal-threshold"
+                                class="font-mono"></span></span>
+                    </p>
+                </div>
+                <button id="btn-modal-close" onclick="closeOutlierModal()" class="text-slate-400 hover:text-slate-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
+                    </svg>
+                </button>
+            </div>
+
+            <div id="modal-loading" class="flex-1 flex items-center justify-center">
+                <div class="loading-spinner"></div> Loading outliers...
+            </div>
+
+            <div id="modal-content" class="flex-1 overflow-auto p-0 hidden flex flex-col">
+                <table class="data-table">
+                    <thead class="sticky top-0 bg-slate-50 shadow-sm" id="modal-thead">
+                    </thead>
+                    <tbody id="modal-tbody"></tbody>
+                </table>
+            </div>
+
+            <div class="p-4 border-t bg-slate-50 flex flex-col sm:flex-row justify-between items-center text-sm gap-4">
+                <!-- Modal Pagination -->
+                <div class="flex items-center gap-4">
+                    <div id="modal-pagination-info" class="text-slate-600">Page 1</div>
+                    <div class="flex gap-2">
+                        <button id="btn-modal-prev" onclick="changeModalPage(-1)"
+                            class="px-3 py-1 bg-white border rounded hover:bg-slate-100 disabled:opacity-50 text-slate-700">Previous</button>
+                        <button id="btn-modal-next" onclick="changeModalPage(1)"
+                            class="px-3 py-1 bg-white border rounded hover:bg-slate-100 disabled:opacity-50 text-slate-700">Next</button>
+                    </div>
+                </div>
+
+                <div class="flex gap-4 items-center">
+                    <span class="text-slate-500 hidden sm:inline">Sorted by highest deviation first.</span>
+                    <button onclick="closeOutlierModal()"
+                        class="px-4 py-2 bg-slate-200 hover:bg-slate-300 rounded text-slate-700 font-medium">Close</button>
                 </div>
             </div>
         </div>
-    </main>
+    </div>
 
     <script>
         // State
@@ -549,14 +801,518 @@
                         fetchHierarchy();
                     } else if (tabName === 'uniform') {
                         fetchUniformRisks();
+                    } else if (tabName === 'uniform') {
+                        fetchUniformRisks();
                     } else if (tabName === 'dist') {
                         fetchDistribution();
+                    } else if (tabName === 'stats') {
+                        fetchStats();
+                    } else if (tabName === 'repeated') {
+                        fetchRepeated();
                     }
                 });
             });
         }
 
-        async function fetchProjects(page) {
+        async function fetchStats() {
+            const loading = document.getElementById('stats-loading');
+            const content = document.getElementById('stats-content');
+
+            loading.style.display = 'block';
+            content.style.display = 'none';
+
+            try {
+                const response = await fetch('/api/dpwh2026/stats');
+                const data = await response.json();
+
+                if (data.success) {
+                    renderStats(data);
+                    loading.style.display = 'none';
+                    content.style.display = 'block';
+                } else {
+                    loading.innerHTML = `<span class="text-red-600">Error: ${data.error}</span>`;
+                }
+            } catch (err) {
+                console.error(err);
+                loading.innerHTML = `<span class="text-red-600">Error loading stats</span>`;
+            }
+        }
+
+        function renderStats(data) {
+            document.getElementById('stat-total-parsed').textContent = data.total_parsed.toLocaleString();
+
+            // Render Grand Total Card if not exists, or update it
+            let grandTotalContainer = document.getElementById('stats-grand-total');
+            if (!grandTotalContainer) {
+                // Insert it before the grid
+                const grid = document.querySelector('#tab-stats .grid');
+                if (grid) {
+                    grandTotalContainer = document.createElement('div');
+                    grandTotalContainer.id = 'stats-grand-total';
+                    grandTotalContainer.className = "mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex flex-col sm:flex-row justify-between items-center shadow-sm";
+                    grid.parentNode.insertBefore(grandTotalContainer, grid);
+                }
+            }
+
+            if (grandTotalContainer) {
+                grandTotalContainer.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="p-3 bg-red-100 rounded-full text-red-600">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-red-800">Total Red Flags Found</h3>
+                            <p class="text-sm text-red-600">Across all categories (Cost anomalies)</p>
+                        </div>
+                    </div>
+                    <div class="text-right mt-4 sm:mt-0">
+                        <div class="text-3xl font-bold text-red-700 font-mono">${data.grand_total_outliers ? data.grand_total_outliers.toLocaleString() : '0'}</div>
+                        <div class="text-sm font-bold text-red-800 bg-red-100 px-2 py-0.5 rounded mt-1">
+                            Total Cost: ${formatCurrency(data.grand_total_outlier_amount || 0)}
+                        </div>
+                    </div>
+                `;
+            }
+
+            const cats = ['national_roads', 'secondary_roads', 'bridges', 'flood_control', 'public_buildings'];
+
+            cats.forEach(cat => {
+                const container = document.getElementById(`stats-${cat}`);
+                const s = data.stats[cat];
+                if (!s) {
+                    container.innerHTML = '<span class="text-slate-400 italic">No data found</span>';
+                    return;
+                }
+
+                const label = cat === 'public_buildings' ? 'Mean Cost:' : 'Mean Cost/KM:';
+
+                container.innerHTML = `
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between"><span class="text-slate-500">Count:</span> <span class="font-mono font-medium">${s.count}</span></div>
+                        <div class="flex justify-between border-b pb-1">
+                            <span class="text-slate-500">${label}</span> 
+                            <span class="font-mono font-bold text-slate-800">${formatCurrency(s.mean)}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-500">Median:</span> 
+                            <span class="font-mono text-slate-700">${formatCurrency(s.median)}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-500">Min:</span> 
+                            <span class="font-mono text-green-700">${formatCurrency(s.min)}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-500">Max:</span> 
+                            <span class="font-mono text-red-700">${formatCurrency(s.max)}</span>
+                        </div>
+                        <div onclick="showOutliers('${cat}')" class="flex flex-col pt-2 mt-2 border-t border-red-100 bg-red-50 hover:bg-red-100 p-2 rounded gap-2 cursor-pointer transition-colors group">
+                            <div class="flex justify-between items-center">
+                                <span class="text-red-700 font-bold flex items-center gap-1">
+                                    🚩 Red Flags:
+                                </span> 
+                                <span class="font-mono font-bold text-red-700 group-hover:underline px-1 rounded">
+                                    ${s.outlier_count}
+                                </span>
+                            </div>
+                            <div class="flex justify-between items-center text-xs border-t border-red-200 pt-1">
+                                <span class="text-red-800 font-semibold">Total Cost:</span>
+                                <span class="font-mono text-red-700 font-bold">${formatCurrency(s.outlier_total_amount || 0)}</span>
+                            </div>
+                        </div>
+
+
+                    </div>
+                `;
+            });
+        }
+
+        // Legacy showOutliers removed, using window.showOutliers defined below
+
+
+        window.closeOutlierModal = function () {
+            const modal = document.getElementById('outlier-modal');
+            modal.style.display = 'none';
+            // Clear nuclear styles so they don't persist locally or if reopened without force
+            modal.style.position = '';
+            modal.style.top = '';
+            modal.style.left = '';
+            modal.style.width = '';
+            modal.style.height = '';
+            modal.style.zIndex = '';
+        }
+
+        // --- Repeated Projects Logic ---
+        let repeatedDataCache = null;
+
+        // ---- MODAL & REPEATED PAGINATION LOGIC ----
+
+        window.modalState = {
+            data: [],
+            page: 1,
+            limit: 5,
+            mode: 'cost' // 'cost' or 'repeated'
+        };
+
+        window.repeatedState = {
+            data: [], // populated via cache
+            page: 1,
+            limit: 50
+        };
+
+        // --- Repeated Tab Functions ---
+
+        async function fetchRepeated() {
+            const loading = document.getElementById('repeated-loading');
+            const content = document.getElementById('repeated-content');
+            const repeatedCountDisplay = document.getElementById('repeated-count-display');
+
+            if (repeatedDataCache) {
+                window.repeatedState.data = repeatedDataCache.groups;
+                // Render cached stats
+                document.getElementById('repeated-summary').classList.remove('hidden');
+                document.getElementById('repeated-total-count').textContent = repeatedDataCache.count.toLocaleString();
+                document.getElementById('repeated-total-amount').textContent = formatCurrency(repeatedDataCache.total_amount);
+
+                renderRepeatedPage(1);
+                return;
+            }
+
+            loading.style.display = 'block';
+            content.style.display = 'none';
+
+            try {
+                const response = await fetch('/api/dpwh2026/repeated');
+                const data = await response.json();
+
+                if (data.success) {
+                    // Update cache to store full info, not just groups
+                    repeatedDataCache = {
+                        groups: data.groups,
+                        count: data.count,
+                        total_amount: data.total_amount
+                    };
+                    window.repeatedState.data = data.groups;
+
+                    // Render Stats
+                    document.getElementById('repeated-summary').classList.remove('hidden');
+                    document.getElementById('repeated-total-count').textContent = data.count.toLocaleString();
+                    document.getElementById('repeated-total-amount').textContent = formatCurrency(data.total_amount);
+
+                    renderRepeatedPage(1);
+                    loading.style.display = 'none';
+                    content.style.display = 'block';
+                } else {
+                    loading.innerHTML = `<span class="text-red-600">Error: ${data.error}</span>`;
+                }
+            } catch (err) {
+                console.error(err);
+                loading.innerHTML = `<span class="text-red-600">Error loading repeated projects</span>`;
+            }
+        }
+
+        function renderRepeatedPage(page) {
+            window.repeatedState.page = page;
+            const start = (page - 1) * window.repeatedState.limit;
+            const end = start + window.repeatedState.limit;
+            const items = window.repeatedState.data.slice(start, end);
+            const totalPages = Math.ceil(window.repeatedState.data.length / window.repeatedState.limit);
+
+            const tbody = document.getElementById('repeated-tbody');
+            if (window.repeatedState.data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center p-8 text-slate-400">No repeated projects found.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = items.map(g => {
+                const historyHtml = g.history.length > 0
+                    ? g.history.map(h => `<span class="px-1.5 py-0.5 border rounded text-xs bg-slate-50 text-slate-600 font-mono whitespace-nowrap">${h.year}: ${formatCurrency(h.amount)}</span>`).join(' ')
+                    : '<span class="text-xs text-slate-400 italic">No history found</span>';
+
+                return `
+                 <tr class="hover:bg-slate-50">
+                     <td class="align-top font-medium text-slate-800 text-sm py-3">${g.name}</td>
+                     <td class="align-top text-center py-3"><span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-xs font-bold">${g.count}</span></td>
+                     <td class="align-top text-right font-mono font-bold text-slate-700 py-3">${formatCurrency(g.total_amount)}</td>
+                     <td class="align-top pl-4 py-3">
+                         <div class="flex flex-wrap gap-1">
+                             ${historyHtml}
+                         </div>
+                     </td>
+                 </tr>
+             `}).join('');
+
+            // Update Pagination UI
+            document.getElementById('repeated-page-info').textContent = `Page ${page} of ${totalPages} (Total ${window.repeatedState.data.length})`;
+            document.getElementById('btn-repeated-prev').disabled = page <= 1;
+            document.getElementById('btn-repeated-next').disabled = page >= totalPages;
+        }
+
+        window.changeRepeatedPage = function (delta) {
+            const newPage = window.repeatedState.page + delta;
+            const totalPages = Math.ceil(window.repeatedState.data.length / window.repeatedState.limit);
+            if (newPage >= 1 && newPage <= totalPages) {
+                renderRepeatedPage(newPage);
+            }
+        }
+
+        // --- Modal Outlier Functions ---
+
+        window.currentOutliersData = null; // Store for CSV
+        window.currentOutliersCategory = null;
+
+        // Ensure showOutliers is globally accessible
+        window.showOutliers = async function (category) {
+            window.currentOutliersCategory = category;
+
+            // Add download button if missing
+            // Add download button if missing
+            try {
+                const header = document.querySelector('#outlier-modal .flex.justify-between');
+                if (header && !document.getElementById('btn-download-outliers')) {
+                    const btn = document.createElement('button');
+                    btn.id = 'btn-download-outliers';
+                    btn.className = "mr-4 text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1";
+                    btn.innerHTML = `
+                        <svg class="w-4 h-4" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        Download CSV
+                     `;
+                    btn.onclick = window.downloadOutliersCSV;
+
+                    // Insert before close button
+                    const closeBtn = header.lastElementChild;
+                    if (closeBtn) {
+                        header.insertBefore(btn, closeBtn);
+                    } else {
+                        header.appendChild(btn);
+                    }
+                }
+            } catch (e) {
+                console.warn("Failed to inject download button:", e);
+            }
+
+            console.log('Opening outliers for:', category);
+            const modal = document.getElementById('outlier-modal');
+            const content = document.getElementById('modal-content');
+            const loading = document.getElementById('modal-loading');
+
+            if (!modal) {
+                console.error("FATAL: outlier-modal element NOT FOUND in DOM");
+                alert("Error: Modal element missing");
+                return;
+            }
+
+            console.log("Modal found:", modal);
+
+            // Nuclear Option: Force Styles
+            modal.style.display = 'flex';
+            modal.style.zIndex = '9999';
+            modal.style.position = 'fixed';
+            modal.style.top = '0';
+            modal.style.left = '0';
+            modal.style.width = '100%';
+            modal.style.height = '100%';
+
+            // Debug Visibility
+            const computed = window.getComputedStyle(modal);
+            console.log("Modal Computed:", {
+                display: computed.display,
+                visibility: computed.visibility,
+                opacity: computed.opacity,
+                zIndex: computed.zIndex,
+                position: computed.position
+            });
+
+            // Check Parents
+            let p = modal.parentElement;
+            while (p) {
+                const s = window.getComputedStyle(p);
+                console.log(`Parent <${p.tagName} id="${p.id}"> display: ${s.display}, visibility: ${s.visibility}`);
+                if (s.display === 'none') {
+                    console.error(`FATAL: Parent <${p.tagName} id="${p.id}"> is hidden!`);
+                    alert(`Error: Modal is inside hidden parent ${p.tagName}#${p.id}`);
+                }
+                p = p.parentElement;
+            }
+
+            if (content) content.classList.add('hidden');
+            if (loading) loading.style.display = 'flex';
+
+            document.getElementById('modal-total-count').textContent = '-';
+
+            // Dynamic Modal Title
+            const titleContainer = document.querySelector('#modal-header h3');
+            if (category === 'repeated') {
+                titleContainer.innerHTML = `🔄 Repeated Projects Dashboard`;
+                titleContainer.className = "text-lg font-bold text-blue-800 flex items-center gap-2";
+            } else {
+                titleContainer.innerHTML = `🚩 Red Flag Projects: <span id="modal-category-title" class="capitalize">${category.replace('_', ' ')}</span>`;
+                titleContainer.className = "text-lg font-bold text-red-700 flex items-center gap-2";
+            }
+
+            // Reset Modal Text
+            document.getElementById('modal-threshold-container').style.display = (category === 'repeated') ? 'none' : 'inline';
+
+            try {
+                let data = { success: false, outliers: [] };
+
+                if (category === 'repeated') {
+                    window.modalState.mode = 'repeated';
+                    // Reuse repeated fetch logic if cache exists, else fetch
+                    if (!repeatedDataCache) {
+                        const response = await fetch('/api/dpwh2026/repeated');
+                        const res = await response.json();
+                        if (res.success) {
+                            repeatedDataCache = res.groups;
+                            if (document.getElementById('repeated-count-display'))
+                                document.getElementById('repeated-count-display').textContent = res.count.toLocaleString();
+                        }
+                    }
+                    if (repeatedDataCache) {
+                        data = { success: true, outliers: repeatedDataCache, count: repeatedDataCache.length };
+                    }
+                } else {
+                    window.modalState.mode = 'cost';
+                    const response = await fetch(`/api/dpwh2026/stats/outliers?category=${category}`);
+                    data = await response.json();
+                }
+
+                if (data.success) {
+                    // Normalize data structure for Modal Pagination
+                    if (window.modalState.mode === 'repeated') {
+                        window.modalState.data = data.outliers; // used 'outliers' key in mock, essentially 'groups'
+                        document.getElementById('modal-total-count').textContent = data.count.toLocaleString();
+                        window.currentOutliersData = data.outliers;
+                    } else {
+                        window.modalState.data = data.outliers;
+                        window.currentOutliersData = data.outliers;
+                        document.getElementById('modal-total-count').textContent = data.count.toLocaleString();
+                        document.getElementById('modal-threshold').textContent = formatCurrency(data.threshold) + (category === 'public_buildings' ? '' : '/km');
+                    }
+
+                    renderModalPage(1);
+
+                    loading.style.display = 'none';
+                    content.classList.remove('hidden');
+                    console.log('Modal content shown');
+                } else {
+                    alert('Failed to load outliers: ' + data.error);
+                    window.closeOutlierModal();
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Error loading outliers');
+                window.closeOutlierModal();
+            }
+        }
+
+        function renderModalPage(page) {
+            window.modalState.page = page;
+            const start = (page - 1) * window.modalState.limit;
+            const end = start + window.modalState.limit;
+            const items = window.modalState.data.slice(start, end);
+            const totalPages = Math.ceil(window.modalState.data.length / window.modalState.limit);
+
+            const thead = document.getElementById('modal-thead');
+            const tbody = document.getElementById('modal-tbody');
+
+            // Dynamic Headers
+            if (window.modalState.mode === 'repeated') {
+                thead.innerHTML = `
+                    <tr>
+                         <th class="w-1/2 p-2 text-left">Project Name</th>
+                         <th class="text-center p-2">Yrs Found</th>
+                         <th class="text-right p-2">2026 Amount</th>
+                         <th class="text-left p-2 pl-4">History</th>
+                    </tr>
+                 `;
+                // Clear body before mapping
+                tbody.innerHTML = items.map(g => {
+                    const historyHtml = g.history.length > 0
+                        ? g.history.map(h => `<span class="px-1.5 py-0.5 border rounded text-xs bg-slate-50 text-slate-600 font-mono whitespace-nowrap">${h.year}: ${formatCurrency(h.amount)}</span>`).join(' ')
+                        : '<span class="text-xs text-slate-400 italic">No history found</span>';
+
+                    return `
+                    <tr class="hover:bg-slate-50 border-b">
+                        <td class="p-2 text-sm font-medium text-slate-800">${g.name}</td>
+                        <td class="p-2 text-center"><span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-xs font-bold">${g.count}</span></td>
+                        <td class="p-2 text-right font-mono font-bold text-slate-700">${formatCurrency(g.total_amount)}</td>
+                        <td class="p-2 pl-4">
+                            <div class="flex flex-wrap gap-1 max-w-xs">
+                                ${historyHtml}
+                            </div>
+                        </td>
+                    </tr>
+                 `}).join('');
+            } else {
+                thead.innerHTML = `
+                    <tr>
+                         <th class="w-1/2 p-2 text-left">Project Name</th>
+                         <th class="text-right p-2">Distance (KM)</th>
+                         <th class="text-right p-2">Total Amount</th>
+                         <th class="text-right p-2 font-bold text-red-700">Cost Metric</th>
+                    </tr>
+                 `;
+                tbody.innerHTML = items.map(item => `
+                    <tr class="hover:bg-red-50 border-b">
+                        <td class="p-2 text-sm font-medium text-slate-800">${item.name}</td>
+                        <td class="p-2 text-right font-mono text-slate-600">${item.distance_km > 0 ? item.distance_km.toFixed(3) : '-'}</td>
+                        <td class="p-2 text-right font-mono text-slate-600">${formatCurrency(item.amount)}</td>
+                        <td class="p-2 text-right font-mono font-bold text-red-700 bg-red-50">${formatCurrency(item.cost_metric)}</td>
+                    </tr>
+                `).join('');
+            }
+
+            // Update Pagination UI
+            document.getElementById('modal-pagination-info').textContent = `Page ${page} of ${totalPages} (Total ${window.modalState.data.length})`;
+            document.getElementById('btn-modal-prev').disabled = page <= 1;
+            document.getElementById('btn-modal-next').disabled = page >= totalPages;
+        }
+
+        window.changeModalPage = function (delta) {
+            const newPage = window.modalState.page + delta;
+            const totalPages = Math.ceil(window.modalState.data.length / window.modalState.limit);
+            if (newPage >= 1 && newPage <= totalPages) {
+                renderModalPage(newPage);
+            }
+        }
+
+        window.downloadOutliersCSV = function () {
+            // ... existing download logic stays same as it uses window.currentOutliersData ...
+            if (!window.currentOutliersData) return;
+
+            // Updated to handle Repeated format if needed, but currentOutliersData structure differs
+            // Let's stick to existing CSV format for Cost, or separate if mode is repeated
+
+            let csv = "";
+            const cat = window.currentOutliersCategory || 'unknown';
+
+            if (cat === 'repeated') {
+                csv = "Project Name,Years Found,2026 Amount,History Details\n";
+                window.currentOutliersData.forEach(g => {
+                    const name = `"${g.name.replace(/"/g, '""')}"`;
+                    const historyStr = g.history ? g.history.map(h => `${h.year}: ${h.amount}`).join('; ') : '';
+                    const history = `"${historyStr}"`;
+                    csv += `${name},${g.count},${g.total_amount},${history}\n`;
+                });
+            } else {
+                csv = "Category,Project Name,Amount,Distance KM,Cost Metric\n";
+                window.currentOutliersData.forEach(item => {
+                    const name = `"${item.name.replace(/"/g, '""')}"`;
+                    csv += `${cat},${name},${item.amount},${item.distance_km},${item.cost_metric}\n`;
+                });
+            }
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", `dpwh2026_${cat}_outliers.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        window.fetchProjects = async function (page) {
             const loadingIndicator = document.getElementById('loading-indicator');
             const tbody = document.getElementById('projects-tbody');
 
@@ -1402,7 +2158,7 @@
         // Deep linking hash handler
         function handleHashChange() {
             const hash = window.location.hash.substring(1); // remove #
-            if (['projects', 'hierarchy', 'uniform', 'summary', 'dist', 'diff'].includes(hash)) {
+            if (['projects', 'hierarchy', 'uniform', 'summary', 'dist', 'diff', 'stats', 'repeated'].includes(hash)) {
 
                 // Special handling for Diff tab loading
                 if (hash === 'diff' && !diffDataCache.stats) {

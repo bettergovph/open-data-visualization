@@ -13069,7 +13069,7 @@ async def get_dpwh_2026_projects(
     search: Optional[str] = Query(default=None, description="Search term")
 ) -> JSONResponse:
     try:
-        parquet_file = DATA_ROOT.parent.parent / "data" / "parquet" / "parsed_dpwh_2026.parquet"
+        parquet_file = DATA_ROOT.parent.parent / "data" / "parquet" / "dpwh_2026_leaf_nodes.parquet"
         if not parquet_file.exists():
             return JSONResponse(content={"success": False, "error": f"File not found: {parquet_file}"}, status_code=404)
 
@@ -13077,113 +13077,92 @@ async def get_dpwh_2026_projects(
         try:
             parquet_path_str = str(parquet_file).replace("'", "''")
             
-            # Use CTE to fill down categories (B to I) and Funding Source
-            # We use PARTITION BY logic to ensure child levels are RESET when a parent level changes.
-            # E.g. A new Program (Col C) must clear the previous Region (Col H).
-            base_cte = f"""
-                WITH params AS (
-                    SELECT 
-                        _excel_row,
-                        amount,
-                        latest_qualifier_column,
-                        latest_qualifier_value,
-                        col_J,
-                        
-                        -- Identify Funding Source Rows
-                        CASE 
-                            WHEN col_J ILIKE 'GOP' THEN 'GOP'
-                            WHEN col_J ILIKE 'Loan Proceeds' THEN 'Loan Proceeds'
-                            ELSE NULL 
-                        END as raw_funding,
-
-                        col_B, col_C, 
-                        
-                        -- Clean H and I to remove list markers (e.g. "a.", "1", "1.")
-                        -- If length is small (< 3) or matches pattern, treat as NULL so we fill from above
-                        CASE WHEN LENGTH(col_H) > 3 THEN col_H ELSE NULL END as clean_H,
-                        CASE WHEN LENGTH(col_I) > 3 THEN col_I ELSE NULL END as clean_I
+            # --- Dynamic Metadata Extraction Logic ---
+            # The new parquet is denormalized (flattened). We need to reconstruct the context.
+            # We assume 'amount' IS NOT NULL implies a project/line-item.
+            # We search the ancestor levels (level_0 to level_...) for context.
+            
+            # REGEX Patterns for extraction (DuckDB syntax)
+            # Region: Matches 'Region I', 'NCR', 'CAR', etc.
+            region_pattern = r'(?i)\b(National Capital Region|NCR|Cordillera Administrative Region|CAR|Bangsamoro|BARMM|MIMAROPA|Region\s+(?:[IVX]+|[0-9]+))\b'
+            
+            # District: Matches 'District Engineering Office', 'DEO', 'Central Office'
+            district_pattern = r'(?i)\b(District Engineering Office|DEO|Central Office|Bureau Proper|Regional Office)\b'
+            
+            # Program: Usually Level 3 or 4. We'll pick the first ancestor that looks like a Program.
+            # Heuristic: Level 3 is often the major program (e.g. Asset Preservation Program).
+            
+            base_query = f"""
+                WITH raw_data AS (
+                    SELECT * 
                     FROM read_parquet('{parquet_path_str}')
+                    WHERE amount IS NOT NULL
                 ),
-                groups AS (
+                extracted AS (
                     SELECT 
-                        *,
-                        -- Generate grouping IDs for each level (running count of non-nulls)
-                        COUNT(col_B) OVER (ORDER BY _excel_row) as grp_B,
-                        COUNT(col_C) OVER (ORDER BY _excel_row) as grp_C,
-                        COUNT(clean_H) OVER (ORDER BY _excel_row) as grp_H,
-                        COUNT(clean_I) OVER (ORDER BY _excel_row) as grp_I
-                    FROM params
-                ),
-                filled_data AS (
-                    SELECT 
-                        _excel_row,
+                        value as project_name,
                         amount,
-                        latest_qualifier_column,
-                        latest_qualifier_value,
-                        col_J,
+                        path,
                         
-                        -- Fill down using partitions to effectively "reset" when parent changes
-                        LAST_VALUE(col_B IGNORE NULLS) OVER (ORDER BY _excel_row) as cat_B,
+                        -- EXTRACT REGION: Concatenate all levels and find the LAST matching region pattern
+                        -- Note: Simpler approach -> Check levels in reverse order? DuckDB regexp_extract is easier on single string.
+                        -- But we have columns level_0...level_7.
+                        -- Let's use a COALESCE approach searching from deepest level up (level 6->3) for Region
+                        COALESCE(
+                            CASE WHEN regexp_matches(level_6, '{region_pattern}') THEN level_6 END,
+                            CASE WHEN regexp_matches(level_5, '{region_pattern}') THEN level_5 END,
+                            CASE WHEN regexp_matches(level_4, '{region_pattern}') THEN level_4 END,
+                            CASE WHEN regexp_matches(level_3, '{region_pattern}') THEN level_3 END
+                        ) as region,
                         
-                        -- C resets if B changes? (Usually global C count is safe, but let's be strict if needed. 
-                        -- Actually C is dominantly its own stream. Partitioning by grp_B is safer)
-                        LAST_VALUE(col_C IGNORE NULLS) OVER (PARTITION BY grp_B ORDER BY _excel_row) as cat_C,
+                        -- EXTRACT DISTRICT: Similar approach
+                        COALESCE(
+                            CASE WHEN regexp_matches(level_6, '{district_pattern}') THEN level_6 END,
+                            CASE WHEN regexp_matches(level_5, '{district_pattern}') THEN level_5 END,
+                            CASE WHEN regexp_matches(level_4, '{district_pattern}') THEN level_4 END
+                        ) as district,
                         
-                        -- Region (H) MUST reset if Program (C) changes
-                        -- Use clean_H as source
-                        LAST_VALUE(clean_H IGNORE NULLS) OVER (PARTITION BY grp_C ORDER BY _excel_row) as cat_H,
+                        -- PROGRAM: Usually Level 3
+                        level_3 as program,
                         
-                        -- District (I) MUST reset if Region (H) changes
-                        -- Use clean_I as source
-                        LAST_VALUE(clean_I IGNORE NULLS) OVER (PARTITION BY grp_H ORDER BY _excel_row) as cat_I,
+                        -- CATEGORY: Usually Level 1 or 2
+                        level_1 as category
                         
-                        -- Funding (J) MUST reset if District (I) changes (or Project context changes)
-                        -- Funding is usually tight to the project list.
-                        LAST_VALUE(raw_funding IGNORE NULLS) OVER (PARTITION BY grp_I ORDER BY _excel_row) as funding_source
-                    FROM groups
+                    FROM raw_data
                 )
             """
 
-            # Filter for projects only (Column J)
-            where_clause = """
-                latest_qualifier_column = 'J' 
-                AND col_J NOT ILIKE 'GOP' 
-                AND col_J NOT ILIKE 'Loan Proceeds'
-                AND col_J NOT ILIKE '%Sub-Total%'
-                AND col_J NOT ILIKE '%Grand Total%'
-            """
-            
+            # Filter Logic
+            where_conditions = ["1=1"]
             if search:
-                safe_search = search
-                safe_search = safe_search.replace("'", "''")
-                where_clause += f""" AND (
-                        col_J ILIKE '%{safe_search}%' OR
-                        cat_H ILIKE '%{safe_search}%' OR 
-                        cat_I ILIKE '%{safe_search}%' OR
-                        cat_C ILIKE '%{safe_search}%'
-                    )
-                """
+                safe_search = search.replace("'", "''")
+                where_conditions.append(f"""(
+                    project_name ILIKE '%{safe_search}%' OR 
+                    region ILIKE '%{safe_search}%' OR 
+                    district ILIKE '%{safe_search}%' OR
+                    program ILIKE '%{safe_search}%'
+                )""")
+
+            where_clause = " AND ".join(where_conditions)
 
             # Count Query
-            count_q = f"{base_cte} SELECT COUNT(*) FROM filled_data WHERE {where_clause}"
+            count_q = f"{base_query} SELECT COUNT(*) FROM extracted WHERE {where_clause}"
             total = conn.execute(count_q).fetchone()[0]
 
             # Data Query
             offset = (page - 1) * limit
             query = f"""
-                {base_cte}
+                {base_query}
                 SELECT 
-                    _excel_row, 
-                    col_J as project_name, 
+                    project_name, 
                     amount, 
-                    cat_H as region,
-                    cat_I as district,
-                    cat_C as program,
-                    cat_B as category,
-                    funding_source
-                FROM filled_data 
+                    region,
+                    district,
+                    program,
+                    category
+                FROM extracted 
                 WHERE {where_clause} 
-                ORDER BY _excel_row
+                ORDER BY amount DESC
                 OFFSET {offset} LIMIT {limit}
             """
             
@@ -13215,9 +13194,10 @@ async def get_dpwh_2026_projects(
 @app.get("/api/dpwh2026/hierarchy")
 async def get_dpwh_2026_hierarchy() -> JSONResponse:
     try:
-        # Define path to the JSON hierarchy file
-        json_path = Path("/home/joebert/dpwh-2026-hierarchy-analysis/data/FY 2026_DPWH DETAILS ENROLLED COPY (Final)_hierarchy.json")
+        # Define path to the JSON hierarchy file (New Location)
+        json_path = DATA_ROOT / "FY 2026_DPWH DETAILS ENROLLED COPY (Final)_hierarchy.json"
         
+
         if not json_path.exists():
             # Fallback to local data/ if not found (for dev/test)
             json_path = DATA_ROOT / "FY 2026_DPWH DETAILS ENROLLED COPY (Final)_hierarchy.json"
@@ -13229,28 +13209,399 @@ async def get_dpwh_2026_hierarchy() -> JSONResponse:
         with open(json_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
 
-        # The frontend expects a specific structure. The JSON is a tree.
-        # If the frontend adapter (renderHierarchy) expects a flat list with types,
-        # we might need to flatten it or serve it as is and update the frontend.
-        #
-        # Current Frontend `renderHierarchy` expects: array of objects with {name, type, amount, region, district, program}
-        # New JSON is: array of objects with {value, amount, children: []}
-        #
-        # WE WILL SERVE THE RAW TREE and update the frontend to render a recursive tree or a flattened version.
-        # PROPOSAL: Let's flatten a bit for the table (e.g. top 2-3 levels) OR better yet,
-        # Update the frontend to handle this tree structure properly (drill down).
-        #
-        # VALIDATION: The prompt says "augment our /dpwh2006 with proper heirarchy from this repo".
-        # It's safest to serve the full tree and let the frontend decide how to show it.
-        # BUT, the current endpoint returns a flat list of 2000 items. 
-        # Let's wrap it in a structure that indicates it's the new format.
-        
         return JSONResponse(content={"data": data, "format": "tree"})
 
     except Exception as e:
         import traceback
         traceback.print_exc()
         return JSONResponse(content={"success": False, "error": str(e)}, status_code=500)
+
+        return JSONResponse(content={"success": False, "error": str(e)}, status_code=500)
+
+def _calculate_dpwh_2026_stats():
+    """
+    Helper function to calculate stats and return raw data for further filtering.
+    Returns: (projects_by_category, stats_results, total_parsed)
+    """
+    import statistics
+    import re
+    
+    parquet_file = DATA_ROOT.parent.parent / "data" / "parquet" / "dpwh_2026_leaf_nodes.parquet"
+    if not parquet_file.exists():
+         raise FileNotFoundError("Data file not found")
+         
+    conn = duckdb.connect()
+    try:
+        parquet_path_str = str(parquet_file).replace("'", "''")
+        
+        # Fetch all projects with amounts
+        query = f"SELECT value as name, amount FROM read_parquet('{parquet_path_str}') WHERE amount IS NOT NULL AND amount > 0"
+        rows = conn.execute(query).fetchall()
+        
+        projects_by_category = {
+            'national_roads': [],
+            'secondary_roads': [],
+            'bridges': [],
+            'flood_control': [],
+            'traffic_signs': [],
+            'public_buildings': []
+        }
+        
+        # Helper to extract ranges
+        def extract_all_chainage_ranges(name: str):
+            if not name: return []
+            ranges = []
+            seen = set()
+            def add_range(start_km, start_m, end_km, end_m):
+                key = (int(start_km), int(start_m), int(end_km), int(end_m))
+                if key not in seen:
+                    seen.add(key)
+                    ranges.append(key)
+
+            pattern_k = r'K(\d+)\s*\+\s*\(?(-?\d+)\)?\s*-\s*K(\d+)\s*\+\s*\(?(-?\d+)\)?'
+            for match in re.finditer(pattern_k, name, re.IGNORECASE):
+                add_range(match.group(1), match.group(2), match.group(3), match.group(4))
+
+            pattern_chainage = r'Chainage\s+(\d+)\s*-\s*Chainage\s+(\d+)'
+            for match in re.finditer(pattern_chainage, name, re.IGNORECASE):
+                s, e = int(match.group(1)), int(match.group(2))
+                add_range(s // 1000, s % 1000, e // 1000, e % 1000)
+
+            pattern_sta = r'Sta\.?\s*(\d+)\+(\d+)\s*-\s*(?:Sta\.?\s*)?(\d+)\+(\d+)'
+            for match in re.finditer(pattern_sta, name, re.IGNORECASE):
+                add_range(match.group(1), match.group(2), match.group(3), match.group(4))
+            
+            return ranges
+
+        def calculate_distance(chainage_ranges):
+            if not chainage_ranges: return 0.0
+            total_m = 0
+            for r in chainage_ranges:
+                 start_m = r[0] * 1000 + r[1]
+                 end_m = r[2] * 1000 + r[3]
+                 total_m += abs(end_m - start_m)
+            return total_m / 1000.0
+
+        processed_count = 0
+        
+        for r in rows:
+            name = r[0]
+            amount = r[1]
+            name_lower = name.lower()
+            
+            # Skip summary lines
+            if 'public-private partnership' in name_lower or 'priority' in name_lower and 'projects' in name_lower:
+                continue
+
+            # 0. Check for Public Buildings (Use Raw Amount, Ignore Distance)
+            if any(x in name_lower for x in ['building', 'hall', 'center', 'school', 'clinic', 'hospital', 'gym', 'mpb', 'multi purpose']):
+                 projects_by_category['public_buildings'].append({'name': name, 'amount': amount, 'cost_metric': amount, 'distance_km': 0})
+                 processed_count += 1
+                 continue
+
+            # 1. Parse Distance for others
+            ranges = extract_all_chainage_ranges(name)
+            distance_km = calculate_distance(ranges)
+            
+            # Validation: Reasonable distance (e.g. > 10 meters and < 500km)
+            if distance_km < 0.01 or distance_km > 500:
+                continue
+            
+            cost_per_km = amount / distance_km
+            item_data = {'name': name, 'amount': amount, 'distance_km': distance_km, 'cost_metric': cost_per_km}
+
+            # 2. Categorize Infrastructure
+            if any(x in name_lower for x in ['flood', 'river', 'drainage', 'creek', 'revetment', 'dike', 'seawall', 'shoreline']):
+                 projects_by_category['flood_control'].append(item_data)
+            elif any(x in name_lower for x in ['bridge', 'viaduct', 'flyover', 'box culvert']):
+                 projects_by_category['bridges'].append(item_data)
+            elif any(x in name_lower for x in ['safety', 'sign', 'marking', 'light', 'lamp']):
+                 projects_by_category['traffic_signs'].append(item_data)
+            else:
+                if any(x in name_lower for x in ['secondary', 'local', 'barangay']):
+                     projects_by_category['secondary_roads'].append(item_data)
+                else:
+                     projects_by_category['national_roads'].append(item_data)
+
+            processed_count += 1
+            
+        # Calculate Statistics
+        stats_results = {}
+        for cat, items in projects_by_category.items():
+            if not items:
+                stats_results[cat] = None
+                continue
+                
+            costs = [x['cost_metric'] for x in items]
+            costs.sort()
+            
+            n = len(costs)
+            mean_val = statistics.mean(costs)
+            median_val = statistics.median(costs)
+            try:
+                std_dev = statistics.stdev(costs) if n > 1 else 0
+            except:
+                std_dev = 0
+                
+            # MAD (Median Absolute Deviation)
+            MAD_SCALE = 1.4826
+            deviations = [abs(c - median_val) for c in costs]
+            mad = statistics.median(deviations) if deviations else 0
+            threshold = median_val + (3 * mad * MAD_SCALE) # 3 Sigma equivalent
+            
+            outliers = [x for x in items if x['cost_metric'] > threshold]
+            outlier_count = len(outliers)
+            outlier_total_amount = sum(x['amount'] for x in outliers)
+            
+            stats_results[cat] = {
+                'count': n,
+                'min': costs[0],
+                'max': costs[-1],
+                'mean': mean_val,
+                'median': median_val,
+                'std_dev': std_dev,
+                'mad': mad,
+                'threshold': threshold,
+                'outlier_count': outlier_count,
+                'outlier_total_amount': outlier_total_amount,
+                'total_dist': sum(x['distance_km'] for x in items),
+                'total_amount': sum(x['amount'] for x in items)
+            }
+        
+        return projects_by_category, stats_results, processed_count
+
+    finally:
+        conn.close()
+
+@app.get("/api/dpwh2026/stats")
+async def get_dpwh_2026_stats() -> JSONResponse:
+    """
+    Calculate statistics for DPWH 2026 projects, specifically Cost per KM.
+    """
+    try:
+        _, stats_results, processed_count = _calculate_dpwh_2026_stats()
+        
+        # Calculate Grand Totals
+        grand_total_outliers = 0
+        grand_total_outlier_amount = 0.0
+        
+        for cat, data in stats_results.items():
+            if data and 'outlier_count' in data:
+                grand_total_outliers += data['outlier_count']
+                grand_total_outlier_amount += data.get('outlier_total_amount', 0)
+                
+        return JSONResponse(content={
+            "success": True, 
+            "stats": stats_results, 
+            "total_parsed": processed_count,
+            "grand_total_outliers": grand_total_outliers,
+            "grand_total_outlier_amount": grand_total_outlier_amount
+        })
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JSONResponse(content={"success": False, "error": str(e)}, status_code=500)
+
+@app.get("/api/dpwh2026/stats/outliers")
+async def get_dpwh_2026_outliers(
+    category: str = Query(..., description="Category to fetch outliers for")
+) -> JSONResponse:
+    try:
+        projects_by_category, stats_results, _ = _calculate_dpwh_2026_stats()
+        
+        if category not in projects_by_category:
+            return JSONResponse(content={"success": False, "error": "Invalid category"}, status_code=400)
+            
+        if not stats_results.get(category):
+             return JSONResponse(content={"success": True, "outliers": [], "threshold": 0})
+
+        threshold = stats_results[category]['threshold']
+        items = projects_by_category[category]
+        
+        # Filter Outliers
+        outliers = [
+            x for x in items 
+            if x['cost_metric'] > threshold
+        ]
+        
+        # Sort by deviation (cost_metric desc)
+        outliers.sort(key=lambda x: x['cost_metric'], reverse=True)
+        
+        return JSONResponse(content={
+            "success": True,
+            "category": category,
+            "threshold": threshold,
+            "count": len(outliers),
+            "outliers": outliers
+        })
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JSONResponse(content={"success": False, "error": str(e)}, status_code=500)
+
+
+@app.get("/api/dpwh2026/repeated")
+async def get_dpwh_2026_repeated() -> JSONResponse:
+    try:
+        groups = _get_dpwh_2026_repeated()
+        total_amount = sum(g['total_amount'] for g in groups)
+        return JSONResponse(content={
+            "success": True,
+            "count": len(groups),
+            "total_amount": total_amount,
+            "groups": groups
+        })
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JSONResponse(content={"success": False, "error": str(e)}, status_code=500)
+
+@app.get("/api/dpwh2026/red-flags/all")
+async def get_dpwh_2026_all_red_flags() -> JSONResponse:
+    try:
+        # 1. Get Cost Outliers
+        projects_by_category, stats_results, _ = _calculate_dpwh_2026_stats()
+        
+        all_red_flags = []
+        
+        for category, stats in stats_results.items():
+            threshold = stats['threshold']
+            for p in projects_by_category[category]:
+                if p['cost_metric'] > threshold:
+                    all_red_flags.append({
+                        "risk_type": "Cost Anomaly",
+                        "category": category,
+                        "project_name": p['name'],
+                        "amount": p['amount'],
+                        "distance_km": p['distance_km'],
+                        "metric_val": p['cost_metric'],
+                        "details": f"Exceeds threshold {threshold:,.2f}"
+                    })
+        
+        # 2. Get Repeated Projects
+        repeated_groups = _get_dpwh_2026_repeated()
+        for g in repeated_groups:
+             all_red_flags.append({
+                "risk_type": "Repeated Project",
+                "category": "All",
+                "project_name": g['name'],
+                "amount": g['total_amount'],
+                "distance_km": 0,
+                "metric_val": g['count'],
+                "details": f"Appears in {g['count']} past years"
+             })
+
+        # Sort by Amount Desc
+        all_red_flags.sort(key=lambda x: x['amount'], reverse=True)
+
+        return JSONResponse(content={
+            "success": True,
+            "count": len(all_red_flags),
+            "data": all_red_flags
+        })
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JSONResponse(content={"success": False, "error": str(e)}, status_code=500)
+
+def _get_dpwh_2026_repeated():
+    # 1. Source files
+    parquet_2026 = DATA_ROOT.parent.parent / "data" / "parquet" / "dpwh_2026_leaf_nodes.parquet"
+    parquet_2025 = DATA_ROOT.parent.parent / "data" / "parquet" / "budget_2025.parquet" 
+    parquet_2024 = DATA_ROOT.parent.parent / "data" / "parquet" / "budget_2024.parquet"
+
+    if not parquet_2026.exists():
+         raise Exception("2026 Data file not found")
+    
+    conn = duckdb.connect()
+    try:
+         path_2026 = str(parquet_2026).replace("'", "''")
+         # Conditionally add 2024/2025 if they exist
+         p2025_exists = parquet_2025.exists()
+         p2024_exists = parquet_2024.exists()
+
+         path_2025 = str(parquet_2025).replace("'", "''")
+         path_2024 = str(parquet_2024).replace("'", "''")
+         
+         # 2. Blocklist Logic
+         # Exclude: Central Office, GOP, Loan Proceeds, Region X, District Engg Office
+         blocklist_clause = """
+            AND value NOT ILIKE 'Central Office%' 
+            AND value NOT ILIKE 'GOP%'
+            AND value NOT ILIKE 'Loan Proceeds%'
+            AND value NOT ILIKE 'Region %'
+            AND value NOT ILIKE '%District Engineering Office%'
+            AND value NOT ILIKE '%DEO%'
+            AND value NOT ILIKE '%Cordillera Administrative Region%'
+            AND value NOT ILIKE '%National Capital Region%'
+            AND value NOT ILIKE '%Public-Private Partnership%'
+            AND NOT (value ILIKE '%priority%' AND value ILIKE '%projects%')
+         """
+
+         # 3. Main Query: 
+         # Find unique project names in 2026 that also exist in 2024 OR 2025
+         
+         # Subquery for 2026 unique items (summing amount if appears multiple times, though we only care about name existence for cross-year)
+         query = f"""
+            WITH Proj2026 AS (
+                SELECT 
+                    value as name, 
+                    SUM(amount) as amount_2026
+                FROM read_parquet('{path_2026}')
+                WHERE amount IS NOT NULL AND amount > 0 
+                {blocklist_clause}
+                GROUP BY value
+            ),
+            History2025 AS (
+                {'SELECT description as name, SUM(amount) * 1000 as amount_2025 FROM read_parquet(' + "'" + path_2025 + "'" + ') GROUP BY description' if p2025_exists else "SELECT '' as name, 0 as amount_2025 WHERE 1=0"}
+            ),
+            History2024 AS (
+                {'SELECT description as name, SUM(amount) * 1000 as amount_2024 FROM read_parquet(' + "'" + path_2024 + "'" + ') GROUP BY description' if p2024_exists else "SELECT '' as name, 0 as amount_2024 WHERE 1=0"}
+            )
+            SELECT 
+                p.name,
+                p.amount_2026,
+                h25.amount_2025,
+                h24.amount_2024
+            FROM Proj2026 p
+            LEFT JOIN History2025 h25 ON p.name = h25.name
+            LEFT JOIN History2024 h24 ON p.name = h24.name
+            WHERE (h25.name IS NOT NULL OR h24.name IS NOT NULL)
+            ORDER BY p.amount_2026 DESC
+         """
+         
+         rows = conn.execute(query).fetchall()
+         
+         repeated_proj = []
+         for r in rows:
+             name = r[0]
+             amt_26 = r[1]
+             amt_25 = r[2] if r[2] is not None else 0
+             amt_24 = r[3] if r[3] is not None else 0
+             
+             history = []
+             if amt_25 > 0: history.append({"year": 2025, "amount": amt_25})
+             if amt_24 > 0: history.append({"year": 2024, "amount": amt_24})
+
+             # To match existing frontend which expects "amounts" list for "Breakdown"
+             # We will repackage history into "amounts" somewhat artificially or just change frontend
+             # User requested "History columns", so let's send structured history
+             
+             repeated_proj.append({
+                 "name": name,
+                 "count": len(history), # Count of HISTORICAL occurrences
+                 "total_amount": amt_26, # Current year amount
+                 "history": history,     # Detailed history
+                 "amounts": [h['amount'] for h in history] # quick fix for backward combat if any
+             })
+             
+         return repeated_proj
+    finally:
+        conn.close()
+
+
 
 
 @app.get("/api/dpwh2026/risks/uniform")
