@@ -736,6 +736,7 @@ async fn main() -> std::io::Result<()> {
             .service(web::resource("/dynasty-poverty-correlation").to(dynasty_poverty_correlation))
             .service(web::resource("/eogo").to(eogo))
             .service(web::resource("/sources").to(sources))
+            .service(fs::Files::new("/sources/dpwh-2026-hierarchy-analysis", "/home/joebert/dpwh-2026-hierarchy-analysis").show_files_listing())
             .service(web::resource("/circles").to(circles))
             .service(web::resource("/hours").to(hours))
             .service(web::resource("/integ2026").to(integ2026))

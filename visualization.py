@@ -13813,6 +13813,9 @@ def _get_dpwh_2026_repeated():
             AND value NOT ILIKE '%Cordillera Administrative Region%'
             AND value NOT ILIKE '%National Capital Region%'
             AND value NOT ILIKE '%Public-Private Partnership%'
+            AND value NOT ILIKE '%Management of Construction and Maintenance Equipment%'
+            AND value NOT ILIKE '%Infrastructure Research, Quality Control and Management%'
+            AND value NOT ILIKE '%Construction / Rehabilitation of Septage%'
             AND NOT (value ILIKE '%priority%' AND value ILIKE '%projects%')
         """
 
