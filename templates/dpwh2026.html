@@ -247,13 +247,14 @@
             <!-- Tabs -->
             <div class="budget-tabs">
                 <div class="budget-tab-nav">
-                    <a href="#projects" class="budget-tab-btn active" data-tab="projects">📑 All Projects</a>
+                    <a href="#projects" class="budget-tab-btn active hidden md:inline-block" data-tab="projects">📑 All
+                        Projects</a>
                     <a href="#stats" class="budget-tab-btn" data-tab="stats">📊 Statistics</a>
                     <a href="#repeated" class="budget-tab-btn" data-tab="repeated">🔄 Repeated</a>
                     <!-- <a href="#hierarchy" class="budget-tab-btn" data-tab="hierarchy">📂 Hierarchy</a> -->
                     <a href="#uniform" class="budget-tab-btn" data-tab="uniform">⚠️ Uniform Risks</a>
-                    <a href="#dist" class="budget-tab-btn" data-tab="dist">📈 Distribution</a>
-                    <a href="#diff" class="budget-tab-btn" data-tab="diff">📉 Changes</a>
+                    <a href="#dist" class="budget-tab-btn hidden md:inline-block" data-tab="dist">📈 Distribution</a>
+                    <a href="#diff" class="budget-tab-btn hidden md:inline-block" data-tab="diff">📉 Changes</a>
                 </div>
 
                 <div class="budget-tab-content">
@@ -2157,7 +2158,15 @@
 
         // Deep linking hash handler
         function handleHashChange() {
-            const hash = window.location.hash.substring(1); // remove #
+            let hash = window.location.hash.substring(1); // remove #
+
+            // Mobile Optimization: Default to 'stats' if no hash and mobile screen (< 768px)
+            if (!hash && window.innerWidth < 768) {
+                hash = 'stats';
+                // Update URL without scrolling
+                history.replaceState(null, null, '#stats');
+            }
+
             if (['projects', 'hierarchy', 'uniform', 'summary', 'dist', 'diff', 'stats', 'repeated'].includes(hash)) {
 
                 // Special handling for Diff tab loading
