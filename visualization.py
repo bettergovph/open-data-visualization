@@ -14023,7 +14023,7 @@ async def get_dpwh_2026_uniform_risks(
             # LABEL FIX: Cross-reference with Hierarchy JSON
             # ---------------------------------------------------------
             try:
-                hierarchy_path = Path('sources/dpwh-2026-hierarchy-analysis/data/FY 2026_DPWH DETAILS ENROLLED COPY (Final)_hierarchy.json')
+                hierarchy_path = Path('static/data/dpwh-2026-hierarchy.json')
                 if hierarchy_path.exists():
                     print("   ✅ Loading Hierarchy JSON to fix labels...")
                     with open(hierarchy_path, 'r', encoding='utf-8') as f:
