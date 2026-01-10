@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title | default(value=SITE_NAME) }}</title>
+
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <link rel="stylesheet" href="/static/css/tailwind.css">
+
+    <!-- BetterGovPH Metadata -->
+    <meta name="description"
+        content="DPWH 2026 Budget Proposal Analysis - Mobile View. Key statistics and risk analysis.">
+    <meta name="keywords" content="DPWH, budget 2026, infrastructure, government spending, Philippines, transparency">
+    <meta name="author" content="BetterGovPH">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif !important;
+            margin: 0;
+            padding: 0;
+            color: #0f172a !important;
+            min-height: 100vh;
+            background-color: #f8fafc;
+            overflow-y: auto !important;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 12px;
+        }
+
+        /* Mobile optimized tabs */
+        .budget-tabs {
+            margin: 0.5rem 0;
+        }
+
+        .budget-tab-nav {
+            display: flex;
+            border-bottom: 2px solid #e9ecef;
+            margin-bottom: 0.5rem;
+            gap: 0.25rem;
+        }
+
+        .budget-tab-btn {
+            text-decoration: none;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-bottom: none;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px 6px 0 0;
+            cursor: pointer;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.2s ease;
+            font-size: 12px;
+            flex: 1;
+            text-align: center;
+        }
+
+        .budget-tab-btn.active {
+            background: white;
+            color: #333;
+            border-color: #333;
+            border-bottom: 2px solid white;
+            margin-bottom: -2px;
+            z-index: 1;
+        }
+
+        .budget-tab-content {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-top: none;
+            padding: 12px;
+            border-radius: 0 0 8px 8px;
+        }
+
+        .budget-tab-panel {
+            display: none;
+        }
+
+        .budget-tab-panel.active {
+            display: block;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+
+        .section-desc {
+            font-size: 11px;
+            color: #64748b;
+            margin-bottom: 12px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .loading-spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid #e2e8f0;
+            border-top: 3px solid #0d9488;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 8px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .data-table th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #475569;
+        }
+    </style>
+</head>
+
+<body>
+    {% include "mobile/navbar.html" %}
+
+    <main class="container">
+        <div class="mb-3">
+            <h1 class="text-lg font-bold text-slate-900">DPWH 2026 <small
+                    class="text-slate-400 font-normal text-sm">(Mobile)</small></h1>
+            <p class="text-xs text-slate-500">Key statistics and risk analysis.</p>
+        </div>
+
+        <div class="budget-tabs">
+            <div class="budget-tab-nav">
+                <a href="#stats" class="budget-tab-btn active" data-tab="stats">📊 Stats</a>
+                <a href="#repeated" class="budget-tab-btn" data-tab="repeated">🔄 Repeated</a>
+                <a href="#uniform" class="budget-tab-btn" data-tab="uniform">⚠️ Uniform</a>
+            </div>
+
+            <div class="budget-tab-content">
+
+                <!-- Statistics Tab -->
+                <div id="tab-stats" class="budget-tab-panel active">
+                    <div id="stats-loading" class="hidden">
+                        <div class="flex items-center gap-2 text-slate-500 py-4">
+                            <div class="loading-spinner"></div> Calculating...
+                        </div>
+                    </div>
+
+                    <div id="stats-content">
+                        <div class="grid grid-cols-2 gap-2">
+                            <!-- Summary Card -->
+                            <div class="col-span-2 p-3 bg-blue-50 border border-blue-100 rounded shadow-sm">
+                                <div class="text-blue-800 font-bold text-xs mb-1">Total Analyzed</div>
+                                <div class="text-2xl font-mono font-bold text-blue-600" id="stat-total-parsed">-</div>
+                            </div>
+
+                            <!-- Primary Roads -->
+                            <div class="stat-card" data-cat="primary_roads">
+                                <h3 class="font-bold text-slate-700 bg-slate-100 p-2 text-xs">🛣️ Primary</h3>
+                                <div class="p-2 text-xs" id="stats-primary_roads">Loading...</div>
+                            </div>
+
+                            <!-- Secondary Roads -->
+                            <div class="stat-card" data-cat="secondary_roads">
+                                <h3 class="font-bold text-slate-700 bg-slate-100 p-2 text-xs">🛣️ Secondary</h3>
+                                <div class="p-2 text-xs" id="stats-secondary_roads">Loading...</div>
+                            </div>
+
+                            <!-- Tertiary Roads -->
+                            <div class="stat-card" data-cat="tertiary_roads">
+                                <h3 class="font-bold text-slate-700 bg-slate-100 p-2 text-xs">🛣️ Tertiary</h3>
+                                <div class="p-2 text-xs" id="stats-tertiary_roads">Loading...</div>
+                            </div>
+
+                            <!-- Other Roads -->
+                            <div class="stat-card" data-cat="other_roads">
+                                <h3 class="font-bold text-slate-700 bg-slate-100 p-2 text-xs">🛤️ Other Roads</h3>
+                                <div class="p-2 text-xs" id="stats-other_roads">Loading...</div>
+                            </div>
+
+                            <!-- Bridges Primary -->
+                            <div class="stat-card" data-cat="bridges_primary">
+                                <h3 class="font-bold text-slate-700 bg-slate-100 p-2 text-xs">🌉 Bridges Pri</h3>
+                                <div class="p-2 text-xs" id="stats-bridges_primary">Loading...</div>
+                            </div>
+
+                            <!-- Bridges Secondary -->
+                            <div class="stat-card" data-cat="bridges_secondary">
+                                <h3 class="font-bold text-slate-700 bg-slate-100 p-2 text-xs">🌉 Bridges Sec</h3>
+                                <div class="p-2 text-xs" id="stats-bridges_secondary">Loading...</div>
+                            </div>
+
+                            <!-- Bridges Tertiary -->
+                            <div class="stat-card" data-cat="bridges_tertiary">
+                                <h3 class="font-bold text-slate-700 bg-slate-100 p-2 text-xs">🌉 Bridges Ter</h3>
+                                <div class="p-2 text-xs" id="stats-bridges_tertiary">Loading...</div>
+                            </div>
+
+                            <!-- Bridges Other -->
+                            <div class="stat-card" data-cat="bridges_other">
+                                <h3 class="font-bold text-slate-700 bg-slate-100 p-2 text-xs">🌉 Bridges Oth</h3>
+                                <div class="p-2 text-xs" id="stats-bridges_other">Loading...</div>
+                            </div>
+
+                            <!-- Flood Control -->
+                            <div class="stat-card" data-cat="flood_control">
+                                <h3 class="font-bold text-slate-700 bg-slate-100 p-2 text-xs">🌊 Flood</h3>
+                                <div class="p-2 text-xs" id="stats-flood_control">Loading...</div>
+                            </div>
+
+                            <!-- Public Buildings -->
+                            <div class="stat-card" data-cat="public_buildings">
+                                <h3 class="font-bold text-slate-700 bg-slate-100 p-2 text-xs">🏢 Buildings</h3>
+                                <div class="p-2 text-xs" id="stats-public_buildings">Loading...</div>
+                            </div>
+
+                            <!-- Traffic Signs -->
+                            <div class="stat-card col-span-2" data-cat="traffic_signs">
+                                <h3 class="font-bold text-slate-700 bg-slate-100 p-2 text-xs">🛑 Traffic Signs</h3>
+                                <div class="p-2 text-xs" id="stats-traffic_signs">Loading...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Repeated Tab -->
+                <div id="tab-repeated" class="budget-tab-panel">
+                    <h2 class="section-title">🔄 Repeated Projects</h2>
+                    <p class="section-desc">Projects appearing in multiple years (2020-2025).</p>
+
+                    <div id="repeated-summary" class="hidden mb-3">
+                        <div class="grid grid-cols-2 gap-2">
+                            <div class="bg-white p-3 rounded border border-slate-200 text-center">
+                                <h3 class="text-xs font-bold text-slate-500">Total Projects</h3>
+                                <div id="repeated-total-count" class="text-xl font-bold text-slate-800">-</div>
+                            </div>
+                            <div class="bg-white p-3 rounded border border-slate-200 text-center">
+                                <h3 class="text-xs font-bold text-slate-500">Total Cost</h3>
+                                <div id="repeated-total-amount" class="text-xl font-bold text-green-700">-</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="repeated-loading" class="hidden py-4 text-center text-slate-500 text-sm">
+                        <div class="loading-spinner inline-block"></div> Finding duplicates...
+                    </div>
+
+                    <div id="repeated-content">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th class="text-left">Project Name</th>
+                                    <th class="text-right">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody id="repeated-tbody"></tbody>
+                        </table>
+                        <div id="repeated-pagination"
+                            class="flex justify-between items-center mt-3 text-xs text-slate-600">
+                            <div id="repeated-page-info">Page 1</div>
+                            <div class="flex gap-1">
+                                <button id="btn-repeated-prev" onclick="changeRepeatedPage(-1)"
+                                    class="px-2 py-1 bg-white border rounded text-xs">Prev</button>
+                                <button id="btn-repeated-next" onclick="changeRepeatedPage(1)"
+                                    class="px-2 py-1 bg-white border rounded text-xs">Next</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Uniform Risks Tab -->
+                <div id="tab-uniform" class="budget-tab-panel">
+                    <h3 class="section-title text-red-700">⚠️ Uniform Pricing Risks</h3>
+                    <p class="section-desc">Clusters of projects with identical amounts (Min: 10 items).</p>
+
+                    <div id="loading-risks" style="display:none;" class="py-4 text-center text-slate-500 text-sm">
+                        <div class="loading-spinner inline-block"></div> Loading clusters...
+                    </div>
+                    <div id="risks-container" class="space-y-2"></div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    {% include "mobile/footer.html" %}
+
+    <script>
+        // Format currency
+        function formatCurrency(amount) {
+            if (amount == null || isNaN(amount)) return '₱0';
+            return '₱' + Number(amount).toLocaleString('en-PH', { maximumFractionDigits: 0 });
+        }
+
+        // State
+        let repeatedDataCache = null;
+        let repeatedPage = 1;
+        const repeatedLimit = 20;
+
+        // Init
+        document.addEventListener('DOMContentLoaded', () => {
+            initTabs();
+            // Load stats by default
+            fetchStats();
+        });
+
+        function initTabs() {
+            document.querySelectorAll('.budget-tab-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const tabName = btn.getAttribute('data-tab');
+
+                    document.querySelectorAll('.budget-tab-btn').forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('.budget-tab-panel').forEach(p => {
+                        p.classList.remove('active');
+                        p.style.display = 'none';
+                    });
+
+                    btn.classList.add('active');
+                    const panel = document.getElementById(`tab-${tabName}`);
+                    panel.classList.add('active');
+                    panel.style.display = 'block';
+
+                    // Lazy load
+                    if (tabName === 'stats') fetchStats();
+                    else if (tabName === 'repeated') fetchRepeated();
+                    else if (tabName === 'uniform') fetchUniformRisks();
+                });
+            });
+        }
+
+        async function fetchStats() {
+            const loading = document.getElementById('stats-loading');
+            const content = document.getElementById('stats-content');
+
+            loading.classList.remove('hidden');
+            content.style.display = 'none';
+
+            try {
+                const response = await fetch('/api/dpwh2026/stats');
+                const data = await response.json();
+
+                if (data.success) {
+                    renderStats(data);
+                    loading.classList.add('hidden');
+                    content.style.display = 'block';
+                } else {
+                    loading.innerHTML = `<span class="text-red-600">Error: ${data.error}</span>`;
+                }
+            } catch (err) {
+                console.error(err);
+                loading.innerHTML = `<span class="text-red-600">Error loading stats</span>`;
+            }
+        }
+
+        function renderStats(data) {
+            document.getElementById('stat-total-parsed').textContent = data.total_parsed.toLocaleString();
+
+            const cats = ['primary_roads', 'secondary_roads', 'tertiary_roads', 'other_roads', 'bridges_primary', 'bridges_secondary', 'bridges_tertiary', 'bridges_other', 'flood_control', 'public_buildings', 'traffic_signs'];
+
+            cats.forEach(cat => {
+                const container = document.getElementById(`stats-${cat}`);
+                const s = data.stats[cat];
+                if (!s) {
+                    container.innerHTML = '<span class="text-slate-400 italic">No data</span>';
+                    return;
+                }
+
+                container.innerHTML = `
+                    <div class="space-y-1">
+                        <div class="flex justify-between"><span class="text-slate-500">Count:</span> <span class="font-mono font-medium">${s.count}</span></div>
+                        <div class="flex justify-between"><span class="text-slate-500">Mean:</span> <span class="font-mono font-bold">${formatCurrency(s.mean)}</span></div>
+                        <div class="flex justify-between text-red-700 font-bold"><span>🚩 Red Flags:</span> <span>${s.outlier_count}</span></div>
+                    </div>
+                `;
+            });
+        }
+
+        async function fetchRepeated() {
+            const loading = document.getElementById('repeated-loading');
+            const summary = document.getElementById('repeated-summary');
+            const tbody = document.getElementById('repeated-tbody');
+
+            loading.classList.remove('hidden');
+            tbody.innerHTML = '';
+
+            try {
+                if (!repeatedDataCache) {
+                    const response = await fetch('/api/dpwh2026/repeated');
+                    const res = await response.json();
+                    if (res.success) {
+                        repeatedDataCache = res.groups;
+                        document.getElementById('repeated-total-count').textContent = res.count.toLocaleString();
+                        document.getElementById('repeated-total-amount').textContent = formatCurrency(res.total_amount);
+                    }
+                }
+
+                if (repeatedDataCache) {
+                    summary.classList.remove('hidden');
+                    renderRepeatedPage();
+                }
+
+                loading.classList.add('hidden');
+            } catch (err) {
+                console.error(err);
+                loading.innerHTML = '<span class="text-red-600">Error loading</span>';
+            }
+        }
+
+        function renderRepeatedPage() {
+            const tbody = document.getElementById('repeated-tbody');
+            const start = (repeatedPage - 1) * repeatedLimit;
+            const items = repeatedDataCache.slice(start, start + repeatedLimit);
+            const totalPages = Math.ceil(repeatedDataCache.length / repeatedLimit);
+
+            tbody.innerHTML = items.map(g => `
+                <tr class="border-b">
+                    <td class="py-2 text-slate-800 text-xs">${g.name}</td>
+                    <td class="py-2 text-right font-mono font-bold text-slate-700 text-xs">${formatCurrency(g.total_amount)}</td>
+                </tr>
+            `).join('');
+
+            document.getElementById('repeated-page-info').textContent = `Page ${repeatedPage} of ${totalPages}`;
+            document.getElementById('btn-repeated-prev').disabled = repeatedPage === 1;
+            document.getElementById('btn-repeated-next').disabled = repeatedPage >= totalPages;
+        }
+
+        function changeRepeatedPage(delta) {
+            const totalPages = Math.ceil(repeatedDataCache.length / repeatedLimit);
+            repeatedPage = Math.max(1, Math.min(totalPages, repeatedPage + delta));
+            renderRepeatedPage();
+        }
+
+        let uniformRisksData = null;
+
+        async function fetchUniformRisks() {
+            const container = document.getElementById('risks-container');
+            const loading = document.getElementById('loading-risks');
+
+            loading.style.display = 'block';
+            container.innerHTML = '';
+
+            try {
+                const response = await fetch('/api/dpwh2026/risks/uniform?min_cluster_size=10');
+                const json = await response.json();
+                const rows = json.data;
+
+                uniformRisksData = rows;
+                loading.style.display = 'none';
+
+                if (!rows || rows.length === 0) {
+                    container.innerHTML = '<div class="text-center py-4 text-slate-500 text-sm">No clusters found</div>';
+                    return;
+                }
+
+                // Group by run_id
+                const clusters = {};
+                rows.forEach(r => {
+                    if (!clusters[r.run_id]) clusters[r.run_id] = [];
+                    clusters[r.run_id].push(r);
+                });
+
+                // Render Clusters (simplified for mobile)
+                Object.values(clusters).forEach(cluster => {
+                    const first = cluster[0];
+                    const count = cluster.length;
+
+                    const card = document.createElement('div');
+                    card.className = "bg-white border border-red-200 rounded p-3";
+                    card.innerHTML = `
+                        <div class="flex justify-between items-center">
+                            <div class="font-bold text-slate-800 text-xs truncate flex-1">${first.program || 'Unknown'}</div>
+                            <span class="text-red-700 font-bold text-xs ml-2">${count}</span>
+                        </div>
+                        <div class="mt-1 font-mono text-xs text-red-700">${formatCurrency(first.amount)}</div>
+                    `;
+                    container.appendChild(card);
+                });
+
+            } catch (err) {
+                console.error(err);
+                loading.style.display = 'none';
+                container.innerHTML = '<div class="text-center py-4 text-red-500 text-sm">Error loading risks</div>';
+            }
+        }
+    </script>
+</body>
+
+</html>
