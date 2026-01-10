@@ -287,10 +287,11 @@
                         <table class="data-table" id="projects-table">
                             <thead>
                                 <tr>
-                                    <th style="width: 35%">Project Name</th>
-                                    <th style="width: 15%">Program</th>
-                                    <th style="width: 15%">Region</th>
-                                    <th style="width: 15%">District / DEO</th>
+                                    <th style="width: 30%">Project Name</th>
+                                    <th style="width: 10%">Program</th>
+                                    <th style="width: 10%">Region</th>
+                                    <th style="width: 10%">District / DEO</th>
+                                    <th style="width: 20%">Road Inventory</th>
                                     <th style="text-align: right; width: 20%">Amount (PHP)</th>
                                 </tr>
                             </thead>
@@ -398,286 +399,324 @@
                                 <div class="text-3xl font-mono font-bold text-blue-600" id="stat-total-parsed">-</div>
                                 <div class="text-xs text-blue-500 mt-1">Projects with parsable chainage/dimensions</div>
                             </div>
-                            <div class="stat-card" data-cat="national_roads">
+
+                            <!-- Primary Roads -->
+                            <div class="stat-card" data-cat="primary_roads">
                                 <h3 class="font-bold text-slate-700 bg-slate-100 p-2 rounded-t border-b text-sm">🛣️
-                                    National Roads</h3>
+                                    National Primary</h3>
                                 <div class="p-3 bg-white border border-t-0 rounded-b shadow-sm"
-                                    id="stats-national_roads">
-                                    Loading...</div>
+                                    id="stats-primary_roads">Loading...</div>
                             </div>
 
+                            <!-- Secondary Roads -->
                             <div class="stat-card" data-cat="secondary_roads">
                                 <h3 class="font-bold text-slate-700 bg-slate-100 p-2 rounded-t border-b text-sm">🛣️
-                                    Secondary Roads</h3>
+                                    National Secondary</h3>
                                 <div class="p-3 bg-white border border-t-0 rounded-b shadow-sm"
-                                    id="stats-secondary_roads">
+                                    id="stats-secondary_roads">Loading...</div>
+                            </div>
+
+                            <!-- Tertiary Roads -->
+                            <div class="stat-card" data-cat="tertiary_roads">
+                                <h3 class="font-bold text-slate-700 bg-slate-100 p-2 rounded-t border-b text-sm">🛣️
+                                    National Tertiary</h3>
+                                <div class="p-3 bg-white border border-t-0 rounded-b shadow-sm"
+                                    id="stats-tertiary_roads">Loading...</div>
+                            </div>
+
+                            <!-- Other Roads -->
+                            <div class="stat-card" data-cat="other_roads">
+                                <h3 class="font-bold text-slate-700 bg-slate-100 p-2 rounded-t border-b text-sm">🛤️
+                                    Other/Unclassified Roads</h3>
+                                <div class="p-3 bg-white border border-t-0 rounded-b shadow-sm" id="stats-other_roads">
                                     Loading...</div>
                             </div>
 
-                            <div class="stat-card" data-cat="bridges">
+                            <!-- Primary Bridges -->
+                            <div class="stat-card" data-cat="bridges_primary">
                                 <h3 class="font-bold text-slate-700 bg-slate-100 p-2 rounded-t border-b text-sm">🌉
-                                    Bridges
-                                </h3>
-                                <div class="p-3 bg-white border border-t-0 rounded-b shadow-sm" id="stats-bridges">
-                                    Loading...</div>
-                            </div>
-
-                            <div class="stat-card" data-cat="flood_control">
-                                <h3 class="font-bold text-slate-700 bg-slate-100 p-2 rounded-t border-b text-sm">🌊
-                                    Flood
-                                    Control</h3>
+                                    Bridges - Primary</h3>
                                 <div class="p-3 bg-white border border-t-0 rounded-b shadow-sm"
-                                    id="stats-flood_control">
-                                    Loading...</div>
+                                    id="stats-bridges_primary">Loading...</div>
                             </div>
 
-                            <div class="stat-card" data-cat="public_buildings">
-                                <h3 class="font-bold text-slate-700 bg-slate-100 p-2 rounded-t border-b text-sm">🏢
-                                    Public
-                                    Buildings</h3>
+                            <!-- Secondary Bridges -->
+                            <div class="stat-card" data-cat="bridges_secondary">
+                                <h3 class="font-bold text-slate-700 bg-slate-100 p-2 rounded-t border-b text-sm">🌉
+                                    Bridges - Secondary</h3>
                                 <div class="p-3 bg-white border border-t-0 rounded-b shadow-sm"
-                                    id="stats-public_buildings">
-                                    Loading...</div>
+                                    id="stats-bridges_secondary">Loading...</div>
                             </div>
 
+                            <!-- Tertiary Bridges -->
+                            <div class="stat-card" data-cat="bridges_tertiary">
+                                <h3 class="font-bold text-slate-700 bg-slate-100 p-2 rounded-t border-b text-sm">🌉
+                                    Bridges - Tertiary</h3>
+                                <div class="p-3 bg-white border border-t-0 rounded-b shadow-sm"
+                                    id="stats-bridges_tertiary">Loading...</div>
+                            </div>
 
+                            <!-- Other Bridges -->
+                            <div class="stat-card" data-cat="bridges_other">
+                                <h3 class="font-bold text-slate-700 bg-slate-100 p-2 rounded-t border-b text-sm">🌉
+                                    Bridges - Other</h3>
+                                <div class="p-3 bg-white border border-t-0 rounded-b shadow-sm"
+                                    id="stats-bridges_other">Loading...</div>
+                            </div> Loading...
                         </div>
                     </div>
+
+                    <div class="stat-card" data-cat="flood_control">
+                        <h3 class="font-bold text-slate-700 bg-slate-100 p-2 rounded-t border-b text-sm">🌊
+                            Flood Control</h3>
+                        <div class="p-3 bg-white border border-t-0 rounded-b shadow-sm" id="stats-flood_control">
+                            Loading...</div>
+                    </div>
+
+                    <div class="stat-card" data-cat="public_buildings">
+                        <h3 class="font-bold text-slate-700 bg-slate-100 p-2 rounded-t border-b text-sm">🏢
+                            Public Buildings</h3>
+                        <div class="p-3 bg-white border border-t-0 rounded-b shadow-sm" id="stats-public_buildings">
+                            Loading...</div>
+                    </div>
+
+                    <div class="stat-card" data-cat="traffic_signs">
+                        <h3 class="font-bold text-slate-700 bg-slate-100 p-2 rounded-t border-b text-sm">🛑
+                            Traffic Signs</h3>
+                        <div class="p-3 bg-white border border-t-0 rounded-b shadow-sm" id="stats-traffic_signs">
+                            Loading...</div>
+                    </div>
+
+
                 </div>
+            </div>
+        </div>
 
-                <!-- Repeated Tab (Keeping it for full view) -->
-                <div id="tab-repeated" class="budget-tab-panel" style="display: none;">
-                    <div class="mb-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
-                        <div>
-                            <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
-                                🔄 Repeated Projects (Cross-Year)
-                                <span
-                                    class="text-sm font-normal text-slate-500 bg-slate-100 px-2 py-1 rounded-full">Comparison
-                                    vs 2024/2025</span>
-                            </h2>
-                            <p class="text-slate-600 mt-1 text-sm">
-                                Projects in 2026 that also appear in previous years (2024, 2025).
-                                Excludes generic names (e.g., Central Office, Region X).
-                            </p>
-                        </div>
-                        <div>
-                            <button onclick="downloadRepeatedCSV()"
-                                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow text-sm font-medium flex items-center gap-2">
-                                <svg class="w-4 h-4" width="16" height="16" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-                                </svg>
-                                Download CSV
-                            </button>
-                        </div>
-                    </div>
-
-                    <div id="repeated-summary" class="hidden mb-6">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div
-                                class="bg-white p-4 rounded-lg shadow-sm border border-slate-200 flex items-center gap-4">
-                                <div class="p-3 bg-blue-100 rounded-full text-blue-600">
-                                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
-                                        </path>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <h3 class="text-sm font-bold text-slate-500 uppercase">Total Repeated Projects</h3>
-                                    <div id="repeated-total-count" class="text-2xl font-bold text-slate-800">-</div>
-                                </div>
-                            </div>
-                            <div
-                                class="bg-white p-4 rounded-lg shadow-sm border border-slate-200 flex items-center gap-4">
-                                <div class="p-3 bg-green-100 rounded-full text-green-600">
-                                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
-                                        </path>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <h3 class="text-sm font-bold text-slate-500 uppercase">Total Cost Involved</h3>
-                                    <div id="repeated-total-amount" class="text-2xl font-bold text-green-700">-</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="repeated-loading" class="hidden">
-                        <div class="flex items-center gap-2 text-slate-500">
-                            <div class="loading-spinner w-4 h-4 border-2"></div> Finding duplicates...
-                        </div>
-                    </div>
-
-                    <div id="repeated-content">
-                        <div class="bg-white rounded-lg shadow border border-slate-200 overflow-hidden">
-                            <table class="data-table">
-                                <thead class="bg-slate-50">
-                                    <tr>
-                                        <th class="text-left w-1/2">Project Name</th>
-                                        <th class="text-center w-24">Yrs Found</th>
-                                        <th class="text-right">2026 Amount</th>
-                                        <th class="text-left pl-4">History</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="repeated-tbody"></tbody>
-                            </table>
-                        </div>
-                        <!-- Pagination for Repeated Tab -->
-                        <div id="repeated-pagination"
-                            class="flex justify-between items-center mt-4 text-sm text-slate-600">
-                            <div id="repeated-page-info">Page 1</div>
-                            <div class="flex gap-2">
-                                <button id="btn-repeated-prev" onclick="changeRepeatedPage(-1)"
-                                    class="px-3 py-1 bg-white border rounded hover:bg-slate-50 disabled:opacity-50">Previous</button>
-                                <button id="btn-repeated-next" onclick="changeRepeatedPage(1)"
-                                    class="px-3 py-1 bg-white border rounded hover:bg-slate-50 disabled:opacity-50">Next</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Changes Tab -->
-                <div id="tab-diff" class="budget-tab-panel">
-                    <div class="flex justify-between items-center mb-6">
-                        <div>
-                            <h3 class="section-title text-indigo-700">Budget Changes (vs GAB Annex A-5)</h3>
-                            <p class="text-slate-500">
-                                Comparing <strong>Parsed DPWH 2026</strong> (Target) against <strong>GAB Annex A-5
-                                    Baseline</strong> (Reference).
-                            </p>
-                        </div>
-                        <div class="text-sm text-right">
-                            <button onclick="loadDiffData()"
-                                class="px-4 py-2 bg-indigo-50 text-indigo-700 rounded hover:bg-indigo-100 transition-colors">
-                                🔄 Refresh Diff
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Diff Stats -->
-                    <div id="diff-stats" class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
-                        <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200">
-                            <div class="text-xs text-slate-500 uppercase font-bold">Ref Count</div>
-                            <div id="stats-ref-count" class="text-xl font-bold text-slate-700">-</div>
-                        </div>
-                        <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200">
-                            <div class="text-xs text-slate-500 uppercase font-bold">Target Count</div>
-                            <div id="stats-target-count" class="text-xl font-bold text-slate-700">-</div>
-                        </div>
-                        <div
-                            class="bg-white p-4 rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-green-500">
-                            <div class="text-xs text-green-600 uppercase font-bold">Items Added</div>
-                            <div id="stats-added-count" class="text-2xl font-bold text-green-700">-</div>
-                        </div>
-                        <div
-                            class="bg-white p-4 rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-red-500">
-                            <div class="text-xs text-red-600 uppercase font-bold">Items Removed</div>
-                            <div id="stats-removed-count" class="text-2xl font-bold text-red-700">-</div>
-                        </div>
-                        <div
-                            class="bg-white p-4 rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-orange-500">
-                            <div class="text-xs text-orange-600 uppercase font-bold">Modified Items</div>
-                            <div id="stats-modified-count" class="text-2xl font-bold text-orange-700">-</div>
-                        </div>
-                        <div
-                            class="bg-white p-4 rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-blue-500">
-                            <div class="text-xs text-blue-600 uppercase font-bold">Matches</div>
-                            <div id="stats-match-count" class="text-2xl font-bold text-blue-700">-</div>
-                        </div>
-                    </div>
-
-                    <!-- Search Filter -->
-                    <div class="mb-6">
-                        <input type="text" id="diff-search"
-                            class="w-full p-2 border border-slate-300 rounded focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-                            placeholder="Filter changes by Project Name or Program..." onkeyup="filterDiff(this.value)">
-                    </div>
-
-                    <!-- Diff Columns -->
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <!-- Removed Column -->
-                        <div class="flex flex-col h-full">
-                            <h4
-                                class="flex items-center gap-2 text-lg font-bold text-red-700 mb-4 pb-2 border-b border-red-200">
-                                <span>❌ Removed</span>
-                            </h4>
-                            <div id="diff-removed-list" class="space-y-3 overflow-y-auto max-h-[800px] pr-2">
-                                <div class="py-8 text-center text-slate-400">Loading...</div>
-                            </div>
-                            <button id="load-more-removed" onclick="loadMoreRemoved()" style="display:none"
-                                class="mt-4 px-4 py-2 bg-red-50 text-red-700 rounded hover:bg-red-100 transition-colors font-semibold">
-                                Load All Removed Items
-                            </button>
-                        </div>
-
-                        <!-- Modified Column -->
-                        <div class="flex flex-col h-full">
-                            <h4
-                                class="flex items-center gap-2 text-lg font-bold text-orange-700 mb-4 pb-2 border-b border-orange-200">
-                                <span>⚠️ Modified</span>
-                            </h4>
-                            <div id="diff-modified-list" class="space-y-3 overflow-y-auto max-h-[800px] pr-2">
-                                <div class="py-8 text-center text-slate-400">Loading...</div>
-                            </div>
-                            <button id="load-more-modified" onclick="loadMoreModified()" style="display:none"
-                                class="mt-4 px-4 py-2 bg-orange-50 text-orange-700 rounded hover:bg-orange-100 transition-colors font-semibold">
-                                Load All Modified Items
-                            </button>
-                        </div>
-
-                        <!-- Added Column -->
-                        <div class="flex flex-col h-full">
-                            <h4
-                                class="flex items-center gap-2 text-lg font-bold text-green-700 mb-4 pb-2 border-b border-green-200">
-                                <span>✅ Added (In Target, Not Ref)</span>
-                            </h4>
-                            <div id="diff-added-list" class="space-y-3 overflow-y-auto max-h-[800px] pr-2">
-                                <div class="py-8 text-center text-slate-400">Loading...</div>
-                            </div>
-                            <button id="load-more-added" onclick="loadMoreAdded()" style="display:none"
-                                class="mt-4 px-4 py-2 bg-green-50 text-green-700 rounded hover:bg-green-100 transition-colors font-semibold">
-                                Load All Added Items
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div id="tab-dist" class="budget-tab-panel">
-                    <h3 class="section-title text-blue-700">Project Amount Distribution</h3>
-                    <p class="section-desc">Analysis of project amounts to identify clustering and pricing patterns.
+        <!-- Repeated Tab (Keeping it for full view) -->
+        <div id="tab-repeated" class="budget-tab-panel" style="display: none;">
+            <div class="mb-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                        🔄 Repeated Projects (Cross-Year)
+                        <span class="text-sm font-normal text-slate-500 bg-slate-100 px-2 py-1 rounded-full">Comparison
+                            vs 2024/2025</span>
+                    </h2>
+                    <p class="text-slate-600 mt-1 text-sm">
+                        Projects in 2026 that also appear in previous years (2024, 2025).
+                        Excludes generic names (e.g., Central Office, Region X).
                     </p>
+                </div>
+                <div>
+                    <button onclick="downloadRepeatedCSV()"
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow text-sm font-medium flex items-center gap-2">
+                        <svg class="w-4 h-4" width="16" height="16" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                        </svg>
+                        Download CSV
+                    </button>
+                </div>
+            </div>
 
-                    <!-- Stats Cards -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                        <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200 text-center">
-                            <h3 class="text-slate-500 text-sm uppercase font-bold mb-2">Total Projects</h3>
-                            <p id="dist-total-projects" class="text-3xl font-bold text-blue-700">-</p>
+            <div id="repeated-summary" class="hidden mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200 flex items-center gap-4">
+                        <div class="p-3 bg-blue-100 rounded-full text-blue-600">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
+                                </path>
+                            </svg>
                         </div>
-                        <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200 text-center">
-                            <h3 class="text-slate-500 text-sm uppercase font-bold mb-2">Total Amount</h3>
-                            <p id="dist-total-amount" class="text-2xl font-bold text-teal-600">-</p>
-                        </div>
-                        <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200 text-center">
-                            <h3 class="text-slate-500 text-sm uppercase font-bold mb-2">Unique Amounts</h3>
-                            <p id="dist-unique-amounts" class="text-2xl font-bold text-purple-600">-</p>
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-500 uppercase">Total Repeated Projects</h3>
+                            <div id="repeated-total-count" class="text-2xl font-bold text-slate-800">-</div>
                         </div>
                     </div>
-
-                    <!-- Chart -->
-                    <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200"
-                        style="height: 500px; position: relative;">
-                        <canvas id="distChart"></canvas>
-                        <div id="dist-loading"
-                            class="absolute inset-0 flex flex-col items-center justify-center bg-white bg-opacity-90"
-                            style="display:none;">
-                            <div class="loading-spinner mb-2"></div>
-                            <p class="text-slate-500">Loading distribution data...</p>
+                    <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200 flex items-center gap-4">
+                        <div class="p-3 bg-green-100 rounded-full text-green-600">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                                </path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-500 uppercase">Total Cost Involved</h3>
+                            <div id="repeated-total-amount" class="text-2xl font-bold text-green-700">-</div>
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <div id="repeated-loading" class="hidden">
+                <div class="flex items-center gap-2 text-slate-500">
+                    <div class="loading-spinner w-4 h-4 border-2"></div> Finding duplicates...
+                </div>
+            </div>
+
+            <div id="repeated-content">
+                <div class="bg-white rounded-lg shadow border border-slate-200 overflow-hidden">
+                    <table class="data-table">
+                        <thead class="bg-slate-50">
+                            <tr>
+                                <th class="text-left w-1/2">Project Name</th>
+                                <th class="text-center w-24">Yrs Found</th>
+                                <th class="text-right">2026 Amount</th>
+                                <th class="text-left pl-4">History</th>
+                            </tr>
+                        </thead>
+                        <tbody id="repeated-tbody"></tbody>
+                    </table>
+                </div>
+                <!-- Pagination for Repeated Tab -->
+                <div id="repeated-pagination" class="flex justify-between items-center mt-4 text-sm text-slate-600">
+                    <div id="repeated-page-info">Page 1</div>
+                    <div class="flex gap-2">
+                        <button id="btn-repeated-prev" onclick="changeRepeatedPage(-1)"
+                            class="px-3 py-1 bg-white border rounded hover:bg-slate-50 disabled:opacity-50">Previous</button>
+                        <button id="btn-repeated-next" onclick="changeRepeatedPage(1)"
+                            class="px-3 py-1 bg-white border rounded hover:bg-slate-50 disabled:opacity-50">Next</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Changes Tab -->
+        <div id="tab-diff" class="budget-tab-panel">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h3 class="section-title text-indigo-700">Budget Changes (vs GAB Annex A-5)</h3>
+                    <p class="text-slate-500">
+                        Comparing <strong>Parsed DPWH 2026</strong> (Target) against <strong>GAB Annex A-5
+                            Baseline</strong> (Reference).
+                    </p>
+                </div>
+                <div class="text-sm text-right">
+                    <button onclick="loadDiffData()"
+                        class="px-4 py-2 bg-indigo-50 text-indigo-700 rounded hover:bg-indigo-100 transition-colors">
+                        🔄 Refresh Diff
+                    </button>
+                </div>
+            </div>
+
+            <!-- Diff Stats -->
+            <div id="diff-stats" class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200">
+                    <div class="text-xs text-slate-500 uppercase font-bold">Ref Count</div>
+                    <div id="stats-ref-count" class="text-xl font-bold text-slate-700">-</div>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200">
+                    <div class="text-xs text-slate-500 uppercase font-bold">Target Count</div>
+                    <div id="stats-target-count" class="text-xl font-bold text-slate-700">-</div>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-green-500">
+                    <div class="text-xs text-green-600 uppercase font-bold">Items Added</div>
+                    <div id="stats-added-count" class="text-2xl font-bold text-green-700">-</div>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-red-500">
+                    <div class="text-xs text-red-600 uppercase font-bold">Items Removed</div>
+                    <div id="stats-removed-count" class="text-2xl font-bold text-red-700">-</div>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-orange-500">
+                    <div class="text-xs text-orange-600 uppercase font-bold">Modified Items</div>
+                    <div id="stats-modified-count" class="text-2xl font-bold text-orange-700">-</div>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-blue-500">
+                    <div class="text-xs text-blue-600 uppercase font-bold">Matches</div>
+                    <div id="stats-match-count" class="text-2xl font-bold text-blue-700">-</div>
+                </div>
+            </div>
+
+            <!-- Search Filter -->
+            <div class="mb-6">
+                <input type="text" id="diff-search"
+                    class="w-full p-2 border border-slate-300 rounded focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                    placeholder="Filter changes by Project Name or Program..." onkeyup="filterDiff(this.value)">
+            </div>
+
+            <!-- Diff Columns -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Removed Column -->
+                <div class="flex flex-col h-full">
+                    <h4
+                        class="flex items-center gap-2 text-lg font-bold text-red-700 mb-4 pb-2 border-b border-red-200">
+                        <span>❌ Removed</span>
+                    </h4>
+                    <div id="diff-removed-list" class="space-y-3 overflow-y-auto max-h-[800px] pr-2">
+                        <div class="py-8 text-center text-slate-400">Loading...</div>
+                    </div>
+                    <button id="load-more-removed" onclick="loadMoreRemoved()" style="display:none"
+                        class="mt-4 px-4 py-2 bg-red-50 text-red-700 rounded hover:bg-red-100 transition-colors font-semibold">
+                        Load All Removed Items
+                    </button>
+                </div>
+
+                <!-- Modified Column -->
+                <div class="flex flex-col h-full">
+                    <h4
+                        class="flex items-center gap-2 text-lg font-bold text-orange-700 mb-4 pb-2 border-b border-orange-200">
+                        <span>⚠️ Modified</span>
+                    </h4>
+                    <div id="diff-modified-list" class="space-y-3 overflow-y-auto max-h-[800px] pr-2">
+                        <div class="py-8 text-center text-slate-400">Loading...</div>
+                    </div>
+                    <button id="load-more-modified" onclick="loadMoreModified()" style="display:none"
+                        class="mt-4 px-4 py-2 bg-orange-50 text-orange-700 rounded hover:bg-orange-100 transition-colors font-semibold">
+                        Load All Modified Items
+                    </button>
+                </div>
+
+                <!-- Added Column -->
+                <div class="flex flex-col h-full">
+                    <h4
+                        class="flex items-center gap-2 text-lg font-bold text-green-700 mb-4 pb-2 border-b border-green-200">
+                        <span>✅ Added (In Target, Not Ref)</span>
+                    </h4>
+                    <div id="diff-added-list" class="space-y-3 overflow-y-auto max-h-[800px] pr-2">
+                        <div class="py-8 text-center text-slate-400">Loading...</div>
+                    </div>
+                    <button id="load-more-added" onclick="loadMoreAdded()" style="display:none"
+                        class="mt-4 px-4 py-2 bg-green-50 text-green-700 rounded hover:bg-green-100 transition-colors font-semibold">
+                        Load All Added Items
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="tab-dist" class="budget-tab-panel">
+            <h3 class="section-title text-blue-700">Project Amount Distribution</h3>
+            <p class="section-desc">Analysis of project amounts to identify clustering and pricing patterns.
+            </p>
+
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200 text-center">
+                    <h3 class="text-slate-500 text-sm uppercase font-bold mb-2">Total Projects</h3>
+                    <p id="dist-total-projects" class="text-3xl font-bold text-blue-700">-</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200 text-center">
+                    <h3 class="text-slate-500 text-sm uppercase font-bold mb-2">Total Amount</h3>
+                    <p id="dist-total-amount" class="text-2xl font-bold text-teal-600">-</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200 text-center">
+                    <h3 class="text-slate-500 text-sm uppercase font-bold mb-2">Unique Amounts</h3>
+                    <p id="dist-unique-amounts" class="text-2xl font-bold text-purple-600">-</p>
+                </div>
+            </div>
+
+            <!-- Chart -->
+            <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200"
+                style="height: 500px; position: relative;">
+                <canvas id="distChart"></canvas>
+                <div id="dist-loading"
+                    class="absolute inset-0 flex flex-col items-center justify-center bg-white bg-opacity-90"
+                    style="display:none;">
+                    <div class="loading-spinner mb-2"></div>
+                    <p class="text-slate-500">Loading distribution data...</p>
+                </div>
+            </div>
+        </div>
 
 
 
@@ -686,7 +725,7 @@
 
 
 
-                <!-- Changes Tab -->
+        <!-- Changes Tab -->
 
     </main>
 
@@ -875,7 +914,7 @@
                 `;
             }
 
-            const cats = ['national_roads', 'secondary_roads', 'bridges', 'flood_control', 'public_buildings'];
+            const cats = ['primary_roads', 'secondary_roads', 'tertiary_roads', 'other_roads', 'bridges_primary', 'bridges_secondary', 'bridges_tertiary', 'bridges_other', 'flood_control', 'public_buildings', 'traffic_signs'];
 
             cats.forEach(cat => {
                 const container = document.getElementById(`stats-${cat}`);
@@ -1247,20 +1286,27 @@
             } else {
                 thead.innerHTML = `
                     <tr>
-                         <th class="w-1/2 p-2 text-left">Project Name</th>
-                         <th class="text-right p-2">Distance (KM)</th>
-                         <th class="text-right p-2">Total Amount</th>
-                         <th class="text-right p-2 font-bold text-red-700">Cost Metric</th>
+                         <th class="w-[40%] p-2 text-left">Project Name</th>
+                         <th class="p-2 text-left">Road Match</th>
+                         <th class="text-right p-2">Dist (KM)</th>
+                         <th class="text-right p-2">Amount</th>
+                         <th class="text-right p-2 font-bold text-red-700">Cost/KM</th>
                     </tr>
                  `;
-                tbody.innerHTML = items.map(item => `
+                tbody.innerHTML = items.map(item => {
+                    const roadHtml = item.road_id
+                        ? `<div class="flex flex-col"><span class="font-mono text-xs font-bold text-indigo-700 bg-indigo-50 px-1 rounded w-fit">${item.road_id}</span><span class="text-[10px] text-slate-500 leading-tight line-clamp-2" title="${item.road_name || ''}">${item.road_name || ''}</span></div>`
+                        : '<span class="text-slate-300 text-xs">-</span>';
+
+                    return `
                     <tr class="hover:bg-red-50 border-b">
-                        <td class="p-2 text-sm font-medium text-slate-800">${item.name}</td>
-                        <td class="p-2 text-right font-mono text-slate-600">${item.distance_km > 0 ? item.distance_km.toFixed(3) : '-'}</td>
-                        <td class="p-2 text-right font-mono text-slate-600">${formatCurrency(item.amount)}</td>
-                        <td class="p-2 text-right font-mono font-bold text-red-700 bg-red-50">${formatCurrency(item.cost_metric)}</td>
+                        <td class="p-2 text-xs font-medium text-slate-800 leading-snug">${item.name}</td>
+                        <td class="p-2 text-xs">${roadHtml}</td>
+                        <td class="p-2 text-right font-mono text-xs text-slate-600">${item.distance_km > 0 ? item.distance_km.toFixed(3) : '-'}</td>
+                        <td class="p-2 text-right font-mono text-xs text-slate-600">${formatCurrency(item.amount)}</td>
+                        <td class="p-2 text-right font-mono text-xs font-bold text-red-700">${formatCurrency(item.cost_metric)}</td>
                     </tr>
-                `).join('');
+                 `}).join('');
             }
 
             // Update Pagination UI
@@ -1394,6 +1440,14 @@
                     <td><div class="text-xs text-slate-600 font-medium">${program}</div></td>
                     <td><div class="text-xs text-slate-600">${region}</div></td>
                     <td><div class="text-xs text-slate-600">${district}</div></td>
+                    <td>
+                        ${item.road_id ? `
+                            <div class="flex flex-col gap-0.5">
+                                <span class="bg-indigo-100 text-indigo-700 font-mono text-xs px-1.5 py-0.5 rounded inline-block w-fit font-bold">${item.road_id}</span>
+                                <span class="text-[10px] text-indigo-500 leading-tight">${item.road_name_match || ''}</span>
+                            </div>
+                        ` : `<span class="text-slate-300 text-xs">-</span>`}
+                    </td>
                     <td class="amount">${formatCurrency(amount)}</td>
                 `;
                 tbody.appendChild(row);

@@ -13151,6 +13151,11 @@ async def get_dpwh_2026_projects(
 
             # Data Query
             offset = (page - 1) * limit
+            
+            # Register Inventory for lookup
+            road_inv_path = str(DATA_ROOT.parent.parent / "data" / "parquet" / "road_inventory_2025.parquet").replace("'", "''")
+            conn.execute(f"CREATE OR REPLACE VIEW road_inventory AS SELECT * FROM read_parquet('{road_inv_path}') WHERE \"Road Name\" IS NOT NULL AND LENGTH(\"Road Name\") > 3")
+            
             query = f"""
                 {base_query}
                 SELECT 
@@ -13159,7 +13164,15 @@ async def get_dpwh_2026_projects(
                     region,
                     district,
                     program,
-                    category
+                    category,
+                    (SELECT "Road ID" FROM road_inventory i 
+                     WHERE extracted.project_name ILIKE '%' || i."Road Name" || '%' 
+                     ORDER BY length(i."Road Name") DESC LIMIT 1
+                    ) as road_id,
+                    (SELECT "Road Name" FROM road_inventory i 
+                     WHERE extracted.project_name ILIKE '%' || i."Road Name" || '%' 
+                     ORDER BY length(i."Road Name") DESC LIMIT 1
+                    ) as road_name_match
                 FROM extracted 
                 WHERE {where_clause} 
                 ORDER BY amount DESC
@@ -13227,21 +13240,105 @@ def _calculate_dpwh_2026_stats():
     import re
     
     parquet_file = DATA_ROOT.parent.parent / "data" / "parquet" / "dpwh_2026_leaf_nodes.parquet"
+    road_inv_file = DATA_ROOT.parent.parent / "data" / "parquet" / "road_inventory_2025.parquet"
+    road_sec_file = DATA_ROOT.parent.parent / "data" / "parquet" / "road_section_inventory_2025.parquet"
+    bridge_inv_file = DATA_ROOT.parent.parent / "data" / "parquet" / "bridge_inventory.parquet"
+
     if not parquet_file.exists():
          raise FileNotFoundError("Data file not found")
          
     conn = duckdb.connect()
     try:
         parquet_path_str = str(parquet_file).replace("'", "''")
+        road_inv_path = str(road_inv_file).replace("'", "''")
+        road_sec_path = str(road_sec_file).replace("'", "''")
+        bridge_inv_path = str(bridge_inv_file).replace("'", "''")
         
-        # Fetch all projects with amounts
-        query = f"SELECT value as name, amount FROM read_parquet('{parquet_path_str}') WHERE amount IS NOT NULL AND amount > 0"
+        # 1. Create Projects Table
+        conn.execute(f"CREATE OR REPLACE TABLE projects AS SELECT value as name, amount FROM read_parquet('{parquet_path_str}') WHERE amount IS NOT NULL AND amount > 0")
+        
+        has_inventory = False
+        has_bridge_inv = False
+        
+        if road_inv_file.exists() and road_sec_file.exists():
+            has_inventory = True
+            # Create Road Class Map
+            conn.execute(f"""
+                CREATE OR REPLACE TABLE road_class_map AS
+                WITH SectionLengths AS (
+                    SELECT "Road ID", "Functional Classification", SUM("Length (m)") as total_len
+                    FROM read_parquet('{road_sec_path}')
+                    GROUP BY 1, 2
+                ),
+                DominantClass AS (
+                    SELECT "Road ID", "Functional Classification",
+                    ROW_NUMBER() OVER (PARTITION BY "Road ID" ORDER BY total_len DESC) as rn
+                    FROM SectionLengths
+                ),
+                UniqueRoads AS (
+                    SELECT "Road ID", "Functional Classification" as classification
+                    FROM DominantClass WHERE rn = 1
+                )
+                SELECT r."Road Name" as road_name, u.classification, u."Road ID" as road_id
+                FROM read_parquet('{road_inv_path}') r
+                JOIN UniqueRoads u ON r."Road ID" = u."Road ID"
+                WHERE r."Road Name" IS NOT NULL AND LENGTH(r."Road Name") > 3
+            """)
+            
+        if bridge_inv_file.exists():
+            has_bridge_inv = True
+            # Create Bridge Map (Link Bridge -> Road Section -> Classification)
+            # Some bridges might have null Section ID, we'll take what we can get.
+            # Bridges don't have lengths in the same way, but let's just get unique bridge names.
+            # If duplicates, we pick one randomly or by ID.
+            conn.execute(f"""
+                CREATE OR REPLACE TABLE bridge_map AS
+                SELECT 
+                    b."Bridge Name" as bridge_name,
+                    b."Bridge ID" as bridge_id,
+                    COALESCE(rs."Functional Classification", 'Unclassified') as bridge_class
+                FROM read_parquet('{bridge_inv_path}') b
+                LEFT JOIN read_parquet('{road_sec_path}') rs ON b."Road Section ID" = rs."Road Section ID"
+                WHERE b."Bridge Name" IS NOT NULL AND LENGTH(b."Bridge Name") > 2
+                QUALIFY ROW_NUMBER() OVER (PARTITION BY b."Bridge Name" ORDER BY b."Bridge ID") = 1
+            """)
+        
+        # 2. Extract Data
+        project_cols = "p.name, p.amount"
+        
+        # Road Match
+        if has_inventory:
+            road_select = """
+                (SELECT classification FROM road_class_map i WHERE p.name ILIKE '%' || i.road_name || '%' ORDER BY length(i.road_name) DESC LIMIT 1) as road_class,
+                (SELECT road_id FROM road_class_map i WHERE p.name ILIKE '%' || i.road_name || '%' ORDER BY length(i.road_name) DESC LIMIT 1) as matched_road_id,
+                (SELECT road_name FROM road_class_map i WHERE p.name ILIKE '%' || i.road_name || '%' ORDER BY length(i.road_name) DESC LIMIT 1) as matched_road_name
+            """
+        else:
+            road_select = "NULL as road_class, NULL as matched_road_id, NULL as matched_road_name"
+            
+        # Bridge Match
+        if has_bridge_inv:
+            bridge_select = """
+                (SELECT bridge_id FROM bridge_map b WHERE p.name ILIKE '%' || b.bridge_name || '%' ORDER BY length(b.bridge_name) DESC LIMIT 1) as matched_bridge_id,
+                (SELECT bridge_name FROM bridge_map b WHERE p.name ILIKE '%' || b.bridge_name || '%' ORDER BY length(b.bridge_name) DESC LIMIT 1) as matched_bridge_name,
+                (SELECT bridge_class FROM bridge_map b WHERE p.name ILIKE '%' || b.bridge_name || '%' ORDER BY length(b.bridge_name) DESC LIMIT 1) as matched_bridge_class
+            """
+        else:
+            bridge_select = "NULL as matched_bridge_id, NULL as matched_bridge_name, NULL as matched_bridge_class"
+
+        query = f"SELECT {project_cols}, {road_select}, {bridge_select} FROM projects p"
+            
         rows = conn.execute(query).fetchall()
         
         projects_by_category = {
-            'national_roads': [],
+            'primary_roads': [],
             'secondary_roads': [],
-            'bridges': [],
+            'tertiary_roads': [],
+            'other_roads': [],
+            'bridges_primary': [],
+            'bridges_secondary': [],
+            'bridges_tertiary': [],
+            'bridges_other': [],
             'flood_control': [],
             'traffic_signs': [],
             'public_buildings': []
@@ -13287,43 +13384,92 @@ def _calculate_dpwh_2026_stats():
         for r in rows:
             name = r[0]
             amount = r[1]
+            road_class = r[2]
+            matched_id = r[3]
+            matched_name = r[4]
+            # Bridge Matches
+            matched_bridge_id = r[5]
+            matched_bridge_name = r[6]
+            matched_bridge_class = r[7]
+            
             name_lower = name.lower()
             
             # Skip summary lines
             if 'public-private partnership' in name_lower or 'priority' in name_lower and 'projects' in name_lower:
                 continue
 
-            # 0. Check for Public Buildings (Use Raw Amount, Ignore Distance)
+            # 0. Check for Public Buildings (Priority over Road Name match)
             if any(x in name_lower for x in ['building', 'hall', 'center', 'school', 'clinic', 'hospital', 'gym', 'mpb', 'multi purpose']):
-                 projects_by_category['public_buildings'].append({'name': name, 'amount': amount, 'cost_metric': amount, 'distance_km': 0})
+                 projects_by_category['public_buildings'].append({'name': name, 'amount': amount, 'cost_metric': amount, 'distance_km': 0, 'road_id': None, 'road_name': None})
+                 processed_count += 1
+                 continue
+                 
+            # 1. Flood Control
+            if any(x in name_lower for x in ['flood', 'river', 'dike', 'seawall', 'drainage', 'water system']):
+                projects_by_category['flood_control'].append({'name': name, 'amount': amount, 'cost_metric': amount, 'distance_km': 0, 'road_id': None, 'road_name': None})
+                processed_count += 1
+                continue
+                
+            # 2. Bridges
+            if 'bridge' in name_lower:
+                 # Use Bridge ID if matched, otherwise fallback to Road ID if matched
+                 final_id = matched_bridge_id if matched_bridge_id else matched_id
+                 final_match_name = matched_bridge_name if matched_bridge_id else matched_name
+                 
+                 item = {'name': name, 'amount': amount, 'cost_metric': amount, 'distance_km': 0, 'road_id': final_id, 'road_name': final_match_name}
+                 
+                 # Categorize Bridge if matched
+                 if matched_bridge_class == 'Primary':
+                    projects_by_category['bridges_primary'].append(item)
+                 elif matched_bridge_class == 'Secondary':
+                    projects_by_category['bridges_secondary'].append(item)
+                 elif matched_bridge_class == 'Tertiary':
+                    projects_by_category['bridges_tertiary'].append(item)
+                 else:
+                    projects_by_category['bridges_other'].append(item)
+
                  processed_count += 1
                  continue
 
-            # 1. Parse Distance for others
+            # 3. Roads
+            # Use distance for cost metric
             ranges = extract_all_chainage_ranges(name)
-            distance_km = calculate_distance(ranges)
+            distance = calculate_distance(ranges)
+            metric = None
+            if distance > 0:
+                 metric = amount / distance
+            # If distance is 0, metric is None (cannot calculate Cost/KM)
             
-            # Validation: Reasonable distance (e.g. > 10 meters and < 500km)
-            if distance_km < 0.01 or distance_km > 500:
-                continue
+            # If we calculated a valid distance, we treat it as a road project regardless of keywords
+            # OR if it has road keywords
+            is_road = distance > 0 or any(x in name_lower for x in ['road', 'highway', 'expressway', 'bypass', 'avenue', 'street', 'way', 'connector', 'diversion'])
             
-            cost_per_km = amount / distance_km
-            item_data = {'name': name, 'amount': amount, 'distance_km': distance_km, 'cost_metric': cost_per_km}
-
-            # 2. Categorize Infrastructure
-            if any(x in name_lower for x in ['flood', 'river', 'drainage', 'creek', 'revetment', 'dike', 'seawall', 'shoreline']):
-                 projects_by_category['flood_control'].append(item_data)
-            elif any(x in name_lower for x in ['bridge', 'viaduct', 'flyover', 'box culvert']):
-                 projects_by_category['bridges'].append(item_data)
-            elif any(x in name_lower for x in ['safety', 'sign', 'marking', 'light', 'lamp']):
-                 projects_by_category['traffic_signs'].append(item_data)
-            else:
-                if any(x in name_lower for x in ['secondary', 'local', 'barangay']):
-                     projects_by_category['secondary_roads'].append(item_data)
+            if is_road:
+                item = {'name': name, 'amount': amount, 'cost_metric': metric, 'distance_km': distance, 'road_id': matched_id, 'road_name': matched_name}
+                
+                if road_class == 'Primary':
+                    projects_by_category['primary_roads'].append(item)
+                elif road_class == 'Secondary':
+                    projects_by_category['secondary_roads'].append(item)
+                elif road_class == 'Tertiary':
+                    projects_by_category['tertiary_roads'].append(item)
                 else:
-                     projects_by_category['national_roads'].append(item_data)
-
-            processed_count += 1
+                    projects_by_category['other_roads'].append(item)
+                processed_count += 1
+                continue
+                
+            # Else: unclassified or signs?
+            # Basic fallback
+            
+            # 4. Traffic Signs
+            if any(x in name_lower for x in ['safety', 'sign', 'marking', 'light', 'lamp']):
+                 # Assign Road Match for Traffic Signs
+                 projects_by_category['traffic_signs'].append({'name': name, 'amount': amount, 'cost_metric': amount, 'distance_km': 0, 'road_id': matched_id, 'road_name': matched_name})
+                 processed_count += 1
+                 continue
+            
+            # If it reaches here, it's an unclassified project.
+            # processed_count += 1 
             
         # Calculate Statistics
         stats_results = {}
@@ -13332,7 +13478,27 @@ def _calculate_dpwh_2026_stats():
                 stats_results[cat] = None
                 continue
                 
-            costs = [x['cost_metric'] for x in items]
+            # Filter valid costs for stat calculation (ignore None)
+            costs = [x['cost_metric'] for x in items if x['cost_metric'] is not None and x['cost_metric'] > 0]
+            
+            if not costs:
+                # No valid costs for stats, but we still have items
+                stats_results[cat] = {
+                    'count': len(items),
+                    'min': 0,
+                    'max': 0,
+                    'mean': 0,
+                    'median': 0,
+                    'std_dev': 0,
+                    'mad': 0,
+                    'threshold': 0,
+                    'outlier_count': 0,
+                    'outlier_total_amount': 0,
+                    'total_dist': sum(x['distance_km'] for x in items),
+                    'total_amount': sum(x['amount'] for x in items)
+                }
+                continue
+            
             costs.sort()
             
             n = len(costs)
@@ -13349,12 +13515,13 @@ def _calculate_dpwh_2026_stats():
             mad = statistics.median(deviations) if deviations else 0
             threshold = median_val + (3 * mad * MAD_SCALE) # 3 Sigma equivalent
             
-            outliers = [x for x in items if x['cost_metric'] > threshold]
+            # Outliers: Check cost_metric only if valid
+            outliers = [x for x in items if x['cost_metric'] is not None and x['cost_metric'] > threshold]
             outlier_count = len(outliers)
             outlier_total_amount = sum(x['amount'] for x in outliers)
             
             stats_results[cat] = {
-                'count': n,
+                'count': len(items),
                 'min': costs[0],
                 'max': costs[-1],
                 'mean': mean_val,
@@ -13377,9 +13544,34 @@ def _calculate_dpwh_2026_stats():
 async def get_dpwh_2026_stats() -> JSONResponse:
     """
     Calculate statistics for DPWH 2026 projects, specifically Cost per KM.
+    Uses JSON cache if available.
     """
     try:
-        _, stats_results, processed_count = _calculate_dpwh_2026_stats()
+        # Cache Handling
+        cache_dir = DATA_ROOT.parent.parent / "data" / "cache"
+        cache_dir.mkdir(parents=True, exist_ok=True)
+        cache_file = cache_dir / "dpwh_2026_stats.json"
+        
+        if cache_file.exists():
+            with open(cache_file, 'r') as f:
+                return JSONResponse(content=json.load(f))
+
+        # Generate Cache if not exists
+        return generate_dpwh_2026_stats_cache()
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JSONResponse(content={"success": False, "error": str(e)}, status_code=500)
+
+def generate_dpwh_2026_stats_cache():
+    """Generates the stats JSON and saves it to cache."""
+    try:
+        cache_dir = DATA_ROOT.parent.parent / "data" / "cache"
+        cache_dir.mkdir(parents=True, exist_ok=True)
+        cache_file = cache_dir / "dpwh_2026_stats.json"
+        
+        projects_by_category, stats_results, processed_count = _calculate_dpwh_2026_stats()
         
         # Calculate Grand Totals
         grand_total_outliers = 0
@@ -13389,24 +13581,41 @@ async def get_dpwh_2026_stats() -> JSONResponse:
             if data and 'outlier_count' in data:
                 grand_total_outliers += data['outlier_count']
                 grand_total_outlier_amount += data.get('outlier_total_amount', 0)
-                
-        return JSONResponse(content={
+        
+        payload = {
             "success": True, 
             "stats": stats_results, 
             "total_parsed": processed_count,
             "grand_total_outliers": grand_total_outliers,
-            "grand_total_outlier_amount": grand_total_outlier_amount
-        })
+            "grand_total_outlier_amount": grand_total_outlier_amount,
+            "generated_at": datetime.now().isoformat()
+        }
+        
+        with open(cache_file, 'w') as f:
+            json.dump(payload, f)
+            
+        print(f"Stats cache generated at {cache_file}")
+        return JSONResponse(content=payload)
     except Exception as e:
-        import traceback
-        traceback.print_exc()
-        return JSONResponse(content={"success": False, "error": str(e)}, status_code=500)
+        print(f"Failed to generate stats cache: {e}")
+        raise e
+
 
 @app.get("/api/dpwh2026/stats/outliers")
 async def get_dpwh_2026_outliers(
     category: str = Query(..., description="Category to fetch outliers for")
 ) -> JSONResponse:
     try:
+        # 1. Try Cache
+        cache_dir = DATA_ROOT.parent.parent / "data" / "cache"
+        cache_file = cache_dir / f"outliers_{category}.json"
+        
+        if cache_file.exists():
+            with open(cache_file, 'r') as f:
+                return JSONResponse(content=json.load(f))
+
+        # 2. Fallback (should ideally be generated by cache script)
+        # If cache missing, calculating on the fly is slow but better than 500
         projects_by_category, stats_results, _ = _calculate_dpwh_2026_stats()
         
         if category not in projects_by_category:
@@ -13421,10 +13630,9 @@ async def get_dpwh_2026_outliers(
         # Filter Outliers
         outliers = [
             x for x in items 
-            if x['cost_metric'] > threshold
+            if x['cost_metric'] is not None and x['cost_metric'] > threshold
         ]
         
-        # Sort by deviation (cost_metric desc)
         outliers.sort(key=lambda x: x['cost_metric'], reverse=True)
         
         return JSONResponse(content={
@@ -13439,6 +13647,65 @@ async def get_dpwh_2026_outliers(
         import traceback
         traceback.print_exc()
         return JSONResponse(content={"success": False, "error": str(e)}, status_code=500)
+
+def generate_dpwh_2026_stats_cache():
+    """Generates the stats JSON and saves it to cache."""
+    try:
+        cache_dir = DATA_ROOT.parent.parent / "data" / "cache"
+        cache_dir.mkdir(parents=True, exist_ok=True)
+        cache_file = cache_dir / "dpwh_2026_stats.json"
+        
+        projects_by_category, stats_results, processed_count = _calculate_dpwh_2026_stats()
+        
+        # Calculate Grand Totals
+        grand_total_outliers = 0
+        grand_total_outlier_amount = 0.0
+        
+        for cat, data in stats_results.items():
+            if data and 'outlier_count' in data:
+                grand_total_outliers += data['outlier_count']
+                grand_total_outlier_amount += data.get('outlier_total_amount', 0)
+                
+                # --- GENERATE OUTLIER CACHE PER CATEGORY ---
+                try:
+                    threshold = data['threshold']
+                    items = projects_by_category.get(cat, [])
+                    outliers = [x for x in items if x['cost_metric'] is not None and x['cost_metric'] > threshold]
+                    outliers.sort(key=lambda x: x['cost_metric'], reverse=True)
+                    
+                    cat_payload = {
+                        "success": True,
+                        "category": cat,
+                        "threshold": threshold,
+                        "count": len(outliers),
+                        "outliers": outliers,
+                        "generated_at": datetime.now().isoformat()
+                    }
+                    
+                    cat_cache_file = cache_dir / f"outliers_{cat}.json"
+                    with open(cat_cache_file, 'w') as f:
+                        json.dump(cat_payload, f)
+                    # print(f"  Saved outliers cache: {cat_cache_file}")
+                except Exception as sub_e:
+                    print(f"  Error caching outliers for {cat}: {sub_e}")
+        
+        payload = {
+            "success": True, 
+            "stats": stats_results, 
+            "total_parsed": processed_count,
+            "grand_total_outliers": grand_total_outliers,
+            "grand_total_outlier_amount": grand_total_outlier_amount,
+            "generated_at": datetime.now().isoformat()
+        }
+        
+        with open(cache_file, 'w') as f:
+            json.dump(payload, f)
+            
+        print(f"Stats cache generated at {cache_file}")
+        return JSONResponse(content=payload)
+    except Exception as e:
+        print(f"Failed to generate stats cache: {e}")
+        raise e
 
 
 @app.get("/api/dpwh2026/repeated")
@@ -13517,17 +13784,26 @@ def _get_dpwh_2026_repeated():
     
     conn = duckdb.connect()
     try:
-         path_2026 = str(parquet_2026).replace("'", "''")
-         # Conditionally add 2024/2025 if they exist
-         p2025_exists = parquet_2025.exists()
-         p2024_exists = parquet_2024.exists()
+        path_2026 = str(parquet_2026).replace("'", "''")
+        path_2025 = str(parquet_2025).replace("'", "''")
+        path_2024 = str(parquet_2024).replace("'", "''")
+        
+        # Add paths for older years
+        path_2023 = str(DATA_ROOT.parent.parent / "data" / "parquet" / "budget_2023.parquet").replace("'", "''")
+        path_2022 = str(DATA_ROOT.parent.parent / "data" / "parquet" / "budget_2022.parquet").replace("'", "''")
+        path_2021 = str(DATA_ROOT.parent.parent / "data" / "parquet" / "budget_2021.parquet").replace("'", "''")
+        path_2020 = str(DATA_ROOT.parent.parent / "data" / "parquet" / "budget_2020.parquet").replace("'", "''")
 
-         path_2025 = str(parquet_2025).replace("'", "''")
-         path_2024 = str(parquet_2024).replace("'", "''")
-         
-         # 2. Blocklist Logic
-         # Exclude: Central Office, GOP, Loan Proceeds, Region X, District Engg Office
-         blocklist_clause = """
+        p2025_exists = parquet_2025.exists() # Keep existing checks
+        p2024_exists = parquet_2024.exists() # Keep existing checks
+        exists_2023 = (DATA_ROOT.parent.parent / "data" / "parquet" / "budget_2023.parquet").exists()
+        exists_2022 = (DATA_ROOT.parent.parent / "data" / "parquet" / "budget_2022.parquet").exists()
+        exists_2021 = (DATA_ROOT.parent.parent / "data" / "parquet" / "budget_2021.parquet").exists()
+        exists_2020 = (DATA_ROOT.parent.parent / "data" / "parquet" / "budget_2020.parquet").exists()
+
+        # 2. Blocklist Logic
+        # Exclude: Central Office, GOP, Loan Proceeds, Region X, District Engg Office
+        blocklist_clause = """
             AND value NOT ILIKE 'Central Office%' 
             AND value NOT ILIKE 'GOP%'
             AND value NOT ILIKE 'Loan Proceeds%'
@@ -13538,13 +13814,13 @@ def _get_dpwh_2026_repeated():
             AND value NOT ILIKE '%National Capital Region%'
             AND value NOT ILIKE '%Public-Private Partnership%'
             AND NOT (value ILIKE '%priority%' AND value ILIKE '%projects%')
-         """
+        """
 
-         # 3. Main Query: 
-         # Find unique project names in 2026 that also exist in 2024 OR 2025
-         
-         # Subquery for 2026 unique items (summing amount if appears multiple times, though we only care about name existence for cross-year)
-         query = f"""
+        # 3. Main Query: 
+        # Find unique project names in 2026 that also exist in ANY previous year (2020-2025)
+        
+        # Subquery for 2026 unique items (summing amount if appears multiple times, though we only care about name existence for cross-year)
+        query = f"""
             WITH Proj2026 AS (
                 SELECT 
                     value as name, 
@@ -13559,45 +13835,75 @@ def _get_dpwh_2026_repeated():
             ),
             History2024 AS (
                 {'SELECT description as name, SUM(amount) * 1000 as amount_2024 FROM read_parquet(' + "'" + path_2024 + "'" + ') GROUP BY description' if p2024_exists else "SELECT '' as name, 0 as amount_2024 WHERE 1=0"}
+            ),
+            History2023 AS (
+                {'SELECT description as name, SUM(amount) * 1000 as amount_2023 FROM read_parquet(' + "'" + path_2023 + "'" + ') GROUP BY description' if exists_2023 else "SELECT '' as name, 0 as amount_2023 WHERE 1=0"}
+            ),
+            History2022 AS (
+                {'SELECT description as name, SUM(amount) * 1000 as amount_2022 FROM read_parquet(' + "'" + path_2022 + "'" + ') GROUP BY description' if exists_2022 else "SELECT '' as name, 0 as amount_2022 WHERE 1=0"}
+            ),
+            History2021 AS (
+                {'SELECT description as name, SUM(amount) * 1000 as amount_2021 FROM read_parquet(' + "'" + path_2021 + "'" + ') GROUP BY description' if exists_2021 else "SELECT '' as name, 0 as amount_2021 WHERE 1=0"}
+            ),
+            History2020 AS (
+                {'SELECT description as name, SUM(amount) * 1000 as amount_2020 FROM read_parquet(' + "'" + path_2020 + "'" + ') GROUP BY description' if exists_2020 else "SELECT '' as name, 0 as amount_2020 WHERE 1=0"}
             )
             SELECT 
                 p.name,
                 p.amount_2026,
                 h25.amount_2025,
-                h24.amount_2024
+                h24.amount_2024,
+                h23.amount_2023,
+                h22.amount_2022,
+                h21.amount_2021,
+                h20.amount_2020
             FROM Proj2026 p
             LEFT JOIN History2025 h25 ON p.name = h25.name
             LEFT JOIN History2024 h24 ON p.name = h24.name
-            WHERE (h25.name IS NOT NULL OR h24.name IS NOT NULL)
+            LEFT JOIN History2023 h23 ON p.name = h23.name
+            LEFT JOIN History2022 h22 ON p.name = h22.name
+            LEFT JOIN History2021 h21 ON p.name = h21.name
+            LEFT JOIN History2020 h20 ON p.name = h20.name
+            WHERE (
+                h25.name IS NOT NULL OR 
+                h24.name IS NOT NULL OR 
+                h23.name IS NOT NULL OR 
+                h22.name IS NOT NULL OR 
+                h21.name IS NOT NULL OR 
+                h20.name IS NOT NULL
+            )
             ORDER BY p.amount_2026 DESC
-         """
-         
-         rows = conn.execute(query).fetchall()
-         
-         repeated_proj = []
-         for r in rows:
-             name = r[0]
-             amt_26 = r[1]
-             amt_25 = r[2] if r[2] is not None else 0
-             amt_24 = r[3] if r[3] is not None else 0
-             
-             history = []
-             if amt_25 > 0: history.append({"year": 2025, "amount": amt_25})
-             if amt_24 > 0: history.append({"year": 2024, "amount": amt_24})
+        """
+        
+        rows = conn.execute(query).fetchall()
+        
+        repeated_proj = []
+        for r in rows:
+            name = r[0]
+            amt_26 = r[1]
+            # DuckDB returns tuples: name, amt26, 25, 24, 23, 22, 21, 20
+            
+            history = []
+            if r[2] and r[2] > 0: history.append({"year": 2025, "amount": r[2]})
+            if r[3] and r[3] > 0: history.append({"year": 2024, "amount": r[3]})
+            if r[4] and r[4] > 0: history.append({"year": 2023, "amount": r[4]})
+            if r[5] and r[5] > 0: history.append({"year": 2022, "amount": r[5]})
+            if r[6] and r[6] > 0: history.append({"year": 2021, "amount": r[6]})
+            if r[7] and r[7] > 0: history.append({"year": 2020, "amount": r[7]})
 
-             # To match existing frontend which expects "amounts" list for "Breakdown"
-             # We will repackage history into "amounts" somewhat artificially or just change frontend
-             # User requested "History columns", so let's send structured history
-             
-             repeated_proj.append({
-                 "name": name,
-                 "count": len(history), # Count of HISTORICAL occurrences
-                 "total_amount": amt_26, # Current year amount
-                 "history": history,     # Detailed history
-                 "amounts": [h['amount'] for h in history] # quick fix for backward combat if any
-             })
-             
-         return repeated_proj
+            # To match existing frontend which expects "amounts" list for "Breakdown"
+            # We will repackage history into "amounts" somewhat artificially or just change frontend
+            # User requested "History columns", so let's send structured history
+            
+            repeated_proj.append({
+                "name": name,
+                "count": len(history), # Count of HISTORICAL occurrences
+                "total_amount": amt_26, # Current year amount
+                "history": history,     # Detailed history
+                "amounts": [h['amount'] for h in history] # quick fix for backward combat if any
+            })
+            
+        return repeated_proj
     finally:
         conn.close()
 
