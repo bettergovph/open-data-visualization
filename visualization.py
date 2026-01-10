@@ -13445,9 +13445,11 @@ async def get_dpwh_2026_outliers(
 async def get_dpwh_2026_repeated() -> JSONResponse:
     try:
         groups = _get_dpwh_2026_repeated()
+        total_amount = sum(g['total_amount'] for g in groups)
         return JSONResponse(content={
             "success": True,
             "count": len(groups),
+            "total_amount": total_amount,
             "groups": groups
         })
     except Exception as e:
