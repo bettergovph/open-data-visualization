@@ -499,6 +499,30 @@ async def get_integrated_coverage(refresh: bool = Query(False)) -> JSONResponse:
     snapshot = _cached_integrated_coverage_snapshot()
     return JSONResponse(content=snapshot)
 
+@app.get("/api/budget/condition-analysis")
+async def get_condition_analysis() -> JSONResponse:
+    """Return the pre-calculated condition risks."""
+    cache_path = DATA_ROOT / "condition_risks.json"
+    if not cache_path.exists():
+        return JSONResponse(
+            content={
+                "success": False, 
+                "error": "Condition analysis cache not found. Please run generation script.",
+                "low_priority_projects": [],
+                "no_data_projects": []
+            }, 
+            status_code=404
+        )
+    
+    try:
+        data = _read_json_file(cache_path)
+        return JSONResponse(content={"success": True, **data})
+    except Exception as e:
+        return JSONResponse(
+            content={"success": False, "error": str(e)}, 
+            status_code=500
+        )
+
 @app.get("/api/mpb/top-buildings")
 async def get_mpb_top_buildings() -> JSONResponse:
     """Return the list of MPB buildings.
