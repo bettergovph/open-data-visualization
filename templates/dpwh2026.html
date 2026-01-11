@@ -269,6 +269,7 @@
                         Projects</a>
                     <a href="#stats" class="budget-tab-btn" data-tab="stats">📊 Statistics</a>
                     <a href="#repeated" class="budget-tab-btn" data-tab="repeated">🔄 Repeated</a>
+                    <a href="#multi" class="budget-tab-btn" data-tab="multi">🚩 Multiple Flags</a>
                     <!-- <a href="#hierarchy" class="budget-tab-btn" data-tab="hierarchy">📂 Hierarchy</a> -->
                     <a href="#uniform" class="budget-tab-btn" data-tab="uniform">⚠️ Uniform Risks</a>
                     <a href="#condition" class="budget-tab-btn" data-tab="condition">🚧 Condition</a>
@@ -344,6 +345,19 @@
                     </div>
                 </div>
 
+
+                <div id="tab-multi" class="budget-tab-panel" style="display: none;">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="section-title text-red-700">🚩 Multi-Flagged Project Risks</h3>
+                        <div class="text-sm text-slate-500">
+                            Projects flagged across multiple categories (Condition + Repeated + Cost Outliers).
+                        </div>
+                    </div>
+                    <div id="multi-tab-content">
+                        <!-- Content injected by renderMultiFlagTable() -->
+                    </div>
+                </div>
+
                 <div id="tab-uniform" class="budget-tab-panel">
                     <div class="flex justify-between items-center mb-4">
                         <div>
@@ -391,6 +405,13 @@
                         <!-- Content injected by renderConditionStatsInline() -->
                     </div>
 
+
+                    <!-- Inline Condition Statistics and Charts -->
+                    <div id="condition-stats-container" class="mb-8 hidden">
+                        <!-- Content injected by renderConditionStatsInline() -->
+                    </div>
+
+                    <!-- Uniform Risks Content (Legacy / Reverted to keep simple if needed, but I moved buttons away) -->
                     <!-- Filter and Download -->
                     <div class="mb-4 flex flex-row gap-4 items-center">
                         <input type="text" id="condition-search"
@@ -429,377 +450,383 @@
                             </tbody>
                         </table>
                     </div>
+
+                    <!-- Pagination for Condition Tab -->
+                    <div id="condition-pagination"
+                        class="flex justify-between items-center mt-4 text-sm text-slate-600"></div>
+
+                </div> <!-- End Uniform Risks Content -->
+
+                <!-- Multiple Flags Content -->
+                <div id="multi-tab-content" class="hidden">
+                    <!-- Content injected by renderMultiFlagTable() -->
                 </div>
 
-                <!-- Stats Tab -->
-                <div id="tab-stats" class="budget-tab-panel" style="display: none;">
-                    <div class="mb-4 flex flex-col md:flex-row md:justify-between md:items-start gap-4">
-                        <div>
-                            <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
-                                📊 Project Cost Analysis
-                                <span
-                                    class="text-sm font-normal text-slate-500 bg-slate-100 px-2 py-1 rounded-full">Based
-                                    on Cost per KM</span>
-                            </h2>
-                            <p class="text-slate-600 mt-1 text-sm">
-                                Analysis of <strong>project efficiency</strong> using statistical anomalies (MAD
-                                method).
-                                Projects flagged as "Red Flags" deviate significantly from the median cost for their
-                                category.
-                            </p>
-                        </div>
-                        <button onclick="downloadMasterRedFlagsCSV()"
-                            class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded shadow text-sm font-medium flex items-center gap-2 whitespace-nowrap">
-                            <svg class="w-4 h-4" width="16" height="16" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
-                                </path>
-                            </svg>
-                            Download Full Risk Report (CSV)
-                        </button>
-                    </div>
-
-                    <div id="stats-loading" class="hidden">
-                        <div class="flex items-center gap-2 text-slate-500">
-                            <div class="loading-spinner w-4 h-4 border-2"></div> Calculating statistics...
-                        </div>
-                    </div>
-
-                    <div id="stats-content">
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            <!-- Summary Card -->
-                            <div class="p-4 bg-blue-50 border border-blue-100 rounded shadow-sm">
-                                <div class="text-blue-800 font-bold mb-1">Total Analyzed</div>
-                                <div class="text-3xl font-mono font-bold text-blue-600" id="stat-total-parsed">-</div>
-                                <div class="text-xs text-blue-500 mt-1">Projects with parsable chainage/dimensions</div>
-                            </div>
-
-                            <!-- Primary Roads -->
-                            <div class="stat-card" data-cat="primary_roads">
-                                <h3 class="font-bold text-slate-700 bg-slate-100 p-2 rounded-t border-b text-sm">🛣️
-                                    National Primary</h3>
-                                <div class="p-3 bg-white border border-t-0 rounded-b shadow-sm"
-                                    id="stats-primary_roads">Loading...</div>
-                            </div>
-
-                            <!-- Secondary Roads -->
-                            <div class="stat-card" data-cat="secondary_roads">
-                                <h3 class="font-bold text-slate-700 bg-slate-100 p-2 rounded-t border-b text-sm">🛣️
-                                    National Secondary</h3>
-                                <div class="p-3 bg-white border border-t-0 rounded-b shadow-sm"
-                                    id="stats-secondary_roads">Loading...</div>
-                            </div>
-
-                            <!-- Tertiary Roads -->
-                            <div class="stat-card" data-cat="tertiary_roads">
-                                <h3 class="font-bold text-slate-700 bg-slate-100 p-2 rounded-t border-b text-sm">🛣️
-                                    National Tertiary</h3>
-                                <div class="p-3 bg-white border border-t-0 rounded-b shadow-sm"
-                                    id="stats-tertiary_roads">Loading...</div>
-                            </div>
-
-                            <!-- Other Roads -->
-                            <div class="stat-card" data-cat="other_roads">
-                                <h3 class="font-bold text-slate-700 bg-slate-100 p-2 rounded-t border-b text-sm">🛤️
-                                    Other/Unclassified Roads</h3>
-                                <div class="p-3 bg-white border border-t-0 rounded-b shadow-sm" id="stats-other_roads">
-                                    Loading...</div>
-                            </div>
-
-                            <!-- Primary Bridges -->
-                            <div class="stat-card" data-cat="bridges_primary">
-                                <h3 class="font-bold text-slate-700 bg-slate-100 p-2 rounded-t border-b text-sm">🌉
-                                    Bridges - Primary</h3>
-                                <div class="p-3 bg-white border border-t-0 rounded-b shadow-sm"
-                                    id="stats-bridges_primary">Loading...</div>
-                            </div>
-
-                            <!-- Secondary Bridges -->
-                            <div class="stat-card" data-cat="bridges_secondary">
-                                <h3 class="font-bold text-slate-700 bg-slate-100 p-2 rounded-t border-b text-sm">🌉
-                                    Bridges - Secondary</h3>
-                                <div class="p-3 bg-white border border-t-0 rounded-b shadow-sm"
-                                    id="stats-bridges_secondary">Loading...</div>
-                            </div>
-
-                            <!-- Tertiary Bridges -->
-                            <div class="stat-card" data-cat="bridges_tertiary">
-                                <h3 class="font-bold text-slate-700 bg-slate-100 p-2 rounded-t border-b text-sm">🌉
-                                    Bridges - Tertiary</h3>
-                                <div class="p-3 bg-white border border-t-0 rounded-b shadow-sm"
-                                    id="stats-bridges_tertiary">Loading...</div>
-                            </div>
-
-                            <!-- Other Bridges -->
-                            <div class="stat-card" data-cat="bridges_other">
-                                <h3 class="font-bold text-slate-700 bg-slate-100 p-2 rounded-t border-b text-sm">🌉
-                                    Bridges - Other</h3>
-                                <div class="p-3 bg-white border border-t-0 rounded-b shadow-sm"
-                                    id="stats-bridges_other">Loading...</div>
-                            </div>
-
-                            <!-- Flood Control -->
-                            <div class="stat-card" data-cat="flood_control">
-                                <h3 class="font-bold text-slate-700 bg-slate-100 p-2 rounded-t border-b text-sm">🌊
-                                    Flood Control</h3>
-                                <div class="p-3 bg-white border border-t-0 rounded-b shadow-sm"
-                                    id="stats-flood_control">
-                                    Loading...</div>
-                            </div>
-
-                            <!-- Public Buildings -->
-                            <div class="stat-card" data-cat="public_buildings">
-                                <h3 class="font-bold text-slate-700 bg-slate-100 p-2 rounded-t border-b text-sm">🏢
-                                    Public Buildings</h3>
-                                <div class="p-3 bg-white border border-t-0 rounded-b shadow-sm"
-                                    id="stats-public_buildings">
-                                    Loading...</div>
-                            </div>
-
-                            <!-- Traffic Signs -->
-                            <div class="stat-card" data-cat="traffic_signs">
-                                <h3 class="font-bold text-slate-700 bg-slate-100 p-2 rounded-t border-b text-sm">🛑
-                                    Traffic Signs</h3>
-                                <div class="p-3 bg-white border border-t-0 rounded-b shadow-sm"
-                                    id="stats-traffic_signs">
-                                    Loading...</div>
-                            </div>
-
-                        </div>
-                    </div>
-                </div>
             </div>
 
-            <!-- Repeated Tab (Keeping it for full view) -->
-            <div id="tab-repeated" class="budget-tab-panel" style="display: none;">
-                <div class="mb-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+            <!-- Stats Tab -->
+            <div id="tab-stats" class="budget-tab-panel" style="display: none;">
+                <div class="mb-4 flex flex-col md:flex-row md:justify-between md:items-start gap-4">
                     <div>
                         <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
-                            🔄 Repeated Projects (Cross-Year)
-                            <span
-                                class="text-sm font-normal text-slate-500 bg-slate-100 px-2 py-1 rounded-full">Comparison
-                                vs 2024/2025</span>
+                            📊 Project Cost Analysis
+                            <span class="text-sm font-normal text-slate-500 bg-slate-100 px-2 py-1 rounded-full">Based
+                                on Cost per KM</span>
                         </h2>
                         <p class="text-slate-600 mt-1 text-sm">
-                            Projects in 2026 that also appear in previous years (2024, 2025).
-                            Excludes generic names (e.g., Central Office, Region X).
+                            Analysis of <strong>project efficiency</strong> using statistical anomalies (MAD
+                            method).
+                            Projects flagged as "Red Flags" deviate significantly from the median cost for their
+                            category.
                         </p>
                     </div>
-                    <div>
-                        <button onclick="downloadRepeatedCSV()"
-                            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow text-sm font-medium flex items-center gap-2">
-                            <svg class="w-4 h-4" width="16" height="16" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-                            </svg>
-                            Download CSV
-                        </button>
-                    </div>
+                    <button onclick="downloadMasterRedFlagsCSV()"
+                        class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded shadow text-sm font-medium flex items-center gap-2 whitespace-nowrap">
+                        <svg class="w-4 h-4" width="16" height="16" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                            </path>
+                        </svg>
+                        Download Full Risk Report (CSV)
+                    </button>
                 </div>
 
-                <div id="repeated-summary" class="hidden mb-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200 flex items-center gap-4">
-                            <div class="p-3 bg-blue-100 rounded-full text-blue-600">
-                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
-                                    </path>
-                                </svg>
-                            </div>
-                            <div>
-                                <h3 class="text-sm font-bold text-slate-500 uppercase">Total Repeated Projects</h3>
-                                <div id="repeated-total-count" class="text-2xl font-bold text-slate-800">-</div>
-                            </div>
-                        </div>
-                        <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200 flex items-center gap-4">
-                            <div class="p-3 bg-green-100 rounded-full text-green-600">
-                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
-                                    </path>
-                                </svg>
-                            </div>
-                            <div>
-                                <h3 class="text-sm font-bold text-slate-500 uppercase">Total Cost Involved</h3>
-                                <div id="repeated-total-amount" class="text-2xl font-bold text-green-700">-</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="repeated-loading" class="hidden">
+                <div id="stats-loading" class="hidden">
                     <div class="flex items-center gap-2 text-slate-500">
-                        <div class="loading-spinner w-4 h-4 border-2"></div> Finding duplicates...
+                        <div class="loading-spinner w-4 h-4 border-2"></div> Calculating statistics...
                     </div>
                 </div>
 
-                <div id="repeated-content">
-                    <div class="bg-white rounded-lg shadow border border-slate-200 overflow-hidden">
-                        <table class="data-table">
-                            <thead class="bg-slate-50">
-                                <tr>
-                                    <th class="text-left w-1/2">Project Name</th>
-                                    <th class="text-center w-24">Yrs Found</th>
-                                    <th class="text-right">2026 Amount</th>
-                                    <th class="text-left pl-4">History</th>
-                                </tr>
-                            </thead>
-                            <tbody id="repeated-tbody"></tbody>
-                        </table>
+                <div id="stats-content">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <!-- Summary Card -->
+                        <div class="p-4 bg-blue-50 border border-blue-100 rounded shadow-sm">
+                            <div class="text-blue-800 font-bold mb-1">Total Analyzed</div>
+                            <div class="text-3xl font-mono font-bold text-blue-600" id="stat-total-parsed">-
+                            </div>
+                            <div class="text-xs text-blue-500 mt-1">Projects with parsable chainage/dimensions
+                            </div>
+                        </div>
+
+                        <!-- Primary Roads -->
+                        <div class="stat-card" data-cat="primary_roads">
+                            <h3 class="font-bold text-slate-700 bg-slate-100 p-2 rounded-t border-b text-sm">🛣️
+                                National Primary</h3>
+                            <div class="p-3 bg-white border border-t-0 rounded-b shadow-sm" id="stats-primary_roads">
+                                Loading...</div>
+                        </div>
+
+                        <!-- Secondary Roads -->
+                        <div class="stat-card" data-cat="secondary_roads">
+                            <h3 class="font-bold text-slate-700 bg-slate-100 p-2 rounded-t border-b text-sm">🛣️
+                                National Secondary</h3>
+                            <div class="p-3 bg-white border border-t-0 rounded-b shadow-sm" id="stats-secondary_roads">
+                                Loading...</div>
+                        </div>
+
+                        <!-- Tertiary Roads -->
+                        <div class="stat-card" data-cat="tertiary_roads">
+                            <h3 class="font-bold text-slate-700 bg-slate-100 p-2 rounded-t border-b text-sm">🛣️
+                                National Tertiary</h3>
+                            <div class="p-3 bg-white border border-t-0 rounded-b shadow-sm" id="stats-tertiary_roads">
+                                Loading...</div>
+                        </div>
+
+                        <!-- Other Roads -->
+                        <div class="stat-card" data-cat="other_roads">
+                            <h3 class="font-bold text-slate-700 bg-slate-100 p-2 rounded-t border-b text-sm">🛤️
+                                Other/Unclassified Roads</h3>
+                            <div class="p-3 bg-white border border-t-0 rounded-b shadow-sm" id="stats-other_roads">
+                                Loading...</div>
+                        </div>
+
+                        <!-- Primary Bridges -->
+                        <div class="stat-card" data-cat="bridges_primary">
+                            <h3 class="font-bold text-slate-700 bg-slate-100 p-2 rounded-t border-b text-sm">🌉
+                                Bridges - Primary</h3>
+                            <div class="p-3 bg-white border border-t-0 rounded-b shadow-sm" id="stats-bridges_primary">
+                                Loading...</div>
+                        </div>
+
+                        <!-- Secondary Bridges -->
+                        <div class="stat-card" data-cat="bridges_secondary">
+                            <h3 class="font-bold text-slate-700 bg-slate-100 p-2 rounded-t border-b text-sm">🌉
+                                Bridges - Secondary</h3>
+                            <div class="p-3 bg-white border border-t-0 rounded-b shadow-sm"
+                                id="stats-bridges_secondary">Loading...</div>
+                        </div>
+
+                        <!-- Tertiary Bridges -->
+                        <div class="stat-card" data-cat="bridges_tertiary">
+                            <h3 class="font-bold text-slate-700 bg-slate-100 p-2 rounded-t border-b text-sm">🌉
+                                Bridges - Tertiary</h3>
+                            <div class="p-3 bg-white border border-t-0 rounded-b shadow-sm" id="stats-bridges_tertiary">
+                                Loading...</div>
+                        </div>
+
+                        <!-- Other Bridges -->
+                        <div class="stat-card" data-cat="bridges_other">
+                            <h3 class="font-bold text-slate-700 bg-slate-100 p-2 rounded-t border-b text-sm">🌉
+                                Bridges - Other</h3>
+                            <div class="p-3 bg-white border border-t-0 rounded-b shadow-sm" id="stats-bridges_other">
+                                Loading...</div>
+                        </div>
+
+                        <!-- Flood Control -->
+                        <div class="stat-card" data-cat="flood_control">
+                            <h3 class="font-bold text-slate-700 bg-slate-100 p-2 rounded-t border-b text-sm">🌊
+                                Flood Control</h3>
+                            <div class="p-3 bg-white border border-t-0 rounded-b shadow-sm" id="stats-flood_control">
+                                Loading...</div>
+                        </div>
+
+                        <!-- Public Buildings -->
+                        <div class="stat-card" data-cat="public_buildings">
+                            <h3 class="font-bold text-slate-700 bg-slate-100 p-2 rounded-t border-b text-sm">🏢
+                                Public Buildings</h3>
+                            <div class="p-3 bg-white border border-t-0 rounded-b shadow-sm" id="stats-public_buildings">
+                                Loading...</div>
+                        </div>
+
+                        <!-- Traffic Signs -->
+                        <div class="stat-card" data-cat="traffic_signs">
+                            <h3 class="font-bold text-slate-700 bg-slate-100 p-2 rounded-t border-b text-sm">🛑
+                                Traffic Signs</h3>
+                            <div class="p-3 bg-white border border-t-0 rounded-b shadow-sm" id="stats-traffic_signs">
+                                Loading...</div>
+                        </div>
+
                     </div>
-                    <!-- Pagination for Repeated Tab -->
-                    <div id="repeated-pagination" class="flex justify-between items-center mt-4 text-sm text-slate-600">
-                        <div id="repeated-page-info">Page 1</div>
-                        <div class="flex gap-2">
-                            <button id="btn-repeated-prev" onclick="changeRepeatedPage(-1)"
-                                class="px-3 py-1 bg-white border rounded hover:bg-slate-50 disabled:opacity-50">Previous</button>
-                            <button id="btn-repeated-next" onclick="changeRepeatedPage(1)"
-                                class="px-3 py-1 bg-white border rounded hover:bg-slate-50 disabled:opacity-50">Next</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Repeated Tab (Keeping it for full view) -->
+        <div id="tab-repeated" class="budget-tab-panel" style="display: none;">
+            <div class="mb-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                        🔄 Repeated Projects (Cross-Year)
+                        <span class="text-sm font-normal text-slate-500 bg-slate-100 px-2 py-1 rounded-full">Comparison
+                            vs 2024/2025</span>
+                    </h2>
+                    <p class="text-slate-600 mt-1 text-sm">
+                        Projects in 2026 that also appear in previous years (2024, 2025).
+                        Excludes generic names (e.g., Central Office, Region X).
+                    </p>
+                </div>
+                <div>
+                    <button onclick="downloadRepeatedCSV()"
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow text-sm font-medium flex items-center gap-2">
+                        <svg class="w-4 h-4" width="16" height="16" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                        </svg>
+                        Download CSV
+                    </button>
+                </div>
+            </div>
+
+            <div id="repeated-summary" class="hidden mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200 flex items-center gap-4">
+                        <div class="p-3 bg-blue-100 rounded-full text-blue-600">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
+                                </path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-500 uppercase">Total Repeated Projects</h3>
+                            <div id="repeated-total-count" class="text-2xl font-bold text-slate-800">-</div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200 flex items-center gap-4">
+                        <div class="p-3 bg-green-100 rounded-full text-green-600">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                                </path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-500 uppercase">Total Cost Involved</h3>
+                            <div id="repeated-total-amount" class="text-2xl font-bold text-green-700">-</div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Changes Tab -->
-            <div id="tab-diff" class="budget-tab-panel">
-                <div class="flex justify-between items-center mb-6">
-                    <div>
-                        <h3 class="section-title text-indigo-700">Budget Changes (vs GAB Annex A-5)</h3>
-                        <p class="text-slate-500">
-                            Comparing <strong>Parsed DPWH 2026</strong> (Target) against <strong>GAB Annex A-5
-                                Baseline</strong> (Reference).
-                        </p>
-                    </div>
-                    <div class="text-sm text-right">
-                        <button onclick="loadDiffData()"
-                            class="px-4 py-2 bg-indigo-50 text-indigo-700 rounded hover:bg-indigo-100 transition-colors">
-                            🔄 Refresh Diff
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Diff Stats -->
-                <div id="diff-stats" class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
-                    <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200">
-                        <div class="text-xs text-slate-500 uppercase font-bold">Ref Count</div>
-                        <div id="stats-ref-count" class="text-xl font-bold text-slate-700">-</div>
-                    </div>
-                    <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200">
-                        <div class="text-xs text-slate-500 uppercase font-bold">Target Count</div>
-                        <div id="stats-target-count" class="text-xl font-bold text-slate-700">-</div>
-                    </div>
-                    <div
-                        class="bg-white p-4 rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-green-500">
-                        <div class="text-xs text-green-600 uppercase font-bold">Items Added</div>
-                        <div id="stats-added-count" class="text-2xl font-bold text-green-700">-</div>
-                    </div>
-                    <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-red-500">
-                        <div class="text-xs text-red-600 uppercase font-bold">Items Removed</div>
-                        <div id="stats-removed-count" class="text-2xl font-bold text-red-700">-</div>
-                    </div>
-                    <div
-                        class="bg-white p-4 rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-orange-500">
-                        <div class="text-xs text-orange-600 uppercase font-bold">Modified Items</div>
-                        <div id="stats-modified-count" class="text-2xl font-bold text-orange-700">-</div>
-                    </div>
-                    <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-blue-500">
-                        <div class="text-xs text-blue-600 uppercase font-bold">Matches</div>
-                        <div id="stats-match-count" class="text-2xl font-bold text-blue-700">-</div>
-                    </div>
-                </div>
-
-                <!-- Search Filter -->
-                <div class="mb-6">
-                    <input type="text" id="diff-search"
-                        class="w-full p-2 border border-slate-300 rounded focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-                        placeholder="Filter changes by Project Name or Program..." onkeyup="filterDiff(this.value)">
-                </div>
-
-                <!-- Diff Columns -->
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <!-- Removed Column -->
-                    <div class="flex flex-col h-full">
-                        <h4
-                            class="flex items-center gap-2 text-lg font-bold text-red-700 mb-4 pb-2 border-b border-red-200">
-                            <span>❌ Removed</span>
-                        </h4>
-                        <div id="diff-removed-list" class="space-y-3 overflow-y-auto max-h-[800px] pr-2">
-                            <div class="py-8 text-center text-slate-400">Loading...</div>
-                        </div>
-                        <button id="load-more-removed" onclick="loadMoreRemoved()" style="display:none"
-                            class="mt-4 px-4 py-2 bg-red-50 text-red-700 rounded hover:bg-red-100 transition-colors font-semibold">
-                            Load All Removed Items
-                        </button>
-                    </div>
-
-                    <!-- Modified Column -->
-                    <div class="flex flex-col h-full">
-                        <h4
-                            class="flex items-center gap-2 text-lg font-bold text-orange-700 mb-4 pb-2 border-b border-orange-200">
-                            <span>⚠️ Modified</span>
-                        </h4>
-                        <div id="diff-modified-list" class="space-y-3 overflow-y-auto max-h-[800px] pr-2">
-                            <div class="py-8 text-center text-slate-400">Loading...</div>
-                        </div>
-                        <button id="load-more-modified" onclick="loadMoreModified()" style="display:none"
-                            class="mt-4 px-4 py-2 bg-orange-50 text-orange-700 rounded hover:bg-orange-100 transition-colors font-semibold">
-                            Load All Modified Items
-                        </button>
-                    </div>
-
-                    <!-- Added Column -->
-                    <div class="flex flex-col h-full">
-                        <h4
-                            class="flex items-center gap-2 text-lg font-bold text-green-700 mb-4 pb-2 border-b border-green-200">
-                            <span>✅ Added (In Target, Not Ref)</span>
-                        </h4>
-                        <div id="diff-added-list" class="space-y-3 overflow-y-auto max-h-[800px] pr-2">
-                            <div class="py-8 text-center text-slate-400">Loading...</div>
-                        </div>
-                        <button id="load-more-added" onclick="loadMoreAdded()" style="display:none"
-                            class="mt-4 px-4 py-2 bg-green-50 text-green-700 rounded hover:bg-green-100 transition-colors font-semibold">
-                            Load All Added Items
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div id="tab-dist" class="budget-tab-panel">
-                <h3 class="section-title text-blue-700">Project Amount Distribution</h3>
-                <p class="section-desc">Analysis of project amounts to identify clustering and pricing patterns.
-                </p>
-
-                <!-- Stats Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200 text-center">
-                        <h3 class="text-slate-500 text-sm uppercase font-bold mb-2">Total Projects</h3>
-                        <p id="dist-total-projects" class="text-3xl font-bold text-blue-700">-</p>
-                    </div>
-                    <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200 text-center">
-                        <h3 class="text-slate-500 text-sm uppercase font-bold mb-2">Total Amount</h3>
-                        <p id="dist-total-amount" class="text-2xl font-bold text-teal-600">-</p>
-                    </div>
-                    <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200 text-center">
-                        <h3 class="text-slate-500 text-sm uppercase font-bold mb-2">Unique Amounts</h3>
-                        <p id="dist-unique-amounts" class="text-2xl font-bold text-purple-600">-</p>
-                    </div>
-                </div>
-
-                <!-- Chart -->
-                <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200"
-                    style="height: 500px; position: relative;">
-                    <canvas id="distChart"></canvas>
-                    <div id="dist-loading"
-                        class="absolute inset-0 flex flex-col items-center justify-center bg-white bg-opacity-90"
-                        style="display:none;">
-                        <div class="loading-spinner mb-2"></div>
-                        <p class="text-slate-500">Loading distribution data...</p>
-                    </div>
+            <div id="repeated-loading" class="hidden">
+                <div class="flex items-center gap-2 text-slate-500">
+                    <div class="loading-spinner w-4 h-4 border-2"></div> Finding duplicates...
                 </div>
             </div>
 
+            <div id="repeated-content">
+                <div class="bg-white rounded-lg shadow border border-slate-200 overflow-hidden">
+                    <table class="data-table">
+                        <thead class="bg-slate-50">
+                            <tr>
+                                <th class="text-left w-1/2">Project Name</th>
+                                <th class="text-center w-24">Yrs Found</th>
+                                <th class="text-right">2026 Amount</th>
+                                <th class="text-left pl-4">History</th>
+                            </tr>
+                        </thead>
+                        <tbody id="repeated-tbody"></tbody>
+                    </table>
+                </div>
+                <!-- Pagination for Repeated Tab -->
+                <div id="repeated-pagination" class="flex justify-between items-center mt-4 text-sm text-slate-600">
+                    <div id="repeated-page-info">Page 1</div>
+                    <div class="flex gap-2">
+                        <button id="btn-repeated-prev" onclick="changeRepeatedPage(-1)"
+                            class="px-3 py-1 bg-white border rounded hover:bg-slate-50 disabled:opacity-50">Previous</button>
+                        <button id="btn-repeated-next" onclick="changeRepeatedPage(1)"
+                            class="px-3 py-1 bg-white border rounded hover:bg-slate-50 disabled:opacity-50">Next</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Changes Tab -->
+        <div id="tab-diff" class="budget-tab-panel">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h3 class="section-title text-indigo-700">Budget Changes (vs GAB Annex A-5)</h3>
+                    <p class="text-slate-500">
+                        Comparing <strong>Parsed DPWH 2026</strong> (Target) against <strong>GAB Annex A-5
+                            Baseline</strong> (Reference).
+                    </p>
+                </div>
+                <div class="text-sm text-right">
+                    <button onclick="loadDiffData()"
+                        class="px-4 py-2 bg-indigo-50 text-indigo-700 rounded hover:bg-indigo-100 transition-colors">
+                        🔄 Refresh Diff
+                    </button>
+                </div>
+            </div>
+
+            <!-- Diff Stats -->
+            <div id="diff-stats" class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200">
+                    <div class="text-xs text-slate-500 uppercase font-bold">Ref Count</div>
+                    <div id="stats-ref-count" class="text-xl font-bold text-slate-700">-</div>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200">
+                    <div class="text-xs text-slate-500 uppercase font-bold">Target Count</div>
+                    <div id="stats-target-count" class="text-xl font-bold text-slate-700">-</div>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-green-500">
+                    <div class="text-xs text-green-600 uppercase font-bold">Items Added</div>
+                    <div id="stats-added-count" class="text-2xl font-bold text-green-700">-</div>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-red-500">
+                    <div class="text-xs text-red-600 uppercase font-bold">Items Removed</div>
+                    <div id="stats-removed-count" class="text-2xl font-bold text-red-700">-</div>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-orange-500">
+                    <div class="text-xs text-orange-600 uppercase font-bold">Modified Items</div>
+                    <div id="stats-modified-count" class="text-2xl font-bold text-orange-700">-</div>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-blue-500">
+                    <div class="text-xs text-blue-600 uppercase font-bold">Matches</div>
+                    <div id="stats-match-count" class="text-2xl font-bold text-blue-700">-</div>
+                </div>
+            </div>
+
+            <!-- Search Filter -->
+            <div class="mb-6">
+                <input type="text" id="diff-search"
+                    class="w-full p-2 border border-slate-300 rounded focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                    placeholder="Filter changes by Project Name or Program..." onkeyup="filterDiff(this.value)">
+            </div>
+
+            <!-- Diff Columns -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Removed Column -->
+                <div class="flex flex-col h-full">
+                    <h4
+                        class="flex items-center gap-2 text-lg font-bold text-red-700 mb-4 pb-2 border-b border-red-200">
+                        <span>❌ Removed</span>
+                    </h4>
+                    <div id="diff-removed-list" class="space-y-3 overflow-y-auto max-h-[800px] pr-2">
+                        <div class="py-8 text-center text-slate-400">Loading...</div>
+                    </div>
+                    <button id="load-more-removed" onclick="loadMoreRemoved()" style="display:none"
+                        class="mt-4 px-4 py-2 bg-red-50 text-red-700 rounded hover:bg-red-100 transition-colors font-semibold">
+                        Load All Removed Items
+                    </button>
+                </div>
+
+                <!-- Modified Column -->
+                <div class="flex flex-col h-full">
+                    <h4
+                        class="flex items-center gap-2 text-lg font-bold text-orange-700 mb-4 pb-2 border-b border-orange-200">
+                        <span>⚠️ Modified</span>
+                    </h4>
+                    <div id="diff-modified-list" class="space-y-3 overflow-y-auto max-h-[800px] pr-2">
+                        <div class="py-8 text-center text-slate-400">Loading...</div>
+                    </div>
+                    <button id="load-more-modified" onclick="loadMoreModified()" style="display:none"
+                        class="mt-4 px-4 py-2 bg-orange-50 text-orange-700 rounded hover:bg-orange-100 transition-colors font-semibold">
+                        Load All Modified Items
+                    </button>
+                </div>
+
+                <!-- Added Column -->
+                <div class="flex flex-col h-full">
+                    <h4
+                        class="flex items-center gap-2 text-lg font-bold text-green-700 mb-4 pb-2 border-b border-green-200">
+                        <span>✅ Added (In Target, Not Ref)</span>
+                    </h4>
+                    <div id="diff-added-list" class="space-y-3 overflow-y-auto max-h-[800px] pr-2">
+                        <div class="py-8 text-center text-slate-400">Loading...</div>
+                    </div>
+                    <button id="load-more-added" onclick="loadMoreAdded()" style="display:none"
+                        class="mt-4 px-4 py-2 bg-green-50 text-green-700 rounded hover:bg-green-100 transition-colors font-semibold">
+                        Load All Added Items
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="tab-dist" class="budget-tab-panel">
+            <h3 class="section-title text-blue-700">Project Amount Distribution</h3>
+            <p class="section-desc">Analysis of project amounts to identify clustering and pricing patterns.
+            </p>
+
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200 text-center">
+                    <h3 class="text-slate-500 text-sm uppercase font-bold mb-2">Total Projects</h3>
+                    <p id="dist-total-projects" class="text-3xl font-bold text-blue-700">-</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200 text-center">
+                    <h3 class="text-slate-500 text-sm uppercase font-bold mb-2">Total Amount</h3>
+                    <p id="dist-total-amount" class="text-2xl font-bold text-teal-600">-</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200 text-center">
+                    <h3 class="text-slate-500 text-sm uppercase font-bold mb-2">Unique Amounts</h3>
+                    <p id="dist-unique-amounts" class="text-2xl font-bold text-purple-600">-</p>
+                </div>
+            </div>
+
+            <!-- Chart -->
+            <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200"
+                style="height: 500px; position: relative;">
+                <canvas id="distChart"></canvas>
+                <div id="dist-loading"
+                    class="absolute inset-0 flex flex-col items-center justify-center bg-white bg-opacity-90"
+                    style="display:none;">
+                    <div class="loading-spinner mb-2"></div>
+                    <p class="text-slate-500">Loading distribution data...</p>
+                </div>
+            </div>
+        </div>
 
 
 
@@ -807,7 +834,8 @@
 
 
 
-            <!-- Changes Tab -->
+
+        <!-- Changes Tab -->
 
     </main>
 
@@ -859,6 +887,8 @@
                             class="px-3 py-1 bg-white border rounded hover:bg-slate-100 disabled:opacity-50 text-slate-700">Next</button>
                     </div>
                 </div>
+
+
 
                 <div class="flex gap-4 items-center">
                     <span class="text-slate-500 hidden sm:inline">Sorted by highest deviation first.</span>
@@ -923,8 +953,8 @@
                         fetchHierarchy();
                     } else if (tabName === 'uniform') {
                         fetchUniformRisks();
-                    } else if (tabName === 'uniform') {
-                        fetchUniformRisks();
+                    } else if (tabName === 'multi') {
+                        loadMultiFlagData();
                     } else if (tabName === 'dist') {
                         fetchDistribution();
                     } else if (tabName === 'stats') {
@@ -961,93 +991,225 @@
         }
 
         function renderStats(data) {
-            document.getElementById('stat-total-parsed').textContent = data.total_parsed.toLocaleString();
+            const parsedEl = document.getElementById('stat-total-parsed');
+            if (parsedEl) parsedEl.textContent = data.total_parsed.toLocaleString();
 
-            // Render Grand Total Card if not exists, or update it
+            // Render Grand Total Card (Keeping this as a card/summary box)
             let grandTotalContainer = document.getElementById('stats-grand-total');
             if (!grandTotalContainer) {
-                // Insert it before the grid
+                const container = document.getElementById('tab-stats');
+                // Insert after the title/search area
+                grandTotalContainer = document.createElement('div');
+                grandTotalContainer.id = 'stats-grand-total';
+                grandTotalContainer.className = "mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex flex-col sm:flex-row justify-between items-center shadow-sm";
                 const grid = document.querySelector('#tab-stats .grid');
                 if (grid) {
-                    grandTotalContainer = document.createElement('div');
-                    grandTotalContainer.id = 'stats-grand-total';
-                    grandTotalContainer.className = "mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex flex-col sm:flex-row justify-between items-center shadow-sm";
                     grid.parentNode.insertBefore(grandTotalContainer, grid);
+                } else {
+                    // Fallback if grid is gone (subsequent renders)
+                    const wrapper = document.getElementById('stats-table-wrapper');
+                    if (wrapper) wrapper.parentNode.insertBefore(grandTotalContainer, wrapper);
                 }
             }
 
             if (grandTotalContainer) {
                 grandTotalContainer.innerHTML = `
-                    <div class="flex items-center gap-3">
-                        <div class="p-3 bg-red-100 rounded-full text-red-600">
-                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-bold text-red-800">Total Red Flags Found</h3>
-                            <p class="text-sm text-red-600">Across all categories (Cost anomalies)</p>
-                        </div>
+                <div class="flex items-center gap-3">
+                    <div class="p-3 bg-red-100 rounded-full text-red-600">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
                     </div>
-                    <div class="text-right mt-4 sm:mt-0">
-                        <div class="text-3xl font-bold text-red-700 font-mono">${data.grand_total_outliers ? data.grand_total_outliers.toLocaleString() : '0'}</div>
-                        <div class="text-sm font-bold text-red-800 bg-red-100 px-2 py-0.5 rounded mt-1">
-                            Total Cost: ${formatCurrency(data.grand_total_outlier_amount || 0)}
-                        </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-red-800">Total Red Flags Found</h3>
+                        <p class="text-sm text-red-600">Across all categories (Cost anomalies)</p>
                     </div>
-                `;
+                </div>
+                <div class="text-right mt-4 sm:mt-0">
+                    <div class="text-3xl font-bold text-red-700 font-mono">${data.grand_total_outliers ? data.grand_total_outliers.toLocaleString() : '0'}</div>
+                    <div class="text-sm font-bold text-red-800 bg-red-100 px-2 py-0.5 rounded mt-1">
+                        Total Cost: ${formatCurrency(data.grand_total_outlier_amount || 0)}
+                    </div>
+                </div>
+            `;
             }
 
-            const cats = ['primary_roads', 'secondary_roads', 'tertiary_roads', 'other_roads', 'bridges_primary', 'bridges_secondary', 'bridges_tertiary', 'bridges_other', 'flood_control', 'public_buildings', 'traffic_signs'];
+            // Helper to sum stats
+            const sumStats = (cats) => {
+                return cats.reduce((acc, cat) => {
+                    const s = data.stats[cat];
+                    if (!s) return acc;
+                    return {
+                        count: acc.count + s.count,
+                        total_amount: acc.total_amount + (s.total_amount || 0),
+                        total_dist: acc.total_dist + (s.total_dist || 0),
+                        outlier_count: acc.outlier_count + s.outlier_count,
+                        outlier_total_amount: acc.outlier_total_amount + (s.outlier_total_amount || 0),
+                        has_data: true
+                    };
+                }, { count: 0, total_amount: 0, total_dist: 0, outlier_count: 0, outlier_total_amount: 0, has_data: false });
+            };
 
-            cats.forEach(cat => {
-                const container = document.getElementById(`stats-${cat}`);
-                const s = data.stats[cat];
-                if (!s) {
-                    container.innerHTML = '<span class="text-slate-400 italic">No data found</span>';
-                    return;
+            const roadCats = ['primary_roads', 'secondary_roads', 'tertiary_roads', 'other_roads'];
+            const bridgeCats = ['bridges_primary', 'bridges_secondary', 'bridges_tertiary', 'bridges_other'];
+            const otherCats = ['flood_control', 'public_buildings', 'traffic_signs'];
+
+            const roadSum = sumStats(roadCats);
+            const bridgeSum = sumStats(bridgeCats);
+
+            // Group Definitions
+            const groups = [
+                { title: 'Roads Summary', summary: roadSum, cats: roadCats, type: 'road' },
+                { title: 'Bridges Summary', summary: bridgeSum, cats: bridgeCats, type: 'bridge' },
+                { title: 'Others', summary: null, cats: otherCats, type: 'other' }
+            ];
+
+            let tableHtml = `
+            <div class="table-wrapper" id="stats-table-wrapper">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th class="bg-slate-50">Category</th>
+                            <th class="bg-slate-50 text-right">Count</th>
+                            <th class="bg-slate-50 text-right">Mean Cost</th>
+                            <th class="bg-slate-50 text-right">Median</th>
+                            <th class="bg-slate-50 text-right">Max Cost</th>
+                            <th class="bg-slate-50 text-right">Threshold</th>
+                            <th class="bg-red-50 text-red-700 text-right">Red Flags</th>
+                            <th class="bg-red-50 text-red-700 text-right">Flag Amt</th>
+                            <th class="bg-red-50 text-red-700 text-right">% Flags</th>
+                            <th class="bg-red-50 text-red-700 text-right text-xs">% Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+
+            const renderRow = (cat, label, isSummary = false) => {
+                // For summary, cat is the object. For normal, cat is string key
+                let s, name;
+                if (isSummary) {
+                    s = cat;
+                    name = label;
+                    if (!s.has_data) return '';
+                } else {
+                    s = data.stats[cat];
+                    if (cat === 'flood_control') {
+                        name = 'Drainage';
+                    } else {
+                        name = cat.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                    }
+                    if (!s) return '';
                 }
 
-                const label = cat === 'public_buildings' ? 'Mean Cost:' : 'Mean Cost/KM:';
+                // Calculate derived metrics for summary
+                let mean = s.mean;
+                if (isSummary) {
+                    if (label.includes('Roads') && s.total_dist > 0) mean = s.total_amount / s.total_dist;
+                    else if (label.includes('Bridges') && s.count > 0) mean = s.total_amount / s.count;
+                    else mean = 0;
+                }
 
-                container.innerHTML = `
-                    <div class="space-y-2 text-sm">
-                        <div class="flex justify-between"><span class="text-slate-500">Count:</span> <span class="font-mono font-medium">${s.count}</span></div>
-                        <div class="flex justify-between border-b pb-1">
-                            <span class="text-slate-500">${label}</span> 
-                            <span class="font-mono font-bold text-slate-800">${formatCurrency(s.mean)}</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-slate-500">Median:</span> 
-                            <span class="font-mono text-slate-700">${formatCurrency(s.median)}</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-slate-500">Min:</span> 
-                            <span class="font-mono text-green-700">${formatCurrency(s.min)}</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-slate-500">Max:</span> 
-                            <span class="font-mono text-red-700">${formatCurrency(s.max)}</span>
-                        </div>
-                        <div onclick="showOutliers('${cat}')" class="flex flex-col pt-2 mt-2 border-t border-red-100 bg-red-50 hover:bg-red-100 p-2 rounded gap-2 cursor-pointer transition-colors group">
-                            <div class="flex justify-between items-center">
-                                <span class="text-red-700 font-bold flex items-center gap-1">
-                                    🚩 Red Flags:
-                                </span> 
-                                <span class="font-mono font-bold text-red-700 group-hover:underline px-1 rounded">
-                                    ${s.outlier_count}
-                                </span>
-                            </div>
-                            <div class="flex justify-between items-center text-xs border-t border-red-200 pt-1">
-                                <span class="text-red-800 font-semibold">Total Cost:</span>
-                                <span class="font-mono text-red-700 font-bold">${formatCurrency(s.outlier_total_amount || 0)}</span>
-                            </div>
-                        </div>
+                const rowClass = isSummary ? "bg-slate-100 font-bold border-t-2 border-slate-300" : "hover:bg-slate-50";
+                const nameClass = isSummary ? "text-slate-900" : "text-slate-700 pl-8";
 
+                // Metrics
+                const count = s.count.toLocaleString();
+                const meanStr = formatCurrency(mean);
+                const medianStr = isSummary ? '-' : formatCurrency(s.median);
+                const maxStr = isSummary ? '-' : formatCurrency(s.max); // Could calculate max of maxes but simpler to omit for summary
+                const thresholdStr = isSummary ? '-' : formatCurrency(s.threshold);
+                const redCount = s.outlier_count;
+                const redAmt = formatCurrency(s.outlier_total_amount);
+                const pctCount = ((s.outlier_count / s.count) * 100).toFixed(1) + '%';
+                const pctVal = ((s.outlier_total_amount / s.total_amount) * 100).toFixed(1) + '%';
 
-                    </div>
-                `;
+                const onClick = !isSummary ? `onclick="showOutliers('${cat}')" style="cursor:pointer"` : '';
+
+                return `
+                <tr class="${rowClass} transition-colors" ${onClick}>
+                    <td class="${nameClass}">${name}</td>
+                    <td class="text-right font-mono">${count}</td>
+                    <td class="text-right font-mono text-xs">${meanStr}</td>
+                    <td class="text-right font-mono text-xs text-slate-500">${medianStr}</td>
+                    <td class="text-right font-mono text-xs text-slate-500">${maxStr}</td>
+                    <td class="text-right font-mono text-xs text-red-400">${thresholdStr}</td>
+                    <td class="text-right font-mono font-bold text-red-700">${redCount}</td>
+                    <td class="text-right font-mono text-xs text-red-700">${redAmt}</td>
+                    <td class="text-right font-mono text-xs text-red-600">${pctCount}</td>
+                    <td class="text-right font-mono text-xs text-red-600">${pctVal}</td>
+                </tr>
+             `;
+            };
+
+            groups.forEach(group => {
+                if (group.summary) {
+                    // Render Summary Row First
+                    tableHtml += renderRow(group.summary, `Total ${group.title.replace(' Summary', '')}`, true);
+                }
+                // Render Children
+                group.cats.forEach(cat => {
+                    tableHtml += renderRow(cat, null, false);
+                });
             });
-        }
 
+            // Calculate Grand Total
+            const grandSum = groups.reduce((acc, group) => {
+                const s = group.summary;
+                if (!s) { // For 'Others' which is null summary, we need to sum its cats manually or improve group logic
+                    // Actually simplest is just to sum ALL stats
+                    return acc;
+                }
+                // Wait, groups[2] (Others) has summary: null. Better to use sumStats(allCats)
+                return acc;
+            }, {});
+
+            // Correct Grand Total Calculation: Sum over ALL categories
+            const allCats = [...roadCats, ...bridgeCats, ...otherCats];
+            const totalStats = sumStats(allCats);
+
+            // Render Grand Total Row manually
+            const totalMean = totalStats.count > 0 ? totalStats.total_amount / totalStats.count : 0;
+            const totalPctCount = totalStats.count > 0 ? ((totalStats.outlier_count / totalStats.count) * 100).toFixed(1) + '%' : '0.0%';
+            const totalPctVal = totalStats.total_amount > 0 ? ((totalStats.outlier_total_amount / totalStats.total_amount) * 100).toFixed(1) + '%' : '0.0%';
+
+            tableHtml += `
+            <tr class="bg-slate-200 font-bold border-t-4 border-slate-400">
+                <td class="text-slate-900 border-r border-slate-300">GRAND TOTAL</td>
+                <td class="text-right font-mono text-slate-900">${totalStats.count.toLocaleString()}</td>
+                <td class="text-right font-mono text-xs text-slate-800">${formatCurrency(totalMean)}</td>
+                <td class="text-right font-mono text-xs text-slate-500">-</td>
+                <td class="text-right font-mono text-xs text-slate-500">-</td>
+                <td class="text-right font-mono text-xs text-slate-500">-</td>
+                <td class="text-right font-mono font-bold text-red-800 text-lg">${totalStats.outlier_count.toLocaleString()}</td>
+                <td class="text-right font-mono text-xs text-red-800">${formatCurrency(totalStats.outlier_total_amount)}</td>
+                <td class="text-right font-mono text-xs text-red-800">${totalPctCount}</td>
+                <td class="text-right font-mono text-xs text-red-800">${totalPctVal}</td>
+            </tr>
+            `;
+
+            tableHtml += `</tbody></table></div>`;
+
+            // Remove existing grid if present
+            const oldGrid = document.querySelector('#tab-stats .grid');
+            if (oldGrid) oldGrid.remove();
+
+            // Remove existing table wrapper if present (re-render case)
+            const oldTable = document.getElementById('stats-table-wrapper');
+            if (oldTable) oldTable.remove();
+
+            // Append Table
+            const container = document.getElementById('tab-stats');
+            // We want to append after grandTotalContainer. 
+            // grandTotalContainer is currently child of container (if newly created) or we find it.
+            // Actually, just append to container, order matters.
+            // GrandTotal is at top?
+            // Let's create a container for content if not exists
+            let contentDiv = document.getElementById('stats-content-area');
+            if (!contentDiv) {
+                contentDiv = document.createElement('div');
+                contentDiv.id = 'stats-content-area';
+                container.appendChild(contentDiv);
+            }
+            contentDiv.innerHTML = tableHtml;
+        }
         // Legacy showOutliers removed, using window.showOutliers defined below
 
 
@@ -1481,13 +1643,19 @@
         }
 
         function formatCurrency(amount) {
-            if (amount === undefined || amount === null || amount === '') return '-';
+            if (amount === undefined || amount === null) return '-';
             return new Intl.NumberFormat('en-PH', {
                 style: 'currency',
                 currency: 'PHP',
                 minimumFractionDigits: 0,
                 maximumFractionDigits: 0
             }).format(amount);
+        }
+
+        function formatCompactNumber(number) {
+            if (number === undefined || number === null) return '0';
+            const formatter = Intl.NumberFormat('en', { notation: 'compact' });
+            return formatter.format(number);
         }
 
         function renderProjects(data) {
@@ -2333,7 +2501,7 @@
             if (document.getElementById('condition-pagination')) document.getElementById('condition-pagination').innerHTML = '';
 
             try {
-                const response = await fetch('/api/budget/condition-analysis');
+                const response = await fetch(`/api/budget/condition-analysis?v=${Date.now()}`);
                 if (!response.ok) throw new Error("Failed to fetch data");
                 const data = await response.json();
 
@@ -2497,6 +2665,10 @@
                 const ndAmt = window.conditionStats.details.no_data.total_amount;
                 const lpPct = ((lpAmt / financialTotal) * 100).toFixed(1);
                 const ndPct = ((ndAmt / financialTotal) * 100).toFixed(1);
+                const nmAmt = window.conditionStats.details.no_match.total_amount;
+                const jusAmt = window.conditionStats.details.justified.total_amount;
+                const nmPct = ((nmAmt / financialTotal) * 100).toFixed(1);
+                const jusPct = ((jusAmt / financialTotal) * 100).toFixed(1);
 
                 const renderCard = (title, data, color, subtitle) => {
                     const styleMap = {
@@ -2562,7 +2734,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                             </svg>
-                            Condition Assessment Analysis
+                            Condition Assessment Analysis (v3)
                         </h2>
                     </div>
 
@@ -2640,23 +2812,203 @@
                 if (container) {
                     container.innerHTML = contentHtml;
                     container.classList.remove('hidden');
-                    // Slight delay to ensure DOM is ready for Chart.js
+
+                    // Render Allocation Chart
+                    const allocCtx = document.getElementById('condAllocationChart').getContext('2d');
+                    new Chart(allocCtx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['High Risk (Redundant)', 'High Risk (No Data)', 'High Risk (No Match)', 'Medium Risk (Unaddressed)', 'Low Risk (Justified)'],
+                            datasets: [{
+                                data: [
+                                    window.conditionStats.details.low_priority.amount,
+                                    window.conditionStats.details.no_data.amount,
+                                    window.conditionStats.details.no_match.amount,
+                                    window.conditionStats.details.unaddressed.amount,
+                                    window.conditionStats.details.justified.amount
+                                ],
+                                backgroundColor: ['#ef4444', '#f97316', '#94a3b8', '#eab308', '#22c55e']
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: false } // Custom legend used
+                            }
+                        }
+                    });
+
+                    // Render Legend
+                    const legendHtml = `
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between items-center"><span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-red-500"></span>Highest Risk</span> <span class="font-mono text-slate-600">${formatCompactNumber(window.conditionStats.details.low_priority.amount)} (${lpPct}%)</span></div>
+                            <div class="flex justify-between items-center"><span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-orange-500"></span>High (No Data)</span> <span class="font-mono text-slate-600">${formatCompactNumber(window.conditionStats.details.no_data.amount)} (${ndPct}%)</span></div>
+                            <div class="flex justify-between items-center"><span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-slate-400"></span>High (No Match)</span> <span class="font-mono text-slate-600">${formatCompactNumber(window.conditionStats.details.no_match.amount)} (${nmPct}%)</span></div>
+                            <div class="flex justify-between items-center"><span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-yellow-500"></span>Medium Risk</span> <span class="font-mono text-slate-600">${formatCompactNumber(window.conditionStats.details.unaddressed.amount)}</span></div>
+                            <div class="flex justify-between items-center"><span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-green-500"></span>Low Risk</span> <span class="font-mono text-slate-600">${formatCompactNumber(window.conditionStats.details.justified.amount)} (${jusPct}%)</span></div>
+                        </div>
+                    `;
+                    document.getElementById('allocation-legend').innerHTML = legendHtml;
+
+
+
+                    // Render Allocation Chart
                     requestAnimationFrame(() => {
                         renderConditionCharts();
                     });
                 }
+
             } catch (e) {
-                console.error(e);
+                console.error("Error loading condition data:", e);
+                const container = document.getElementById('condition-stats-container');
+                if (container) container.innerHTML = `<div class="p-8 text-center text-red-500">Failed to load condition data.</div>`;
             }
         }
 
+        // --- MULTIPLE FLAGS TAB ---
+        let multiFlagPagination = { page: 1, limit: 10 };
+        let currentMultiFlagData = [];
+
+        async function loadMultiFlagData() {
+            const container = document.getElementById('multi-tab-content');
+            if (!container) return;
+
+            container.innerHTML = `<div class="p-8 text-center text-slate-500"><div class="loading-spinner w-8 h-8 mx-auto mb-4 border-slate-300 border-t-indigo-600"></div>Loading multi-flag analysis...</div>`;
+
+            try {
+                const response = await fetch('/api/dpwh2026/multi-flags');
+                if (!response.ok) throw new Error("Failed to load data");
+                const result = await response.json();
+
+                if (result.success) {
+                    // Filter out items with only 1 flag that is just "High Risk (No Match)" if user thinks that's clutter
+                    // But requirement says "the more flags the higher", so we include all.
+                    currentMultiFlagData = result.data;
+                    renderMultiFlagTable();
+                } else {
+                    container.innerHTML = `<div class="p-8 text-center text-red-500">Error: ${result.error}</div>`;
+                }
+            } catch (e) {
+                container.innerHTML = `<div class="p-8 text-center text-red-500">Failed to load data: ${e.message}</div>`;
+            }
+        }
+
+        function renderMultiFlagTable() {
+            const container = document.getElementById('multi-tab-content');
+            const data = currentMultiFlagData;
+
+            // Pagination Logic
+            const page = multiFlagPagination.page;
+            const limit = multiFlagPagination.limit;
+            const totalPages = Math.ceil(data.length / limit);
+            const start = (page - 1) * limit;
+            const end = start + limit;
+            const pageData = data.slice(start, end);
+
+            const rows = pageData.map(item => {
+                const badges = item.flags.map(flag => {
+                    let style = 'bg-slate-100 text-slate-600';
+                    if (flag.includes('Highest Risk') || flag.includes('Cost Outlier')) style = 'bg-red-100 text-red-700 border border-red-200';
+                    else if (flag.includes('High Risk')) style = 'bg-orange-100 text-orange-700 border border-orange-200';
+                    else if (flag.includes('Repeated')) style = 'bg-purple-100 text-purple-700 border border-purple-200';
+                    else if (flag.includes('Medium Risk')) style = 'bg-yellow-100 text-yellow-700 border border-yellow-200';
+
+                    return `<span class="inline-block px-2 py-0.5 rounded text-xs font-bold mr-1 mb-1 ${style}">${flag}</span>`;
+                }).join('');
+
+                return `
+                    <tr class="hover:bg-slate-50 transition-colors border-b border-slate-100">
+                        <td class="p-4 align-top">
+                            <div class="font-medium text-slate-800">${item.project_name}</div>
+                        </td>
+                        <td class="p-4 align-top w-48">
+                            <div class="flex flex-wrap items-start content-start">${badges}</div>
+                        </td>
+                        <td class="p-4 align-top text-center w-24">
+                            <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 font-bold text-slate-700 border border-slate-200">${item.score}</span>
+                        </td>
+                        <td class="p-4 align-top text-right font-mono text-slate-700 font-medium whitespace-nowrap">
+                            ${formatCurrency(item.amount)}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            const prevDisabled = page === 1 ? 'disabled class="opacity-50 cursor-not-allowed px-3 py-1 border rounded"' : 'class="px-3 py-1 border rounded hover:bg-slate-50"';
+            const nextDisabled = page === totalPages ? 'disabled class="opacity-50 cursor-not-allowed px-3 py-1 border rounded"' : 'class="px-3 py-1 border rounded hover:bg-slate-50"';
+
+            const tableHtml = `
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="p-4 border-b bg-slate-50 flex justify-between items-center">
+                        <h2 class="font-bold text-slate-700 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                            Step Id: 2428
+Multiple Risk Analysis
+                        </h2>
+                        <span class="text-xs font-medium text-slate-500 bg-slate-200 px-2 py-1 rounded-full">${data.length.toLocaleString()} Flagged Projects</span>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left">
+                            <thead class="text-xs text-slate-500 uppercase bg-slate-50 border-b">
+                                <tr>
+                                    <th class="p-4 font-semibold w-5/12">Project Name</th>
+                                    <th class="p-4 font-semibold w-4/12">Risk Flags</th>
+                                    <th class="p-4 font-semibold text-center w-1/12">Score</th>
+                                    <th class="p-4 font-semibold text-right w-2/12">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${rows}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="p-4 border-t bg-slate-50 flex justify-between items-center">
+                        <div class="text-xs text-slate-500">
+                            Showing ${start + 1}-${Math.min(end, data.length)} of ${data.length}
+                        </div>
+                        <div class="flex gap-2">
+                             <button ${prevDisabled} onclick="changeMultiPage(-1)">Previous</button>
+                             <button ${nextDisabled} onclick="changeMultiPage(1)">Next</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            container.innerHTML = tableHtml;
+        }
+
+        function changeMultiPage(delta) {
+            const data = currentMultiFlagData;
+            const totalPages = Math.ceil(data.length / multiFlagPagination.limit);
+            const newPage = multiFlagPagination.page + delta;
+
+            if (newPage >= 1 && newPage <= totalPages) {
+                multiFlagPagination.page = newPage;
+                renderMultiFlagTable();
+            }
+        }
+
+
+
         function renderConditionCharts() {
-            if (window.condCharts.allocation) window.condCharts.allocation.destroy();
-            ['highRisk', 'risky', 'unaddressed'].forEach(key => {
-                if (window.condCharts[key]) window.condCharts[key].destroy();
-            });
+            // Robustly destroy existing charts using Chart.js helper
+            const destroyChart = (id) => {
+                const existingChart = Chart.getChart(id);
+                if (existingChart) existingChart.destroy();
+            };
+
+            destroyChart('condAllocationChart');
+            destroyChart('chartHighRisk');
+            destroyChart('chartRisky');
+            destroyChart('chartUnaddressed');
+            destroyChart('chartAnomalies');
 
             const stats = window.conditionStats.details;
+
+
 
             // Allocation Chart (Colors: Green, Red, Yellow)
             // Allocation Chart (Colors: Green, Red, Orange)
@@ -2912,12 +3264,16 @@
             document.body.removeChild(link);
         }
 
+
+
         // Hook into Tab Switching
         document.addEventListener('DOMContentLoaded', () => {
             const hash = window.location.hash;
             if (hash === '#condition') {
                 document.querySelector('[data-tab="condition"]').click();
                 loadConditionData();
+            } else if (hash === '#multi') {
+                document.querySelector('[data-tab="multi"]').click();
             }
 
             document.querySelectorAll('.budget-tab-btn').forEach(btn => {

@@ -502,7 +502,7 @@ async def get_integrated_coverage(refresh: bool = Query(False)) -> JSONResponse:
 @app.get("/api/budget/condition-analysis")
 async def get_condition_analysis() -> JSONResponse:
     """Return the pre-calculated condition risks."""
-    cache_path = DATA_ROOT / "condition_risks.json"
+    cache_path = DATA_ROOT / "condition_risks_v2.json"
     if not cache_path.exists():
         return JSONResponse(
             content={
@@ -522,6 +522,18 @@ async def get_condition_analysis() -> JSONResponse:
             content={"success": False, "error": str(e)}, 
             status_code=500
         )
+
+@app.get("/api/dpwh2026/multi-flags")
+async def get_multi_flags() -> JSONResponse:
+    """Return aggregated multi-flag risks."""
+    cache_path = DATA_ROOT / "multi_risk_cache.json"
+    if not cache_path.exists():
+        return JSONResponse(content={"success": False, "error": "Cache not found"}, status_code=404)
+    try:
+        data = _read_json_file(cache_path)
+        return JSONResponse(content=data)
+    except Exception as e:
+        return JSONResponse(content={"success": False, "error": str(e)}, status_code=500)
 
 @app.get("/api/mpb/top-buildings")
 async def get_mpb_top_buildings() -> JSONResponse:
@@ -13419,9 +13431,20 @@ def _calculate_dpwh_2026_stats():
             name_lower = name.lower()
             
             # Skip summary lines
-            if 'public-private partnership' in name_lower or 'priority' in name_lower and 'projects' in name_lower:
+            # Skip summary lines
+            if 'public-private partnership' in name_lower or ('priority' in name_lower and 'projects' in name_lower):
+                continue
+            
+            # Skip Generic Summary Headers
+            if name_lower.strip() in ['highways', 'flood control', 'others', 'total', 'grand total', 'sub-total', 'volume']:
                 continue
 
+            # Skip Specific Long Summary Headers
+            if 'highways, flood control, and others' in name_lower:
+                continue
+            if 'construction/ upgrading/ rehabilitation of drainage along national roads' in name_lower:
+                continue
+                
             # 0. Check for Public Buildings (Priority over Road Name match)
             if any(x in name_lower for x in ['building', 'hall', 'center', 'school', 'clinic', 'hospital', 'gym', 'mpb', 'multi purpose']):
                  projects_by_category['public_buildings'].append({'name': name, 'amount': amount, 'cost_metric': amount, 'distance_km': 0, 'road_id': None, 'road_name': None})
@@ -13436,9 +13459,9 @@ def _calculate_dpwh_2026_stats():
                 
             # 2. Bridges
             if 'bridge' in name_lower:
-                 # Use Bridge ID if matched, otherwise fallback to Road ID if matched
-                 final_id = matched_bridge_id if matched_bridge_id else matched_id
-                 final_match_name = matched_bridge_name if matched_bridge_id else matched_name
+                # Use Bridge ID only. Do not fallback to Road ID to avoid confusion.
+                 final_id = matched_bridge_id
+                 final_match_name = matched_bridge_name
                  
                  item = {'name': name, 'amount': amount, 'cost_metric': amount, 'distance_km': 0, 'road_id': final_id, 'road_name': final_match_name}
                  
