@@ -2503,7 +2503,8 @@
                         'green': 'background-color: #dcfce7; border-color: #86efac; color: #14532d;', // Green-100/300/900
                         'red': 'background-color: #fee2e2; border-color: #fca5a5; color: #7f1d1d;', // Red-100/300/900
                         'yellow': 'background-color: #fef08a; border-color: #fde047; color: #713f12;', // Yellow-200/300/900
-                        'orange': 'background-color: #fed7aa; border-color: #fdba74; color: #7c2d12;'  // Orange-200/300/900
+                        'orange': 'background-color: #fed7aa; border-color: #fdba74; color: #7c2d12;',  // Orange-200/300/900
+                        'gray': 'background-color: #e2e8f0; border-color: #cbd5e1; color: #334155;'    // Slate-200/300/700
                     }[color] || '';
 
                     if (!data) return '';
@@ -2574,15 +2575,17 @@
                             </h3>
                             <ul class="space-y-1 list-disc pl-5">
                                 <li><strong>Highest Risk (Redundant):</strong> Projects on assets already in Good/Fair condition. Likely wasteful spending.</li>
-                                <li><strong>High Risk (No Data):</strong> Projects with no corresponding asset inventory data. Blind budgeting.</li>
+                                <li><strong>High Risk (No Data):</strong> Projects matched to road but no condition data available. Blind budgeting.</li>
+                                <li><strong>High Risk (No Match):</strong> Projects without chainage info or road name match. Cannot verify condition.</li>
                                 <li><strong>Medium Risk (Unaddressed):</strong> Assets in Bad/Poor condition with no assigned rehabilitation project.</li>
                                 <li><strong>Low Risk (Justified):</strong> Projects addressing Bad/Poor conditions.</li>
                             </ul>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                             ${renderCard('Highest Risk (Redundant)', window.conditionStats.details.low_priority, 'red', `${lpPct}% of Budget`)}
                             ${renderCard('High Risk (No Data)', window.conditionStats.details.no_data, 'orange', `${ndPct}% of Budget`)}
+                            ${renderCard('High Risk (No Match)', window.conditionStats.details.no_match, 'gray', 'No Chainage/Road Match')}
                             ${renderCard('Medium Risk (Unaddressed)', window.conditionStats.details.unaddressed, 'yellow', 'Bad/Poor Gaps')}
                         </div>
                         

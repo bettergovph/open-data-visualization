@@ -206,15 +206,17 @@ def generate_cache():
     
     results = {
         'generated_at': pd.Timestamp.now().isoformat(),
-        'low_priority_projects': [], # Good/Fair
-        'no_data_projects': [],      # Gamble
-        'justified_projects': [],    # Bad/Poor (Good decisions)
-        'unaddressed_assets': [],    # Bad/Poor with no project
+        'low_priority_projects': [], # Highest Risk - Good/Fair
+        'no_data_projects': [],      # High Risk - No condition data
+        'no_match_projects': [],     # High Risk - No chainage/road match
+        'justified_projects': [],    # Low Risk - Bad/Poor (Good decisions)
+        'unaddressed_assets': [],    # Medium Risk - Bad/Poor with no project
         'stats': {
             'total_rehabs_scanned': len(potential_rehabs),
             'matches_found': 0,
             'low_priority_count': 0,
             'no_data_count': 0,
+            'no_match_count': 0,
             'justified_count': 0,
             'unaddressed_count': 0
         }
@@ -251,7 +253,7 @@ def generate_cache():
         # Region extraction
         final_region = region if pd.notna(region) and region else 'Unknown'
         
-        # If no chainage OR no road match, flag as High Risk (No Data/Match)
+        # If no chainage OR no road match, flag as High Risk (No Match)
         if not ranges or not matched_road_id:
             entry = {
                 'id': 'N/A',
@@ -261,10 +263,10 @@ def generate_cache():
                 'road_name': matched_road_name or '(No Match)',
                 'road_id': matched_road_id or 'N/A',
                 'conditions': [],
-                'remark': 'High Risk (No Data/Match)'
+                'remark': 'High Risk (No Match)'
             }
-            results['no_data_projects'].append(entry)
-            results['stats']['no_data_count'] += 1
+            results['no_match_projects'].append(entry)
+            results['stats']['no_match_count'] += 1
             continue
         
         # If we have both chainage AND road match, check condition data
@@ -368,12 +370,14 @@ def generate_cache():
     # Sort results
     results['low_priority_projects'].sort(key=lambda x: x.get('amount', 0) or 0, reverse=True)
     results['no_data_projects'].sort(key=lambda x: x.get('amount', 0) or 0, reverse=True)
+    results['no_match_projects'].sort(key=lambda x: x.get('amount', 0) or 0, reverse=True)
     results['unaddressed_assets'].sort(key=lambda x: x.get('road_name', ''), reverse=False)
 
     # Compute Detailed Stats
     results['stats']['details'] = {
         'low_priority': compute_category_stats(results['low_priority_projects']),
         'no_data': compute_category_stats(results['no_data_projects']),
+        'no_match': compute_category_stats(results['no_match_projects']),
         'justified': compute_category_stats(results['justified_projects']),
         'unaddressed': compute_category_stats(results['unaddressed_assets'])
     }
@@ -382,6 +386,7 @@ def generate_cache():
     total_rehab_amount = (
         results['stats']['details']['low_priority']['total_amount'] +
         results['stats']['details']['no_data']['total_amount'] +
+        results['stats']['details']['no_match']['total_amount'] +
         results['stats']['details']['justified']['total_amount']
     )
     results['stats']['financial_total'] = total_rehab_amount
@@ -472,7 +477,8 @@ def generate_cache():
     results['matches'] = (
         results['justified_projects'] + 
         results['low_priority_projects'] + 
-        results['no_data_projects']
+        results['no_data_projects'] +
+        results['no_match_projects']
     )
     
     # Keep individual lists for detailed stats if needed, or rely on 'details' having top regions
@@ -483,6 +489,7 @@ def generate_cache():
     print(f"Analysis Complete.")
     print(f"  Flagged Low Priority: {results['stats']['low_priority_count']}")
     print(f"  Flagged No Data: {results['stats']['no_data_count']}")
+    print(f"  Flagged No Match: {results['stats']['no_match_count']}")
     
     # Save to JSON
     with open(OUTPUT_FILE, 'w', encoding='utf-8') as f:
