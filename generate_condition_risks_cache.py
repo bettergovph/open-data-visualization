@@ -12,8 +12,13 @@ DATA_DIR = Path('/home/joebert/open-data-visualization/data/parquet')
 OUTPUT_FILE = Path('/home/joebert/open-data-visualization/static/data/condition_risks.json')
 
 REHAB_KEYWORDS = [
+    # Rehabilitation / Repair
     'rehabilitation', 'major repair', 'reconstruction', 'asset preservation', 
-    'preventive maintenance', 'restoration', 'upgrading', 'improvement'
+    'preventive maintenance', 'restoration', 'upgrading', 'improvement',
+    # New Construction
+    'construction', 'widening', 'concreting', 'asphalting',
+    # General Road Keywords
+    'road', 'highway', 'bridge', 'drainage', 'pavement', 'overlay'
 ]
 
 # Canonical Region names for extraction
