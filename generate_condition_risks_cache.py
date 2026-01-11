@@ -227,7 +227,7 @@ def generate_cache():
             
             if not has_overlap:
                 # Flag: No Condition Data (Gamble)
-                entry['remark'] = 'No Survey Data (Gamble)'
+                entry['remark'] = 'High Risk (No Data)'
                 results['no_data_projects'].append(entry)
                 results['stats']['no_data_count'] += 1
             else:
@@ -236,13 +236,13 @@ def generate_cache():
                  
                  if is_good_fair_present and not is_bad_poor_present:
                      # Purely Good/Fair
-                     entry['remark'] = 'Low Priority (Good/Fair Condition)'
+                     entry['remark'] = 'High Risk (Redundant)'
                      results['low_priority_projects'].append(entry)
                      results['stats']['low_priority_count'] += 1
                  else:
                      # Contains Bad or Poor - Justified!
                      # We don't display these in the main list (user focused on risks), but we track for stats
-                     entry['remark'] = 'Justified (Addressing Bad/Poor)'
+                     entry['remark'] = 'Low Risk (Justified)'
                      results['justified_projects'].append(entry)
                      results['stats']['justified_count'] += 1
 
@@ -280,8 +280,8 @@ def generate_cache():
             by_region[reg]['count'] += 1
             by_region[reg]['amount'] += amt
             
-        # Top 5 Regions by Count
-        top_regions = sorted(by_region.items(), key=lambda x: x[1]['count'], reverse=True)[:5]
+        # All Regions by Count (Expanded to All)
+        top_regions = sorted(by_region.items(), key=lambda x: x[1]['count'], reverse=True)
         return {
             'count': len(items),
             'total_amount': total_amount,
@@ -314,7 +314,7 @@ def generate_cache():
     
     # 1. Build Contingency Table (Region x Category)
     regions = set()
-    cat_counts = {'justified': {}, 'low_priority': {}, 'no_data': {}}
+    cat_counts = {'justified': {}, 'low_priority': {}, 'no_data': {}, 'unaddressed': {}}
     
     for r in results['justified_projects']:
         reg = r.get('region') or 'Unknown'
@@ -330,6 +330,12 @@ def generate_cache():
         reg = r.get('region') or 'Unknown'
         regions.add(reg)
         cat_counts['no_data'][reg] = cat_counts['no_data'].get(reg, 0) + 1
+
+    for r in results['unaddressed_assets']:
+        # Unaddressed assets might have different keys, check visualization.py usually has 'region'
+        reg = r.get('region') or 'Unknown'
+        regions.add(reg)
+        cat_counts['unaddressed'][reg] = cat_counts['unaddressed'].get(reg, 0) + 1
         
     sorted_regions = sorted(list(regions))
     
@@ -339,7 +345,8 @@ def generate_cache():
         row = [
             cat_counts['justified'].get(reg, 0),
             cat_counts['low_priority'].get(reg, 0),
-            cat_counts['no_data'].get(reg, 0)
+            cat_counts['no_data'].get(reg, 0),
+            cat_counts['unaddressed'].get(reg, 0)
         ]
         observed.append(row)
         
@@ -354,10 +361,14 @@ def generate_cache():
             residuals = np.nan_to_num(residuals)
             
         anomalies = []
-        cols = ['Justified', 'Low Priority', 'No Data'] 
+        cols = ['Low Risk', 'Highest Risk', 'High Risk', 'Medium Risk'] 
         
         for i, reg in enumerate(sorted_regions):
             for j, col_name in enumerate(cols):
+                # User request: exclude Low Risk anomalies
+                if col_name == 'Low Risk':
+                    continue
+
                 res_val = residuals[i][j]
                 if res_val > 2.0: # Significantly HIGHER
                     anomalies.append({
@@ -387,10 +398,10 @@ def generate_cache():
         results['no_data_projects']
     )
     
-    # Cleanup individual lists to save space (optional, but keeps JSON clean if frontend uses matches)
-    del results['justified_projects']
-    del results['low_priority_projects']
-    del results['no_data_projects']
+    # Keep individual lists for detailed stats if needed, or rely on 'details' having top regions
+    # del results['justified_projects']
+    # del results['low_priority_projects']
+    # del results['no_data_projects']
     
     print(f"Analysis Complete.")
     print(f"  Flagged Low Priority: {results['stats']['low_priority_count']}")
