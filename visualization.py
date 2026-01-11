@@ -523,6 +523,18 @@ async def get_condition_analysis() -> JSONResponse:
             status_code=500
         )
 
+@app.get("/api/dpwh2026/multi-flags")
+async def get_multi_flags() -> JSONResponse:
+    """Return aggregated multi-flag risks."""
+    cache_path = DATA_ROOT / "multi_risk_cache.json"
+    if not cache_path.exists():
+        return JSONResponse(content={"success": False, "error": "Cache not found"}, status_code=404)
+    try:
+        data = _read_json_file(cache_path)
+        return JSONResponse(content=data)
+    except Exception as e:
+        return JSONResponse(content={"success": False, "error": str(e)}, status_code=500)
+
 @app.get("/api/mpb/top-buildings")
 async def get_mpb_top_buildings() -> JSONResponse:
     """Return the list of MPB buildings.
@@ -13436,9 +13448,9 @@ def _calculate_dpwh_2026_stats():
                 
             # 2. Bridges
             if 'bridge' in name_lower:
-                 # Use Bridge ID if matched, otherwise fallback to Road ID if matched
-                 final_id = matched_bridge_id if matched_bridge_id else matched_id
-                 final_match_name = matched_bridge_name if matched_bridge_id else matched_name
+                # Use Bridge ID only. Do not fallback to Road ID to avoid confusion.
+                 final_id = matched_bridge_id
+                 final_match_name = matched_bridge_name
                  
                  item = {'name': name, 'amount': amount, 'cost_metric': amount, 'distance_km': 0, 'road_id': final_id, 'road_name': final_match_name}
                  

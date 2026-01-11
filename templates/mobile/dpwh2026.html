@@ -162,6 +162,7 @@
             <div class="budget-tab-nav">
                 <a href="#stats" class="budget-tab-btn active" data-tab="stats">📊 Stats</a>
                 <a href="#repeated" class="budget-tab-btn" data-tab="repeated">🔄 Repeated</a>
+                <a href="#multi" class="budget-tab-btn" data-tab="multi">🚩 Multi</a>
                 <a href="#uniform" class="budget-tab-btn" data-tab="uniform">⚠️ Uniform</a>
             </div>
 
@@ -297,6 +298,50 @@
                     </div>
                 </div>
 
+                <!-- Multi Flag Tab -->
+                <div id="tab-multi" class="budget-tab-panel">
+                    <h2 class="section-title text-red-700">🚩 Multiple Flags</h2>
+                    <p class="section-desc">Projects flagged across multiple risk categories.</p>
+
+                    <div id="multi-loading" class="hidden py-4 text-center text-slate-500 text-sm">
+                        <div class="loading-spinner inline-block"></div> Loading data...
+                    </div>
+
+                    <div id="multi-content">
+                        <!-- Summary -->
+                        <div class="grid grid-cols-2 gap-2 mb-3">
+                            <div class="bg-red-50 p-3 rounded border border-red-100 text-center">
+                                <h3 class="text-xs font-bold text-red-800">Total Projects</h3>
+                                <div id="multi-total-count" class="text-xl font-bold text-red-600">-</div>
+                            </div>
+                            <div class="bg-red-50 p-3 rounded border border-red-100 text-center">
+                                <h3 class="text-xs font-bold text-red-800">Total Flagged</h3>
+                                <div id="multi-total-flags" class="text-xl font-bold text-red-600">-</div>
+                            </div>
+                        </div>
+
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th class="text-left">Project Name</th>
+                                    <th class="text-right">Risk Score</th>
+                                </tr>
+                            </thead>
+                            <tbody id="multi-tbody"></tbody>
+                        </table>
+                        <div id="multi-pagination"
+                            class="flex justify-between items-center mt-3 text-xs text-slate-600">
+                            <div id="multi-page-info">Page 1</div>
+                            <div class="flex gap-1">
+                                <button id="btn-multi-prev" onclick="changeMultiPage(-1)"
+                                    class="px-2 py-1 bg-white border rounded text-xs">Prev</button>
+                                <button id="btn-multi-next" onclick="changeMultiPage(1)"
+                                    class="px-2 py-1 bg-white border rounded text-xs">Next</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Uniform Risks Tab -->
                 <div id="tab-uniform" class="budget-tab-panel">
                     <h3 class="section-title text-red-700">⚠️ Uniform Pricing Risks</h3>
@@ -353,6 +398,7 @@
                     // Lazy load
                     if (tabName === 'stats') fetchStats();
                     else if (tabName === 'repeated') fetchRepeated();
+                    else if (tabName === 'multi') loadMultiFlagData();
                     else if (tabName === 'uniform') fetchUniformRisks();
                 });
             });
@@ -385,24 +431,121 @@
         function renderStats(data) {
             document.getElementById('stat-total-parsed').textContent = data.total_parsed.toLocaleString();
 
-            const cats = ['primary_roads', 'secondary_roads', 'tertiary_roads', 'other_roads', 'bridges_primary', 'bridges_secondary', 'bridges_tertiary', 'bridges_other', 'flood_control', 'public_buildings', 'traffic_signs'];
+            const roadCats = ['primary_roads', 'secondary_roads', 'tertiary_roads', 'other_roads'];
+            const bridgeCats = ['bridges_primary', 'bridges_secondary', 'bridges_tertiary', 'bridges_other'];
+            const otherCats = ['flood_control', 'public_buildings', 'traffic_signs'];
 
-            cats.forEach(cat => {
-                const container = document.getElementById(`stats-${cat}`);
-                const s = data.stats[cat];
-                if (!s) {
-                    container.innerHTML = '<span class="text-slate-400 italic">No data</span>';
-                    return;
+            // Helper to sum stats
+            const sumStats = (cats) => {
+                return cats.reduce((acc, cat) => {
+                    const s = data.stats[cat];
+                    if (!s) return acc;
+                    return {
+                        count: acc.count + s.count,
+                        total_amount: acc.total_amount + (s.total_amount || 0),
+                        total_dist: acc.total_dist + (s.total_dist || 0),
+                        outlier_count: acc.outlier_count + s.outlier_count,
+                        outlier_total_amount: acc.outlier_total_amount + (s.outlier_total_amount || 0),
+                        has_data: true
+                    };
+                }, { count: 0, total_amount: 0, total_dist: 0, outlier_count: 0, outlier_total_amount: 0, has_data: false });
+            };
+
+            const roadSum = sumStats(roadCats);
+            const bridgeSum = sumStats(bridgeCats);
+
+            // Group Definitions
+            const groups = [
+                { title: 'Roads', summary: roadSum, cats: roadCats },
+                { title: 'Bridges', summary: bridgeSum, cats: bridgeCats },
+                { title: 'Others', summary: null, cats: otherCats }
+            ];
+
+            let html = `
+                <!-- Grand Total (kept as card) -->
+                <div class="p-3 bg-red-50 border border-red-100 rounded shadow-sm mb-4">
+                    <div class="text-blue-800 font-bold text-xs mb-1">Total Parsed Projects</div>
+                    <div class="text-2xl font-mono font-bold text-blue-600 mb-3">${data.total_parsed.toLocaleString()}</div>
+                    
+                    <div class="text-xs font-bold text-red-800 mb-1">Total Red Flags</div>
+                    <div class="flex justify-between items-end">
+                        <div class="text-2xl font-mono font-bold text-red-600">${data.grand_total_outliers.toLocaleString()}</div>
+                        <div class="text-xs font-bold text-red-700 bg-red-100 px-2 py-1 rounded">
+                            ${formatCurrency(data.grand_total_outlier_amount || 0)}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto border rounded border-slate-200 shadow-sm">
+                    <table class="data-table w-full whitespace-nowrap">
+                        <thead>
+                            <tr class="bg-slate-50 border-b border-slate-200">
+                                <th class="text-left py-2 px-2 sticky left-0 bg-slate-50 z-10 border-r shadow-sm">Category</th>
+                                <th class="text-right py-2 px-2">Count</th>
+                                <th class="text-right py-2 px-2">Mean</th>
+                                <th class="text-right py-2 px-2">Max</th>
+                                <th class="text-right py-2 px-2 text-red-600">Flags</th>
+                                <th class="text-right py-2 px-2 text-red-600">Flag Cost</th>
+                                <th class="text-right py-2 px-2 text-xs text-red-600">% Count</th>
+                                <th class="text-right py-2 px-2 text-xs text-red-600">% Val</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-slate-100">
+            `;
+
+            const renderRow = (cat, label, isSummary = false) => {
+                let s, name;
+                if (isSummary) {
+                    s = cat;
+                    name = label;
+                    if (!s.has_data) return '';
+                } else {
+                    s = data.stats[cat];
+                    name = cat.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+                        .replace('Roads', '').replace('Bridges', '').trim() || cat; // Shorten names
+                    if (!s) return '';
                 }
 
-                container.innerHTML = `
-                    <div class="space-y-1">
-                        <div class="flex justify-between"><span class="text-slate-500">Count:</span> <span class="font-mono font-medium">${s.count}</span></div>
-                        <div class="flex justify-between"><span class="text-slate-500">Mean:</span> <span class="font-mono font-bold">${formatCurrency(s.mean)}</span></div>
-                        <div class="flex justify-between text-red-700 font-bold"><span>🚩 Red Flags:</span> <span>${s.outlier_count}</span></div>
-                    </div>
+                // Summary Mean Logic
+                let mean = s.mean;
+                if (isSummary) {
+                    if (label.includes('Roads') && s.total_dist > 0) mean = s.total_amount / s.total_dist;
+                    else if (label.includes('Bridges') && s.count > 0) mean = s.total_amount / s.count;
+                    else mean = 0;
+                }
+
+                const bgClass = isSummary ? "bg-slate-100 font-bold" : "";
+                const nameStyle = isSummary ? "" : "padding-left: 12px;";
+                const stickyClass = isSummary ? "bg-slate-100 font-bold" : "bg-white";
+
+                const pctCount = ((s.outlier_count / s.count) * 100).toFixed(1) + '%';
+                const pctVal = ((s.outlier_total_amount / s.total_amount) * 100).toFixed(1) + '%';
+
+                return `
+                    <tr class="${bgClass}">
+                        <td class="py-2 px-2 border-r sticky left-0 z-10 text-xs text-slate-700 ${stickyClass}" style="${nameStyle}">${name}</td>
+                        <td class="text-right py-2 px-2 text-xs font-mono">${s.count.toLocaleString()}</td>
+                        <td class="text-right py-2 px-2 text-xs font-mono">${formatCurrency(mean)}</td>
+                        <td class="text-right py-2 px-2 text-xs font-mono text-slate-500">${isSummary ? '-' : formatCurrency(s.max)}</td>
+                        <td class="text-right py-2 px-2 text-xs font-mono font-bold text-red-700">${s.outlier_count}</td>
+                        <td class="text-right py-2 px-2 text-xs font-mono text-red-700">${formatCurrency(s.outlier_total_amount)}</td>
+                        <td class="text-right py-2 px-2 text-[10px] font-mono text-red-600">${pctCount}</td>
+                        <td class="text-right py-2 px-2 text-[10px] font-mono text-red-600">${pctVal}</td>
+                    </tr>
                 `;
+            };
+
+            groups.forEach(group => {
+                if (group.summary) {
+                    html += renderRow(group.summary, group.title + " (All)", true);
+                }
+                group.cats.forEach(cat => html += renderRow(cat, null, false));
             });
+
+            html += `</tbody></table></div>`;
+
+            // Replace content content
+            document.getElementById('stats-content').innerHTML = html;
         }
 
         async function fetchRepeated() {
@@ -510,6 +653,91 @@
                 console.error(err);
                 loading.style.display = 'none';
                 container.innerHTML = '<div class="text-center py-4 text-red-500 text-sm">Error loading risks</div>';
+            }
+        }
+
+        // Multi Flag Logic
+        let multiDataCache = null;
+        let multiPage = 1;
+        const multiLimit = 20;
+
+        async function loadMultiFlagData() {
+            const loading = document.getElementById('multi-loading');
+            const content = document.getElementById('multi-content');
+
+            loading.classList.remove('hidden');
+            content.classList.add('hidden'); // Initially hide content until loaded
+
+            try {
+                if (!multiDataCache) {
+                    const response = await fetch('/api/dpwh2026/multi-flags');
+                    const data = await response.json();
+
+                    if (data.success) {
+                        multiDataCache = data.data;
+                        document.getElementById('multi-total-count').textContent = multiDataCache.length.toLocaleString();
+                        // Count total flags
+                        const totalFlags = multiDataCache.reduce((acc, curr) => acc + (curr.flags ? curr.flags.length : 0), 0);
+                        document.getElementById('multi-total-flags').textContent = totalFlags.toLocaleString();
+                    } else {
+                        console.error('API Error:', data.error);
+                        loading.innerHTML = '<span class="text-red-500">Failed to load data.</span>';
+                        return;
+                    }
+                }
+
+                renderMultiFlagPage();
+                loading.classList.add('hidden');
+                content.classList.remove('hidden');
+
+            } catch (err) {
+                console.error("Error fetching multi-flags:", err);
+                loading.innerHTML = '<span class="text-red-500">Network Error.</span>';
+            }
+        }
+
+        function renderMultiFlagPage() {
+            const tbody = document.getElementById('multi-tbody');
+            if (!multiDataCache) return;
+
+            const start = (multiPage - 1) * multiLimit;
+            const end = start + multiLimit;
+            const pageData = multiDataCache.slice(start, end);
+            const totalPages = Math.ceil(multiDataCache.length / multiLimit);
+
+            tbody.innerHTML = pageData.map(item => {
+                const badgeHtml = (item.flags || []).map(f =>
+                    `<span class="inline-block bg-red-100 text-red-800 text-[10px] px-1 rounded border border-red-200 mr-1 mb-1">${f}</span>`
+                ).join('');
+
+                return `
+                <tr class="border-b hover:bg-slate-50">
+                    <td class="py-2 align-top">
+                        <div class="font-bold text-xs text-slate-800 mb-1">${item.project_name}</div>
+                        <div class="text-[10px] text-slate-500 font-mono">${formatCurrency(item.amount)}</div>
+                        <div class="mt-1">${badgeHtml}</div>
+                    </td>
+                    <td class="py-2 text-right align-top">
+                        <span class="inline-block bg-slate-800 text-white text-xs font-bold px-2 py-0.5 rounded-full">${item.score}</span>
+                    </td>
+                </tr>
+                `;
+            }).join('');
+
+            document.getElementById('multi-page-info').textContent = `Page ${multiPage} of ${totalPages}`;
+            document.getElementById('btn-multi-prev').disabled = multiPage <= 1;
+            document.getElementById('btn-multi-next').disabled = multiPage >= totalPages;
+        }
+
+        function changeMultiPage(delta) {
+            if (!multiDataCache) return;
+            const totalPages = Math.ceil(multiDataCache.length / multiLimit);
+            const newPage = multiPage + delta;
+            if (newPage >= 1 && newPage <= totalPages) {
+                multiPage = newPage;
+                renderMultiFlagPage();
+                // Scroll to top of table
+                document.getElementById('multi-content').scrollIntoView({ behavior: 'smooth' });
             }
         }
     </script>
