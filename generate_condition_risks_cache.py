@@ -172,8 +172,12 @@ def generate_cache():
 
     # 2. Filter Rehabilitation Projects
     print("Filtering rehabilitation projects...")
+    # Include keywords
     mask = projects['project_name'].str.contains('|'.join(REHAB_KEYWORDS), case=False, na=False)
-    potential_rehabs = projects[mask]
+    # Exclude non-road projects (lighting, buildings, etc.)
+    EXCLUDE_KEYWORDS = ['lighting', 'building', 'office', 'warehouse', 'storage', 'water supply', 'waterworks']
+    exclude_mask = projects['project_name'].str.contains('|'.join(EXCLUDE_KEYWORDS), case=False, na=False)
+    potential_rehabs = projects[mask & ~exclude_mask]
     print(f"Found {len(potential_rehabs)} potential rehabilitation projects.")
 
     # 3. Analyze Projects
