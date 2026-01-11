@@ -125,6 +125,27 @@ def generate_cache():
         if len(name) > 4:
             road_lookup[name] = rid
     
+    # Add common highway aliases (many DPWH projects use these names)
+    # Map project naming convention -> inventory naming convention
+    HIGHWAY_ALIASES = {
+        'maharlika highway': ['daang maharlika'],
+        'manila north road': ['macarthur hwy', 'manila north', 'north rd'],
+        'manila south road': ['south superhighway', 'south rd'],
+        'pan-philippine highway': ['daang maharlika', 'pan-philippine'],
+    }
+    
+    # Try to find a road ID for aliases by searching existing names
+    for alias, patterns in HIGHWAY_ALIASES.items():
+        if alias not in road_lookup:
+            # Try to find a matching road in existing lookup
+            for existing_name, rid in list(road_lookup.items()):
+                for pattern in patterns:
+                    if pattern in existing_name:
+                        road_lookup[alias] = rid
+                        break
+    
+    print(f"  Road lookup size: {len(road_lookup)}")
+    
     # Road ID -> List of Section IDs
     road_to_sections = {}
     for _, row in sect_inv.iterrows():
@@ -185,15 +206,17 @@ def generate_cache():
     
     results = {
         'generated_at': pd.Timestamp.now().isoformat(),
-        'low_priority_projects': [], # Good/Fair
-        'no_data_projects': [],      # Gamble
-        'justified_projects': [],    # Bad/Poor (Good decisions)
-        'unaddressed_assets': [],    # Bad/Poor with no project
+        'low_priority_projects': [], # Highest Risk - Good/Fair
+        'no_data_projects': [],      # High Risk - No condition data
+        'no_match_projects': [],     # High Risk - No chainage/road match
+        'justified_projects': [],    # Low Risk - Bad/Poor (Good decisions)
+        'unaddressed_assets': [],    # Medium Risk - Bad/Poor with no project
         'stats': {
             'total_rehabs_scanned': len(potential_rehabs),
             'matches_found': 0,
             'low_priority_count': 0,
             'no_data_count': 0,
+            'no_match_count': 0,
             'justified_count': 0,
             'unaddressed_count': 0
         }
@@ -213,12 +236,10 @@ def generate_cache():
         amount = row.get('amount', 0)
         region = row.get('region')
         
-        # Only analyze if it has chainage info
+        # Extract chainage info (if available)
         ranges = extract_all_chainage_ranges(name)
-        if not ranges:
-            continue
-            
-        # Match Road Name
+        
+        # Try to match Road Name
         matched_road_id = None
         matched_road_name = None
         
@@ -229,65 +250,80 @@ def generate_cache():
                 matched_road_id = road_lookup[r_name]
                 break
         
-        if matched_road_id:
-            results['stats']['matches_found'] += 1
-            
-            # Check Condition
-            sections = road_to_sections.get(matched_road_id, [])
-            conditions_found = set()
-            has_overlap = False
-            
-            for (start_km, start_m, end_km, end_m) in ranges:
-                p_start = to_meters(start_km, start_m)
-                p_end = to_meters(end_km, end_m)
-                
-                # Check ALL sections for this road
-                for sid in sections:
-                    conds = section_to_conditions.get(sid, [])
-                    for c in conds:
-                        if overlaps(p_start, p_end, c['start'], c['end']):
-                            val = c['condition']
-                            if val: # Ensure not None
-                                conditions_found.add(val)
-                            has_overlap = True
-                            
-                            # Mark as covered if tracked
-                            if 'id' in c and c['id'] in bad_poor_registry:
-                                bad_poor_registry[c['id']]['covered'] = True
-            
-            # Region is now extracted directly from the path column
-            final_region = region if pd.notna(region) and region else 'Unknown'
-            
+        # Region extraction
+        final_region = region if pd.notna(region) and region else 'Unknown'
+        
+        # If no chainage OR no road match, flag as High Risk (No Match)
+        if not ranges or not matched_road_id:
             entry = {
-                'id': 'N/A',  # DPWH 2026 hierarchy doesn't have project_id
+                'id': 'N/A',
                 'project_name': name,
                 'amount': amount,
                 'region': final_region,
-                'road_name': matched_road_name,
-                'road_id': matched_road_id,
-                'conditions': list(conditions_found)
+                'road_name': matched_road_name or '(No Match)',
+                'road_id': matched_road_id or 'N/A',
+                'conditions': [],
+                'remark': 'High Risk (No Match)'
             }
+            results['no_match_projects'].append(entry)
+            results['stats']['no_match_count'] += 1
+            continue
+        
+        # If we have both chainage AND road match, check condition data
+        results['stats']['matches_found'] += 1
+        
+        # Check Condition
+        sections = road_to_sections.get(matched_road_id, [])
+        conditions_found = set()
+        has_overlap = False
+        
+        for (start_km, start_m, end_km, end_m) in ranges:
+            p_start = to_meters(start_km, start_m)
+            p_end = to_meters(end_km, end_m)
             
-            if not has_overlap:
-                # Flag: No Condition Data (Gamble)
-                entry['remark'] = 'High Risk (No Data)'
-                results['no_data_projects'].append(entry)
-                results['stats']['no_data_count'] += 1
-            else:
-                 is_bad_poor_present = 'Bad' in conditions_found or 'Poor' in conditions_found
-                 is_good_fair_present = 'Good' in conditions_found or 'Fair' in conditions_found
-                 
-                 if is_good_fair_present and not is_bad_poor_present:
-                     # Purely Good/Fair - Highest Risk (Wasteful)
-                     entry['remark'] = 'Highest Risk (Redundant)'
-                     results['low_priority_projects'].append(entry)
-                     results['stats']['low_priority_count'] += 1
-                 else:
-                     # Contains Bad or Poor - Justified!
-                     # We don't display these in the main list (user focused on risks), but we track for stats
-                     entry['remark'] = 'Low Risk (Justified)'
-                     results['justified_projects'].append(entry)
-                     results['stats']['justified_count'] += 1
+            # Check ALL sections for this road
+            for sid in sections:
+                conds = section_to_conditions.get(sid, [])
+                for c in conds:
+                    if overlaps(p_start, p_end, c['start'], c['end']):
+                        val = c['condition']
+                        if val: # Ensure not None
+                            conditions_found.add(val)
+                        has_overlap = True
+                        
+                        # Mark as covered if tracked
+                        if 'id' in c and c['id'] in bad_poor_registry:
+                            bad_poor_registry[c['id']]['covered'] = True
+        
+        entry = {
+            'id': 'N/A',  # DPWH 2026 hierarchy doesn't have project_id
+            'project_name': name,
+            'amount': amount,
+            'region': final_region,
+            'road_name': matched_road_name,
+            'road_id': matched_road_id,
+            'conditions': list(conditions_found)
+        }
+        
+        if not has_overlap:
+            # Flag: No Condition Data (Gamble)
+            entry['remark'] = 'High Risk (No Data)'
+            results['no_data_projects'].append(entry)
+            results['stats']['no_data_count'] += 1
+        else:
+             is_bad_poor_present = 'Bad' in conditions_found or 'Poor' in conditions_found
+             is_good_fair_present = 'Good' in conditions_found or 'Fair' in conditions_found
+             
+             if is_good_fair_present and not is_bad_poor_present:
+                 # Purely Good/Fair - Highest Risk (Wasteful)
+                 entry['remark'] = 'Highest Risk (Redundant)'
+                 results['low_priority_projects'].append(entry)
+                 results['stats']['low_priority_count'] += 1
+             else:
+                 # Contains Bad or Poor - Justified!
+                 entry['remark'] = 'Low Risk (Justified)'
+                 results['justified_projects'].append(entry)
+                 results['stats']['justified_count'] += 1
 
     # 4. Identify Unaddressed Bad/Poor
     print("Identifying unaddressed assets...")
@@ -334,12 +370,14 @@ def generate_cache():
     # Sort results
     results['low_priority_projects'].sort(key=lambda x: x.get('amount', 0) or 0, reverse=True)
     results['no_data_projects'].sort(key=lambda x: x.get('amount', 0) or 0, reverse=True)
+    results['no_match_projects'].sort(key=lambda x: x.get('amount', 0) or 0, reverse=True)
     results['unaddressed_assets'].sort(key=lambda x: x.get('road_name', ''), reverse=False)
 
     # Compute Detailed Stats
     results['stats']['details'] = {
         'low_priority': compute_category_stats(results['low_priority_projects']),
         'no_data': compute_category_stats(results['no_data_projects']),
+        'no_match': compute_category_stats(results['no_match_projects']),
         'justified': compute_category_stats(results['justified_projects']),
         'unaddressed': compute_category_stats(results['unaddressed_assets'])
     }
@@ -348,6 +386,7 @@ def generate_cache():
     total_rehab_amount = (
         results['stats']['details']['low_priority']['total_amount'] +
         results['stats']['details']['no_data']['total_amount'] +
+        results['stats']['details']['no_match']['total_amount'] +
         results['stats']['details']['justified']['total_amount']
     )
     results['stats']['financial_total'] = total_rehab_amount
@@ -438,7 +477,8 @@ def generate_cache():
     results['matches'] = (
         results['justified_projects'] + 
         results['low_priority_projects'] + 
-        results['no_data_projects']
+        results['no_data_projects'] +
+        results['no_match_projects']
     )
     
     # Keep individual lists for detailed stats if needed, or rely on 'details' having top regions
@@ -449,6 +489,7 @@ def generate_cache():
     print(f"Analysis Complete.")
     print(f"  Flagged Low Priority: {results['stats']['low_priority_count']}")
     print(f"  Flagged No Data: {results['stats']['no_data_count']}")
+    print(f"  Flagged No Match: {results['stats']['no_match_count']}")
     
     # Save to JSON
     with open(OUTPUT_FILE, 'w', encoding='utf-8') as f:
