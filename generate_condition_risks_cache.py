@@ -125,6 +125,27 @@ def generate_cache():
         if len(name) > 4:
             road_lookup[name] = rid
     
+    # Add common highway aliases (many DPWH projects use these names)
+    # Map project naming convention -> inventory naming convention
+    HIGHWAY_ALIASES = {
+        'maharlika highway': ['daang maharlika'],
+        'manila north road': ['macarthur hwy', 'manila north', 'north rd'],
+        'manila south road': ['south superhighway', 'south rd'],
+        'pan-philippine highway': ['daang maharlika', 'pan-philippine'],
+    }
+    
+    # Try to find a road ID for aliases by searching existing names
+    for alias, patterns in HIGHWAY_ALIASES.items():
+        if alias not in road_lookup:
+            # Try to find a matching road in existing lookup
+            for existing_name, rid in list(road_lookup.items()):
+                for pattern in patterns:
+                    if pattern in existing_name:
+                        road_lookup[alias] = rid
+                        break
+    
+    print(f"  Road lookup size: {len(road_lookup)}")
+    
     # Road ID -> List of Section IDs
     road_to_sections = {}
     for _, row in sect_inv.iterrows():
