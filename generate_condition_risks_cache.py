@@ -274,8 +274,8 @@ def generate_cache():
                  is_good_fair_present = 'Good' in conditions_found or 'Fair' in conditions_found
                  
                  if is_good_fair_present and not is_bad_poor_present:
-                     # Purely Good/Fair
-                     entry['remark'] = 'High Risk (Redundant)'
+                     # Purely Good/Fair - Highest Risk (Wasteful)
+                     entry['remark'] = 'Highest Risk (Redundant)'
                      results['low_priority_projects'].append(entry)
                      results['stats']['low_priority_count'] += 1
                  else:
