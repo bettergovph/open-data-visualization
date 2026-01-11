@@ -501,8 +501,12 @@
                     if (!s.has_data) return '';
                 } else {
                     s = data.stats[cat];
-                    name = cat.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
-                        .replace('Roads', '').replace('Bridges', '').trim() || cat; // Shorten names
+                    if (cat === 'flood_control') {
+                        name = 'Drainage';
+                    } else {
+                        name = cat.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+                            .replace('Roads', '').replace('Bridges', '').trim() || cat;
+                    }
                     if (!s) return '';
                 }
 
@@ -541,6 +545,27 @@
                 }
                 group.cats.forEach(cat => html += renderRow(cat, null, false));
             });
+
+            // Calculate Grand Total for Mobile
+            const allCats = [...roadCats, ...bridgeCats, ...otherCats];
+            const totalStats = sumStats(allCats);
+
+            const totalMean = totalStats.count > 0 ? totalStats.total_amount / totalStats.count : 0;
+            const totalPctCount = totalStats.count > 0 ? ((totalStats.outlier_count / totalStats.count) * 100).toFixed(1) + '%' : '0.0%';
+            const totalPctVal = totalStats.total_amount > 0 ? ((totalStats.outlier_total_amount / totalStats.total_amount) * 100).toFixed(1) + '%' : '0.0%';
+
+            html += `
+            <tr class="bg-slate-200 font-bold border-t-2 border-slate-400">
+                <td class="py-2 px-2 border-r sticky left-0 z-10 text-xs text-slate-900 bg-slate-200">GRAND TOTAL</td>
+                <td class="text-right py-2 px-2 text-xs font-mono text-slate-900">${totalStats.count.toLocaleString()}</td>
+                <td class="text-right py-2 px-2 text-xs font-mono text-slate-800">${formatCurrency(totalMean)}</td>
+                <td class="text-right py-2 px-2 text-xs font-mono text-slate-500">-</td>
+                <td class="text-right py-2 px-2 text-xs font-mono font-bold text-red-800">${totalStats.outlier_count}</td>
+                <td class="text-right py-2 px-2 text-xs font-mono text-red-800">${formatCurrency(totalStats.outlier_total_amount)}</td>
+                <td class="text-right py-2 px-2 text-[10px] font-mono text-red-800">${totalPctCount}</td>
+                <td class="text-right py-2 px-2 text-[10px] font-mono text-red-800">${totalPctVal}</td>
+            </tr>
+            `;
 
             html += `</tbody></table></div>`;
 

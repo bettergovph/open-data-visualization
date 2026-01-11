@@ -13431,7 +13431,12 @@ def _calculate_dpwh_2026_stats():
             name_lower = name.lower()
             
             # Skip summary lines
-            if 'public-private partnership' in name_lower or 'priority' in name_lower and 'projects' in name_lower:
+            # Skip summary lines
+            if 'public-private partnership' in name_lower or ('priority' in name_lower and 'projects' in name_lower):
+                continue
+            
+            # Skip Generic Summary Headers
+            if name_lower.strip() in ['highways', 'flood control', 'others', 'total', 'grand total', 'sub-total', 'volume']:
                 continue
 
             # 0. Check for Public Buildings (Priority over Road Name match)

@@ -991,7 +991,8 @@
         }
 
         function renderStats(data) {
-            document.getElementById('stat-total-parsed').textContent = data.total_parsed.toLocaleString();
+            const parsedEl = document.getElementById('stat-total-parsed');
+            if (parsedEl) parsedEl.textContent = data.total_parsed.toLocaleString();
 
             // Render Grand Total Card (Keeping this as a card/summary box)
             let grandTotalContainer = document.getElementById('stats-grand-total');
@@ -1090,7 +1091,11 @@
                     if (!s.has_data) return '';
                 } else {
                     s = data.stats[cat];
-                    name = cat.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                    if (cat === 'flood_control') {
+                        name = 'Drainage';
+                    } else {
+                        name = cat.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                    }
                     if (!s) return '';
                 }
 
@@ -1144,6 +1149,41 @@
                     tableHtml += renderRow(cat, null, false);
                 });
             });
+
+            // Calculate Grand Total
+            const grandSum = groups.reduce((acc, group) => {
+                const s = group.summary;
+                if (!s) { // For 'Others' which is null summary, we need to sum its cats manually or improve group logic
+                    // Actually simplest is just to sum ALL stats
+                    return acc;
+                }
+                // Wait, groups[2] (Others) has summary: null. Better to use sumStats(allCats)
+                return acc;
+            }, {});
+
+            // Correct Grand Total Calculation: Sum over ALL categories
+            const allCats = [...roadCats, ...bridgeCats, ...otherCats];
+            const totalStats = sumStats(allCats);
+
+            // Render Grand Total Row manually
+            const totalMean = totalStats.count > 0 ? totalStats.total_amount / totalStats.count : 0;
+            const totalPctCount = totalStats.count > 0 ? ((totalStats.outlier_count / totalStats.count) * 100).toFixed(1) + '%' : '0.0%';
+            const totalPctVal = totalStats.total_amount > 0 ? ((totalStats.outlier_total_amount / totalStats.total_amount) * 100).toFixed(1) + '%' : '0.0%';
+
+            tableHtml += `
+            <tr class="bg-slate-200 font-bold border-t-4 border-slate-400">
+                <td class="text-slate-900 border-r border-slate-300">GRAND TOTAL</td>
+                <td class="text-right font-mono text-slate-900">${totalStats.count.toLocaleString()}</td>
+                <td class="text-right font-mono text-xs text-slate-800">${formatCurrency(totalMean)}</td>
+                <td class="text-right font-mono text-xs text-slate-500">-</td>
+                <td class="text-right font-mono text-xs text-slate-500">-</td>
+                <td class="text-right font-mono text-xs text-slate-500">-</td>
+                <td class="text-right font-mono font-bold text-red-800 text-lg">${totalStats.outlier_count.toLocaleString()}</td>
+                <td class="text-right font-mono text-xs text-red-800">${formatCurrency(totalStats.outlier_total_amount)}</td>
+                <td class="text-right font-mono text-xs text-red-800">${totalPctCount}</td>
+                <td class="text-right font-mono text-xs text-red-800">${totalPctVal}</td>
+            </tr>
+            `;
 
             tableHtml += `</tbody></table></div>`;
 
