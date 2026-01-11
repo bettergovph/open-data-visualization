@@ -492,9 +492,11 @@ def generate_cache():
     print(f"  Flagged No Match: {results['stats']['no_match_count']}")
     
     # Save to JSON
+    OUTPUT_FILE = DATA_DIR / 'condition_risks_v2.json'
     with open(OUTPUT_FILE, 'w', encoding='utf-8') as f:
         json.dump(results, f, indent=2)
     print(f"Saved to {OUTPUT_FILE}")
 
 if __name__ == "__main__":
     generate_cache()
+

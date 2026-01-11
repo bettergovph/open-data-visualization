@@ -502,7 +502,7 @@ async def get_integrated_coverage(refresh: bool = Query(False)) -> JSONResponse:
 @app.get("/api/budget/condition-analysis")
 async def get_condition_analysis() -> JSONResponse:
     """Return the pre-calculated condition risks."""
-    cache_path = DATA_ROOT / "condition_risks.json"
+    cache_path = DATA_ROOT / "condition_risks_v2.json"
     if not cache_path.exists():
         return JSONResponse(
             content={
