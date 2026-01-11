@@ -16,6 +16,28 @@ REHAB_KEYWORDS = [
     'preventive maintenance', 'restoration', 'upgrading', 'improvement'
 ]
 
+# Canonical Region names for extraction
+REGION_NAMES = [
+    'National Capital Region', 'Cordillera Administrative Region',
+    'Ilocos Region', 'Region I', 'Cagayan Valley', 'Region II',
+    'Central Luzon', 'Region III', 'CALABARZON', 'Region IV-A',
+    'MIMAROPA', 'Region IV-B', 'Bicol Region', 'Region V',
+    'Western Visayas', 'Region VI', 'Central Visayas', 'Region VII',
+    'Eastern Visayas', 'Region VIII', 'Zamboanga Peninsula', 'Region IX',
+    'Northern Mindanao', 'Region X', 'Davao Region', 'Region XI',
+    'SOCCSKSARGEN', 'Region XII', 'Caraga', 'Region XIII',
+    'Bangsamoro Autonomous Region', 'BARMM', 'Negros Island Region', 'NIR'
+]
+
+def extract_region_from_path(path):
+    """Extracts Region name from a hierarchy path string."""
+    if not path or pd.isna(path):
+        return None
+    for reg in REGION_NAMES:
+        if reg.lower() in path.lower():
+            return reg
+    return None
+
 # Helper Functions
 def extract_all_chainage_ranges(name: str):
     """Extract all chainage ranges from name"""
@@ -66,17 +88,26 @@ def overlaps(start1, end1, start2, end2):
 def generate_cache():
     print("Loading data...")
     try:
-        # Load Parquet Files
-        projects = pd.read_parquet(DATA_DIR / 'integrated_projects_classified.parquet')
+        # Use DPWH 2026 Leaf Nodes as the primary project source (FY 2026)
+        dpwh_2026 = pd.read_parquet(DATA_DIR / 'dpwh_2026_leaf_nodes.parquet')
         road_inv = pd.read_parquet(DATA_DIR / 'road_inventory_2025.parquet')
         sect_inv = pd.read_parquet(DATA_DIR / 'road_section_inventory_2025.parquet')
         road_cond = pd.read_parquet(DATA_DIR / 'road_condition_2025.parquet')
-        # bridges could be added here in future
     except Exception as e:
         print(f"Error reading parquet files: {e}")
         return
 
-    print(f"Loaded {len(projects)} projects.")
+    print(f"Loaded {len(dpwh_2026)} DPWH 2026 leaf nodes.")
+    
+    # Pre-process DPWH 2026 data: extract Region from path
+    # Filter to rows with actual project data (amount > 0)
+    dpwh_2026['extracted_region'] = dpwh_2026['path'].apply(extract_region_from_path)
+    projects = dpwh_2026[dpwh_2026['amount'].notna() & (dpwh_2026['amount'] > 0)].copy()
+    projects = projects.rename(columns={'value': 'project_name'})
+    projects['region'] = projects['extracted_region']
+    print(f"Filtered to {len(projects)} project rows with amount > 0.")
+
+
 
     # 1. Build Road Lookups
     print("Building road lookups...")
@@ -215,11 +246,14 @@ def generate_cache():
                             if 'id' in c and c['id'] in bad_poor_registry:
                                 bad_poor_registry[c['id']]['covered'] = True
             
+            # Region is now extracted directly from the path column
+            final_region = region if pd.notna(region) and region else 'Unknown'
+            
             entry = {
-                'id': row.get('project_id', 'N/A'), 
+                'id': 'N/A',  # DPWH 2026 hierarchy doesn't have project_id
                 'project_name': name,
                 'amount': amount,
-                'region': region,
+                'region': final_region,
                 'road_name': matched_road_name,
                 'road_id': matched_road_id,
                 'conditions': list(conditions_found)
