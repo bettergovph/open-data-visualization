@@ -253,6 +253,7 @@
                     <a href="#repeated" class="budget-tab-btn" data-tab="repeated">🔄 Repeated</a>
                     <!-- <a href="#hierarchy" class="budget-tab-btn" data-tab="hierarchy">📂 Hierarchy</a> -->
                     <a href="#uniform" class="budget-tab-btn" data-tab="uniform">⚠️ Uniform Risks</a>
+                    <a href="#condition" class="budget-tab-btn" data-tab="condition">🚧 Condition</a>
                     <a href="#dist" class="budget-tab-btn hidden md:inline-block" data-tab="dist">📈 Distribution</a>
                     <a href="#diff" class="budget-tab-btn hidden md:inline-block" data-tab="diff">📉 Changes</a>
                 </div>
@@ -353,6 +354,62 @@
 
                     <div id="risks-container" class="space-y-8">
                         <!-- Risk clusters injected here -->
+                    </div>
+                </div>
+
+                <!-- Condition Tab -->
+                <div id="tab-condition" class="budget-tab-panel" style="display: none;">
+                    <div class="mb-6">
+                        <h3 class="section-title text-rose-700">Road & Bridge Condition Assessment</h3>
+                        <div class="text-sm text-slate-500 mt-1">
+                            Identification of <strong class="text-rose-700">"Bad"</strong> or <strong
+                                class="text-rose-700">"Poor"</strong> road segments that <strong>DO NOT</strong> have a
+                            corresponding rehabilitation project in the 2026 budget.
+                        </div>
+                    </div>
+
+                    <!-- Inline Condition Statistics and Charts -->
+                    <div id="condition-stats-container" class="mb-8 hidden">
+                        <!-- Content injected by renderConditionStatsInline() -->
+                    </div>
+
+                    <!-- Filter and Download -->
+                    <div class="mb-4 flex flex-row gap-4 items-center">
+                        <input type="text" id="condition-search"
+                            class="w-full md:w-3/4 p-2 border border-slate-300 rounded focus:border-rose-500 focus:ring-1 focus:ring-rose-500"
+                            placeholder="Filter by Project Name, Road Name, or Remark..."
+                            onkeyup="filterConditionTable(this.value)">
+
+                        <button onclick="downloadConditionCSV()"
+                            class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded flex items-center justify-center gap-2 text-sm whitespace-nowrap">
+                            <svg class="w-4 h-4" width="16" height="16" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                            </svg>
+                            Download CSV
+                        </button>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 40%">Project Name</th>
+                                    <th style="width: 20%">Road/Asset Name</th>
+                                    <th style="width: 15%">Conditions Found</th>
+                                    <th style="width: 15%">Amount</th>
+                                    <th style="width: 10%">Remark</th>
+                                </tr>
+                            </thead>
+                            <tbody id="condition-tbody">
+                                <tr>
+                                    <td colspan="5" class="text-center py-8 text-slate-500">
+                                        Select the "Condition" tab to load analysis...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
@@ -2239,6 +2296,342 @@
                 if (btn) btn.click();
             }
         }
+
+        // --- Condition Analysis Logic ---
+        window.conditionData = [];
+        window.conditionStats = {};
+        window.condCharts = {};
+        window.conditionPagination = { page: 1, limit: 50 };
+        // Track displayed data for pagination to work with filtering
+        window.currentConditionData = [];
+
+        async function loadConditionData() {
+            const tbody = document.getElementById('condition-tbody');
+            tbody.innerHTML = `<tr>
+    <td colspan="5" class="text-center py-8">
+        <div class="loading-spinner w-6 h-6 border-2 mx-auto mb-2"></div>Loading condition analysis...
+    </td>
+</tr>`;
+
+            try {
+                const response = await fetch('/api/budget/condition-analysis');
+                if (!response.ok) throw new Error("Failed to fetch data");
+                const data = await response.json();
+
+                if (data.success) {
+                    // Sort: Low Priority First > Amount Descending
+                    data.matches.sort((a, b) => {
+                        const getScore = (r) => {
+                            if (r && r.includes('Low Priority')) return 0;
+                            if (r && r.includes('No Data')) return 1;
+                            return 2; // Others (Justified)
+                        };
+                        const scoreA = getScore(a.remark);
+                        const scoreB = getScore(b.remark);
+
+                        if (scoreA !== scoreB) return scoreA - scoreB;
+                        return (b.amount || 0) - (a.amount || 0);
+                    });
+
+                    window.conditionData = data.matches;
+                    // Initialize current view data
+                    window.currentConditionData = data.matches;
+                    window.conditionStats = data.stats;
+
+                    // Render Inline Stats
+                    renderConditionStatsInline();
+
+                    // Render Table
+                    renderConditionTable();
+                } else {
+                    tbody.innerHTML = `<tr>
+    <td colspan="5" class="text-center text-red-500 py-4">Error loading data: ${data.error}</td>
+</tr>`;
+                }
+            } catch (error) {
+                console.error("Error fetching condition data:", error);
+                tbody.innerHTML = `<tr>
+    <td colspan="5" class="text-center text-red-500 py-4">Failed to load condition analysis.</td>
+</tr>`;
+            }
+        }
+
+        function renderConditionTable(filteredData = null) {
+            // Update current data state if filtered data is provided
+            if (filteredData) {
+                window.currentConditionData = filteredData;
+                window.conditionPagination.page = 1; // Reset to first page
+            }
+            const data = window.currentConditionData; // Use tracked data state
+            const tbody = document.getElementById('condition-tbody');
+            const paginationContainer = document.getElementById('projects-pagination'); // Reuse current placement or new one
+
+            // Ensure pagination container exists specifically for condition tab if not reuse
+            let condPagination = document.getElementById('condition-pagination');
+            if (!condPagination) {
+                // Determine where to place - probably after the table wrapper
+                const wrapper = tbody.closest('.table-wrapper');
+                if (wrapper) {
+                    condPagination = document.createElement('div');
+                    condPagination.id = 'condition-pagination';
+                    condPagination.className = "mt-6 flex justify-center gap-2 items-center flex-wrap";
+                    wrapper.parentNode.insertBefore(condPagination, wrapper.nextSibling);
+                }
+            }
+
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4">No matching records found.</td></tr>`;
+                if (condPagination) condPagination.innerHTML = '';
+                return;
+            }
+
+            // Pagination Logic
+            const page = window.conditionPagination.page;
+            const limit = window.conditionPagination.limit;
+            const totalPages = Math.ceil(data.length / limit);
+            const start = (page - 1) * limit;
+            const end = start + limit;
+            const pageData = data.slice(start, end);
+
+            const rows = pageData.map(item => {
+                const remarkClass = item.remark && item.remark.includes('Low Priority') ? 'text-yellow-600 bg-yellow-50 px-2 py-0.5 rounded text-xs font-bold' :
+                    item.remark && item.remark.includes('No Data') ? 'text-red-600 bg-red-50 px-2 py-0.5 rounded text-xs font-bold' :
+                        item.remark && item.remark.includes('Justified') ? 'text-green-600 bg-green-50 px-2 py-0.5 rounded text-xs font-bold' :
+                            'text-slate-600 bg-slate-100 px-2 py-0.5 rounded text-xs font-bold';
+
+                const conditionBadges = (item.conditions || []).map(c => {
+                    let color = 'bg-slate-100 text-slate-600';
+                    if (c === 'Bad') color = 'bg-red-100 text-red-700 border border-red-200';
+                    if (c === 'Poor') color = 'bg-amber-100 text-amber-800 border border-amber-200';
+                    if (c === 'Fair') color = 'bg-yellow-100 text-yellow-700 border border-yellow-200';
+                    if (c === 'Good') color = 'bg-green-100 text-green-700 border border-green-200';
+                    return `<span class="px-2 py-0.5 rounded text-xs font-bold ${color}">${c}</span>`;
+                }).join(' ');
+
+                return `
+                <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="font-medium text-slate-800 text-sm">${item.project_name}</td>
+                    <td class="text-sm text-slate-600">${item.road_name || '<span class="italic text-slate-400">N/A</span>'}</td>
+                    <td class="flex gap-1 flex-wrap py-3">${conditionBadges}</td>
+                    <td class="font-mono text-sm text-right">${formatCurrency(item.amount)}</td>
+                    <td class="text-center"><span class="${remarkClass}">${item.remark || 'Unknown'}</span></td>
+                </tr>`;
+            }).join('');
+
+            tbody.innerHTML = rows;
+
+            // Render Pagination Controls
+            if (condPagination) {
+                condPagination.innerHTML = `
+                    <button onclick="changeConditionPage(-1)" ${page === 1 ? 'disabled' : ''} 
+                        class="px-3 py-1 bg-white border rounded hover:bg-slate-100 disabled:opacity-50 text-slate-700">Previous</button>
+                    <span class="text-sm text-slate-600 font-medium">Page ${page} of ${totalPages} (Total ${data.length})</span>
+                    <button onclick="changeConditionPage(1)" ${page === totalPages ? 'disabled' : ''} 
+                        class="px-3 py-1 bg-white border rounded hover:bg-slate-100 disabled:opacity-50 text-slate-700">Next</button>
+                `;
+            }
+        }
+
+        function changeConditionPage(delta) {
+            const data = window.currentConditionData; // Use filtered/current data
+            const limit = window.conditionPagination.limit;
+            const totalPages = Math.ceil(data.length / limit);
+            const newPage = window.conditionPagination.page + delta;
+
+            if (newPage >= 1 && newPage <= totalPages) {
+                window.conditionPagination.page = newPage;
+                renderConditionTable(); // Will use window.currentConditionData
+            }
+        }
+
+        function filterConditionTable(query) {
+            if (!query) {
+                renderConditionTable();
+                return;
+            }
+            const lowerQ = query.toLowerCase();
+            const filtered = window.conditionData.filter(item =>
+                (item.project_name && item.project_name.toLowerCase().includes(lowerQ)) ||
+                (item.road_name && item.road_name.toLowerCase().includes(lowerQ)) ||
+                (item.remark && item.remark.toLowerCase().includes(lowerQ))
+            );
+            renderConditionTable(filtered);
+        }
+
+        function renderConditionStatsInline() {
+            try {
+                if (!window.conditionStats || !window.conditionStats.details) return;
+
+                const financialTotal = window.conditionStats.financial_total || 1;
+                const lpAmt = window.conditionStats.details.low_priority.total_amount;
+                const ndAmt = window.conditionStats.details.no_data.total_amount;
+                // Justified might be missing if key changed, use safe access
+                const justAmt = window.conditionStats.details.justified ? window.conditionStats.details.justified.total_amount : 0;
+
+                const lpPct = ((lpAmt / financialTotal) * 100).toFixed(1);
+                const ndPct = ((ndAmt / financialTotal) * 100).toFixed(1);
+
+                const renderCard = (title, data, color, subtitle) => {
+                    const colors = {
+                        'yellow': 'bg-yellow-50 border-yellow-200 text-yellow-800',
+                        'red': 'bg-red-50 border-red-200 text-red-800',
+                        'orange': 'bg-orange-50 border-orange-200 text-orange-800'
+                    }[color];
+
+                    if (!data) return '';
+
+                    return `
+                <div class="${colors} rounded-lg border p-4 shadow-sm flex flex-col justify-between h-full">
+                    <div>
+                        <div class="text-xs font-bold uppercase tracking-wider opacity-70 mb-1">${title}</div>
+                        <div class="flex justify-between items-end mb-1">
+                            <span class="text-2xl font-bold">${data.count.toLocaleString()}</span>
+                            <span class="text-xs font-bold bg-white/50 px-2 py-1 rounded">${subtitle}</span>
+                        </div>
+                        <div class="text-lg font-mono font-semibold opacity-90">${formatCurrency(data.total_amount)}</div>
+                    </div>
+                </div>`;
+                };
+
+                const contentHtml = `
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200">
+                    <div class="p-4 border-b bg-slate-50 rounded-t-xl transition-colors hover:bg-slate-100">
+                        <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <svg width="20" height="20" style="width: 20px; height: 20px;" class="w-5 h-5 text-slate-500" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                            Condition Assessment Analysis
+                        </h2>
+                    </div>
+
+
+                    <div class="p-6 space-y-6">
+                        <!-- Legend / Definitions -->
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-slate-700 space-y-2">
+                            <h3 class="font-bold text-blue-800 mb-2 flex items-center gap-2">
+                                <svg width="16" height="16" style="width: 16px; height: 16px; min-width: 16px;" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                Category Definitions
+                            </h3>
+                            <ul class="space-y-1 list-disc pl-5">
+                                <li><strong>Low Priority (Good/Fair):</strong> Rehabilitation projects targeting assets that are already in Good or Fair condition. These may be redundant.</li>
+                                <li><strong>Risky (No Data):</strong> Projects where no matching condition data was found in the asset inventory. Proceeding without survey data is a gamble.</li>
+                                <li><strong>Unaddressed Needs:</strong> Road/Bridge sections rated "Bad" or "Poor" that have <em>no</em> matching rehabilitation project assigned to them.</li>
+                            </ul>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            ${renderCard('Low Priority', window.conditionStats.details.low_priority, 'yellow', `${lpPct}% of Budget`)}
+                            ${renderCard('Risky (No Data)', window.conditionStats.details.no_data, 'red', `${ndPct}% of Budget`)}
+                            ${renderCard('Unaddressed Needs', window.conditionStats.details.unaddressed, 'orange', 'Bad/Poor left behind')}
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                                <h3 class="font-bold text-slate-700 mb-4">Rehabilitation Budget Allocation</h3>
+                                <div class="h-64 relative"><canvas id="condAllocationChart"></canvas></div>
+                            </div>
+                            <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                                <h3 class="font-bold text-slate-700 mb-4">Top 5 Unaddressed Regions</h3>
+                                <div class="h-64 relative"><canvas id="condRegionChart"></canvas></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+
+                const container = document.getElementById('condition-stats-container');
+                if (container) {
+                    container.innerHTML = contentHtml;
+                    container.classList.remove('hidden');
+                    // Slight delay to ensure DOM is ready for Chart.js
+                    requestAnimationFrame(() => {
+                        renderConditionCharts();
+                    });
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        function renderConditionCharts() {
+            if (window.condCharts.allocation) window.condCharts.allocation.destroy();
+            if (window.condCharts.region) window.condCharts.region.destroy();
+
+            const stats = window.conditionStats.details;
+
+            // Allocation Chart
+            window.condCharts.allocation = new Chart(document.getElementById('condAllocationChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Justified', 'Low Priority', 'No Data'],
+                    datasets: [{
+                        data: [
+                            stats.justified ? stats.justified.total_amount : 0,
+                            stats.low_priority.total_amount,
+                            stats.no_data.total_amount
+                        ],
+                        backgroundColor: ['#10B981', '#FCD34D', '#EF4444']
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            // Region Chart (Unaddressed)
+            const topRegions = stats.unaddressed.top_regions || [];
+            window.condCharts.region = new Chart(document.getElementById('condRegionChart'), {
+                type: 'bar',
+                data: {
+                    labels: topRegions.map(r => r[0]),
+                    datasets: [{
+                        label: 'Unaddressed Bad/Poor Assets',
+                        data: topRegions.map(r => r[1].count),
+                        backgroundColor: '#F97316'
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y' }
+            });
+        }
+
+        function downloadConditionCSV() {
+            if (!window.conditionData || window.conditionData.length === 0) {
+                alert("No data available.");
+                return;
+            }
+            const header = ["Project Name", "Road Name", "Conditions", "Amount", "Remark"];
+            const rows = window.conditionData.map(item => [
+                `"${(item.project_name || '').replace(/"/g, '""')}"`,
+                `"${(item.road_name || '').replace(/"/g, '""')}"`,
+                `"${(item.conditions || []).join(', ')}"`,
+                item.amount,
+                `"${item.remark}"`
+            ]);
+            const csv = [header.join(','), ...rows.map(r => r.join(','))].join('\\n');
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = "dpwh_condition_assessment.csv";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Hook into Tab Switching
+        document.addEventListener('DOMContentLoaded', () => {
+            const hash = window.location.hash;
+            if (hash === '#condition') {
+                document.querySelector('[data-tab="condition"]').click();
+                loadConditionData();
+            }
+
+            document.querySelectorAll('.budget-tab-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    if (e.target.dataset.tab === 'condition') {
+                        if (window.conditionData.length === 0) loadConditionData();
+                    }
+                });
+            });
+        });
+
     </script>
 </body>
 
