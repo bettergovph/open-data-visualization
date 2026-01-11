@@ -12,9 +12,36 @@ DATA_DIR = Path('/home/joebert/open-data-visualization/data/parquet')
 OUTPUT_FILE = Path('/home/joebert/open-data-visualization/static/data/condition_risks.json')
 
 REHAB_KEYWORDS = [
+    # Rehabilitation / Repair
     'rehabilitation', 'major repair', 'reconstruction', 'asset preservation', 
-    'preventive maintenance', 'restoration', 'upgrading', 'improvement'
+    'preventive maintenance', 'restoration', 'upgrading', 'improvement',
+    # New Construction
+    'construction', 'widening', 'concreting', 'asphalting',
+    # General Road Keywords
+    'road', 'highway', 'bridge', 'drainage', 'pavement', 'overlay'
 ]
+
+# Canonical Region names for extraction
+REGION_NAMES = [
+    'National Capital Region', 'Cordillera Administrative Region',
+    'Ilocos Region', 'Region I', 'Cagayan Valley', 'Region II',
+    'Central Luzon', 'Region III', 'CALABARZON', 'Region IV-A',
+    'MIMAROPA', 'Region IV-B', 'Bicol Region', 'Region V',
+    'Western Visayas', 'Region VI', 'Central Visayas', 'Region VII',
+    'Eastern Visayas', 'Region VIII', 'Zamboanga Peninsula', 'Region IX',
+    'Northern Mindanao', 'Region X', 'Davao Region', 'Region XI',
+    'SOCCSKSARGEN', 'Region XII', 'Caraga', 'Region XIII',
+    'Bangsamoro Autonomous Region', 'BARMM', 'Negros Island Region', 'NIR'
+]
+
+def extract_region_from_path(path):
+    """Extracts Region name from a hierarchy path string."""
+    if not path or pd.isna(path):
+        return None
+    for reg in REGION_NAMES:
+        if reg.lower() in path.lower():
+            return reg
+    return None
 
 # Helper Functions
 def extract_all_chainage_ranges(name: str):
@@ -66,17 +93,26 @@ def overlaps(start1, end1, start2, end2):
 def generate_cache():
     print("Loading data...")
     try:
-        # Load Parquet Files
-        projects = pd.read_parquet(DATA_DIR / 'integrated_projects_classified.parquet')
+        # Use DPWH 2026 Leaf Nodes as the primary project source (FY 2026)
+        dpwh_2026 = pd.read_parquet(DATA_DIR / 'dpwh_2026_leaf_nodes.parquet')
         road_inv = pd.read_parquet(DATA_DIR / 'road_inventory_2025.parquet')
         sect_inv = pd.read_parquet(DATA_DIR / 'road_section_inventory_2025.parquet')
         road_cond = pd.read_parquet(DATA_DIR / 'road_condition_2025.parquet')
-        # bridges could be added here in future
     except Exception as e:
         print(f"Error reading parquet files: {e}")
         return
 
-    print(f"Loaded {len(projects)} projects.")
+    print(f"Loaded {len(dpwh_2026)} DPWH 2026 leaf nodes.")
+    
+    # Pre-process DPWH 2026 data: extract Region from path
+    # Filter to rows with actual project data (amount > 0)
+    dpwh_2026['extracted_region'] = dpwh_2026['path'].apply(extract_region_from_path)
+    projects = dpwh_2026[dpwh_2026['amount'].notna() & (dpwh_2026['amount'] > 0)].copy()
+    projects = projects.rename(columns={'value': 'project_name'})
+    projects['region'] = projects['extracted_region']
+    print(f"Filtered to {len(projects)} project rows with amount > 0.")
+
+
 
     # 1. Build Road Lookups
     print("Building road lookups...")
@@ -136,8 +172,12 @@ def generate_cache():
 
     # 2. Filter Rehabilitation Projects
     print("Filtering rehabilitation projects...")
+    # Include keywords
     mask = projects['project_name'].str.contains('|'.join(REHAB_KEYWORDS), case=False, na=False)
-    potential_rehabs = projects[mask]
+    # Exclude non-road projects (lighting, buildings, etc.)
+    EXCLUDE_KEYWORDS = ['lighting', 'building', 'office', 'warehouse', 'storage', 'water supply', 'waterworks']
+    exclude_mask = projects['project_name'].str.contains('|'.join(EXCLUDE_KEYWORDS), case=False, na=False)
+    potential_rehabs = projects[mask & ~exclude_mask]
     print(f"Found {len(potential_rehabs)} potential rehabilitation projects.")
 
     # 3. Analyze Projects
@@ -215,11 +255,14 @@ def generate_cache():
                             if 'id' in c and c['id'] in bad_poor_registry:
                                 bad_poor_registry[c['id']]['covered'] = True
             
+            # Region is now extracted directly from the path column
+            final_region = region if pd.notna(region) and region else 'Unknown'
+            
             entry = {
-                'id': row.get('project_id', 'N/A'), 
+                'id': 'N/A',  # DPWH 2026 hierarchy doesn't have project_id
                 'project_name': name,
                 'amount': amount,
-                'region': region,
+                'region': final_region,
                 'road_name': matched_road_name,
                 'road_id': matched_road_id,
                 'conditions': list(conditions_found)
@@ -227,7 +270,7 @@ def generate_cache():
             
             if not has_overlap:
                 # Flag: No Condition Data (Gamble)
-                entry['remark'] = 'No Survey Data (Gamble)'
+                entry['remark'] = 'High Risk (No Data)'
                 results['no_data_projects'].append(entry)
                 results['stats']['no_data_count'] += 1
             else:
@@ -235,14 +278,14 @@ def generate_cache():
                  is_good_fair_present = 'Good' in conditions_found or 'Fair' in conditions_found
                  
                  if is_good_fair_present and not is_bad_poor_present:
-                     # Purely Good/Fair
-                     entry['remark'] = 'Low Priority (Good/Fair Condition)'
+                     # Purely Good/Fair - Highest Risk (Wasteful)
+                     entry['remark'] = 'Highest Risk (Redundant)'
                      results['low_priority_projects'].append(entry)
                      results['stats']['low_priority_count'] += 1
                  else:
                      # Contains Bad or Poor - Justified!
                      # We don't display these in the main list (user focused on risks), but we track for stats
-                     entry['remark'] = 'Justified (Addressing Bad/Poor)'
+                     entry['remark'] = 'Low Risk (Justified)'
                      results['justified_projects'].append(entry)
                      results['stats']['justified_count'] += 1
 
@@ -280,8 +323,8 @@ def generate_cache():
             by_region[reg]['count'] += 1
             by_region[reg]['amount'] += amt
             
-        # Top 5 Regions by Count
-        top_regions = sorted(by_region.items(), key=lambda x: x[1]['count'], reverse=True)[:5]
+        # All Regions by Count (Expanded to All)
+        top_regions = sorted(by_region.items(), key=lambda x: x[1]['count'], reverse=True)
         return {
             'count': len(items),
             'total_amount': total_amount,
@@ -314,7 +357,7 @@ def generate_cache():
     
     # 1. Build Contingency Table (Region x Category)
     regions = set()
-    cat_counts = {'justified': {}, 'low_priority': {}, 'no_data': {}}
+    cat_counts = {'justified': {}, 'low_priority': {}, 'no_data': {}, 'unaddressed': {}}
     
     for r in results['justified_projects']:
         reg = r.get('region') or 'Unknown'
@@ -330,6 +373,12 @@ def generate_cache():
         reg = r.get('region') or 'Unknown'
         regions.add(reg)
         cat_counts['no_data'][reg] = cat_counts['no_data'].get(reg, 0) + 1
+
+    for r in results['unaddressed_assets']:
+        # Unaddressed assets might have different keys, check visualization.py usually has 'region'
+        reg = r.get('region') or 'Unknown'
+        regions.add(reg)
+        cat_counts['unaddressed'][reg] = cat_counts['unaddressed'].get(reg, 0) + 1
         
     sorted_regions = sorted(list(regions))
     
@@ -339,7 +388,8 @@ def generate_cache():
         row = [
             cat_counts['justified'].get(reg, 0),
             cat_counts['low_priority'].get(reg, 0),
-            cat_counts['no_data'].get(reg, 0)
+            cat_counts['no_data'].get(reg, 0),
+            cat_counts['unaddressed'].get(reg, 0)
         ]
         observed.append(row)
         
@@ -354,10 +404,14 @@ def generate_cache():
             residuals = np.nan_to_num(residuals)
             
         anomalies = []
-        cols = ['Justified', 'Low Priority', 'No Data'] 
+        cols = ['Low Risk', 'Highest Risk', 'High Risk', 'Medium Risk'] 
         
         for i, reg in enumerate(sorted_regions):
             for j, col_name in enumerate(cols):
+                # User request: exclude Low Risk anomalies
+                if col_name == 'Low Risk':
+                    continue
+
                 res_val = residuals[i][j]
                 if res_val > 2.0: # Significantly HIGHER
                     anomalies.append({
@@ -387,10 +441,10 @@ def generate_cache():
         results['no_data_projects']
     )
     
-    # Cleanup individual lists to save space (optional, but keeps JSON clean if frontend uses matches)
-    del results['justified_projects']
-    del results['low_priority_projects']
-    del results['no_data_projects']
+    # Keep individual lists for detailed stats if needed, or rely on 'details' having top regions
+    # del results['justified_projects']
+    # del results['low_priority_projects']
+    # del results['no_data_projects']
     
     print(f"Analysis Complete.")
     print(f"  Flagged Low Priority: {results['stats']['low_priority_count']}")
