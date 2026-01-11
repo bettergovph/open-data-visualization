@@ -14379,289 +14379,43 @@ async def dpwh_2026_diff_api():
     Compare 'parsed_dpwh_2026.parquet' (Target) against 'budget_amendments_2026.json' (Reference/GAB Annex A-5).
     Returns stats only. Use /diff/added, /diff/removed, /diff/modified for full data.
     """
+    stats_file = DATA_ROOT / "api_cache" / "dpwh_diff_stats.json"
+    
+    if not stats_file.exists():
+        if not await _ensure_diff_cache():
+            return JSONResponse({"status": "error", "message": "Failed to generate diff cache"}, status_code=500)
+            
     try:
-        # Check stats cache first  
-        stats_file = DATA_ROOT / "api_cache" / "dpwh_diff_stats.json"
-        if stats_file.exists():
-            try:
-                with open(stats_file, 'r', encoding='utf-8') as f:
-                    cache_data = json.load(f)
-                print(f"✅ [DPWH Diff Stats] Using cached data from {stats_file.name}")
-                return JSONResponse(cache_data)
-            except Exception as cache_err:
-                print(f"⚠️ [DPWH Diff Stats] Error reading cache, falling back to processing: {cache_err}")
-        
-        # 1. Load Reference (NEP Annex A-5)
-        # ------------------------------------------------------------------
-        # Helper function to filter line items only
-        def is_line_item(name):
-            """Filter out hierarchy items like region headers, funding sources, etc."""
-            if not name:
-                return False
-            name_stripped = name.strip()
-            hierarchy_prefixes = (
-                'a.', 'b.', 'c.', 'd.', 'e.', 'f.', 'g.', 'h.', 'i.', 'j.', 'k.', 'l.', 'm.', 
-                'n.', 'o.', 'p.', 'q.', 'r.', 's.', 't.', 'u.', 'v.', 'w.', 'x.', 'y.', 'z.',
-                'A.', 'B.', 'C.', 'D.', 'E.', 'F.', 'G.', 'H.', 'I.', 'J.', 'K.', 'L.', 'M.', 
-                'N.', 'O.', 'P.', 'Q.', 'R.', 'S.', 'T.', 'U.', 'V.', 'W.', 'X.', 'Y.', 'Z.',
-                '1.', '2.', '3.', '4.', '5.', '6.', '7.', '8.', '9.', '0.',
-                'I.', 'II.', 'III.', 'IV.', 'V.', 'VI.', 'VII.', 'VIII.', 'IX.', 'X.',
-                'XI.', 'XII.', 'XIII.', 'XIV.', 'XV.'
-            )
-            if name_stripped.startswith(hierarchy_prefixes):
-                return False
-            if any(keyword in name_stripped for keyword in ['GOP', 'Loan Proceeds', 'Loan proceeds', 'Sub-Total', 'Grand Total']):
-                return False
-            return True
-        
-        ref_path = Path("static/data/budget_amendments_2026.json")
-        ref_projects = []
-        if ref_path.exists():
-            with open(ref_path, "r", encoding="utf-8") as f:
-                ref_data = json.load(f)
-                # Filter for source_sheet == 'Annex A-5'
-                ref_projects = [
-                    p for p in ref_data.get("projects", [])
-                    if p.get("source_sheet") == "Annex A-5"
-                ]
-        else:
-            return JSONResponse({"status": "error", "message": "Reference data not found (budget_amendments_2026.json)"})
+        with open(stats_file, 'r', encoding='utf-8') as f:
+            return JSONResponse(json.load(f))
+    except Exception as e:
+        return JSONResponse({"status": "error", "message": str(e)}, status_code=500)
 
-        # Normalize Reference
-        # Use a tuple of (normalized_name, amount) as key, or just store list to diff
-        ref_map = {}
-        for p in ref_projects:
-            # normalization: lowercase, strip, remove extra spaces
-            # Keys in budget_amendments_2026.json: id, name, description, etc.
-            name = (p.get("name") or p.get("description") or "").strip()
-            # If name is empty, skip or use filler
-            if not name: continue
-            
-            # Filter out non-line-items (hierarchy headers, funding sources, etc.)
-            if not is_line_item(name):
-                continue
-            
-            amt = p.get("final_amount") or p.get("original_amount") or 0.0
-            
-            # Key: name|amount
-            key = f"{name.lower()}|{float(amt):.2f}"
-            ref_map[key] = {
-                "name": name,
-                "amount": amt,
-                "original": p
-            }
 
-        # 2. Load Target (DPWH 2026 Parquet)
-        # ------------------------------------------------------------------
-        target_path = DATA_ROOT.parent.parent / "data" / "parquet" / "parsed_dpwh_2026.parquet"
-        target_projects = []
-        
-        if target_path.exists():
-            import duckdb
-            conn = duckdb.connect()
-            try:
-                parquet_path_str = str(target_path).replace("'", "''")
-                
-                # Use same fill-down logic as projects endpoint
-                query = f"""
-                    WITH params AS (
-                        SELECT 
-                            _excel_row, 
-                            col_J, 
-                            amount, 
-                            latest_qualifier_column,
-                            col_B, col_C,
-                            -- Clean H and I (ignore markers)
-                            CASE WHEN LENGTH(col_H) > 3 THEN col_H ELSE NULL END as clean_H,
-                            CASE WHEN LENGTH(col_I) > 3 THEN col_I ELSE NULL END as clean_I
-                        FROM read_parquet('{parquet_path_str}')
-                    ),
-                    groups AS (
-                        SELECT 
-                            *,
-                            COUNT(col_B) OVER (ORDER BY _excel_row) as grp_B,
-                            COUNT(col_C) OVER (ORDER BY _excel_row) as grp_C,
-                            COUNT(clean_H) OVER (ORDER BY _excel_row) as grp_H,
-                            COUNT(clean_I) OVER (ORDER BY _excel_row) as grp_I
-                        FROM params
-                    ),
-                    filled_data AS (
-                        SELECT 
-                            _excel_row,
-                            amount,
-                            latest_qualifier_column,
-                            col_J,
-                            LAST_VALUE(col_C IGNORE NULLS) OVER (PARTITION BY grp_B ORDER BY _excel_row) as cat_C,
-                            LAST_VALUE(clean_H IGNORE NULLS) OVER (PARTITION BY grp_C ORDER BY _excel_row) as cat_H,
-                            LAST_VALUE(clean_I IGNORE NULLS) OVER (PARTITION BY grp_H ORDER BY _excel_row) as cat_I
-                        FROM groups
-                    )
-                    SELECT 
-                        col_J as project_name, 
-                        amount, 
-                        cat_H as region,
-                        cat_I as district,
-                        cat_C as program
-                    FROM filled_data 
-                    WHERE 
-                        latest_qualifier_column = 'J' 
-                        AND col_J NOT ILIKE 'GOP' 
-                        AND col_J NOT ILIKE 'Loan Proceeds'
-                        AND col_J NOT ILIKE '%Sub-Total%'
-                        AND col_J NOT ILIKE '%Grand Total%'
-                    ORDER BY _excel_row
-                """
-                
-                rows = conn.execute(query).fetchall()
-                # Row tuples: (project_name, amount, region, district, program)
-                
-                for r in rows:
-                    name = str(r[0] or "").strip()
-                    if not name: continue
-                    
-                    amt = float(r[1] or 0.0)
-                    
-                    target_projects.append({
-                        "name": name,
-                        "amount": amt,
-                        "region": r[2],
-                        "district": r[3],
-                        "program": r[4]
-                    })
-                    
-            finally:
-                conn.close()
-                
-        else:
-             return JSONResponse({"status": "error", "message": "Target data not found (parsed_dpwh_2026.parquet)"})
-
-        # Normalize Target
-        target_map = {}
-        target_keys = set()
-        target_by_name = {}  # Map by name only for detecting modifications
-        
-        for p in target_projects:
-            name = p["name"]
-            amt = p["amount"]
-            key = f"{name.lower()}|{amt:.2f}"
-            target_keys.add(key)
-            target_map[key] = p
-            
-            # Also index by name only
-            name_lower = name.lower()
-            if name_lower not in target_by_name:
-                target_by_name[name_lower] = []
-            target_by_name[name_lower].append(p)
-
-        # 3. Calculate Diff
-        # ------------------------------------------------------------------
-        removed = []
-        added = []
-        modified = []
-        
-        # Build ref_by_name for modification detection
-        ref_by_name = {}
-        for k, v in ref_map.items():
-            name_lower = v["name"].lower()
-            if name_lower not in ref_by_name:
-                ref_by_name[name_lower] = []
-            ref_by_name[name_lower].append(v)
-        
-        # Track Programs
-        ref_programs = set(p.get("program_id") for p in ref_projects)
-        
-        # Removed/Modified: In Ref but not in Target (exact match) or Modified (name match, amount diff)
-        for k, v in ref_map.items():
-            if k not in target_keys:
-                # Not an exact match - check if it's a modification
-                name_lower = v["name"].lower()
-                if name_lower in target_by_name:
-                    # Same name exists in target with different amount - it's modified
-                    target_versions = target_by_name[name_lower]
-                    if len(target_versions) == 1:
-                        modified.append({
-                            "name": v["name"],
-                            "ref_amount": v["amount"],
-                            "target_amount": target_versions[0]["amount"],
-                            "program": target_versions[0].get("program")
-                        })
-                    else:
-                        # Multiple targets with same name - ambiguous
-                        removed.append({
-                            "name": v["name"],
-                            "amount": v["amount"],
-                            "program": v["original"].get("program_id")
-                        })
-                else:
-                    # Truly removed
-                    removed.append({
-                        "name": v["name"],
-                        "amount": v["amount"],
-                        "program": v["original"].get("program_id")
-                    })
-        
-        # Added: In Target but not in Ref (exact match) and not already counted as Modified
-        modified_names = set(m["name"].lower() for m in modified)
-        for k in target_keys:
-            if k not in ref_map:
-                p = target_map[k]
-                name_lower = p["name"].lower()
-                # Don't count as added if it's already in modified list
-                if name_lower not in modified_names or name_lower not in ref_by_name:
-                    added.append({
-                        "name": p["name"],
-                        "amount": p["amount"],
-                        "region": p.get("region"),
-                        "district": p.get("district"),
-                        "program": p.get("program")
-                    })
-                
-        # Sort by Amount Descending
-        removed.sort(key=lambda x: x["amount"], reverse=True)
-        added.sort(key=lambda x: x["amount"], reverse=True)
-        modified.sort(key=lambda x: x["target_amount"], reverse=True)
-        
-        # Calculate matches
-        match_count = len(ref_projects) - len(removed) - len(modified)
-        
-        response_data = {
-            "status": "ok",
-            "data": {
-                "stats": {
-                    "ref_count": len(ref_map),
-                    "target_count": len(target_projects),
-                    "added_count": len(added),
-                    "removed_count": len(removed),
-                    "modified_count": len(modified),
-                    "match_count": match_count
-                },
-                "removed": removed,
-                "added": added,
-                "modified": modified
-            }
-        }
-        
-        # Save to cache
-        try:
-            cache_file.parent.mkdir(parents=True, exist_ok=True)
-            with open(cache_file, 'w', encoding='utf-8') as f:
-                json.dump(response_data, f, ensure_ascii=False, indent=2)
-            print(f"💾 [DPWH Diff] Cached data to {cache_file.name}")
-        except Exception as cache_err:
-            print(f"⚠️ [DPWH Diff] Failed to write cache: {cache_err}")
-        
-        return JSONResponse(response_data)
-
+async def _ensure_diff_cache():
+    """Helper to run the cache generation script if files are missing."""
+    print("⚠️ [DPWH Diff] Cache missing, regenerating...")
+    try:
+        # Import dynamically to avoid circular imports or startup cost
+        from generate_diff_cache import generate_diff_cache
+        # Run in thread pool to avoid blocking async loop since it's CPU intensive
+        import asyncio
+        loop = asyncio.get_event_loop()
+        success = await loop.run_in_executor(None, generate_diff_cache)
+        return success
     except Exception as e:
         import traceback
         traceback.print_exc()
-        return JSONResponse({"status": "error", "message": str(e)}, status_code=500)
+        return False
 
 
 @app.get("/api/dpwh2026/diff/removed")
 async def dpwh_2026_diff_removed():
     """Serve removed items preview (first 50 items)"""
     cache_file = DATA_ROOT / "api_cache" / "dpwh_diff_removed_preview.json"
+    if not cache_file.exists():
+        await _ensure_diff_cache()
+        
     if cache_file.exists():
         with open(cache_file, 'r', encoding='utf-8') as f:
             return JSONResponse(json.load(f))
@@ -14672,6 +14426,9 @@ async def dpwh_2026_diff_removed():
 async def dpwh_2026_diff_removed_full():
     """Serve all removed items"""
     cache_file = DATA_ROOT / "api_cache" / "dpwh_diff_removed_full.json"
+    if not cache_file.exists():
+        await _ensure_diff_cache()
+
     if cache_file.exists():
         with open(cache_file, 'r', encoding='utf-8') as f:
             return JSONResponse(json.load(f))
@@ -14682,6 +14439,9 @@ async def dpwh_2026_diff_removed_full():
 async def dpwh_2026_diff_modified():
     """Serve modified items preview (first 50 items)"""
     cache_file = DATA_ROOT / "api_cache" / "dpwh_diff_modified_preview.json"
+    if not cache_file.exists():
+        await _ensure_diff_cache()
+
     if cache_file.exists():
         with open(cache_file, 'r', encoding='utf-8') as f:
             return JSONResponse(json.load(f))
@@ -14692,6 +14452,9 @@ async def dpwh_2026_diff_modified():
 async def dpwh_2026_diff_modified_full():
     """Serve all modified items"""
     cache_file = DATA_ROOT / "api_cache" / "dpwh_diff_modified_full.json"
+    if not cache_file.exists():
+        await _ensure_diff_cache()
+        
     if cache_file.exists():
         with open(cache_file, 'r', encoding='utf-8') as f:
             return JSONResponse(json.load(f))
@@ -14702,6 +14465,9 @@ async def dpwh_2026_diff_modified_full():
 async def dpwh_2026_diff_added():
     """Serve added items preview (first 50 items)"""
     cache_file = DATA_ROOT / "api_cache" / "dpwh_diff_added_preview.json"
+    if not cache_file.exists():
+        await _ensure_diff_cache()
+
     if cache_file.exists():
         with open(cache_file, 'r', encoding='utf-8') as f:
             return JSONResponse(json.load(f))
@@ -14712,6 +14478,9 @@ async def dpwh_2026_diff_added():
 async def dpwh_2026_diff_added_full():
     """Serve all added items"""
     cache_file = DATA_ROOT / "api_cache" / "dpwh_diff_added_full.json"
+    if not cache_file.exists():
+        await _ensure_diff_cache()
+
     if cache_file.exists():
         with open(cache_file, 'r', encoding='utf-8') as f:
             return JSONResponse(json.load(f))
