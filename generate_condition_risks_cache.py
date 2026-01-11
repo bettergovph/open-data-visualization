@@ -112,6 +112,40 @@ def generate_cache():
     projects['region'] = projects['extracted_region']
     print(f"Filtered to {len(projects)} project rows with amount > 0.")
 
+    # 0. Filter out known Summary Headers (Program-level items that look like projects)
+    SUMMARY_HEADERS = [
+        'Preventive Maintenance',
+        'Road Widening',
+        'Rehabilitation/ Reconstruction of Roads with Slips, Slope Collapse, and Landslide',
+        'Rehabilitation/ Reconstruction/ Upgrading of Damaged Paved Roads',
+        'Construction/ Upgrading/ Rehabilitation of Drainage along National Roads',
+        'Off-Carriageway Improvement',
+        'Paving of Unpaved Roads',
+        'Highways, Flood Control, and Others',
+        'Network Development',
+        'Bridge Program',
+        'Construction of New Bridges',
+        'Retrofitting/ Strengthening of Permanent Bridges',
+        'Rehabilitation/ Major Repair of Permanent Bridges',
+        'Widening of Permanent Bridges',
+        'Construction of Flyovers/ Interchanges/ Underpasses/ Long Span Bridges',
+        'Flood Management Program',
+        'Construction/ Maintenance of Flood Mitigation Structures and Drainage Systems',
+        'Construction/ Rehabilitation of Flood Mitigation Facilities within Major River Basins and Principal Rivers',
+        'Convergence and Special Support Program',
+        'Sustainable Infrastructure Projects Alleviating Gaps (SIPAG)',
+        'Basic Infrastructure Program (BIP)',
+        'Public Buildings',
+        'Traffic Mitigation'
+    ]
+    
+    # Normalize headers for comparison
+    normalized_headers = {h.lower().strip() for h in SUMMARY_HEADERS}
+    
+    # Filter out exact matches (case-insensitive)
+    projects = projects[~projects['project_name'].str.lower().str.strip().isin(normalized_headers)].copy()
+    print(f"Filtered to {len(projects)} projects after removing summary headers.")
+
 
 
     # 1. Build Road Lookups
