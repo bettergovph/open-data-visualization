@@ -13439,6 +13439,12 @@ def _calculate_dpwh_2026_stats():
             if name_lower.strip() in ['highways', 'flood control', 'others', 'total', 'grand total', 'sub-total', 'volume']:
                 continue
 
+            # Skip Specific Long Summary Headers
+            if 'highways, flood control, and others' in name_lower:
+                continue
+            if 'construction/ upgrading/ rehabilitation of drainage along national roads' in name_lower:
+                continue
+                
             # 0. Check for Public Buildings (Priority over Road Name match)
             if any(x in name_lower for x in ['building', 'hall', 'center', 'school', 'clinic', 'hospital', 'gym', 'mpb', 'multi purpose']):
                  projects_by_category['public_buildings'].append({'name': name, 'amount': amount, 'cost_metric': amount, 'distance_km': 0, 'road_id': None, 'road_name': None})
