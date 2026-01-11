@@ -234,12 +234,10 @@ def generate_cache():
         amount = row.get('amount', 0)
         region = row.get('region')
         
-        # Only analyze if it has chainage info
+        # Extract chainage info (if available)
         ranges = extract_all_chainage_ranges(name)
-        if not ranges:
-            continue
-            
-        # Match Road Name
+        
+        # Try to match Road Name
         matched_road_id = None
         matched_road_name = None
         
@@ -250,65 +248,80 @@ def generate_cache():
                 matched_road_id = road_lookup[r_name]
                 break
         
-        if matched_road_id:
-            results['stats']['matches_found'] += 1
-            
-            # Check Condition
-            sections = road_to_sections.get(matched_road_id, [])
-            conditions_found = set()
-            has_overlap = False
-            
-            for (start_km, start_m, end_km, end_m) in ranges:
-                p_start = to_meters(start_km, start_m)
-                p_end = to_meters(end_km, end_m)
-                
-                # Check ALL sections for this road
-                for sid in sections:
-                    conds = section_to_conditions.get(sid, [])
-                    for c in conds:
-                        if overlaps(p_start, p_end, c['start'], c['end']):
-                            val = c['condition']
-                            if val: # Ensure not None
-                                conditions_found.add(val)
-                            has_overlap = True
-                            
-                            # Mark as covered if tracked
-                            if 'id' in c and c['id'] in bad_poor_registry:
-                                bad_poor_registry[c['id']]['covered'] = True
-            
-            # Region is now extracted directly from the path column
-            final_region = region if pd.notna(region) and region else 'Unknown'
-            
+        # Region extraction
+        final_region = region if pd.notna(region) and region else 'Unknown'
+        
+        # If no chainage OR no road match, flag as High Risk (No Data/Match)
+        if not ranges or not matched_road_id:
             entry = {
-                'id': 'N/A',  # DPWH 2026 hierarchy doesn't have project_id
+                'id': 'N/A',
                 'project_name': name,
                 'amount': amount,
                 'region': final_region,
-                'road_name': matched_road_name,
-                'road_id': matched_road_id,
-                'conditions': list(conditions_found)
+                'road_name': matched_road_name or '(No Match)',
+                'road_id': matched_road_id or 'N/A',
+                'conditions': [],
+                'remark': 'High Risk (No Data/Match)'
             }
+            results['no_data_projects'].append(entry)
+            results['stats']['no_data_count'] += 1
+            continue
+        
+        # If we have both chainage AND road match, check condition data
+        results['stats']['matches_found'] += 1
+        
+        # Check Condition
+        sections = road_to_sections.get(matched_road_id, [])
+        conditions_found = set()
+        has_overlap = False
+        
+        for (start_km, start_m, end_km, end_m) in ranges:
+            p_start = to_meters(start_km, start_m)
+            p_end = to_meters(end_km, end_m)
             
-            if not has_overlap:
-                # Flag: No Condition Data (Gamble)
-                entry['remark'] = 'High Risk (No Data)'
-                results['no_data_projects'].append(entry)
-                results['stats']['no_data_count'] += 1
-            else:
-                 is_bad_poor_present = 'Bad' in conditions_found or 'Poor' in conditions_found
-                 is_good_fair_present = 'Good' in conditions_found or 'Fair' in conditions_found
-                 
-                 if is_good_fair_present and not is_bad_poor_present:
-                     # Purely Good/Fair - Highest Risk (Wasteful)
-                     entry['remark'] = 'Highest Risk (Redundant)'
-                     results['low_priority_projects'].append(entry)
-                     results['stats']['low_priority_count'] += 1
-                 else:
-                     # Contains Bad or Poor - Justified!
-                     # We don't display these in the main list (user focused on risks), but we track for stats
-                     entry['remark'] = 'Low Risk (Justified)'
-                     results['justified_projects'].append(entry)
-                     results['stats']['justified_count'] += 1
+            # Check ALL sections for this road
+            for sid in sections:
+                conds = section_to_conditions.get(sid, [])
+                for c in conds:
+                    if overlaps(p_start, p_end, c['start'], c['end']):
+                        val = c['condition']
+                        if val: # Ensure not None
+                            conditions_found.add(val)
+                        has_overlap = True
+                        
+                        # Mark as covered if tracked
+                        if 'id' in c and c['id'] in bad_poor_registry:
+                            bad_poor_registry[c['id']]['covered'] = True
+        
+        entry = {
+            'id': 'N/A',  # DPWH 2026 hierarchy doesn't have project_id
+            'project_name': name,
+            'amount': amount,
+            'region': final_region,
+            'road_name': matched_road_name,
+            'road_id': matched_road_id,
+            'conditions': list(conditions_found)
+        }
+        
+        if not has_overlap:
+            # Flag: No Condition Data (Gamble)
+            entry['remark'] = 'High Risk (No Data)'
+            results['no_data_projects'].append(entry)
+            results['stats']['no_data_count'] += 1
+        else:
+             is_bad_poor_present = 'Bad' in conditions_found or 'Poor' in conditions_found
+             is_good_fair_present = 'Good' in conditions_found or 'Fair' in conditions_found
+             
+             if is_good_fair_present and not is_bad_poor_present:
+                 # Purely Good/Fair - Highest Risk (Wasteful)
+                 entry['remark'] = 'Highest Risk (Redundant)'
+                 results['low_priority_projects'].append(entry)
+                 results['stats']['low_priority_count'] += 1
+             else:
+                 # Contains Bad or Poor - Justified!
+                 entry['remark'] = 'Low Risk (Justified)'
+                 results['justified_projects'].append(entry)
+                 results['stats']['justified_count'] += 1
 
     # 4. Identify Unaddressed Bad/Poor
     print("Identifying unaddressed assets...")
