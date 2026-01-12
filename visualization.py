@@ -671,6 +671,93 @@ async def get_mpb_top_buildings() -> JSONResponse:
         traceback.print_exc()
         return JSONResponse(content={"success": False, "error": str(e), "buildings": []}, status_code=500)
 
+@app.get("/api/dpwh/contract-splitting")
+async def get_contract_splitting() -> JSONResponse:
+    """
+    Get clusters of projects that might indicate contract splitting.
+    Groups projects by 'cluster_id' and cross-references with candidates.
+    """
+    import pandas as pd
+    
+    # Define paths
+    base_dir = "/home/joebert/open-data-visualization/database/dpwh/contract splitting"
+    projects_parquet = os.path.join(base_dir, "dpwh_projects_2021_2024.parquet")
+    candidates_parquet = os.path.join(base_dir, "contract_splitting_candidates.parquet")
+    
+    if not os.path.exists(projects_parquet):
+        return JSONResponse(content={"success": False, "error": "Projects data not found"}, status_code=404)
+
+    try:
+        # Load data
+        df_projects = pd.read_parquet(projects_parquet)
+        
+        # Load candidates if available
+        candidates_set = set()
+        if os.path.exists(candidates_parquet):
+            try:
+                df_candidates = pd.read_parquet(candidates_parquet)
+                # Normalize candidates for better matching (case insensitive)
+                if not df_candidates.empty and 'Contract splitting candidates' in df_candidates.columns:
+                    candidates_set = set(df_candidates['Contract splitting candidates'].astype(str).str.lower().str.strip())
+            except Exception as e:
+                print(f"Warning: Failed to load candidates: {e}")
+
+        # Ensure cluster_id exists and filter nulls
+        if 'cluster_id' not in df_projects.columns:
+             return JSONResponse(content={"success": False, "error": "cluster_id column missing"}, status_code=500)
+        
+        df_clustered = df_projects.dropna(subset=['cluster_id'])
+        
+        # Group by cluster_id
+        clusters_data = []
+        
+        # Only interest in clusters with > 1 project
+        # Using value_counts first to filter is faster
+        cluster_counts = df_clustered['cluster_id'].value_counts()
+        valid_clusters = cluster_counts[cluster_counts > 1].index
+        
+        # Filter main df to only valid clusters
+        df_filtered = df_clustered[df_clustered['cluster_id'].isin(valid_clusters)]
+        
+        grouped = df_filtered.groupby('cluster_id')
+        
+        for cluster_id, group in grouped:
+            # Aggregate stats
+            total_amount = group['abc'].sum() if 'abc' in group.columns else 0
+            # Get common attributes (mode) or just take the first one
+            primary_contractor = group['contractor'].iloc[0] if 'contractor' in group.columns else "Unknown"
+            region = group['region'].iloc[0] if 'region' in group.columns else ""
+            
+            # Check if candidate
+            is_candidate = False
+            if isinstance(primary_contractor, str):
+                is_candidate = primary_contractor.lower().strip() in candidates_set
+            
+            # Convert group rows to list of dicts
+            # Nan handling for json serialization
+            projects_list = group.where(pd.notnull(group), None).to_dict(orient='records')
+            
+            clusters_data.append({
+                "cluster_id": int(cluster_id),
+                "contractor": primary_contractor,
+                "project_count": len(group),
+                "total_amount": float(total_amount),
+                "region": region,
+                "is_candidate": is_candidate,
+                "projects": projects_list
+            })
+            
+        # Sort by total amount desc
+        clusters_data.sort(key=lambda x: x['total_amount'], reverse=True)
+        
+        return JSONResponse(content={"success": True, "clusters": clusters_data})
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JSONResponse(content={"success": False, "error": str(e)}, status_code=500)
+
+
 # @app.get("/api/integrated/projects")
 async def _deprecated_get_integrated_projects(
     page: int = Query(default=1, ge=1, description="Page number (1-based)"),

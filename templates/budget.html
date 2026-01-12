@@ -135,6 +135,7 @@
                             <a href="#roads" class="budget-tab-btn" data-tab="roads">🛠️ Projects</a>
                             <a href="#stats" class="budget-tab-btn" data-tab="stats">📊 Project Statistics</a>
                             <a href="#reblock" class="budget-tab-btn" data-tab="reblock">🛣️ Reblocking</a>
+                            <a href="#split" class="budget-tab-btn" data-tab="split">✂️ Contract Splitting</a>
                         </div>
 
                         <div class="budget-tab-content">
@@ -501,6 +502,54 @@
                                     <div class="loading-spinner">Loading budget data...</div>
                                 </div>
                             </div>
+
+                            <!-- Contract Splitting Tab -->
+                            <div id="tab-split" class="budget-tab-panel">
+                                <div class="flex justify-between items-center mb-6">
+                                    <div>
+                                        <h3 class="budget-section-title text-purple-700">Contract Splitting Analysis
+                                        </h3>
+                                        <p class="budget-section-desc">
+                                            Detection of <strong>project clusters</strong> awarded to the same
+                                            contractor, potentially split to bypass approval limits.
+                                            <br>Priority is given to known candidates.
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <button onclick="loadContractSplittingData()"
+                                            class="px-4 py-2 bg-purple-50 text-purple-700 rounded hover:bg-purple-100 transition-colors">
+                                            🔄 Refresh Data
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div id="split-loading" class="hidden mb-4 text-center text-slate-500">
+                                    <div class="loading-spinner w-4 h-4 border-2"></div> Analying clusters...
+                                </div>
+
+                                <div class="table-wrapper">
+                                    <table class="data-table w-full text-left border-collapse">
+                                        <thead>
+                                            <tr class="bg-gray-100 border-b">
+                                                <th class="p-3 border-b border-gray-200">Cluster ID</th>
+                                                <th class="p-3 border-b border-gray-200">Contractor</th>
+                                                <th class="p-3 border-b border-gray-200 text-center">Count</th>
+                                                <th class="p-3 border-b border-gray-200 text-right">Total Amount</th>
+                                                <th class="p-3 border-b border-gray-200">Region</th>
+                                                <th class="p-3 border-b border-gray-200 text-center">Candidate?</th>
+                                                <th class="p-3 border-b border-gray-200 text-center">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="split-tbody">
+                                            <tr>
+                                                <td colspan="7" class="text-center py-8 text-slate-500">Select the tab
+                                                    to load data...</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
         </section>
@@ -4167,6 +4216,15 @@
                             }
                             panel.dataset.loaded = 'true';
                         }
+                    } else if (tabName === 'split') {
+                        // Load Contract Splitting data when tab is activated
+                        const panel = document.getElementById('tab-split');
+                        if (panel && !panel.dataset.loaded) {
+                            if (typeof loadContractSplittingData === 'function') {
+                                loadContractSplittingData();
+                            }
+                            panel.dataset.loaded = 'true';
+                        }
                     }
 
                 } else {
@@ -5817,7 +5875,7 @@
 
                 // Check for hash in URL and switch to that tab
                 const hash = window.location.hash.substring(1); // Remove the # character
-                const validTabs = ['visual', 'browser', 'analysis', 'trends', 'resu', 'cat', 'roads', 'stats', 'reblock'];
+                const validTabs = ['visual', 'browser', 'analysis', 'trends', 'resu', 'cat', 'roads', 'stats', 'reblock', 'split'];
                 if (hash && validTabs.includes(hash)) {
                     switchToTab(hash, false); // Don't update hash since we're reading from it
                 }
@@ -5945,6 +6003,7 @@
 
                 console.log('🚀 [BUDGET] About to initialize tabs...');
                 initializeTabs();
+
 
                 // Load visual charts immediately since visual tab is active by default
                 setTimeout(() => {
@@ -16531,8 +16590,118 @@
 
     {% include "footer.html" %}
     </section>
-    </div>
 
+
+    <script>
+        async function loadContractSplittingData() {
+            const tbody = document.getElementById('split-tbody');
+            const loading = document.getElementById('split-loading');
+
+            if (loading) loading.classList.remove('hidden');
+            if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4">Loading...</td></tr>';
+
+            try {
+                const response = await fetch('/api/dpwh/contract-splitting');
+                const data = await response.json();
+
+                if (!data.success) {
+                    throw new Error(data.error || 'Unknown error');
+                }
+
+                if (!data.clusters || data.clusters.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8">No clusters found.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = '';
+
+                // Helper to format currency
+                const formatCurrency = (amount) => {
+                    return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(amount);
+                };
+
+                data.clusters.forEach(cluster => {
+                    // Create Main Row
+                    const tr = document.createElement('tr');
+                    tr.className = cluster.is_candidate ? 'bg-red-50 hover:bg-red-100 border-b border-gray-100' : 'hover:bg-slate-50 border-b border-gray-100';
+
+                    const candidateBadge = cluster.is_candidate
+                        ? '<span class="px-2 py-1 bg-red-100 text-red-700 rounded text-xs font-bold">MATCH</span>'
+                        : '<span class="text-slate-400">-</span>';
+
+                    tr.innerHTML = `
+                        <td class="p-3 font-mono text-slate-500">#${cluster.cluster_id}</td>
+                        <td class="p-3 font-medium ${cluster.is_candidate ? 'text-red-800' : 'text-slate-700'}">${cluster.contractor}</td>
+                        <td class="p-3 text-center">${cluster.project_count}</td>
+                        <td class="p-3 text-right font-mono text-slate-700">${formatCurrency(cluster.total_amount)}</td>
+                        <td class="p-3 text-sm text-slate-600">${cluster.region}</td>
+                        <td class="p-3 text-center">${candidateBadge}</td>
+                        <td class="p-3 text-center">
+                            <button onclick="toggleClusterDetails(${cluster.cluster_id})" 
+                                class="text-blue-600 hover:text-blue-800 text-sm underline">
+                                Show Projects
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+
+                    // Create Details Row (Hidden)
+                    const trDetails = document.createElement('tr');
+                    trDetails.id = `cluster-details-${cluster.cluster_id}`;
+                    trDetails.style.display = 'none';
+                    trDetails.className = 'bg-slate-50';
+
+                    let projectsHtml = `
+                        <div class="p-4">
+                            <h4 class="font-bold text-sm mb-2 text-slate-600">Projects in Cluster #${cluster.cluster_id}</h4>
+                            <table class="w-full text-sm border border-slate-200 bg-white">
+                                <thead class="bg-slate-100">
+                                    <tr>
+                                        <th class="p-2 border text-left">Contract ID</th>
+                                        <th class="p-2 border text-left">Project Description</th>
+                                        <th class="p-2 border text-right">ABC (PHP)</th>
+                                        <th class="p-2 border text-right">Contract Cost (PHP)</th>
+                                        <th class="p-2 border text-center">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                    `;
+
+                    cluster.projects.forEach(p => {
+                        projectsHtml += `
+                            <tr>
+                                <td class="p-2 border font-mono">${p.contractid || '-'}</td>
+                                <td class="p-2 border">${p.projectdes || '-'}</td>
+                                <td class="p-2 border text-right font-mono">${formatCurrency(p.abc)}</td>
+                                <td class="p-2 border text-right font-mono">${formatCurrency(p.contractco)}</td>
+                                <td class="p-2 border text-center">${p.Status || '-'}</td>
+                            </tr>
+                        `;
+                    });
+
+                    projectsHtml += `</tbody></table></div>`;
+
+                    trDetails.innerHTML = `<td colspan="7">${projectsHtml}</td>`;
+                    tbody.appendChild(trDetails);
+                });
+
+                tbody.setAttribute('data-loaded', 'true');
+
+            } catch (err) {
+                console.error(err);
+                if (tbody) tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-red-600">Error: ${err.message}</td></tr>`;
+            } finally {
+                if (loading) loading.classList.add('hidden');
+            }
+        }
+
+        window.toggleClusterDetails = function (clusterId) {
+            const el = document.getElementById(`cluster-details-${clusterId}`);
+            if (el) {
+                el.style.display = el.style.display === 'none' ? 'table-row' : 'none';
+            }
+        };
+    </script>
 </body>
 
 </html>

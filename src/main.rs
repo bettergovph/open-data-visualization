@@ -618,7 +618,25 @@ async fn api_mpb_top_buildings_proxy() -> Result<HttpResponse, ActixError> {
     }
 }
 
-// Proxies for DPWH 2026
+
+async fn api_contract_splitting_proxy() -> Result<HttpResponse, ActixError> {
+    let client = reqwest::Client::new();
+    // Default to 8001 to bypass ghost process on 8000
+    let base_url = std::env::var("PYTHON_API_URL").unwrap_or_else(|_| "http://127.0.0.1:8001".to_string());
+    let base_url = base_url.trim_end_matches('/');
+    let url = format!("{}/api/dpwh/contract-splitting", base_url);
+
+    match client.get(&url).send().await {
+        Ok(resp) => {
+            let status = actix_web::http::StatusCode::from_u16(resp.status().as_u16()).unwrap_or(actix_web::http::StatusCode::INTERNAL_SERVER_ERROR);
+            match resp.json::<serde_json::Value>().await {
+                Ok(json) => Ok(HttpResponse::build(status).json(json)),
+                Err(e) => Ok(HttpResponse::InternalServerError().json(serde_json::json!({"success": false, "error": format!("Failed: {}", e)})))
+            }
+        },
+        Err(e) => Ok(HttpResponse::BadGateway().json(serde_json::json!({"success": false, "error": format!("Upstream error: {}", e)})))
+    }
+}
 async fn api_dpwh2026_projects_proxy(req: HttpRequest) -> Result<HttpResponse, ActixError> {
     let client = reqwest::Client::new();
     // Default to 8001 to bypass ghost process on 8000
@@ -751,6 +769,7 @@ async fn main() -> std::io::Result<()> {
             .service(web::resource("/api/dynasty-projects/congressman").route(web::get().to(api_dynasty_congressman)))
             .service(web::resource("/api/dpwh2026/projects").route(web::get().to(api_dpwh2026_projects_proxy)))
             .service(web::resource("/api/dpwh2026/summary").route(web::get().to(api_dpwh2026_summary_proxy)))
+            .service(web::resource("/api/dpwh/contract-splitting").route(web::get().to(api_contract_splitting_proxy)))
     })
     .bind(&bind_address)?
     .run()
