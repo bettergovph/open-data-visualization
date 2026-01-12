@@ -516,6 +516,10 @@
                                         </p>
                                     </div>
                                     <div>
+                                        <button onclick="downloadContractSplittingCSV()"
+                                            class="mr-2 px-4 py-2 bg-green-50 text-green-700 rounded hover:bg-green-100 transition-colors">
+                                            📥 Download CSV
+                                        </button>
                                         <button onclick="loadContractSplittingData()"
                                             class="px-4 py-2 bg-purple-50 text-purple-700 rounded hover:bg-purple-100 transition-colors">
                                             🔄 Refresh Data
@@ -16604,6 +16608,9 @@
                 const response = await fetch('/api/dpwh/contract-splitting');
                 const data = await response.json();
 
+                // Store data for CSV download
+                window.contractSplittingData = data.clusters || [];
+
                 if (!data.success) {
                     throw new Error(data.error || 'Unknown error');
                 }
@@ -16700,6 +16707,59 @@
             if (el) {
                 el.style.display = el.style.display === 'none' ? 'table-row' : 'none';
             }
+        };
+
+        window.downloadContractSplittingCSV = function () {
+            if (!window.contractSplittingData || window.contractSplittingData.length === 0) {
+                alert('No data available to download. Please load the data first.');
+                return;
+            }
+
+            const rows = [];
+            // Header
+            rows.push([
+                'Cluster ID', 'Contractor', 'Project Count', 'Total Amount', 'Region', 'Is Candidate',
+                'Contract ID', 'Project Description', 'ABC', 'Contract Cost', 'Status'
+            ].join(','));
+
+            // Data
+            window.contractSplittingData.forEach(cluster => {
+                const clusterInfo = [
+                    cluster.cluster_id,
+                    `"${(cluster.contractor || '').replace(/"/g, '""')}"`, // Basic CSV escaping
+                    cluster.project_count,
+                    cluster.total_amount,
+                    cluster.region,
+                    cluster.is_candidate ? 'Yes' : 'No'
+                ];
+
+                if (cluster.projects && cluster.projects.length > 0) {
+                    cluster.projects.forEach(p => {
+                        const projectInfo = [
+                            p.contractid || '',
+                            `"${(p.projectdes || '').replace(/"/g, '""')}"`,
+                            p.abc || 0,
+                            p.contractco || 0,
+                            p.Status || ''
+                        ];
+                        rows.push([...clusterInfo, ...projectInfo].join(','));
+                    });
+                } else {
+                    // Include cluster even if no projects (shouldn't happen given logic, but safe)
+                    rows.push([...clusterInfo, '', '', '', '', ''].join(','));
+                }
+            });
+
+            const csvContent = rows.join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `contract_splitting_analysis_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         };
     </script>
 </body>
