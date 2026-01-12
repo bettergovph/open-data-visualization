@@ -348,9 +348,17 @@
 
                 <div id="tab-multi" class="budget-tab-panel" style="display: none;">
                     <div class="flex justify-between items-center mb-4">
-                        <h3 class="section-title text-red-700">🚩 Multi-Flagged Project Risks</h3>
-                        <div class="text-sm text-slate-500">
-                            Projects flagged across multiple categories (Condition + Repeated + Cost Outliers).
+                        <div>
+                            <h3 class="section-title text-red-700">🚩 Multi-Flagged Project Risks</h3>
+                            <div class="text-sm text-slate-500">
+                                Projects flagged across multiple categories (Condition + Repeated + Cost Outliers).
+                            </div>
+                        </div>
+                        <div>
+                            <button onclick="downloadMultiFlagsCSV()"
+                                class="px-4 py-2 bg-green-50 text-green-700 rounded hover:bg-green-100 transition-colors text-sm font-semibold">
+                                📊 CSV
+                            </button>
                         </div>
                     </div>
                     <div id="multi-tab-content">
@@ -703,7 +711,11 @@
                             Baseline</strong> (Reference).
                     </p>
                 </div>
-                <div class="text-sm text-right">
+                <div class="text-sm text-right flex gap-2">
+                    <button onclick="downloadDiffCSV()"
+                        class="px-4 py-2 bg-green-50 text-green-700 rounded hover:bg-green-100 transition-colors">
+                        📊 Download CSV
+                    </button>
                     <button onclick="loadDiffData()"
                         class="px-4 py-2 bg-indigo-50 text-indigo-700 rounded hover:bg-indigo-100 transition-colors">
                         🔄 Refresh Diff
@@ -2454,6 +2466,147 @@
             }
         }
 
+        // Multi-Flag Logic
+        window.multiFlagsData = null;
+
+        async function loadMultiFlagsData() {
+            const container = document.getElementById('multi-tab-content');
+            container.innerHTML = '<div class="py-12 text-center text-slate-500"><div class="loading-spinner mx-auto mb-2"></div>Loading multi-flag analysis...</div>';
+
+            try {
+                const response = await fetch('/api/dpwh2026/multi-flags');
+                const json = await response.json();
+
+                if (json.success === false) {
+                    throw new Error(json.error || 'Failed to load data');
+                }
+
+                window.multiFlagsData = json.data || [];
+                renderMultiFlags(window.multiFlagsData);
+
+            } catch (err) {
+                console.error(err);
+                container.innerHTML = `<div class="text-center text-red-500 py-8">Error loading data: ${err.message}</div>`;
+            }
+        }
+
+        function renderMultiFlags(data) {
+            const container = document.getElementById('multi-tab-content');
+            if (!data || data.length === 0) {
+                container.innerHTML = '<div class="text-center text-slate-400 py-8">No multi-flagged projects found.</div>';
+                return;
+            }
+
+            // Simple table render
+            let html = `
+                <div class="table-wrapper">
+                    <table class="data-table w-full text-sm">
+                        <thead class="bg-slate-50">
+                            <tr>
+                                <th class="p-2 text-left">Project Name</th>
+                                <th class="p-2 text-center">Flags</th>
+                                <th class="p-2 text-right">Amount</th>
+                                <th class="p-2 text-left">Region</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            data.slice(0, 500).forEach(item => { // Limit render
+                const flags = [];
+                if (item.is_repeated) flags.push('<span class="bg-blue-100 text-blue-700 px-1 rounded text-xs">Repeated</span>');
+                if (item.is_outlier) flags.push('<span class="bg-red-100 text-red-700 px-1 rounded text-xs">Cost Outlier</span>');
+                if (item.is_condition) flags.push('<span class="bg-orange-100 text-orange-700 px-1 rounded text-xs">Bad Condition</span>');
+
+                html += `
+                    <tr class="hover:bg-slate-50 border-b">
+                        <td class="p-2 max-w-md truncate" title="${item.project_name}">${item.project_name}</td>
+                        <td class="p-2 text-center flex gap-1 justify-center flex-wrap">${flags.join('')}</td>
+                        <td class="p-2 text-right font-mono">${formatCurrency(item.amount)}</td>
+                        <td class="p-2 text-sm text-slate-500">${item.region || '-'}</td>
+                    </tr>
+                `;
+            });
+
+            html += `</tbody></table></div>`;
+            if (data.length > 500) {
+                html += `<div class="text-center py-2 text-slate-400 text-xs">Showing top 500 of ${data.length} records. Download CSV for full list.</div>`;
+            }
+            container.innerHTML = html;
+        }
+
+        window.downloadMultiFlagsCSV = function () {
+            if (!window.multiFlagsData || window.multiFlagsData.length === 0) {
+                alert('No data to download. Please load the tab first.');
+                return;
+            }
+
+            const header = ['Project Name', 'Amount', 'Region', 'District', 'Is Repeated', 'Is Cost Outlier', 'Is Bad Condition', 'Flags Count'];
+            const rows = [header.join(',')];
+
+            window.multiFlagsData.forEach(item => {
+                const row = [
+                    `"${(item.project_name || '').replace(/"/g, '""')}"`,
+                    item.amount || 0,
+                    `"${(item.region || '').replace(/"/g, '""')}"`,
+                    `"${(item.district || '').replace(/"/g, '""')}"`,
+                    item.is_repeated ? 'Yes' : 'No',
+                    item.is_outlier ? 'Yes' : 'No',
+                    item.is_condition ? 'Yes' : 'No',
+                    (item.is_repeated ? 1 : 0) + (item.is_outlier ? 1 : 0) + (item.is_condition ? 1 : 0)
+                ];
+                rows.push(row.join(','));
+            });
+
+            const blob = new Blob([rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `dpwh_2026_multi_flags_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        };
+
+        window.downloadDiffCSV = function () {
+            if (!diffDataCache.stats) {
+                alert('No data available. Please load the Changes tab first.');
+                return;
+            }
+
+            const rows = [];
+            rows.push(['Type', 'Project Name', 'Region', 'District', 'Program', 'Amount (Ref)', 'Amount (Target)', 'Change %']);
+
+            // Helper
+            const escape = (s) => `"${(s || '').replace(/"/g, '""')}"`;
+
+            // Removed
+            (diffDataCache.removed || []).forEach(i => {
+                rows.push(['REMOVED', escape(i.name), escape(i.region), escape(i.district), escape(i.program), i.amount || 0, 0, '-100%'].join(','));
+            });
+
+            // Added
+            (diffDataCache.added || []).forEach(i => {
+                rows.push(['ADDED', escape(i.name), escape(i.region), escape(i.district), escape(i.program), 0, i.amount || 0, '100%'].join(','));
+            });
+
+            // Modified
+            (diffDataCache.modified || []).forEach(i => {
+                const pct = i.ref_amount ? ((i.target_amount - i.ref_amount) / i.ref_amount * 100).toFixed(2) : '0';
+                rows.push(['MODIFIED', escape(i.name), escape(i.region), escape(i.district), escape(i.program), i.ref_amount || 0, i.target_amount || 0, pct + '%'].join(','));
+            });
+
+            const csvContent = rows.join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `dpwh_2026_changes_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        };
+
         function filterDiff(val) {
             if (diffDataCache) {
                 renderDiff(diffDataCache, val);
@@ -2471,11 +2624,16 @@
                 history.replaceState(null, null, '#stats');
             }
 
-            if (['projects', 'hierarchy', 'uniform', 'summary', 'dist', 'diff', 'stats', 'repeated'].includes(hash)) {
+            if (['projects', 'hierarchy', 'uniform', 'summary', 'dist', 'diff', 'stats', 'repeated', 'multi'].includes(hash)) {
 
                 // Special handling for Diff tab loading
                 if (hash === 'diff' && !diffDataCache.stats) {
                     loadDiffData();
+                }
+
+                // Special handling for Multi tab loading
+                if (hash === 'multi' && !window.multiFlagsData) {
+                    loadMultiFlagsData();
                 }
 
                 const btn = document.querySelector(`.budget-tab-btn[data-tab="${hash}"]`);
