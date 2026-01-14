@@ -100,7 +100,10 @@ def extract_all_chainage_ranges(name: str):
     dash = r'[-–—]'
     number = r'\d+(?:[.,]\d+)?'
 
-    pattern_k = rf'K({number})\s*\+\s*\(?(-?{number})\)?\s*{dash}\s*K({number})\s*\+\s*\(?(-?{number})\)?'
+    # Allow K or Sta. or Sta (case insensitive)
+    # Treat Sta. 0+abc as K0+abc
+    prefix = r'(?:K|Sta\.?\s*)'
+    pattern_k = rf'{prefix}({number})\s*\+\s*\(?(-?{number})?\)?\s*{dash}\s*{prefix}({number})\s*\+\s*\(?(-?{number})?\)?'
     for match in re.finditer(pattern_k, name, re.IGNORECASE):
         add_range(match.group(1), match.group(2), match.group(3), match.group(4))
 
@@ -120,17 +123,37 @@ def generate_cache():
         road_inv = pd.read_parquet(DATA_DIR / 'road_inventory_2025.parquet')
         sect_inv = pd.read_parquet(DATA_DIR / 'road_section_inventory_2025.parquet')
         road_cond = pd.read_parquet(DATA_DIR / 'road_condition_2025.parquet')
+        bridge_cond = pd.read_parquet(DATA_DIR / 'bridge_condition_2025.parquet')
     except Exception as e:
         print(f"Error reading parquet files: {e}")
         return
 
     print(f"Loaded {len(dpwh_2026)} DPWH 2026 leaf nodes.")
     
-    # Extract Valid DEOs from Condition Data
-    valid_deos = list(road_cond['District Engineering Office'].dropna().unique())
+    # Extract Valid DEOs from Condition Data (Road + Bridge)
+    road_deos = set(road_cond['District Engineering Office'].dropna().unique())
+    bridge_deos = set(bridge_cond['District Engineering Office'].dropna().unique()) if 'District Engineering Office' in bridge_cond.columns else set()
+    valid_deos = list(road_deos.union(bridge_deos))
+    
     # Sort by length descending to ensure specific matches first
     valid_deos.sort(key=len, reverse=True)
     print(f"Loaded {len(valid_deos)} District Engineering Offices for matching.")
+
+    # Build Bridge Lookup
+    print("Building bridge lookup...")
+    bridge_lookup = {}
+    if 'Bridge ID' in bridge_cond.columns:
+        for _, row in bridge_cond.iterrows():
+            bid = str(row['Bridge ID']).strip()
+            bridge_lookup[bid] = {
+                'condition': row['Condition'] if 'Condition' in row else row.get('VCR'),
+                'region': row.get('Region'),
+                'deo': row.get('District Engineering Office'),
+                'data': row.to_dict() # Store full data for unaddressed check
+            }
+            # Initialize coverage flag
+            bridge_lookup[bid]['covered'] = False
+    print(f"Loaded {len(bridge_lookup)} unique Bridge IDs.")
     
     # Pre-process DPWH 2026 data: extract Region from path
     # Filter to rows with actual project data (amount > 0)
@@ -367,22 +390,54 @@ def generate_cache():
         # Extract chainage info (if available)
         ranges = extract_all_chainage_ranges(name)
         
-        # Try to match Road Name
-        matched_rids = []
-        matched_road_name = None
+        # --- BRIDGE MATCHING ---
+        bridge_match_found = False
+        bridge_conditions = []
+        matched_bridge_ids = []
         
-        # Optimization: Scan sorted road names
-        for r_name in sorted_road_names:
-            if r_name in name_lower:
-                matched_road_name = r_name
-                matched_rids = road_lookup[r_name]
-                break
+        # Regex: B followed by 5 digits and 2 letters (Standard Bridge ID)
+        bridge_matches = re.findall(r'B\d{5}[A-Z]{2}', name)
+        
+        if bridge_matches:
+            # Filter to known IDs
+            valid_bids = [bid for bid in bridge_matches if bid in bridge_lookup]
+            
+            if valid_bids:
+                bridge_match_found = True
+                matched_bridge_ids = valid_bids
+                
+                for bid in valid_bids:
+                    # Mark as covered
+                    bridge_lookup[bid]['covered'] = True
+                    
+                    # Store condition
+                    cond = bridge_lookup[bid]['condition']
+                    if cond:
+                        bridge_conditions.append(cond)
+                        
+                # Determine "Worst" condition found (for risk analysis)
+                # Logic: If ANY is Bad/Poor -> Justified. If ALL Good/Fair -> Low Priority.
+                # Handled later by standard 'conditions_found' logic if we merge it.
+        
+        if not bridge_match_found:
+            # Try to match Road Name (Only if no bridge match)
+            # Bridges are usually on roads, but we want the specific bridge condition if available.
+            
+            matched_rids = []
+            matched_road_name = None
+            
+            # Optimization: Scan sorted road names
+            for r_name in sorted_road_names:
+                if r_name in name_lower:
+                    matched_road_name = r_name
+                    matched_rids = road_lookup[r_name]
+                    break
         
         # Region extraction
         final_region = region if pd.notna(region) and region else 'Unknown'
         
-        # If no chainage OR no road match, flag as High Risk (No Match)
-        if not ranges or not matched_rids:
+        # If no chainage OR no road match (and no bridge match), flag as High Risk (No Match)
+        if not bridge_match_found and (not ranges or not matched_rids):
             entry = {
                 'id': 'N/A',
                 'project_name': name,
@@ -402,18 +457,36 @@ def generate_cache():
         
         # Check Condition
         conditions_found = set()
-        has_overlap = False
         
-        # Iterate over ALL matched Road IDs
-        for matched_road_id in matched_rids:
-            sections = road_to_sections.get(matched_road_id, [])
+        if bridge_match_found:
+            # Use Bridge Conditions
+            for c in bridge_conditions:
+                conditions_found.add(c)
+            # Use Bridge ID as Road Name/ID for display
+            matched_road_name = f"Bridge Matches: {', '.join(matched_bridge_ids)}"
+            matched_rids = matched_bridge_ids # Hack to display Bridge IDs in Road ID field
             
-            for (start_km, start_m, end_km, end_m) in ranges:
-                p_start = to_meters(start_km, start_m)
-                p_end = to_meters(end_km, end_m)
+        else:
+            # Standard Road Matching Logic
+            has_overlap = False
+            
+            # Iterate over ALL matched Road IDs
+            for matched_road_id in matched_rids:
+                sections = road_to_sections.get(matched_road_id, [])
                 
-                # Check ALL sections for this road
-                for sid in sections:
+                for (start_km, start_m, end_km, end_m) in ranges:
+                    p_start = to_meters(start_km, start_m)
+                    p_end = to_meters(end_km, end_m)
+                    
+                    # Check ALL sections for this road
+                    for sid in sections:
+                        conds = section_to_conditions.get(sid, [])
+                        for c in conds:
+                            # 1. Strict Overlap Check
+                            is_match = False
+                            
+                            if overlaps(p_start, p_end, c['start'], c['end']):
+                                is_match = True
                     conds = section_to_conditions.get(sid, [])
                     for c in conds:
                         # 1. Strict Overlap Check
@@ -518,6 +591,24 @@ def generate_cache():
                 'remark': f"Unaddressed {data.get('VCR')} Condition",
                 'segment_details': f"{data.get('Start (m)')} - {data.get('End (m)')}"
             })
+
+
+    # Add Unaddressed Bridges
+    if 'bridge_lookup' in locals():
+        for bid, info in bridge_lookup.items():
+            if not info['covered']:
+                cond = info['condition']
+                if cond in ['Bad', 'Poor']:
+                    data = info['data']
+                    results['unaddressed_assets'].append({
+                        'project_name': '(No Project Assigned)',
+                        'road_name': f"{bid} (Bridge) - {data.get('District Engineering Office')}",
+                        'amount': 0,
+                        'region': info['region'],
+                        'conditions': [cond],
+                        'remark': f"Unaddressed {cond} Bridge",
+                        'segment_details': f"Bridge ID: {bid}"
+                    })
     
     results['stats']['unaddressed_count'] = len(results['unaddressed_assets'])
 
