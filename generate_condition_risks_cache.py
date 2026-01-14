@@ -38,9 +38,18 @@ def extract_region_from_path(path):
     """Extracts Region name from a hierarchy path string."""
     if not path or pd.isna(path):
         return None
+    # Find all matches and return the one that appears LAST in the path (deduced by path string position)
+    # Actually, simpler: Iterate specific regions. The path hierarchy usually puts the accurate region deeper.
+    matches = []
     for reg in REGION_NAMES:
-        if reg.lower() in path.lower():
-            return reg
+        idx = path.lower().find(reg.lower())
+        if idx != -1:
+            matches.append((idx, reg))
+    
+    if matches:
+        # Sort by index descending (latest occurrence matches leaf region)
+        matches.sort(key=lambda x: x[0], reverse=True)
+        return matches[0][1]
     return None
 
 def extract_deo_from_path(path, valid_deos):
@@ -175,14 +184,17 @@ def generate_cache():
 
     # 1. Build Road Lookups
     print("Building road lookups...")
-    # Road Name -> Road ID
+    # Road Name -> List of Road IDs
     road_lookup = {}
     for _, row in road_inv.iterrows():
         name = str(row['Road Name']).lower().strip()
         rid = row['Road ID']
         # Filter out very short or generic names if needed
         if len(name) > 4:
-            road_lookup[name] = rid
+            if name not in road_lookup:
+                road_lookup[name] = []
+            if rid not in road_lookup[name]:
+                road_lookup[name].append(rid)
     
     # Add common highway aliases (many DPWH projects use these names)
     # Map project naming convention -> inventory naming convention
@@ -197,11 +209,17 @@ def generate_cache():
     for alias, patterns in HIGHWAY_ALIASES.items():
         if alias not in road_lookup:
             # Try to find a matching road in existing lookup
-            for existing_name, rid in list(road_lookup.items()):
+            # Collect ALL potential RIDs from matching patterns
+            matched_rids = []
+            for existing_name, rids in list(road_lookup.items()):
                 for pattern in patterns:
                     if pattern in existing_name:
-                        road_lookup[alias] = rid
+                        for rid in rids:
+                            if rid not in matched_rids:
+                                matched_rids.append(rid)
                         break
+            if matched_rids:
+                road_lookup[alias] = matched_rids
     
     print(f"  Road lookup size: {len(road_lookup)}")
     
@@ -302,28 +320,28 @@ def generate_cache():
         ranges = extract_all_chainage_ranges(name)
         
         # Try to match Road Name
-        matched_road_id = None
+        matched_rids = []
         matched_road_name = None
         
         # Optimization: Scan sorted road names
         for r_name in sorted_road_names:
             if r_name in name_lower:
                 matched_road_name = r_name
-                matched_road_id = road_lookup[r_name]
+                matched_rids = road_lookup[r_name]
                 break
         
         # Region extraction
         final_region = region if pd.notna(region) and region else 'Unknown'
         
         # If no chainage OR no road match, flag as High Risk (No Match)
-        if not ranges or not matched_road_id:
+        if not ranges or not matched_rids:
             entry = {
                 'id': 'N/A',
                 'project_name': name,
                 'amount': amount,
                 'region': final_region,
                 'road_name': matched_road_name or '(No Match)',
-                'road_id': matched_road_id or 'N/A',
+                'road_id': str(matched_rids) if matched_rids else 'N/A',
                 'conditions': [],
                 'remark': 'High Risk (No Match)'
             }
@@ -335,32 +353,78 @@ def generate_cache():
         results['stats']['matches_found'] += 1
         
         # Check Condition
-        sections = road_to_sections.get(matched_road_id, [])
         conditions_found = set()
         has_overlap = False
         
-        for (start_km, start_m, end_km, end_m) in ranges:
-            p_start = to_meters(start_km, start_m)
-            p_end = to_meters(end_km, end_m)
+        # Iterate over ALL matched Road IDs
+        for matched_road_id in matched_rids:
+            sections = road_to_sections.get(matched_road_id, [])
             
-            # Check ALL sections for this road
-            for sid in sections:
-                conds = section_to_conditions.get(sid, [])
-                for c in conds:
-                    if overlaps(p_start, p_end, c['start'], c['end']):
-                        # DEO Filter: If Project has a DEO, enforce matching
-                        # If project has no DEO, or segment has no DEO (unlikely), allow it (loose match)
-                        if project_deo and c.get('deo'):
-                            if project_deo != c['deo']:
-                                continue # Skip if DEO mismatch
-                        val = c['condition']
-                        if val: # Ensure not None
-                            conditions_found.add(val)
-                        has_overlap = True
+            for (start_km, start_m, end_km, end_m) in ranges:
+                p_start = to_meters(start_km, start_m)
+                p_end = to_meters(end_km, end_m)
+                
+                # Check ALL sections for this road
+                for sid in sections:
+                    conds = section_to_conditions.get(sid, [])
+                    for c in conds:
+                        # 1. Strict Overlap Check
+                        is_match = False
                         
-                        # Mark as covered if tracked
-                        if 'id' in c and c['id'] in bad_poor_registry:
-                            bad_poor_registry[c['id']]['covered'] = True
+                        if overlaps(p_start, p_end, c['start'], c['end']):
+                            is_match = True
+                        
+                        # 2. Modulo-1000 Heuristic (DEO-Guarded or Region-Guarded)
+                        # Handles Global vs Local stationing mismatches
+                        elif not is_match:
+                             # Check if mod 1000 aligns
+                             p_start_mod = p_start % 1000
+                             p_end_mod = p_end % 1000
+                             length = p_end - p_start
+                             
+                             heuristic_overlap = False
+                             if length < 2000: 
+                                 if p_start_mod <= p_end_mod:
+                                      if overlaps(p_start_mod, p_end_mod, c['start'], c['end']):
+                                          heuristic_overlap = True
+                                 else:
+                                      if overlaps(p_start_mod, 1000, c['start'], c['end']) or overlaps(0, p_end_mod, c['start'], c['end']):
+                                          heuristic_overlap = True
+                             
+                             if heuristic_overlap:
+                                 # GUARD: Only allow heuristic if we have strong geo-evidence
+                                 geo_match = False
+                                 
+                                 # Priority 1: DEO Match
+                                 if project_deo and c.get('deo') and project_deo == c['deo']:
+                                     geo_match = True
+                                 
+                                 # Priority 2: Region Match (If DEO is missing for Project)
+                                 # Use extracted_region (projects['region']) vs c['original_row']['Region']
+                                 # Note: c['original_row'] is available.
+                                 elif not project_deo:
+                                     c_region = c['original_row'].get('Region')
+                                     # final_region is the extracted region for project
+                                     if final_region and c_region and final_region == c_region:
+                                         geo_match = True
+                                 
+                                 if geo_match:
+                                     is_match = True
+
+                        if is_match:
+                            # DEO Filter enforcement
+                            if project_deo and c.get('deo'):
+                                if project_deo != c['deo']:
+                                    continue # Skip if DEO mismatch
+                            
+                            val = c['condition']
+                            if val: # Ensure not None
+                                conditions_found.add(val)
+                            has_overlap = True
+                            
+                            # Mark as covered if tracked
+                            if 'id' in c and c['id'] in bad_poor_registry:
+                                bad_poor_registry[c['id']]['covered'] = True
         
         entry = {
             'id': 'N/A',  # DPWH 2026 hierarchy doesn't have project_id
@@ -368,7 +432,7 @@ def generate_cache():
             'amount': amount,
             'region': final_region,
             'road_name': matched_road_name,
-            'road_id': matched_road_id,
+            'road_id': matched_rids[0] if len(matched_rids) == 1 else 'Multiple Matches',
             'conditions': list(conditions_found)
         }
         
@@ -559,7 +623,8 @@ def generate_cache():
     print(f"  Flagged No Match: {results['stats']['no_match_count']}")
     
     # Save to JSON
-    OUTPUT_FILE = DATA_DIR / 'condition_risks_v2.json'
+    # Update to match visualization.py expectation: static/data/condition_risks_v2.json
+    OUTPUT_FILE = Path('/home/joebert/open-data-visualization/static/data/condition_risks_v2.json')
     with open(OUTPUT_FILE, 'w', encoding='utf-8') as f:
         json.dump(results, f, indent=2)
     print(f"Saved to {OUTPUT_FILE}")
