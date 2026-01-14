@@ -180,6 +180,54 @@ def generate_cache():
     projects = projects[~projects['project_name'].str.lower().str.strip().isin(normalized_headers)].copy()
     print(f"Filtered to {len(projects)} projects after removing summary headers.")
 
+    # --- NEW FILTER: Strict Road/Bridge Category ---
+    def is_valid_road_bridge_project(row):
+        path = str(row.get('path', '')).lower()
+        name = str(row.get('project_name', '')).lower()
+        l3 = str(row.get('level_3', '')).lower()
+        l4 = str(row.get('level_4', '')).lower()
+        
+        # 1. Negative Exclusion First (Strongest signal)
+        exclude_keywords = [
+            'flood control', 'drainage', 'water supply', 'rain water', 'sewerage',
+            'national building program', 'multi-purpose', 'mpb', 'school', 'hospital',
+            'health center', 'library', 'market', 'port', 'wharf', 'airport',
+            'dredging', 'desilting', 'river', 'bank protection'
+        ]
+        
+        if any(k in path for k in exclude_keywords):
+            return False
+            
+        # 2. Exclude Studies/Engineering
+        study_keywords = [
+            'feasibility', 'preliminary engineering', 'detailed engineering', 
+            'geotechnical', 'consultancy', 'soil exploration', 'parcellary'
+        ]
+        
+        if any(k in path for k in study_keywords):
+            return False
+            
+        if name.startswith('fs') or name.startswith('fb'):
+            return False
+            
+        # 3. Positive Inclusion
+        road_keywords = [
+            'asset preservation', 'network development', 'bridge program', 
+            'road', 'highway', 'expressway', 'flyover', 'interchange', 
+            'access roads', 'traffic engineering', 'widening'
+        ]
+        
+        is_included = any(k in l4 for k in road_keywords) or \
+                      any(k in l3 for k in road_keywords) or \
+                      any(k in name for k in road_keywords)
+                      
+        return is_included
+
+    print(f"Applying strict Road/Bridge category filter...")
+    initial_count = len(projects)
+    projects = projects[projects.apply(is_valid_road_bridge_project, axis=1)]
+    print(f"Filtered to {len(projects)} projects (Removed {initial_count - len(projects)} non-relevant items).")
+
 
 
     # 1. Build Road Lookups
