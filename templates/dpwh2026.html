@@ -973,6 +973,8 @@
                         fetchStats();
                     } else if (tabName === 'repeated') {
                         fetchRepeated();
+                    } else if (tabName === 'condition') {
+                        if (window.conditionData.length === 0) loadConditionData();
                     }
                 });
             });
@@ -2624,7 +2626,7 @@
                 history.replaceState(null, null, '#stats');
             }
 
-            if (['projects', 'hierarchy', 'uniform', 'summary', 'dist', 'diff', 'stats', 'repeated', 'multi'].includes(hash)) {
+            if (['projects', 'hierarchy', 'uniform', 'summary', 'dist', 'diff', 'stats', 'repeated', 'multi', 'condition'].includes(hash)) {
 
                 // Special handling for Diff tab loading
                 if (hash === 'diff' && !diffDataCache.stats) {
@@ -2634,6 +2636,11 @@
                 // Special handling for Multi tab loading
                 if (hash === 'multi' && !window.multiFlagsData) {
                     loadMultiFlagsData();
+                }
+
+                // Special handling for Condition tab loading
+                if (hash === 'condition' && window.conditionData.length === 0) {
+                    loadConditionData();
                 }
 
                 const btn = document.querySelector(`.budget-tab-btn[data-tab="${hash}"]`);
@@ -3424,24 +3431,6 @@ Multiple Risk Analysis
 
 
 
-        // Hook into Tab Switching
-        document.addEventListener('DOMContentLoaded', () => {
-            const hash = window.location.hash;
-            if (hash === '#condition') {
-                document.querySelector('[data-tab="condition"]').click();
-                loadConditionData();
-            } else if (hash === '#multi') {
-                document.querySelector('[data-tab="multi"]').click();
-            }
-
-            document.querySelectorAll('.budget-tab-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    if (e.target.dataset.tab === 'condition') {
-                        if (window.conditionData.length === 0) loadConditionData();
-                    }
-                });
-            });
-        });
 
     </script>
 </body>
