@@ -43,6 +43,19 @@ def extract_region_from_path(path):
             return reg
     return None
 
+def extract_deo_from_path(path, valid_deos):
+    """Extracts District Engineering Office from a hierarchy path string."""
+    if not path or pd.isna(path):
+        return None
+    
+    path_lower = path.lower()
+    # Sort valid DEOs by length (descending) to match specific names first
+    # e.g. "Cebu 1st District Engineering Office" before "Cebu District"
+    for deo in valid_deos:
+        if deo.lower() in path_lower:
+            return deo
+    return None
+
 # Helper Functions
 def extract_all_chainage_ranges(name: str):
     """Extract all chainage ranges from name"""
@@ -104,12 +117,24 @@ def generate_cache():
 
     print(f"Loaded {len(dpwh_2026)} DPWH 2026 leaf nodes.")
     
+    # Extract Valid DEOs from Condition Data
+    valid_deos = list(road_cond['District Engineering Office'].dropna().unique())
+    # Sort by length descending to ensure specific matches first
+    valid_deos.sort(key=len, reverse=True)
+    print(f"Loaded {len(valid_deos)} District Engineering Offices for matching.")
+    
     # Pre-process DPWH 2026 data: extract Region from path
     # Filter to rows with actual project data (amount > 0)
     dpwh_2026['extracted_region'] = dpwh_2026['path'].apply(extract_region_from_path)
+    
+    # Optimization: Extract DEO for all rows first
+    print("Extracting DEOs from project paths...")
+    dpwh_2026['extracted_deo'] = dpwh_2026['path'].apply(lambda p: extract_deo_from_path(p, valid_deos))
+
     projects = dpwh_2026[dpwh_2026['amount'].notna() & (dpwh_2026['amount'] > 0)].copy()
     projects = projects.rename(columns={'value': 'project_name'})
     projects['region'] = projects['extracted_region']
+    projects['deo'] = projects['extracted_deo']
     print(f"Filtered to {len(projects)} project rows with amount > 0.")
 
     # 0. Filter out known Summary Headers (Program-level items that look like projects)
@@ -205,11 +230,13 @@ def generate_cache():
         start_m = row['Start (m)']
         end_m = row['End (m)']
         cond = row['VCR']
+        deo = row.get('District Engineering Office') # Get DEO
         
         segment_entry = {
             'start': min(start_m, end_m),
             'end': max(start_m, end_m),
             'condition': cond,
+            'deo': deo,
             'original_row': row.to_dict()
         }
         
@@ -269,6 +296,7 @@ def generate_cache():
         name_lower = name.lower()
         amount = row.get('amount', 0)
         region = row.get('region')
+        project_deo = row.get('deo') # Extracted DEO from path
         
         # Extract chainage info (if available)
         ranges = extract_all_chainage_ranges(name)
@@ -320,6 +348,11 @@ def generate_cache():
                 conds = section_to_conditions.get(sid, [])
                 for c in conds:
                     if overlaps(p_start, p_end, c['start'], c['end']):
+                        # DEO Filter: If Project has a DEO, enforce matching
+                        # If project has no DEO, or segment has no DEO (unlikely), allow it (loose match)
+                        if project_deo and c.get('deo'):
+                            if project_deo != c['deo']:
+                                continue # Skip if DEO mismatch
                         val = c['condition']
                         if val: # Ensure not None
                             conditions_found.add(val)
