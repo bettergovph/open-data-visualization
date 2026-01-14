@@ -100,7 +100,10 @@ def extract_all_chainage_ranges(name: str):
     dash = r'[-–—]'
     number = r'\d+(?:[.,]\d+)?'
 
-    pattern_k = rf'K({number})\s*\+\s*\(?(-?{number})\)?\s*{dash}\s*K({number})\s*\+\s*\(?(-?{number})\)?'
+    # Allow K or Sta. or Sta (case insensitive)
+    # Treat Sta. 0+abc as K0+abc
+    prefix = r'(?:K|Sta\.?\s*)'
+    pattern_k = rf'{prefix}({number})\s*\+\s*\(?(-?{number})?\)?\s*{dash}\s*{prefix}({number})\s*\+\s*\(?(-?{number})?\)?'
     for match in re.finditer(pattern_k, name, re.IGNORECASE):
         add_range(match.group(1), match.group(2), match.group(3), match.group(4))
 
