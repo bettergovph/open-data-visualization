@@ -13,6 +13,11 @@ header .report-nav a{box-sizing:border-box;display:flex;min-width:0;height:34px;
 @media(max-width:900px){header .report-nav{grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:34px;height:160px;min-height:160px}}
 @media(max-width:560px){header .report-nav{grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:34px;height:202px;min-height:202px}}
 </style>
+<style id="full-width-report-layout">
+:root{--report-gutter:clamp(12px,2vw,32px)}
+header{padding-left:var(--report-gutter)!important;padding-right:var(--report-gutter)!important}
+main,.wrap{box-sizing:border-box;width:100%;max-width:none!important;margin-left:0!important;margin-right:0!important;padding-left:var(--report-gutter)!important;padding-right:var(--report-gutter)!important}
+</style>
 </head>
 <body>
 <header><div class="eyebrow">FY2027 NEP · cross-agency keyword scan · DPWH category review</div><h1>Budget Innovations</h1><p>Which budget terms look new, and which describe work that already existed? This page scans project names across agencies, then compares selected FY2027 DPWH labels with the FY2026 DPWH schedule and enacted budget records available locally. Each signal is a lead for scrutiny, not a finding of wrongdoing.</p><nav class="report-nav" aria-label="Budget report pages"><a href="dpwh.html">DPWH · NEP patterns</a><a href="dpwh-hgab.html">DPWH · NEP → HGAB (3rd)</a><a href="dpwh-hgab-comparison.html">DPWH · HGAB 2nd vs 3rd</a><a href="nia-irrigation.html">NIA irrigation</a><a href="deped.html">DepEd</a><a href="rcs.html">RCS · rainfall scenario</a><a href="fmr.html">FMR</a><a href="nia.html">NIA</a><a href="hfep.html">HFEP</a><a href="budget-innovations.html">Budget Innovations</a></nav></header>
