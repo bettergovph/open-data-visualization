@@ -12,7 +12,7 @@ import unicodedata
 from collections import defaultdict
 from pathlib import Path
 
-VERSION = "qualified-location-consensus-v2-province-city-context"
+VERSION = "qualified-location-consensus-v3-confirmed-spelling"
 
 
 def text_key(value):
@@ -21,13 +21,21 @@ def text_key(value):
     return re.sub(r"\s+", " ", value).strip()
 
 
+def confirmed_name_key(value):
+    # User-confirmed complete-name spellings only. Never replace a token inside
+    # a longer name, and never merge distinct geographic levels or parents.
+    if value in {"santo nino", "sto. nino", "sto nino", "sto. ni±o", "sto ni±o"}:
+        return "santo nino"
+    return value
+
+
 def place_key(value):
     # City labels are structural aliases; directions and other name words stay.
     value = text_key(value)
     value = re.sub(r"\s*\(capital\)\s*", "", value)
     value = re.sub(r"^(?:city of|municipality of|province of)\s+", "", value)
     value = re.sub(r"\s+city$", "", value)
-    return re.sub(r"\s+", " ", value).strip(" .")
+    return confirmed_name_key(re.sub(r"\s+", " ", value).strip(" ."))
 
 
 def seat_key(value):
@@ -36,7 +44,7 @@ def seat_key(value):
 
 
 def barangay_key(value):
-    return re.sub(r"^(?:barangay|brgy\.?|bgy\.?)\s+", "", text_key(value))
+    return confirmed_name_key(re.sub(r"^(?:barangay|brgy\.?|bgy\.?)\s+", "", text_key(value)).strip(" ."))
 
 
 class GeographicAttribution:
@@ -158,6 +166,12 @@ class GeographicAttribution:
         markers = list(re.finditer(r"\b(?:barangays?|brgys?\.?|bgys?\.?)\s+", prefix))
         for marker in markers:
             suffix = prefix[marker.end():]
+            # Normalize a complete marked barangay at a delimiter, keeping the
+            # remaining title untouched. Crosswalk consensus still decides LEG.
+            head = re.split(r"[,;()/]", suffix, maxsplit=1)[0].strip()
+            canonical = confirmed_name_key(head.strip(" ."))
+            if canonical != head.strip(" ."):
+                suffix = canonical + suffix[len(head):]
             hits = [(name, seat) for name, seat in b.items()
                     if re.match(re.escape(name) + r"(?=$|[,;()/]|\s*-|\s+and\s+(?:barangay|brgy)\b)", suffix)]
             if not hits:
