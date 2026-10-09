@@ -1,0 +1,39 @@
+{
+  "summary": {
+    "databaseSha256": "b2902f7a4d483cc2dc2d2ab6b501103dbf0d5189e08f50a9ed49bac5cdaa7bc7",
+    "manualReviewSha256": "4277e7e9d4c008d7064be070358e12c3681f754aa0b22a3ec5cf3ec535df5ae8",
+    "hgabSha256": "de70f9a4956b274395cb95eeda47c9173cf73a7ae06c0cb695238143c44daf9b",
+    "qualifiedLocationRows": 8227,
+    "unresolvedWithQualifiedPlaceCandidates": 1708,
+    "scopeHolds": 1,
+    "previouslyAcceptedScopeHolds": 1,
+    "datedMembershipClaims": 0,
+    "policy": "Geographic evidence and scope exclusions only. Undated LEG claims, DEOs and historic GAA titles do not establish new current district assignments.",
+    "newAssignmentsFromUndatedDbClaims": 0
+  },
+  "decisions": {
+    "HB10858-3-0447-006385": {
+      "projectName": "Construction of Daang Maharlika Alternate Route (Jct. BCIR-Baan Tiniwisan-NRJ Daang Maharlika, RTR), Butuan City",
+      "amountPesos": 1200000000,
+      "evidence": [
+        {
+          "basis": "Unresolved project construction scope recorded in the private location database",
+          "issueId": "3ab98ef345e1437fea01f58fbe4704be",
+          "sourceSha256": "3d2a80845551e3030baea42115c743b8014fd01a7ed86d940aa30b9f24136c05",
+          "sourcePage": 447,
+          "RTRInterpretation": "User confirmed Remedios T. Romualdez for this title; construction segment remains unestablished"
+        },
+        {
+          "basis": "Scoped user location review",
+          "decisionId": "HB10858-3-0447-006385_scope_hold",
+          "supportingUserAnswer": "Keep it unresolved pending segment evidence",
+          "interpretation": "Keep the entire allocation unresolved pending construction-segment evidence"
+        }
+      ],
+      "holdUnresolved": true,
+      "reasons": [
+        "Route includes a separately located endpoint without chainage or an allocation split proving the full amount belongs to the named city"
+      ]
+    }
+  }
+}

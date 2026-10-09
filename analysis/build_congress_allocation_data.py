@@ -34,6 +34,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--write", action="store_true", help="write congress-data.json")
     parser.add_argument("--audit", type=Path, help="write project-level geographic decisions to private JSON and CSV files")
+    parser.add_argument("--geographic-decisions", type=Path, default=ROOT / "static/data/congress_location_scope_reviews.json", help="reviewed location evidence supplement; IDs, titles and amounts must match")
     args = parser.parse_args()
 
     roster_raw = json.loads(reps.ROSTER_PATH.read_text())
@@ -63,6 +64,14 @@ def main() -> None:
         ]
     source = json.loads(HGAB_FILE.read_text())
     projects = source["data"]["data"]
+    supplement = json.loads(args.geographic_decisions.read_text()) if args.geographic_decisions and args.geographic_decisions.exists() else {}
+    overrides = supplement.get("decisions", {})
+    expected_source = supplement.get("summary", {}).get("hgabSha256")
+    if expected_source and hashlib.sha256(HGAB_FILE.read_bytes()).hexdigest() != expected_source:
+        raise ValueError("Location review belongs to a different HGAB source snapshot; regenerate the review")
+    project_ids = {p["id"] for p in projects}
+    if set(overrides) - project_ids:
+        raise ValueError("Location supplement contains unknown source IDs")
     excluded_keys = set()
     if REVIEW_FILE.exists():
         with REVIEW_FILE.open(encoding="utf-8-sig", newline="") as f:
@@ -94,6 +103,14 @@ def main() -> None:
         analyzed_count += 1
         analyzed_total += amount
         decision = geography.resolve(project)
+        if project.get("id") in overrides:
+            extra = overrides[project["id"]]
+            if extra["projectName"] != title or int(extra["amountPesos"]) != amount:
+                raise ValueError("Location supplement does not match the current source record")
+            decision["evidence"] += extra.get("evidence", [])
+            if extra.get("holdUnresolved"):
+                decision["indices"] = []
+                decision["reasons"] = sorted(set(decision["reasons"] + extra["reasons"]))
         indices = decision["indices"]
         audit_rows.append({"id": project.get("id"), "projectName": title, "amountPesos": amount,
                            "sourceVolume": project.get("sourceVolume"), "sourcePage": project.get("sourcePage"),
@@ -150,6 +167,10 @@ def main() -> None:
         raise ValueError("Congressional row reconciliation failed")
     if output["summary"]["strictAssignedPesos"] + shared_source_amount + unassigned_amount != analyzed_total:
         raise ValueError("Congressional allocation reconciliation failed")
+    if supplement:
+        output["locationDatabaseReview"] = supplement["summary"]
+        output["attributionMethod"] += "+location-db-scope-review-v1"
+        output["attributionWarning"] += " The private location evidence database supplies qualified-place evidence and scope exclusions. Undated LEG claims and historical GAA project names do not establish new current district assignments."
     print(json.dumps(output["summary"], indent=2))
     if args.write:
         OUT_FILE.write_text(json.dumps(output, ensure_ascii=False, separators=(",", ":")) + "\n")
@@ -158,6 +179,8 @@ def main() -> None:
         sources = [HGAB_FILE, REVIEW_FILE, reps.ROSTER_PATH, ROOT / "static/data/districts.json",
                    ROOT / "static/data/districts_generated.json", ROOT / "city_barangays_mapping.json",
                    Path(__file__), ROOT / "analysis/strict_congress_geography.py"]
+        if args.geographic_decisions:
+            sources.append(args.geographic_decisions)
         provenance = [{"file": str(path), "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
                       for path in sources if path.exists()]
         args.audit.write_text(json.dumps({"method": VERSION, "warning": output["attributionWarning"],
