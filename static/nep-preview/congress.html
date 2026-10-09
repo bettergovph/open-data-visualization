@@ -36,6 +36,17 @@
     <div class="pager" id="strictPager"></div>
   </section>
   <p class="sub">Source: locally extracted FY2027 DPWH HGAB 3rd Reading candidate schedule and ODV’s 20th Congress roster. Location matching uses project titles and local administrative district mappings. The source schedule is a heuristic extraction; check the cited bill page before treating any line as confirmed.</p>
+  <section class="card scenario" aria-labelledby="deoLegTitle">
+    <h2 id="deoLegTitle">DEO and legislative-district allocation crosswalk</h2>
+    <p class="sub">A separate allocation table in the local “DPWH per district” PDF maps DEOs to legislative districts. The two lists show where one DEO is spread across several legislative districts, and where one legislative district receives allocations from several DEOs. One-to-one mappings are omitted. The PDF labels amounts in thousands of pesos and does not show a fiscal year.</p>
+    <div class="notice" id="crosswalkSummary" aria-live="polite">Loading DEO and district links…</div>
+    <div class="notice"><strong>Bulacan example:</strong> Bulacan 1st DEO serves the 1st, 2nd and 5th legislative districts; Bulacan 2nd DEO serves the 4th, 6th and San Jose del Monte lone district; Bulacan 3rd DEO serves the 3rd. That is three DEOs covering seven legislative seats.</div>
+    <div class="crosswalk-grid">
+      <div><h3>DEOs spread across multiple legislative districts</h3><div class="tablewrap"><table><thead><tr><th>DEO</th><th>Legislative district allocations shown in PDF</th><th class="num">Districts</th></tr></thead><tbody id="deoSpreadBody"></tbody></table></div></div>
+      <div><h3>Legislative districts receiving from multiple DEOs</h3><div class="tablewrap"><table><thead><tr><th>Legislative district</th><th>DEO allocations shown in PDF</th><th class="num">DEOs</th></tr></thead><tbody id="legSplitBody"></tbody></table></div></div>
+    </div>
+    <p class="sub crosswalk-note">Source: the local scanned file <em>DPWH per district.pdf</em>. Amounts are transcribed from its stated unit (₱ thousands) and displayed in ₱ millions; “—” means the PDF has a dash for that row. The scan does not show a fiscal year. This crosswalk describes the PDF’s allocation rows; it is not a reallocation of HGAB line items and does not establish project ownership by an individual representative.</p>
+  </section>
 </main>
 <script>
 const money=n=>'₱'+Number(n||0).toLocaleString('en-PH',{maximumFractionDigits:0}),fmt=n=>Number(n||0).toLocaleString('en-PH'),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -54,8 +65,54 @@ fetch('congress-data.json').then(r=>{if(!r.ok)throw Error(`Data request failed (
   document.getElementById(kind+'Csv').onclick=()=>{const columns=['district','representative','lineItems','totalPesos'],csv=[columns,...filtered().map(x=>columns.map(k=>x[k]))].map(row=>row.map(v=>'"'+String(v??'').replaceAll('"','""')+'"').join(',')).join('\r\n'),a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv'}));a.download=`congressional_district_${kind}_hgab_3rd.csv`;a.click();URL.revokeObjectURL(a.href)};
   draw();
  }
- setup('accommodating',D.accommodating,'rgba(8,126,120,.78)');setup('strict',D.strict,'rgba(53,91,146,.78)');
+setup('accommodating',D.accommodating,'rgba(8,126,120,.78)');setup('strict',D.strict,'rgba(53,91,146,.78)');
 }).catch(e=>{console.error(e);document.getElementById('sourceNote').textContent='Could not load the local congressional allocation data.'});
 </script>
+<script>
+// Amounts below are in the PDF's stated unit: thousands of pesos.
+const deoLegRows=[
+['Las Piñas-Muntinlupa DEO','Las Piñas · Lone',1346406],['Las Piñas-Muntinlupa DEO','Muntinlupa · Lone',968588],
+['Malabon-Navotas DEO','Malabon · Lone',1387143],['Malabon-Navotas DEO','Navotas · Lone',1609250],
+['Metro Manila 1st DEO','Mandaluyong · Lone',333675],['Metro Manila 1st DEO','Marikina · 1st',630000],['Metro Manila 1st DEO','Marikina · 2nd',538000],['Metro Manila 1st DEO','Pasig · Lone',892000],['Metro Manila 1st DEO','San Juan · Lone',377562],['Metro Manila 1st DEO','Taguig · 1st',230000],['Metro Manila 1st DEO','Taguig · 2nd',0],
+['Metro Manila 2nd DEO','Makati · 1st',776983],['Metro Manila 2nd DEO','Makati · 2nd',0],['Metro Manila 2nd DEO','Parañaque · 1st',959595],['Metro Manila 2nd DEO','Parañaque · 2nd',874328],
+['Metro Manila 3rd DEO','Caloocan · 1st',1560600],['Metro Manila 3rd DEO','Caloocan · 2nd',269650],['Metro Manila 3rd DEO','Caloocan · 3rd',720800],['Metro Manila 3rd DEO','Valenzuela · 1st',977546],['Metro Manila 3rd DEO','Valenzuela · 2nd',978275],
+['North Manila DEO','Manila · 1st',537700],['North Manila DEO','Manila · 2nd',493500],['North Manila DEO','Manila · 3rd',890500],['North Manila DEO','Manila · 4th',553500],['North Manila DEO','Manila · 6th',342000],['South Manila DEO','Manila · 6th',1050400],['South Manila DEO','Manila · 5th',2765012],['South Manila DEO','Pasay · Lone',905964],
+['Quezon City 1st DEO','Quezon City · 1st',1290030],['Quezon City 1st DEO','Quezon City · 2nd',1594711],['Quezon City 1st DEO','Quezon City · 5th',1335571],['Quezon City 1st DEO','Quezon City · 6th',980340],['Quezon City 2nd DEO','Quezon City · 3rd',844573],['Quezon City 2nd DEO','Quezon City · 4th',1702000],
+['Pangasinan 2nd DEO','Pangasinan · 2nd',1889222],['Pangasinan 2nd DEO','Pangasinan · 4th',1836393],['Pangasinan 3rd DEO','Pangasinan · 5th',2116734],['Pangasinan 3rd DEO','Pangasinan · 6th',2516086],
+['Bulacan 1st DEO','Bulacan · 1st',1575230],['Bulacan 1st DEO','Bulacan · 2nd',1122308],['Bulacan 1st DEO','Bulacan · 5th',1450956],['Bulacan 2nd DEO','Bulacan · 4th',1701000],['Bulacan 2nd DEO','Bulacan · 6th',1557636],['Bulacan 2nd DEO','San Jose del Monte · Lone',1933154],
+['Isabela 3rd DEO','Isabela · 2nd',1865369],['Isabela 3rd DEO','Isabela · 3rd',1134816],['Isabela 4th DEO','Isabela · 4th',2160654],['Isabela 4th DEO','Isabela · 6th',3689000],
+['Nueva Ecija 1st DEO','Nueva Ecija · 1st',3426750],['Nueva Ecija 1st DEO','Nueva Ecija · 2nd',1757124],['Nueva Ecija 2nd DEO','Nueva Ecija · 3rd',493825],['Nueva Ecija 2nd DEO','Nueva Ecija · 4th',1824624],
+['Pampanga 1st DEO','Pampanga · 3rd',2323940],['Pampanga 1st DEO','Pampanga · 4th',1964619],['Tarlac DEO','Tarlac · 1st',1308080],['Tarlac DEO','Tarlac · 2nd',2008000],
+['Batangas 2nd DEO','Batangas · 2nd',3113725],['Batangas 2nd DEO','Batangas · 5th',1338896],['Batangas 4th DEO','Batangas · 4th',1676617],['Batangas 4th DEO','Batangas · 6th',3316000],
+['Cavite 1st DEO','Cavite · 1st',1740638],['Cavite 1st DEO','Cavite · 3rd',1353575],['Cavite 1st DEO','Cavite · 6th',1143302],['Cavite 1st DEO','Cavite · 7th',2059074],['Cavite 3rd DEO','Cavite · 2nd',1672469],['Cavite 3rd DEO','Cavite · 4th',500000],['Cavite 3rd DEO','Cavite · 5th',1377304],
+['Laguna 2nd DEO','Biñan · Lone',1240000],['Laguna 2nd DEO','Calamba · Lone',1463709],['Laguna 2nd DEO','Santa Rosa · Lone',668028],['Laguna 2nd DEO','Laguna · 1st',899271],['Laguna 2nd DEO','Laguna · 2nd',214874],
+['Rizal 1st DEO','Antipolo · 1st',1026094],['Rizal 1st DEO','Antipolo · 2nd',1202550],['Rizal 1st DEO','Rizal · 1st',500000],['Rizal 2nd DEO','Rizal · 2nd',500000],['Rizal 2nd DEO','Rizal · 3rd',500000],['Rizal 2nd DEO','Rizal · 4th',500000],
+['BARMM','Basilan · Lone',188306],['BARMM','Tawi-Tawi · Lone',309772],['BARMM','Lanao del Sur · 1st',1892000],['BARMM','Lanao del Sur · 2nd',657000],['BARMM','Maguindanao del Norte · Lone',365500],['BARMM','Maguindanao del Sur · Lone',1015000],
+['Cebu 6th DEO','Mandaue · Lone',1283844],['Cebu 6th DEO','Lapu-Lapu City · Lone',1972537],['Cebu 6th DEO','Cebu · 6th',1437000],['Cebu City DEO','Cebu City · 1st',565000],['Cebu City DEO','Cebu City · 2nd',2136200],
+['South Cotabato 1st DEO','South Cotabato · 1st',500000],['South Cotabato 1st DEO','General Santos City · Lone',500000]
+];
+// These DEOs each serve one district, but the same district is listed under
+// multiple DEOs. Keep them in the reverse view without implying DEO dilution.
+deoLegRows.push(
+['Apayao 1st DEO','Apayao · Lone',1218898],['Apayao 2nd DEO','Apayao · Lone',1423094],
+['Benguet 1st DEO','Benguet · Lone',985237],['Benguet 2nd DEO','Benguet · Lone',768000],
+['Ifugao 1st DEO','Ifugao · Lone',1042807],['Ifugao 2nd DEO','Ifugao · Lone',1202481],
+['Lower Kalinga DEO','Kalinga · Lone',1468363],['Upper Kalinga DEO','Kalinga · Lone',1180339],
+['Mountain Province 1st DEO','Mountain Province · Lone',1092620],['Mountain Province 2nd DEO','Mountain Province · Lone',1042133],
+['Nueva Vizcaya DEO','Nueva Vizcaya · Lone',1407852],['Nueva Vizcaya 2nd DEO','Nueva Vizcaya · Lone',918312],
+['Leyte 1st DEO','Leyte · 1st',924954],['Tacloban City DEO','Leyte · 1st',875000],
+['Isabela City DEO','Basilan · Lone',205000],
+['Zamboanga del Norte 3rd DEO','Zamboanga del Norte · 3rd',996571],['Zamboanga del Norte 4th DEO','Zamboanga del Norte · 3rd',1555429]
+);
+const moneyMillions=k=>k?'₱'+(k/1000).toLocaleString('en-PH',{minimumFractionDigits:1,maximumFractionDigits:1})+'M':'—';
+const groupBy=key=>{const m=new Map();for(const [deo,leg,amount] of deoLegRows){const name=key==='deo'?deo:leg;if(!m.has(name))m.set(name,[]);m.get(name).push({name:key==='deo'?leg:deo,amount})}return [...m].filter(([,items])=>items.length>1).sort((a,b)=>b[1].length-a[1].length||a[0].localeCompare(b[0]))};
+const deoGroups=groupBy('deo'),legGroups=groupBy('leg');
+document.getElementById('crosswalkSummary').innerHTML=`The transcribed multi-link rows include <strong>${deoGroups.length} DEOs</strong> mapped to multiple legislative districts, and <strong>${legGroups.length} legislative districts</strong> listed under multiple DEOs.`;
+document.getElementById('deoSpreadBody').innerHTML=deoGroups.map(([deo,items])=>`<tr><td>${esc(deo)}</td><td>${items.map(x=>`${esc(x.name)} (${moneyMillions(x.amount)})`).join('<br>')}</td><td class="num">${items.length}</td></tr>`).join('');
+document.getElementById('legSplitBody').innerHTML=legGroups.map(([leg,items])=>`<tr><td>${esc(leg)}</td><td>${items.map(x=>`${esc(x.name)} (${moneyMillions(x.amount)})`).join('<br>')}</td><td class="num">${items.length}</td></tr>`).join('');
+</script>
+<style>
+.crosswalk-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.crosswalk-grid h3{font-size:17px;margin:12px 0}.crosswalk-grid .tablewrap{max-height:620px}.crosswalk-note{margin-top:14px}@media(max-width:900px){.crosswalk-grid{grid-template-columns:1fr}}
+</style>
 </body>
 </html>
