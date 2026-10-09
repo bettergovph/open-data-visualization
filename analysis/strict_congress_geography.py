@@ -11,31 +11,9 @@ import re
 import unicodedata
 from collections import defaultdict
 from pathlib import Path
+from ph_location_text import text_key, confirmed_name_key, place_key, geographic_title, barangay_key
 
-VERSION = "qualified-location-consensus-v3-confirmed-spelling"
-
-
-def text_key(value):
-    value = unicodedata.normalize("NFKD", str(value or ""))
-    value = "".join(c for c in value if not unicodedata.combining(c)).lower()
-    return re.sub(r"\s+", " ", value).strip()
-
-
-def confirmed_name_key(value):
-    # User-confirmed complete-name spellings only. Never replace a token inside
-    # a longer name, and never merge distinct geographic levels or parents.
-    if value in {"santo nino", "sto. nino", "sto nino", "sto. ni±o", "sto ni±o"}:
-        return "santo nino"
-    return value
-
-
-def place_key(value):
-    # City labels are structural aliases; directions and other name words stay.
-    value = text_key(value)
-    value = re.sub(r"\s*\(capital\)\s*", "", value)
-    value = re.sub(r"^(?:city of|municipality of|province of)\s+", "", value)
-    value = re.sub(r"\s+city$", "", value)
-    return confirmed_name_key(re.sub(r"\s+", " ", value).strip(" ."))
+VERSION = "qualified-location-consensus-v4-location-metadata"
 
 
 def seat_key(value):
@@ -43,8 +21,6 @@ def seat_key(value):
     return match.group(1) if match else None
 
 
-def barangay_key(value):
-    return confirmed_name_key(re.sub(r"^(?:barangay|brgy\.?|bgy\.?)\s+", "", text_key(value)).strip(" ."))
 
 
 class GeographicAttribution:
@@ -198,7 +174,14 @@ class GeographicAttribution:
         return ([] if reasons else sorted(set(indices))), sorted(set(reasons)), evidence
 
     def resolve(self, project):
-        title = text_key(project.get("projectName", ""))
+        title,metadata=geographic_title(project.get("projectName",""))
+        result=self._resolve_geographic(dict(project,projectName=title))
+        if metadata:
+            result['evidence'].append({'basis':'Trailing station/coordinate metadata excluded from address matching only; original project title and construction scope retained','metadata':metadata})
+        return result
+
+    def _resolve_geographic(self, project):
+        title, metadata = geographic_title(project.get("projectName", ""))
         components = [x.strip(" .") for x in title.split(",")]
         tail = components[-1]
         # A province and a city can share a bare roster/map label. A complete
