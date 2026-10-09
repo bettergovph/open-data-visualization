@@ -31,14 +31,39 @@ def place_key(value):
 
 def geographic_title(value):
     """Remove trailing station/coordinate metadata, never route/place wording."""
-    fields = [f.strip() for f in text_key(value).split(",")]
+    text = text_key(value)
     removed=[]
-    if len(fields)>=3 and re.fullmatch(r"\d{1,2}\.\d+",fields[-2]) and re.fullmatch(r"\d{2,3}\.\d+",fields[-1]):
-        if 4<=float(fields[-2])<=22 and 116<=float(fields[-1])<=127:
-            removed.extend(fields[-2:]);fields=fields[:-2]
-    marker=r"(?:sta(?:tion)?|km|kilomet(?:er|re)|k)\.?\s*[:=]?\s*"
-    point=r"\+?\s*\d+(?:\.\d+)?\s*(?:\+\s*\(?\s*[+-]?\d+(?:\.\d+)?\s*\)?)?"
-    station=re.compile(marker+point+r"(?:\s*(?:[-–]|to)\s*(?:"+marker+r")?"+point+r")?(?:\s+(?:ls|rs|bs))?",re.I)
+    marker=r"(?:sta(?:tion)?|chainage|km|kilomet(?:er|re)|k)\.?\s*[:=]?\s*"
+    number=r"[+-]?\d+(?:\.\d+)?"
+    offset=r"(?:"+number+r"|\(\s*"+number+r"\s*\))"
+    point=r"\+?\s*\d+(?:\.\d+)?\s*(?:\+\s*"+offset+r")?"
+    station=re.compile(marker+point+r"(?:\s*(?:[-–—]|to)\s*(?:"+marker+r")?"+point+r")?(?:\s+(?:ls|rs|bs))?",re.I)
+    coordinate=re.compile(r"(\d{1,2}\.\d+)\s*°?\s*,\s*(\d{2,3}\.\d+)\s*°?")
+
+    def coordinates(annotation):
+        pair=coordinate.fullmatch(annotation.strip())
+        return bool(pair and 4<=float(pair[1])<=22 and 116<=float(pair[2])<=127)
+
+    # Inspect a balanced final parenthesis group before splitting comma fields.
+    # Nested parentheses are allowed only inside complete numeric offsets.
+    # Route endpoints, place names and mixed comments never satisfy the grammar.
+    while text.endswith(')'):
+        depth=0;start=None
+        for i in range(len(text)-1,-1,-1):
+            if text[i]==')':depth+=1
+            elif text[i]=='(':
+                depth-=1
+                if depth==0:start=i;break
+        if start is None or (start and not (text[start-1].isspace() or text[start-1]==',')):
+            break
+        annotation=text[start+1:-1].strip()
+        chunks=[c.strip() for c in re.split(r'[,;]',annotation)]
+        if not (coordinates(annotation) or (chunks and all(station.fullmatch(c) for c in chunks))):
+            break
+        removed.insert(0,text[start:]);text=text[:start].rstrip(' ,')
+    fields = [f.strip() for f in text.split(",")]
+    if len(fields)>=3 and coordinates(','.join(fields[-2:])):
+        removed[0:0]=fields[-2:];fields=fields[:-2]
     while fields and station.fullmatch(fields[-1]):removed.insert(0,fields.pop())
     if fields:
         # A metadata marker may immediately follow a province field. The
@@ -51,4 +76,3 @@ def geographic_title(value):
 
 def barangay_key(value):
     return confirmed_name_key(re.sub(r"^(?:barangay|brgy\.?|bgy\.?)\s+", "", text_key(value)).strip(" ."))
-

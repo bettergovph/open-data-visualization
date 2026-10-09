@@ -13,7 +13,7 @@ from collections import defaultdict
 from pathlib import Path
 from ph_location_text import text_key, confirmed_name_key, place_key, geographic_title, barangay_key
 
-VERSION = "qualified-location-consensus-v4-location-metadata"
+VERSION = "qualified-location-consensus-v5-balanced-address-metadata"
 
 
 def seat_key(value):
