@@ -97,14 +97,27 @@
       "rank": 8,
       "id": "cost-per-km",
       "title": "Allocation per stated meter: inspect scope before comparing rates",
-      "lead": "Roads: 3,175 screening ratios · Bridges: 60 screening ratios · FMR: 2 screening ratios",
+      "lead": "197 road and 2 bridge high-rate candidates · FMR peers insufficient",
       "basis": "Descriptive allocation/segment-length proxy; comparable engineering costs unavailable",
-      "page": "cost-per-km.html#cost-roads",
+      "page": "cost-per-km.html#length-density-groups",
       "question": "Do apparently high rates reflect short printed segments, structures, broader funded scope, or unusually costly comparable work?",
-      "evidence": "Whole HGAB line-item allocation is divided by its derivable stated segment meters. Roads, bridges and FMR are displayed separately, with official work-program filters. Mixed road/bridge lines receive no single-work rate.",
+      "evidence": "Whole HGAB line-item allocation is divided by its derivable stated segment meters. Roads, bridges and FMR are displayed separately, with official work-program filters. Mixed road/bridge lines receive no single-work rate. Data-derived length groups and within-program slope-change screens are provided; no fixed 100-meter boundary is imposed.",
       "alternative": "Terrain, width, structures, approaches, rehabilitation scope and components outside the stated segment can explain large differences. Tiny printed ranges or parser errors can produce extreme ratios.",
       "next": "Verify station endpoints on original pages, then compare quantities, width, funded extent, designs and bill-of-quantity costs within the same work type. Investigate unusually short denominators before interpreting extreme ratios.",
       "caution": "These are appropriations per stated segment meter, not verified construction unit costs. Bridge chainage is not necessarily bridge span. No cross-category average, overpricing estimate or corruption probability is established."
+    },
+    {
+      "rank": 9,
+      "id": "short-printed-ranges",
+      "title": "Very short printed road ranges need engineering clarification",
+      "lead": "3 checked road ranges imply less than 5 meters",
+      "basis": "Original PDF text agreement; funded engineering extent unresolved",
+      "page": "cost-per-km.html#short-segment-evidence",
+      "question": "Do the printed station endpoints correctly describe the funded segment, or do notation and scope need correction?",
+      "evidence": "Original-page visible text agrees with sampled road titles whose station differences calculate to 0.587 meters, 1.49 meters, 4.67 meters. Across all 3,175 known road lengths, only 204 (6.43%) are below 100 meters; high-rate sorting concentrates short denominators at the top.",
+      "alternative": "A source-document typo, station convention, short component within a larger project, or broader funded scope can explain these values. A very short printed range does not establish the physical length actually funded.",
+      "next": "Request corrected or certified station endpoints, funded-segment plans, engineering quantities and allocation scope; verify notation before interpreting extreme allocation-per-meter rates.",
+      "caution": "This is a printed-range/denominator issue, not evidence that most road projects are short or overpriced. Sampled title agreement rules out a title-transcription mismatch for those examples, not source errors or engineering ambiguity. Bridge lengths require separate interpretation."
     }
   ],
   "statistics": {
@@ -246,6 +259,82 @@
         "withRate": 0,
         "allocationPesos": 12178486000,
         "unusableLengthAllocationPesos": 5902037000
+      }
+    ],
+    "highRateScreen": {
+      "candidates": 199,
+      "graphExtremeRecords": 109,
+      "method": "Peers share category, official PAP and a data-derived length band; at least 20 peers with stated length ≥10m. Candidate rate exceeds both 2× peer median and Q3+1.5×IQR. Chart extremes exceed max(2×median,Q3+3×IQR); sub-10m printed ranges also stay off rate charts.",
+      "limits": "Exploratory relative-rate screen, not proof of overpricing. Width, terrain, structures, engineering quantities and funded extent remain unverified. Missing or insufficient peers produce no high-rate conclusion."
+    },
+    "shortSegments": [
+      {
+        "category": "Roads",
+        "allLines": 6498,
+        "knownLengths": 3175,
+        "below100m": 204,
+        "below100PctOfKnown": 6.43,
+        "medianMeters": 847.0,
+        "top25HighRateRows": 25,
+        "below100InTop25HighRates": 20,
+        "bins": {
+          "<10m": 5,
+          "10–<100m": 199,
+          "100–<1,000m": 1540,
+          "1,000–<5,000m": 1318,
+          "≥5,000m": 113
+        }
+      },
+      {
+        "category": "Bridges",
+        "allLines": 1140,
+        "knownLengths": 60,
+        "below100m": 37,
+        "below100PctOfKnown": 61.67,
+        "medianMeters": 61.0,
+        "top25HighRateRows": 25,
+        "below100InTop25HighRates": 23,
+        "bins": {
+          "<10m": 2,
+          "10–<100m": 35,
+          "100–<1,000m": 21,
+          "1,000–<5,000m": 2,
+          "≥5,000m": 0
+        }
+      },
+      {
+        "category": "FMR",
+        "allLines": 795,
+        "knownLengths": 2,
+        "below100m": 0,
+        "below100PctOfKnown": 0.0,
+        "medianMeters": 850.0,
+        "top25HighRateRows": 2,
+        "below100InTop25HighRates": 0,
+        "bins": {
+          "<10m": 0,
+          "10–<100m": 0,
+          "100–<1,000m": 1,
+          "1,000–<5,000m": 1,
+          "≥5,000m": 0
+        }
+      },
+      {
+        "category": "Mixed roads / bridges",
+        "allLines": 117,
+        "knownLengths": 44,
+        "below100m": 15,
+        "below100PctOfKnown": 34.09,
+        "medianMeters": 139.5,
+        "top25HighRateRows": 0,
+        "below100InTop25HighRates": 0,
+        "bins": {
+          "<10m": 1,
+          "10–<100m": 14,
+          "100–<1,000m": 26,
+          "1,000–<5,000m": 3,
+          "≥5,000m": 0
+        }
       }
     ],
     "lineItemReviewQueue": {
