@@ -1,0 +1,619 @@
+{
+  "title": "Investigative talking points",
+  "rankingMethod": "Editorial triage by evidence strength, allocation scale and verifiable next question; not corruption likelihood or a statistical risk score. Amounts overlap; do not add them.",
+  "findings": [
+    {
+      "rank": 1,
+      "id": "rcs",
+      "title": "RCS: identical budget packages across unequal rainfall proxies",
+      "lead": "199 offices × ₱4.2M = ₱835.800M",
+      "basis": "Direct allocation observation; rainfall need remains a proxy",
+      "page": "rcs.html#rcs-statistical-evidence",
+      "question": "What policy or engineering design justifies one identical budget unit per office?",
+      "evidence": "All district-office RCS lines have the same amount. Province/regional rainfall proxies differ by 2.59×. Alternative formulas move different numbers of budget units. All 199 DEO lines are retained unchanged in HGAB; no differentiated needs weighting is visible in the amounts.",
+      "alternative": "Standard package costs or a minimum coverage policy may justify equal allocations. Rainfall alone does not measure demand.",
+      "next": "Obtain siting, design capacity, water demand, catchment area and existing RCS inventory.",
+      "caution": "DEO is not LEG; province rainfall is not a district observation. Returning FY2026 program."
+    },
+    {
+      "rank": 2,
+      "id": "insertions",
+      "title": "HGAB-only domestic candidates: verify the counterpart before calling an insertion",
+      "lead": "5,549 domestic review candidates · ₱158.363B",
+      "basis": "Parser- and matching-dependent screen",
+      "page": "dpwh-hgab.html#hgab-investigation-evidence",
+      "question": "Which candidates are genuinely absent from NEP after wording, scope and occurrence review?",
+      "evidence": "Native schedule totals reconcile; unmatched domestic records remain distinct from unpaired FAP review lines.",
+      "alternative": "Wrapped titles, OCR, changes in office or PAP, renaming and aggregated occurrences can hide counterparts.",
+      "next": "Stratified original-page adjudication; estimate false positives before extrapolating counts.",
+      "caution": "Do not adopt another analyst’s additions count as ground truth. FAPs take a separate review path."
+    },
+    {
+      "rank": 3,
+      "id": "repeats",
+      "title": "Recurring project titles: inspect overlapping work before alleging duplication",
+      "lead": "634 of 737 NEP comparison pairs clearly retained in HGAB",
+      "basis": "Scope-screened comparison candidates",
+      "page": "dpwh.html#repeat-hgab-survival",
+      "question": "Are new appropriations paying for already-funded components or legitimate continuation?",
+      "evidence": "591 of 686 distinct NEP repeat-screen proposals have clear HGAB links. 21 proposals have explicit overlapping historical chainage. ₱27.260B is the unique NEP proposal allocation, not alleged loss.",
+      "alternative": "Multi-year implementation, rehabilitation and distinct components can share names and segments.",
+      "next": "Prioritize explicitly overlapping retained proposals and high amounts; compare contracts, quantities, tranche scopes and completion.",
+      "caution": "The 737 headline counts NEP–old GAA comparison pairs. Potential retention and missing counterparts remain separate."
+    },
+    {
+      "rank": 4,
+      "id": "prices",
+      "title": "Exact ₱5M road and flood allocations cluster in the same offices",
+      "lead": "35 overlapping offices vs 21.7 expected under independence",
+      "basis": "Exploratory statistical association",
+      "page": "dpwh.html#dpwh-investigation-evidence",
+      "question": "Does standard design, office workload or coordinated allocation explain the co-occurrence?",
+      "evidence": "Office odds ratio 5.34; unadjusted exact p=5.07e-06. Region-controlled result is also unusual under its stated null.",
+      "alternative": "Common specifications, office workload and project mix can create clustering.",
+      "next": "Pre-specify work-type and workload controls; inspect quantities and comparable prior-year prices.",
+      "caution": "Threshold/category selection was post hoc. Association does not establish procurement splitting or intent."
+    },
+    {
+      "rank": 5,
+      "id": "inspire",
+      "title": "INSPIRE: a large returning named appropriation needs a whole-project ledger",
+      "lead": "₱835.000M proposed in FY2027",
+      "basis": "Direct appropriation history; scope unresolved",
+      "page": "budget-innovations.html#innovation-investigation-evidence",
+      "question": "What is the total approved cost and which unfinished components explain the new appropriation?",
+      "evidence": "Named GAA lines exist in FY2023 and FY2025; FY2027 is not a first appearance.",
+      "alternative": "A legitimate phased project can require multiple appropriations.",
+      "next": "Obtain total project cost, phases, progress, obligations, disbursements and procurement records.",
+      "caution": "Appropriations are not actual spending; stage/year sums do not prove duplication."
+    }
+  ],
+  "statistics": {
+    "rcs": {
+      "offices": 199,
+      "poolPesos": 835800000,
+      "allocationCV": 0,
+      "rainfallProxyCV": 0.19125774992682673,
+      "minimumRainMm": 1564.0,
+      "maximumRainMm": 4045.0,
+      "wettestToDriestRatio": 2.586317135549872,
+      "officeMeanUnitsMoved": 0.0,
+      "provinceMeanUnitsMoved": 44.0,
+      "officeMedianUnitsMoved": 0.0,
+      "meanMedianDifferentOfficeUnits": 0,
+      "regionalFallbackOffices": 1,
+      "correlation": "Undefined: allocation variance is zero; no correlation p-value reported."
+    },
+    "repeats": {
+      "comparisonPairs": 737,
+      "uniqueCurrentProposals": 686,
+      "uniqueCurrentPesos": 27260271750,
+      "chainageStatuses": {
+        "overlap": 21,
+        "not applicable": 374,
+        "incomplete": 209,
+        "not stated": 133
+      },
+      "overlapUniqueProposals": 21,
+      "trancheStatuses": {
+        "not stated": 724,
+        "same tranche": 2,
+        "one side stated": 11
+      }
+    },
+    "fiveMillion": {
+      "N": 199,
+      "roadOffices": 96,
+      "floodOffices": 45,
+      "overlap": 35,
+      "expectedOverlap": 21.70854271356784,
+      "hypergeometricP": 5.067002321181279e-06,
+      "oddsRatio": 5.336065573770492,
+      "wald95CI": [
+        2.4621913292960116,
+        11.56433111789073
+      ],
+      "regionalPermutationP": 0.0003199968000319997,
+      "regionalPermutationRepetitions": 100000,
+      "postSelectionAdjusted": false
+    },
+    "strictCoverage": {
+      "candidateLineItems": 16275,
+      "candidateTotalPesos": 587075661000,
+      "excludedScheduleLines": 0,
+      "excludedScheduleAmountPesos": 0,
+      "sourceLineItems": 16275,
+      "sourceTotalPesos": 587075661000,
+      "uniquelyAssignedLines": 8558,
+      "sharedAssignedLines": 2,
+      "unassignedLines": 7715,
+      "unassignedAmountPesos": 365653459000,
+      "sharedSourceAmountPesos": 375000000,
+      "assignedSourceAmountPesos": 221422202000,
+      "strictAssignedPesos": 221047202000,
+      "strictExcludedLines": 7717,
+      "strictExcludedAmountPesos": 366028459000,
+      "strictCoveragePct": 37.65,
+      "districtCount": 254
+    },
+    "repeatRetention": {
+      "comparisonPairs": 737,
+      "uniqueNEPProposals": 686,
+      "pairStatuses": {
+        "Potential retained link": 55,
+        "Clear retained link": 634,
+        "No selected or cited counterpart": 48
+      },
+      "uniqueStatuses": {
+        "Potential retained link": 50,
+        "Clear retained link": 591,
+        "No selected or cited counterpart": 45
+      }
+    },
+    "rcsStageTrace": {
+      "districtOfficeLines": 199,
+      "unchangedInHGAB": 199,
+      "withoutSelectedCounterpart": 0,
+      "allocationDecreases": 0,
+      "provinceFirstScenarioZeroUnitOffices": 44,
+      "confirmedLEGLosses": null
+    }
+  },
+  "sources": [
+    {
+      "file": "dpwh-data.json",
+      "sha256": "39309139d227cc9d1e19852fa8a2a5a4967426f93efcffedaa23ad8cdbc23118"
+    },
+    {
+      "file": "rcs-data.json",
+      "sha256": "8ed653b26c110fce2dda6136094d00080d1b31c7866048865faa57bffdb2c4a9"
+    },
+    {
+      "file": "congress-data.json",
+      "sha256": "7a9f4bfd9db42554622fd14b62af961f098d822350ce9ef624191638f98cee2f"
+    },
+    {
+      "file": "budget-innovations-data.json",
+      "sha256": "2731ef00f0d0d593046ede795c0624af3b4527e051a6523f08719e6027f9c167"
+    },
+    {
+      "file": "dpwh-hgab-comparison.json",
+      "sha256": "b9e29a604b0721e4560007971eb384f888c7ab402d85e9a561ad0654b240430d"
+    },
+    {
+      "file": "hgab-revision-data.json",
+      "sha256": "bfea0955da461b2f86bd00d0c94dceac5fd2466235fb87a471a4f58af670e34c"
+    },
+    {
+      "file": "hb_nep_comparison_3rd.csv",
+      "sha256": "6358f901c9416f7c6cde9328e5a65ac05f6d8962f0bdf6bab3c5f0ef124d36c9"
+    }
+  ],
+  "scope": "FY2027 NEP/HGAB 3rd reading; historical GAA comparisons where locally available. No GAB/GAA 2027 outcome inferred.",
+  "budgetStages": [
+    "NEP",
+    "HGAB (House)",
+    "GAB (Senate)",
+    "Bicam (House/Senate reconciliation)",
+    "GAA (enacted)"
+  ],
+  "selectedDistricts": [
+    {
+      "representative": "Bojie Dy",
+      "district": "Isabela · 6th District",
+      "strictHGABLines": 86,
+      "strictHGABPesos": 3016365000,
+      "potentialInsertionLines": 20,
+      "potentialInsertionPesos": 899000000,
+      "candidateShareOfAttributedHGAB": 0.2980408538091378,
+      "retainedIncreaseLines": 0,
+      "retainedIncreasePesos": 0,
+      "topPotentialInsertions": [
+        {
+          "id": "HB10858-3-0418-005812",
+          "district": "Isabela · 6th District",
+          "representative": "Bojie Dy",
+          "projectName": "Construction of Bridge & Approaches Sta 0+(-230) to Sta0+000, Sta 0+200 to Sta 0+690, Barangay Annafunan, Echague, Isabela",
+          "amountPesos": 370000000,
+          "office": "Central Office",
+          "closestNepTitle": "Construction of Villa Campo to Diasan Road, Sta. 0 + 000 - Sta. 2 + 000, Villa Campo, Echague, Isabela",
+          "similarityPct": 56.6,
+          "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf",
+          "sourcePage": "418"
+        },
+        {
+          "id": "HB10858-3-0418-005813",
+          "district": "Isabela · 6th District",
+          "representative": "Bojie Dy",
+          "projectName": "Construction of Bridge, Barangay Pag-asa, Echague, Isabela",
+          "amountPesos": 80000000,
+          "office": "Central Office",
+          "closestNepTitle": "Construction of Road, Barangay San Antonio Ugad, Echague Isabela",
+          "similarityPct": 82.05,
+          "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf",
+          "sourcePage": "418"
+        },
+        {
+          "id": "HB10858-3-0500-007480",
+          "district": "Isabela · 6th District",
+          "representative": "Bojie Dy",
+          "projectName": "Construction and Rehabilitation of Roads, San Fabian, Echague, Isabela",
+          "amountPesos": 50000000,
+          "office": "Isabela 4th District Engineering Office",
+          "closestNepTitle": "Construction of Road, Barangay Babaran, Echague, Isabela",
+          "similarityPct": 73.33,
+          "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf",
+          "sourcePage": "500"
+        },
+        {
+          "id": "HB10858-3-0501-007512",
+          "district": "Isabela · 6th District",
+          "representative": "Bojie Dy",
+          "projectName": "Rizal Bridge Phase 1, Rizal, San Guillermo, Isabela",
+          "amountPesos": 50000000,
+          "office": "Isabela 4th District Engineering Office",
+          "closestNepTitle": "Construction of Road, Barangay San Mariano Sur, San Guillermo, Isabela",
+          "similarityPct": 46.96,
+          "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf",
+          "sourcePage": "501"
+        },
+        {
+          "id": "HB10858-3-0501-007513",
+          "district": "Isabela · 6th District",
+          "representative": "Bojie Dy",
+          "projectName": "Burgos - Sitio Dimmalama Bridge Phase 1, Burgos, San Guillermo, Isabela",
+          "amountPesos": 50000000,
+          "office": "Isabela 4th District Engineering Office",
+          "closestNepTitle": "Construction of Road, Barangay San Mariano Sur, San Guillermo, Isabela",
+          "similarityPct": 54.14,
+          "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf",
+          "sourcePage": "501"
+        },
+        {
+          "id": "HB10858-3-0711-011799",
+          "district": "Isabela · 6th District",
+          "representative": "Bojie Dy",
+          "projectName": "Rehabilitation of Multi-Purpose Building, Centro 1, San Guillermo, Isabela",
+          "amountPesos": 50000000,
+          "office": "Isabela 3rd District Engineering Office",
+          "closestNepTitle": "",
+          "similarityPct": 0.0,
+          "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf",
+          "sourcePage": "711"
+        },
+        {
+          "id": "HB10858-3-0717-011921",
+          "district": "Isabela · 6th District",
+          "representative": "Bojie Dy",
+          "projectName": "Construction of Multi-Purpose Building, Barangay Cabugao, Echague, Isabela",
+          "amountPesos": 40000000,
+          "office": "Isabela 4th District Engineering Office",
+          "closestNepTitle": "",
+          "similarityPct": 0.0,
+          "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf",
+          "sourcePage": "717"
+        },
+        {
+          "id": "HB10858-3-0337-004221",
+          "district": "Isabela · 6th District",
+          "representative": "Bojie Dy",
+          "projectName": "Construction of Drainage, Barangay Gucab, Echague, Isabela",
+          "amountPesos": 30000000,
+          "office": "Isabela 4th District Engineering Office",
+          "closestNepTitle": "Construction of Drainage Canal, Barangay Tuguegarao, Echague",
+          "similarityPct": 79.65,
+          "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf",
+          "sourcePage": "337"
+        },
+        {
+          "id": "HB10858-3-0337-004222",
+          "district": "Isabela · 6th District",
+          "representative": "Bojie Dy",
+          "projectName": "Construction of Drainage, San Fabian, Echague, Isabela",
+          "amountPesos": 30000000,
+          "office": "Isabela 4th District Engineering Office",
+          "closestNepTitle": "Construction of Drainage Canal, Barangay Soyung, Echague",
+          "similarityPct": 74.29,
+          "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf",
+          "sourcePage": "337"
+        },
+        {
+          "id": "HB10858-3-0499-007478",
+          "district": "Isabela · 6th District",
+          "representative": "Bojie Dy",
+          "projectName": "Rehabilitation of Roads including Drainage, Silauan Sur and Taggappan, Echague, Isabela",
+          "amountPesos": 30000000,
+          "office": "Isabela 4th District Engineering Office",
+          "closestNepTitle": "Rehabilitation of Road, Barangay Silauan Sur, Echague, Isabela",
+          "similarityPct": 75.52,
+          "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf",
+          "sourcePage": "499"
+        }
+      ]
+    },
+    {
+      "representative": "Mika Suansing",
+      "district": "Nueva Ecija · 1st District",
+      "strictHGABLines": 179,
+      "strictHGABPesos": 2231890000,
+      "potentialInsertionLines": 57,
+      "potentialInsertionPesos": 669978000,
+      "candidateShareOfAttributedHGAB": 0.3001841488603829,
+      "retainedIncreaseLines": 1,
+      "retainedIncreasePesos": 9200000,
+      "topPotentialInsertions": [
+        {
+          "id": "HB10858-3-0636-010373",
+          "district": "Nueva Ecija · 1st District",
+          "representative": "Mika Suansing",
+          "projectName": "Construction (Completion) of Multi-Purpose Building, Barangay Dinarayat, Talavera, Nueva Ecija, 15.556002, 120.928936",
+          "amountPesos": 75000000,
+          "office": "Central Office",
+          "closestNepTitle": "Construction (Completion) of Multi-Purpose Building, Barangay Buasao, Sto. Domingo, Nueva Ecija",
+          "similarityPct": 74.37,
+          "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf",
+          "sourcePage": "636"
+        },
+        {
+          "id": "HB10858-3-0340-004284",
+          "district": "Nueva Ecija · 1st District",
+          "representative": "Mika Suansing",
+          "projectName": "Rehabilitation/ Improvement of Flood Control, Barangay San Juan, Licab, Nueva Ecija, Sta. 0+000 - Sta. 0+290",
+          "amountPesos": 50000000,
+          "office": "Nueva Ecija 1st District Engineering Office",
+          "closestNepTitle": "Rehabilitation of Drainage System at Mañalac Ave. (Sta. 0+000 - Sta. 0+084), Barangay San Martin de Porres, Parañaque City",
+          "similarityPct": 47.49,
+          "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf",
+          "sourcePage": "340"
+        },
+        {
+          "id": "HB10858-3-0340-004285",
+          "district": "Nueva Ecija · 1st District",
+          "representative": "Mika Suansing",
+          "projectName": "Rehabilitation/ Improvement of Flood Control, Barangay Aquino, Licab, Nueva Ecija, Sta. 0+000 - Sta. 0+290",
+          "amountPesos": 50000000,
+          "office": "Nueva Ecija 1st District Engineering Office",
+          "closestNepTitle": "Construction of Drainage, Barangay Ninoy Aquino, Angeles City Pampanga, Sta. 0+000 - Sta. 0+550, Sta. 0+000 - Sta. 0+615",
+          "similarityPct": 49.76,
+          "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf",
+          "sourcePage": "340"
+        },
+        {
+          "id": "HB10858-3-0737-012325",
+          "district": "Nueva Ecija · 1st District",
+          "representative": "Mika Suansing",
+          "projectName": "Construction of Multi-Purpose Building, Barangay Cabawangan, Nampicuan, Nueva Ecija",
+          "amountPesos": 50000000,
+          "office": "Nueva Ecija 1st District Engineering Office",
+          "closestNepTitle": "Construction of Multi-Purpose Facility (Evacuation Center) at Barangay Escaño, Guimba Nueva Ecija",
+          "similarityPct": 68.97,
+          "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf",
+          "sourcePage": "737"
+        },
+        {
+          "id": "HB10858-3-0518-007860",
+          "district": "Nueva Ecija · 1st District",
+          "representative": "Mika Suansing",
+          "projectName": "Construction of Bridge, Barangay Narvacan II, Guimba, Nueva Ecija, 15.6950777, 120.749619",
+          "amountPesos": 31850000,
+          "office": "Nueva Ecija 1st District Engineering Office",
+          "closestNepTitle": "Construction of Road, Barangay Narvacan II, Guimba, Nueva Ecija",
+          "similarityPct": 80.56,
+          "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf",
+          "sourcePage": "518"
+        },
+        {
+          "id": "HB10858-3-0736-012308",
+          "district": "Nueva Ecija · 1st District",
+          "representative": "Mika Suansing",
+          "projectName": "Construction of Multi-Purpose Building, District I, Cuyapo, Nueva Ecija, 15.77927, 120.66268",
+          "amountPesos": 20000000,
+          "office": "Nueva Ecija 1st District Engineering Office",
+          "closestNepTitle": "Construction (Completion) of Multi-Purpose Building, Barangay Rizal, Cuyapo, Nueva Ecija",
+          "similarityPct": 70.59,
+          "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf",
+          "sourcePage": "736"
+        },
+        {
+          "id": "HB10858-3-0736-012309",
+          "district": "Nueva Ecija · 1st District",
+          "representative": "Mika Suansing",
+          "projectName": "Construction of Multi-Purpose Building, Barangay North Poblacion, Nampicuan, Nueva Ecija, 15.733979, 120.635554",
+          "amountPesos": 20000000,
+          "office": "Nueva Ecija 1st District Engineering Office",
+          "closestNepTitle": "Construction of Multi-Purpose Building, Barangay San Juan, San Narciso, Zambales 15.003452, 120.095337",
+          "similarityPct": 67.65,
+          "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf",
+          "sourcePage": "736"
+        },
+        {
+          "id": "HB10858-3-0340-004286",
+          "district": "Nueva Ecija · 1st District",
+          "representative": "Mika Suansing",
+          "projectName": "Construction of Drainage Barangay La Torre, Talavera, Nueva Ecija STA 0+000 - STA 0+936",
+          "amountPesos": 16400000,
+          "office": "Nueva Ecija 1st District Engineering Office",
+          "closestNepTitle": "Construction of Drainage Structure (including Pumping Station) along La Salle Avenue, Bacolod City (Sta. 0+000 - Sta. 0+150)",
+          "similarityPct": 62.63,
+          "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf",
+          "sourcePage": "340"
+        },
+        {
+          "id": "HB10858-3-0518-007861",
+          "district": "Nueva Ecija · 1st District",
+          "representative": "Mika Suansing",
+          "projectName": "Construction of Road, Barangay Betes, Aliaga, Nueva Ecija, Sta. 0+000 - Sta. 1+424",
+          "amountPesos": 16000000,
+          "office": "Nueva Ecija 1st District Engineering Office",
+          "closestNepTitle": "Construction of Bridge, Barangay Concepcion, Sto. Domingo, Nueva Ecija Sta. 0+000 - Sta. 0+035",
+          "similarityPct": 76.25,
+          "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf",
+          "sourcePage": "518"
+        },
+        {
+          "id": "HB10858-3-0518-007862",
+          "district": "Nueva Ecija · 1st District",
+          "representative": "Mika Suansing",
+          "projectName": "Construction of Road, Barangay Cawayang Bugtong, Guimba, Nueva Ecija, Sta. 0+000 - Sta. 1+223",
+          "amountPesos": 15000000,
+          "office": "Nueva Ecija 1st District Engineering Office",
+          "closestNepTitle": "Construction of Road, Barangay Cavite to Barangay Sta. Ana, Guimba, Nueva Ecija",
+          "similarityPct": 72.5,
+          "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf",
+          "sourcePage": "518"
+        }
+      ]
+    },
+    {
+      "representative": "Sandro Marcos",
+      "district": "Ilocos Norte · 1st District",
+      "strictHGABLines": 362,
+      "strictHGABPesos": 5016900000,
+      "potentialInsertionLines": 328,
+      "potentialInsertionPesos": 3611900000,
+      "candidateShareOfAttributedHGAB": 0.7199465805577149,
+      "retainedIncreaseLines": 1,
+      "retainedIncreasePesos": 8000000,
+      "topPotentialInsertions": [
+        {
+          "id": "HB10858-3-0301-003551",
+          "district": "Ilocos Norte · 1st District",
+          "representative": "Sandro Marcos",
+          "projectName": "Construction (Completion) of Major Drainage along Rizal St., Barangays Poblacion, Laoag City, Ilocos Norte",
+          "amountPesos": 100000000,
+          "office": "Central Office",
+          "closestNepTitle": "Construction (Completion) of Drainage System, Isabela State University (ISU) Santiago City Extension, Barangay Rizal, Santiago City",
+          "similarityPct": 56.14,
+          "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf",
+          "sourcePage": "301"
+        },
+        {
+          "id": "HB10858-3-0301-003552",
+          "district": "Ilocos Norte · 1st District",
+          "representative": "Sandro Marcos",
+          "projectName": "Construction of Major Drainage along Laoag-Sarrat-Piddig- Solsona Rd, Laoag City, Ilocos Norte",
+          "amountPesos": 100000000,
+          "office": "Central Office",
+          "closestNepTitle": "",
+          "similarityPct": 0.0,
+          "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf",
+          "sourcePage": "301"
+        },
+        {
+          "id": "HB10858-3-0674-011048",
+          "district": "Ilocos Norte · 1st District",
+          "representative": "Sandro Marcos",
+          "projectName": "Construction of 2 Units of Multi-Purpose Building, Barangay Sta. Rita, Bacarra, Ilocos Norte",
+          "amountPesos": 100000000,
+          "office": "Ilocos Norte 1st District Engineering Office",
+          "closestNepTitle": "Construction of Multi-Purpose Building (Barangay Hall), Barangay Sta. Rita, Olongapo City (14.84897, 120.29113)",
+          "similarityPct": 63.87,
+          "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf",
+          "sourcePage": "674"
+        },
+        {
+          "id": "HB10858-3-0666-010903",
+          "district": "Ilocos Norte · 1st District",
+          "representative": "Sandro Marcos",
+          "projectName": "Construction Of Multi Purpose Building, (Provincial Emergency Operations Center), Laoag City, Ilocos Norte",
+          "amountPesos": 80000000,
+          "office": "Ilocos Norte 1st District Engineering Office",
+          "closestNepTitle": "Construction of Multi-Purpose Building (INSPIRE BUILDING), Laoag City, Ilocos Norte",
+          "similarityPct": 75.56,
+          "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf",
+          "sourcePage": "666"
+        },
+        {
+          "id": "HB10858-3-0328-004052",
+          "district": "Ilocos Norte · 1st District",
+          "representative": "Sandro Marcos",
+          "projectName": "Construction of Flood Control Structure along Bislak River, Barangay Casilian, Bacarra, Ilocos Norte",
+          "amountPesos": 50000000,
+          "office": "Ilocos Norte 1st District Engineering Office",
+          "closestNepTitle": "",
+          "similarityPct": 0.0,
+          "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf",
+          "sourcePage": "328"
+        },
+        {
+          "id": "HB10858-3-0330-004081",
+          "district": "Ilocos Norte · 1st District",
+          "representative": "Sandro Marcos",
+          "projectName": "Construction of Sea Wall, Barangay Davila, Pasuquin, Ilocos Norte",
+          "amountPesos": 50000000,
+          "office": "Ilocos Norte 1st District Engineering Office",
+          "closestNepTitle": "",
+          "similarityPct": 0.0,
+          "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf",
+          "sourcePage": "330"
+        },
+        {
+          "id": "HB10858-3-0330-004091",
+          "district": "Ilocos Norte · 1st District",
+          "representative": "Sandro Marcos",
+          "projectName": "Construction of Flood Control Structure along Bengang Creek, Laoag City, Ilocos Norte",
+          "amountPesos": 50000000,
+          "office": "Ilocos Norte 1st District Engineering Office",
+          "closestNepTitle": "Construction of Flood Control Structure along Lawaan Creek, (C 0+000 - C 0+160), Barangay 179, Caloocan City",
+          "similarityPct": 67.39,
+          "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf",
+          "sourcePage": "330"
+        },
+        {
+          "id": "HB10858-3-0330-004093",
+          "district": "Ilocos Norte · 1st District",
+          "representative": "Sandro Marcos",
+          "projectName": "Construction of Slope Protection (Bridge Protection) along Bislak River, Bacarra Br. Abutment B, Bacarra, Ilocos Norte",
+          "amountPesos": 50000000,
+          "office": "Ilocos Norte 1st District Engineering Office",
+          "closestNepTitle": "Construction of Slope Protection along Dila-Dila River Tributary to Colo River, Dinalupihan Bataan, Sta. 0 + 500 - Sta. 6 + 000",
+          "similarityPct": 54.94,
+          "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf",
+          "sourcePage": "330"
+        },
+        {
+          "id": "HB10858-3-0331-004100",
+          "district": "Ilocos Norte · 1st District",
+          "representative": "Sandro Marcos",
+          "projectName": "Construction of Groundsill and its Appurtenant Structure, Bonga Pump 3, Barangay Tangid, Laoag City, Ilocos Norte",
+          "amountPesos": 50000000,
+          "office": "Ilocos Norte 1st District Engineering Office",
+          "closestNepTitle": "",
+          "similarityPct": 0.0,
+          "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf",
+          "sourcePage": "331"
+        },
+        {
+          "id": "HB10858-3-0331-004102",
+          "district": "Ilocos Norte · 1st District",
+          "representative": "Sandro Marcos",
+          "projectName": "Construction of Major Drainage along Laoag-Sarrat-Piddig-Solsona Rd, Barangay Camangaan, Laoag City, Ilocos Norte",
+          "amountPesos": 50000000,
+          "office": "Ilocos Norte 1st District Engineering Office",
+          "closestNepTitle": "",
+          "similarityPct": 0.0,
+          "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf",
+          "sourcePage": "331"
+        }
+      ]
+    }
+  ],
+  "allDistrictComparison": {
+    "districts": 254,
+    "baselineDistricts": 3,
+    "totalStrictLines": 8558
+  },
+  "localDatasetInventory": [
+    {
+      "file": "database/poverty.json",
+      "use": "Potential socio-economic context; no year/definition recorded in the inspected rows, so not used as a needs control.",
+      "sha256": "a0fd7fc2eee547085dd432e1ad055d6ba929ab1ddd9e72900a0155e3caafaeae"
+    },
+    {
+      "file": "static/data/flood_summary.json",
+      "coverage": "2016–2024 projects",
+      "use": "Historical project reference; not a current flood-exposure or FY2027 needs denominator.",
+      "sha256": "167b27c7bb9b2ceb13b371903a71a2bce93b8c82d7863956d394bd721bf7aa46"
+    }
+  ]
+}

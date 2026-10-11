@@ -734,6 +734,11 @@ async fn main() -> std::io::Result<()> {
 
         App::new()
             .wrap(cors)
+            .service(
+                fs::Files::new("/static/nep-preview", "./static/nep-preview/")
+                    .index_file("index.html")
+                    .redirect_to_slash_directory(),
+            )
             .service(fs::Files::new("/static", "./static/"))
             .service(web::resource("/favicon.ico").route(web::get().to(favicon)))
             .service(web::resource("/robots.txt").route(web::get().to(robots)))
