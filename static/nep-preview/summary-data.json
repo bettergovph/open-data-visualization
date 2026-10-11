@@ -79,6 +79,32 @@
       "alternative": "A legitimate phased project can require multiple appropriations.",
       "next": "Obtain total project cost, phases, progress, obligations, disbursements and procurement records.",
       "caution": "Appropriations are not actual spending; stage/year sums do not prove duplication."
+    },
+    {
+      "rank": 7,
+      "id": "length-coverage",
+      "title": "Length and chainage gaps limit budget scrutiny",
+      "lead": "Roads: 51.14% · Bridges: 94.74% · FMR: 99.75% without usable extracted length",
+      "basis": "Extracted metadata coverage; original-document completeness unverified",
+      "page": "cost-per-km.html#cost-coverage",
+      "question": "Can the funded segment and engineering length be established for every allocation?",
+      "evidence": "Roads: 3,175/6,498 lines have derivable stated lengths · Bridges: 60/1,140 lines have derivable stated lengths · FMR: 2/795 lines have derivable stated lengths. Official programs have separate denominators on the supporting page.",
+      "alternative": "Lengths may be recorded in engineering schedules or continuation text not recovered by this extraction; incomplete metadata need not reflect deliberate omission.",
+      "next": "Inspect original source pages and obtain funded-segment boundaries, complete chainage, project quantities and bridge spans; reconcile extraction gaps before alleging disclosure failures.",
+      "caution": "Missing includes absent and unusable extracted evidence, not proof the original documents lack length. Coordinate distances do not establish construction length; mixed scopes are separate."
+    },
+    {
+      "rank": 8,
+      "id": "cost-per-km",
+      "title": "Allocation per stated kilometre: inspect scope before comparing rates",
+      "lead": "Roads: 3,175 screening ratios · Bridges: 60 screening ratios · FMR: 2 screening ratios",
+      "basis": "Descriptive allocation/segment-length proxy; comparable engineering costs unavailable",
+      "page": "cost-per-km.html#cost-roads",
+      "question": "Do apparently high rates reflect short printed segments, structures, broader funded scope, or unusually costly comparable work?",
+      "evidence": "Whole HGAB line-item allocation is divided by its derivable stated segment kilometres. Roads, bridges and FMR are displayed separately, with official work-program filters. Mixed road/bridge lines receive no single-work rate.",
+      "alternative": "Terrain, width, structures, approaches, rehabilitation scope and components outside the stated segment can explain large differences. Tiny printed ranges or parser errors can produce extreme ratios.",
+      "next": "Verify station endpoints on original pages, then compare quantities, width, funded extent, designs and bill-of-quantity costs within the same work type. Investigate unusually short denominators before interpreting extreme ratios.",
+      "caution": "These are appropriations per stated segment kilometre, not verified construction unit costs. Bridge chainage is not necessarily bridge span. No cross-category average, overpricing estimate or corruption probability is established."
     }
   ],
   "statistics": {
@@ -176,6 +202,52 @@
       "removalPesos": 2560500000,
       "adjustedLines": 127
     },
+    "lengthCoverage": [
+      {
+        "category": "Roads",
+        "program": "All selected programs · coverage only",
+        "lineItems": 6498,
+        "withLength": 3175,
+        "withoutLength": 3323,
+        "missingPct": 51.14,
+        "withRate": 3175,
+        "allocationPesos": 270361659000,
+        "unusableLengthAllocationPesos": 90872281000
+      },
+      {
+        "category": "Bridges",
+        "program": "All selected programs · coverage only",
+        "lineItems": 1140,
+        "withLength": 60,
+        "withoutLength": 1080,
+        "missingPct": 94.74,
+        "withRate": 60,
+        "allocationPesos": 54971153000,
+        "unusableLengthAllocationPesos": 49629846000
+      },
+      {
+        "category": "FMR",
+        "program": "All selected programs · coverage only",
+        "lineItems": 795,
+        "withLength": 2,
+        "withoutLength": 793,
+        "missingPct": 99.75,
+        "withRate": 2,
+        "allocationPesos": 14035375000,
+        "unusableLengthAllocationPesos": 14010375000
+      },
+      {
+        "category": "Mixed roads / bridges",
+        "program": "All selected programs · coverage only",
+        "lineItems": 117,
+        "withLength": 44,
+        "withoutLength": 73,
+        "missingPct": 62.39,
+        "withRate": 0,
+        "allocationPesos": 12178486000,
+        "unusableLengthAllocationPesos": 5902037000
+      }
+    ],
     "lineItemReviewQueue": {
       "sourceOccurrences": 16275,
       "flaggedOccurrences": 12015,
