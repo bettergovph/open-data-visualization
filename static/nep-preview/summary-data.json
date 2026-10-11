@@ -339,12 +339,19 @@
     ],
     "lineItemReviewQueue": {
       "sourceOccurrences": 16275,
-      "flaggedOccurrences": 12015,
+      "flaggedOccurrences": 12133,
+      "flagTypes": {
+        "insertion": 5549,
+        "amount_group": 10519,
+        "historical_title": 351,
+        "chainage_overlap": 17,
+        "high_meter_rate": 199
+      },
       "flagCountDistribution": {
         "4": 6,
-        "3": 126,
-        "2": 4151,
-        "1": 7732
+        "3": 135,
+        "2": 4214,
+        "1": 7778
       },
       "top25Occurrences": 25
     },
@@ -409,6 +416,9 @@
       ],
       "historicalMatch": "Identical full normalized title after complete trailing metadata removal; same qualified municipality/province; direction/location/tranche conflict and disjoint stated chainage excluded.",
       "weights": "One point per flag type. Multiple historical years do not add points.",
+      "highMeterRate": "Peers share category, official PAP and a data-derived length band; at least 20 peers with stated length ≥10m. Candidate rate exceeds both 2× peer median and Q3+1.5×IQR. Chart extremes exceed max(2×median,Q3+3×IQR); sub-10m printed ranges also stay off rate charts.",
+      "evidenceGaps": "Missing length, sub-10m printed ranges and insufficient peers are cautions, not points. Extreme rates require denominator/scope review and are omitted from rate charts.",
+      "summaryCoverage": "Nine summary findings are not nine independent line-item flags. RCS equal amounts use the amount-group flag; MPB is a program scope; INSPIRE is outside this DPWH queue. Length gaps and very short printed ranges are evidence cautions. Historical recurrence and overlap support the repeat finding.",
       "dependence": "Historical recurrence and chainage overlap are related indicators; scores are descriptive triage, not independent evidence or probabilities.",
       "limitations": [
         "Uniform packages can be legitimate. Exact appropriation amounts are not unit costs.",
