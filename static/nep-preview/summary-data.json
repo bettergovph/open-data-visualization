@@ -45,11 +45,11 @@
       "rank": 4,
       "id": "repeats",
       "title": "Recurring project titles: inspect overlapping work before alleging duplication",
-      "lead": "634 of 737 NEP comparison pairs clearly retained in HGAB",
+      "lead": "634 of 736 NEP comparison pairs clearly retained in HGAB",
       "basis": "Scope-screened comparison candidates",
       "page": "repeats.html#repeat-hgab-survival",
       "question": "Are new appropriations paying for already-funded components or legitimate continuation?",
-      "evidence": "591 of 686 distinct NEP repeat-screen proposals have clear HGAB links. 21 proposals have explicit overlapping historical chainage. ₱27.260B is the unique NEP proposal allocation, not alleged loss.",
+      "evidence": "591 of 685 distinct NEP repeat-screen proposals have clear HGAB links. 22 proposals have explicit overlapping historical chainage. ₱27.255B is the unique NEP proposal allocation, not alleged loss.",
       "alternative": "Multi-year implementation, rehabilitation and distinct components can share names and segments.",
       "next": "Prioritize explicitly overlapping retained proposals and high amounts; compare contracts, quantities, tranche scopes and completion.",
       "caution": "The 737 headline counts NEP–old GAA comparison pairs. Potential retention and missing counterparts remain separate."
@@ -60,7 +60,7 @@
       "title": "Exact ₱5M road and flood allocations cluster in the same offices",
       "lead": "35 overlapping offices vs 21.7 expected under independence",
       "basis": "Exploratory statistical association",
-      "page": "dpwh.html#dpwh-investigation-evidence",
+      "page": "repeats.html#dpwh-investigation-evidence",
       "question": "Does standard design, office workload or coordinated allocation explain the co-occurrence?",
       "evidence": "Office odds ratio 5.34; unadjusted exact p=5.07e-06. Region-controlled result is also unusual under its stated null.",
       "alternative": "Common specifications, office workload and project mix can create clustering.",
@@ -84,11 +84,11 @@
       "rank": 7,
       "id": "length-coverage",
       "title": "Length and chainage gaps limit budget scrutiny",
-      "lead": "Roads: 51.14% · Bridges: 94.74% · FMR: 99.69% without usable extracted length",
+      "lead": "Roads: 49.25% · Bridges: 94.74% · FMR: 99.69% without usable extracted length",
       "basis": "Extracted metadata coverage; original-document completeness unverified",
       "page": "cost-per-km.html#cost-coverage",
       "question": "Can the funded segment and engineering length be established for every allocation?",
-      "evidence": "Roads: 3,175/6,498 lines have derivable stated lengths · Bridges: 60/1,140 lines have derivable stated lengths · FMR: 3/964 lines have derivable stated lengths. Official programs have separate denominators on the supporting page.",
+      "evidence": "Roads: 3,298/6,498 lines have derivable stated lengths · Bridges: 60/1,140 lines have derivable stated lengths · FMR: 3/964 lines have derivable stated lengths. Official programs have separate denominators on the supporting page.",
       "alternative": "Lengths may be recorded in engineering schedules or continuation text not recovered by this extraction; incomplete metadata need not reflect deliberate omission.",
       "next": "Inspect original source pages and obtain funded-segment boundaries, complete chainage, project quantities and bridge spans; reconcile extraction gaps before alleging disclosure failures.",
       "caution": "Missing includes absent and unusable extracted evidence, not proof the original documents lack length. Coordinate distances do not establish construction length; mixed scopes are separate."
@@ -97,7 +97,7 @@
       "rank": 8,
       "id": "cost-per-km",
       "title": "Allocation per stated meter: inspect scope before comparing rates",
-      "lead": "197 road and 2 bridge high-rate candidates · FMR peers insufficient",
+      "lead": "216 road and 2 bridge high-rate candidates · FMR peers insufficient",
       "basis": "Descriptive allocation/segment-length proxy; comparable engineering costs unavailable",
       "page": "cost-per-km.html#length-density-groups",
       "question": "Do apparently high rates reflect short printed segments, structures, broader funded scope, or unusually costly comparable work?",
@@ -137,18 +137,18 @@
       "correlation": "Undefined: allocation variance is zero; no correlation p-value reported."
     },
     "repeats": {
-      "comparisonPairs": 737,
-      "uniqueCurrentProposals": 686,
-      "uniqueCurrentPesos": 27260271750,
+      "comparisonPairs": 736,
+      "uniqueCurrentProposals": 685,
+      "uniqueCurrentPesos": 27255271750,
       "chainageStatuses": {
-        "overlap": 21,
-        "not applicable": 374,
-        "incomplete": 209,
-        "not stated": 133
+        "overlap": 22,
+        "not stated": 160,
+        "incomplete": 225,
+        "not applicable": 329
       },
-      "overlapUniqueProposals": 21,
+      "overlapUniqueProposals": 22,
       "trancheStatuses": {
-        "not stated": 724,
+        "not stated": 723,
         "same tranche": 2,
         "one side stated": 11
       }
@@ -189,17 +189,17 @@
       "districtCount": 254
     },
     "repeatRetention": {
-      "comparisonPairs": 737,
-      "uniqueNEPProposals": 686,
+      "comparisonPairs": 736,
+      "uniqueNEPProposals": 685,
       "pairStatuses": {
         "Potential retained link": 55,
         "Clear retained link": 634,
-        "No selected or cited counterpart": 48
+        "No selected or cited counterpart": 47
       },
       "uniqueStatuses": {
         "Potential retained link": 50,
         "Clear retained link": 591,
-        "No selected or cited counterpart": 45
+        "No selected or cited counterpart": 44
       }
     },
     "mpb": {
@@ -220,12 +220,12 @@
         "category": "Roads",
         "program": "All selected programs · coverage only",
         "lineItems": 6498,
-        "withLength": 3175,
-        "withoutLength": 3323,
-        "missingPct": 51.14,
-        "withRate": 3175,
+        "withLength": 3298,
+        "withoutLength": 3200,
+        "missingPct": 49.25,
+        "withRate": 3298,
         "allocationPesos": 270361659000,
-        "unusableLengthAllocationPesos": 90872281000
+        "unusableLengthAllocationPesos": 86352653000
       },
       {
         "category": "Bridges",
@@ -262,8 +262,8 @@
       }
     ],
     "highRateScreen": {
-      "candidates": 199,
-      "graphExtremeRecords": 109,
+      "candidates": 218,
+      "graphExtremeRecords": 124,
       "method": "Peers share category, official PAP and a data-derived length band; at least 20 peers with stated length ≥10m. Candidate rate exceeds both 2× peer median and Q3+1.5×IQR. Chart extremes exceed max(2×median,Q3+3×IQR); sub-10m printed ranges also stay off rate charts.",
       "limits": "Exploratory relative-rate screen, not proof of overpricing. Width, terrain, structures, engineering quantities and funded extent remain unverified. Missing or insufficient peers produce no high-rate conclusion."
     },
@@ -271,18 +271,18 @@
       {
         "category": "Roads",
         "allLines": 6498,
-        "knownLengths": 3175,
-        "below100m": 204,
-        "below100PctOfKnown": 6.43,
-        "medianMeters": 847.0,
+        "knownLengths": 3298,
+        "below100m": 218,
+        "below100PctOfKnown": 6.61,
+        "medianMeters": 826.0,
         "top25HighRateRows": 25,
         "below100InTop25HighRates": 20,
         "bins": {
           "<10m": 5,
-          "10–<100m": 199,
-          "100–<1,000m": 1540,
-          "1,000–<5,000m": 1318,
-          "≥5,000m": 113
+          "10–<100m": 213,
+          "100–<1,000m": 1608,
+          "1,000–<5,000m": 1356,
+          "≥5,000m": 116
         }
       },
       {
@@ -304,17 +304,17 @@
       },
       {
         "category": "FMR",
-        "allLines": 795,
-        "knownLengths": 2,
+        "allLines": 964,
+        "knownLengths": 3,
         "below100m": 0,
         "below100PctOfKnown": 0.0,
-        "medianMeters": 850.0,
-        "top25HighRateRows": 2,
+        "medianMeters": 650.0,
+        "top25HighRateRows": 3,
         "below100InTop25HighRates": 0,
         "bins": {
           "<10m": 0,
           "10–<100m": 0,
-          "100–<1,000m": 1,
+          "100–<1,000m": 2,
           "1,000–<5,000m": 1,
           "≥5,000m": 0
         }
@@ -339,19 +339,19 @@
     ],
     "lineItemReviewQueue": {
       "sourceOccurrences": 16275,
-      "flaggedOccurrences": 12133,
+      "flaggedOccurrences": 12147,
       "flagTypes": {
         "insertion": 5549,
         "amount_group": 10519,
         "historical_title": 351,
         "chainage_overlap": 17,
-        "high_meter_rate": 199
+        "high_meter_rate": 218
       },
       "flagCountDistribution": {
         "4": 6,
-        "3": 135,
-        "2": 4214,
-        "1": 7778
+        "3": 137,
+        "2": 4215,
+        "1": 7789
       },
       "top25Occurrences": 25
     },
@@ -367,7 +367,7 @@
   "sources": [
     {
       "file": "dpwh-data.json",
-      "sha256": "39309139d227cc9d1e19852fa8a2a5a4967426f93efcffedaa23ad8cdbc23118"
+      "sha256": "90dc95c8702879ab9d892980cfb7f35007c15f987556e574f2d23b9540dd9290"
     },
     {
       "file": "rcs-data.json",
