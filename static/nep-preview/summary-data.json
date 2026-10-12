@@ -449,5 +449,42 @@
       "use": "Historical project reference; not a current flood-exposure or FY2027 needs denominator.",
       "sha256": "167b27c7bb9b2ceb13b371903a71a2bce93b8c82d7863956d394bd721bf7aa46"
     }
+  ],
+  "agencyComparisonCoverage": [
+    {
+      "scope": "FMR annex",
+      "nepPesos": 16000000000,
+      "hgabPesos": 19628100000,
+      "adjustmentPesos": 3628100000,
+      "limit": "Programme controls; individual counterpart confidence stays separate"
+    },
+    {
+      "scope": "NIA exact named-title subset",
+      "nepPesos": 10355321000,
+      "hgabPesos": 8855321000,
+      "adjustmentPesos": -1500000000,
+      "limit": "Matched subset only; not the whole NIA budget"
+    },
+    {
+      "scope": "HFEP programme total",
+      "nepPesos": 14539832000,
+      "hgabPesos": 10088832000,
+      "adjustmentPesos": -4451000000,
+      "limit": "MOOE and Capital Outlays matched at programme level"
+    },
+    {
+      "scope": "NIA irrigation appendix",
+      "nepPesos": null,
+      "hgabPesos": 7632275000,
+      "adjustmentPesos": null,
+      "limit": "Detailed NEP works baseline missing"
+    },
+    {
+      "scope": "DepEd school operations",
+      "nepPesos": null,
+      "hgabPesos": 102670874000,
+      "adjustmentPesos": null,
+      "limit": "Comparable NEP school baseline not built"
+    }
   ]
 }
