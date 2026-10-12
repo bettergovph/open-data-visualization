@@ -75,6 +75,14 @@
     picker.onchange=()=>draw(items[Number(picker.value)]);
     draw(items[0]);dialog.showModal();
   }
+  // The historical table creates its own evidence button on every redraw.
+  // Use its attached source ranges directly, without title/key discovery.
+  document.addEventListener('click',event=>{
+    const button=event.target.closest('button[data-chainage-diagram]');
+    if(!button)return;
+    const record=JSON.parse(button.dataset.chainageDiagram);
+    if(record.leftRanges?.length&&record.rightRanges?.length&&record.overlapRanges?.length)open(button,[record]);
+  });
   let scheduled=false;
   function decorate(){
     scheduled=false;
@@ -87,6 +95,7 @@
       }
       if(!/\boverlap\b/i.test(row.textContent))continue;
       if(!evidenceCell||evidenceCell.tagName!=='TD')continue;
+      if(evidenceCell.querySelector('button[data-chainage-diagram]'))continue;
       const items=matches(row);if(!items.length)continue;
       for(const cell of [evidenceCell]){
         const walker=document.createTreeWalker(cell,NodeFilter.SHOW_TEXT,{acceptNode:node=>node.parentElement.closest('button,a,script,style')?NodeFilter.FILTER_REJECT:/\boverlap\b/i.test(node.textContent)?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT});
