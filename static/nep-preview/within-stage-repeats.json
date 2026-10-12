@@ -4,12 +4,12 @@
       "stage": "FY2027 NEP",
       "sourceOccurrences": 11420,
       "screenedOccurrences": 10621,
-      "candidatePairs": 26,
-      "distinctFlaggedOccurrences": 48,
+      "candidatePairs": 23,
+      "distinctFlaggedOccurrences": 45,
       "kinds": {
         "Similar title with explicit chainage overlap": 8,
         "Identical normalized full title": 1,
-        "Similar title · funded segment unresolved": 17
+        "Similar title · funded segment unresolved": 14
       },
       "positiveOverlapPairs": 8,
       "exclusionsAndVetoes": {
@@ -17,8 +17,10 @@
         "unresolvedContextExcluded": 8,
         "untrustedTitleExcluded": 13,
         "fapExcluded": 25,
-        "disjointChainageVeto": 1282,
+        "boundedNonoverlapVeto": 1281,
+        "disjointChainageVeto": 1,
         "distinctiveScopeTokenVeto": 9484,
+        "differentBridgeNumberVeto": 3,
         "locationOrDirectionVeto": 17
       }
     },
@@ -26,21 +28,23 @@
       "stage": "FY2027 HGAB 3rd",
       "sourceOccurrences": 16275,
       "screenedOccurrences": 15325,
-      "candidatePairs": 102,
-      "distinctFlaggedOccurrences": 165,
+      "candidatePairs": 97,
+      "distinctFlaggedOccurrences": 157,
       "kinds": {
         "Identical normalized full title": 2,
         "Similar title with explicit chainage overlap": 12,
-        "Similar title · funded segment unresolved": 88
+        "Similar title · funded segment unresolved": 83
       },
       "positiveOverlapPairs": 13,
       "exclusionsAndVetoes": {
         "fapExcluded": 29,
         "genericTitleExcluded": 921,
-        "disjointChainageVeto": 1233,
+        "boundedNonoverlapVeto": 1235,
         "distinctiveScopeTokenVeto": 30619,
         "locationOrDirectionVeto": 36,
-        "trancheVeto": 3
+        "differentBridgeNumberVeto": 2,
+        "trancheVeto": 3,
+        "disjointChainageVeto": 1
       }
     }
   ],
@@ -438,84 +442,6 @@
     {
       "stage": "FY2027 NEP",
       "kind": "Similar title · funded segment unresolved",
-      "titleSimilarity": 0.9756,
-      "contextEvidence": "Qualified municipality and province agree",
-      "chainage": {
-        "has_current_range": false,
-        "has_prior_range": false,
-        "overlaps": false,
-        "current_chainage": "",
-        "prior_chainage": "",
-        "chainage_overlap": "",
-        "chainage_status": "not stated"
-      },
-      "left": {
-        "id": "p281:r2",
-        "projectName": "Mauban Bypass Road (Bridge 3), Mauban, Quezon",
-        "pap3": "Construction of By-Pass and Diversion Roads",
-        "office": "Quezon 1st District Engineering Office",
-        "amountPesos": 150000000,
-        "sourcePage": 281,
-        "sourceVolume": "",
-        "sourceNepId": "p281:r2",
-        "apiId": "2027DPWH-Proposal-31767",
-        "sourceEvidence": "native_row_ambiguity"
-      },
-      "right": {
-        "id": "p281:r3",
-        "projectName": "Mauban Bypass Road (Bridge 4), Mauban, Quezon",
-        "pap3": "Construction of By-Pass and Diversion Roads",
-        "office": "Quezon 1st District Engineering Office",
-        "amountPesos": 60000000,
-        "sourcePage": 281,
-        "sourceVolume": "",
-        "sourceNepId": "p281:r3",
-        "apiId": "2027DPWH-Proposal-31768",
-        "sourceEvidence": "native_row_ambiguity"
-      }
-    },
-    {
-      "stage": "FY2027 NEP",
-      "kind": "Similar title · funded segment unresolved",
-      "titleSimilarity": 0.9756,
-      "contextEvidence": "Qualified municipality and province agree",
-      "chainage": {
-        "has_current_range": false,
-        "has_prior_range": false,
-        "overlaps": false,
-        "current_chainage": "",
-        "prior_chainage": "",
-        "chainage_overlap": "",
-        "chainage_status": "not stated"
-      },
-      "left": {
-        "id": "p281:r2",
-        "projectName": "Mauban Bypass Road (Bridge 3), Mauban, Quezon",
-        "pap3": "Construction of By-Pass and Diversion Roads",
-        "office": "Quezon 1st District Engineering Office",
-        "amountPesos": 150000000,
-        "sourcePage": 281,
-        "sourceVolume": "",
-        "sourceNepId": "p281:r2",
-        "apiId": "2027DPWH-Proposal-31767",
-        "sourceEvidence": "native_row_ambiguity"
-      },
-      "right": {
-        "id": "p281:r4",
-        "projectName": "Mauban Bypass Road (Bridge 5), Mauban, Quezon",
-        "pap3": "Construction of By-Pass and Diversion Roads",
-        "office": "Quezon 1st District Engineering Office",
-        "amountPesos": 60000000,
-        "sourcePage": 281,
-        "sourceVolume": "",
-        "sourceNepId": "p281:r4",
-        "apiId": "2027DPWH-Proposal-31764",
-        "sourceEvidence": "native_row_ambiguity"
-      }
-    },
-    {
-      "stage": "FY2027 NEP",
-      "kind": "Similar title · funded segment unresolved",
       "titleSimilarity": 1.0,
       "contextEvidence": "Same implementing office only; geographic identity unverified",
       "chainage": {
@@ -550,45 +476,6 @@
         "sourceNepId": "p198:r9",
         "apiId": "2027DPWH-Proposal-16688",
         "sourceEvidence": "within_bbox_agreement"
-      }
-    },
-    {
-      "stage": "FY2027 NEP",
-      "kind": "Similar title · funded segment unresolved",
-      "titleSimilarity": 0.9756,
-      "contextEvidence": "Qualified municipality and province agree",
-      "chainage": {
-        "has_current_range": false,
-        "has_prior_range": false,
-        "overlaps": false,
-        "current_chainage": "",
-        "prior_chainage": "",
-        "chainage_overlap": "",
-        "chainage_status": "not stated"
-      },
-      "left": {
-        "id": "p281:r3",
-        "projectName": "Mauban Bypass Road (Bridge 4), Mauban, Quezon",
-        "pap3": "Construction of By-Pass and Diversion Roads",
-        "office": "Quezon 1st District Engineering Office",
-        "amountPesos": 60000000,
-        "sourcePage": 281,
-        "sourceVolume": "",
-        "sourceNepId": "p281:r3",
-        "apiId": "2027DPWH-Proposal-31768",
-        "sourceEvidence": "native_row_ambiguity"
-      },
-      "right": {
-        "id": "p281:r4",
-        "projectName": "Mauban Bypass Road (Bridge 5), Mauban, Quezon",
-        "pap3": "Construction of By-Pass and Diversion Roads",
-        "office": "Quezon 1st District Engineering Office",
-        "amountPesos": 60000000,
-        "sourcePage": 281,
-        "sourceVolume": "",
-        "sourceNepId": "p281:r4",
-        "apiId": "2027DPWH-Proposal-31764",
-        "sourceEvidence": "native_row_ambiguity"
       }
     },
     {
@@ -1647,84 +1534,6 @@
     {
       "stage": "FY2027 HGAB 3rd",
       "kind": "Similar title · funded segment unresolved",
-      "titleSimilarity": 0.9756,
-      "contextEvidence": "Qualified municipality and province agree",
-      "chainage": {
-        "has_current_range": false,
-        "has_prior_range": false,
-        "overlaps": false,
-        "current_chainage": "",
-        "prior_chainage": "",
-        "chainage_overlap": "",
-        "chainage_status": "not stated"
-      },
-      "left": {
-        "id": "HB10858-3-0219-001997",
-        "projectName": "Mauban Bypass Road (Bridge 3), Mauban, Quezon",
-        "pap3": "Construction of By-Pass and Diversion Roads",
-        "office": "Central Office",
-        "amountPesos": 150000000,
-        "sourcePage": "219",
-        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf",
-        "sourceNepId": "",
-        "apiId": "",
-        "sourceEvidence": ""
-      },
-      "right": {
-        "id": "HB10858-3-0219-001998",
-        "projectName": "Mauban Bypass Road (Bridge 4), Mauban, Quezon",
-        "pap3": "Construction of By-Pass and Diversion Roads",
-        "office": "Central Office",
-        "amountPesos": 60000000,
-        "sourcePage": "219",
-        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf",
-        "sourceNepId": "",
-        "apiId": "",
-        "sourceEvidence": ""
-      }
-    },
-    {
-      "stage": "FY2027 HGAB 3rd",
-      "kind": "Similar title · funded segment unresolved",
-      "titleSimilarity": 1.0,
-      "contextEvidence": "Same implementing office only; geographic identity unverified",
-      "chainage": {
-        "has_current_range": false,
-        "has_prior_range": true,
-        "overlaps": false,
-        "current_chainage": "3+500.00 · 0+200.00",
-        "prior_chainage": "3+500.00–7+000.00",
-        "chainage_overlap": "",
-        "chainage_status": "incomplete"
-      },
-      "left": {
-        "id": "HB10858-3-0158-000905",
-        "projectName": "Jolo Port-Bud Daho-Romadier Road (S00003SL), Chainage 3 + 500 to Chainage 7 + 000",
-        "pap3": "Rehabilitation/ Reconstruction/ Upgrading of Damaged Paved Roads - Secondary Roads",
-        "office": "Central Office",
-        "amountPesos": 100000000,
-        "sourcePage": "158",
-        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf",
-        "sourceNepId": "",
-        "apiId": "",
-        "sourceEvidence": ""
-      },
-      "right": {
-        "id": "HB10858-3-0158-000904",
-        "projectName": "Jolo Port-Bud Daho-Romadier Road (S00003SL), Chainage 200 to Chainage 3 + 500",
-        "pap3": "Rehabilitation/ Reconstruction/ Upgrading of Damaged Paved Roads - Secondary Roads",
-        "office": "Central Office",
-        "amountPesos": 90000000,
-        "sourcePage": "158",
-        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf",
-        "sourceNepId": "",
-        "apiId": "",
-        "sourceEvidence": ""
-      }
-    },
-    {
-      "stage": "FY2027 HGAB 3rd",
-      "kind": "Similar title · funded segment unresolved",
       "titleSimilarity": 0.9799,
       "contextEvidence": "Qualified municipality and province agree",
       "chainage": {
@@ -1950,84 +1759,6 @@
         "office": "Isabela 4th District Engineering Office",
         "amountPesos": 50000000,
         "sourcePage": "717",
-        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf",
-        "sourceNepId": "",
-        "apiId": "",
-        "sourceEvidence": ""
-      }
-    },
-    {
-      "stage": "FY2027 HGAB 3rd",
-      "kind": "Similar title · funded segment unresolved",
-      "titleSimilarity": 1.0,
-      "contextEvidence": "Same implementing office only; geographic identity unverified",
-      "chainage": {
-        "has_current_range": true,
-        "has_prior_range": false,
-        "overlaps": false,
-        "current_chainage": "7+000.00–8+200.00",
-        "prior_chainage": "3+500.00 · 0+200.00",
-        "chainage_overlap": "",
-        "chainage_status": "incomplete"
-      },
-      "left": {
-        "id": "HB10858-3-0158-000904",
-        "projectName": "Jolo Port-Bud Daho-Romadier Road (S00003SL), Chainage 200 to Chainage 3 + 500",
-        "pap3": "Rehabilitation/ Reconstruction/ Upgrading of Damaged Paved Roads - Secondary Roads",
-        "office": "Central Office",
-        "amountPesos": 90000000,
-        "sourcePage": "158",
-        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf",
-        "sourceNepId": "",
-        "apiId": "",
-        "sourceEvidence": ""
-      },
-      "right": {
-        "id": "HB10858-3-0158-000906",
-        "projectName": "Jolo Port-Bud Daho-Romadier Road (S00003SL), Chainage 7 + 000 to Chainage 8 + 200",
-        "pap3": "Rehabilitation/ Reconstruction/ Upgrading of Damaged Paved Roads - Secondary Roads",
-        "office": "Central Office",
-        "amountPesos": 30000000,
-        "sourcePage": "158",
-        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf",
-        "sourceNepId": "",
-        "apiId": "",
-        "sourceEvidence": ""
-      }
-    },
-    {
-      "stage": "FY2027 HGAB 3rd",
-      "kind": "Similar title · funded segment unresolved",
-      "titleSimilarity": 1.0,
-      "contextEvidence": "Same implementing office only; geographic identity unverified",
-      "chainage": {
-        "has_current_range": true,
-        "has_prior_range": false,
-        "overlaps": false,
-        "current_chainage": "9+600.00–12+085.00",
-        "prior_chainage": "3+500.00 · 0+200.00",
-        "chainage_overlap": "",
-        "chainage_status": "incomplete"
-      },
-      "left": {
-        "id": "HB10858-3-0158-000904",
-        "projectName": "Jolo Port-Bud Daho-Romadier Road (S00003SL), Chainage 200 to Chainage 3 + 500",
-        "pap3": "Rehabilitation/ Reconstruction/ Upgrading of Damaged Paved Roads - Secondary Roads",
-        "office": "Central Office",
-        "amountPesos": 90000000,
-        "sourcePage": "158",
-        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf",
-        "sourceNepId": "",
-        "apiId": "",
-        "sourceEvidence": ""
-      },
-      "right": {
-        "id": "HB10858-3-0158-000907",
-        "projectName": "Jolo Port-Bud Daho-Romadier Road (S00003SL), Chainage 9 + 600 to Chainage 12 + 085",
-        "pap3": "Rehabilitation/ Reconstruction/ Upgrading of Damaged Paved Roads - Secondary Roads",
-        "office": "Central Office",
-        "amountPesos": 70000000,
-        "sourcePage": "158",
         "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf",
         "sourceNepId": "",
         "apiId": "",
@@ -3432,45 +3163,6 @@
         "office": "Iloilo 2nd District Engineering Office",
         "amountPesos": 15000000,
         "sourcePage": "571",
-        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf",
-        "sourceNepId": "",
-        "apiId": "",
-        "sourceEvidence": ""
-      }
-    },
-    {
-      "stage": "FY2027 HGAB 3rd",
-      "kind": "Similar title · funded segment unresolved",
-      "titleSimilarity": 0.9839,
-      "contextEvidence": "Qualified municipality and province agree",
-      "chainage": {
-        "has_current_range": false,
-        "has_prior_range": false,
-        "overlaps": false,
-        "current_chainage": "",
-        "prior_chainage": "",
-        "chainage_overlap": "",
-        "chainage_status": "not stated"
-      },
-      "left": {
-        "id": "HB10858-3-0612-009891",
-        "projectName": "Construction of Sitio Slide Bridge 1, Kapatagan, Lanao del Norte",
-        "pap3": "BIP - Access Roads and/or Bridges from the National Roads leading to Major/ Strategic Public Buildings/ Facilities",
-        "office": "Lanao del Norte 2nd District Engineering Office",
-        "amountPesos": 15000000,
-        "sourcePage": "612",
-        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf",
-        "sourceNepId": "",
-        "apiId": "",
-        "sourceEvidence": ""
-      },
-      "right": {
-        "id": "HB10858-3-0612-009892",
-        "projectName": "Construction of Sitio Slide Bridge 2, Kapatagan, Lanao del Norte",
-        "pap3": "BIP - Access Roads and/or Bridges from the National Roads leading to Major/ Strategic Public Buildings/ Facilities",
-        "office": "Lanao del Norte 2nd District Engineering Office",
-        "amountPesos": 15000000,
-        "sourcePage": "612",
         "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf",
         "sourceNepId": "",
         "apiId": "",
@@ -5038,7 +4730,7 @@
       }
     }
   ],
-  "method": "Compare distinct allocation occurrence IDs within each stage only. FAPs and untrusted NEP primary titles excluded. Same normalized official PAP and either qualified municipality/province or same implementing office required. At least three shared distinctive nonnumeric title tokens required. Same base title after trailing geographic metadata removal, or ≥0.94 SequenceMatcher similarity with qualified municipality/province AND identical distinctive token sets, produces a candidate. Changed route-endpoint or other distinctive scope tokens veto even when text similarity is high. Direction, qualified-location and tranche conflicts veto. Explicit disjoint ranges veto. No amount-equality requirement. Missing chainage never proves scope overlap.",
+  "method": "Compare distinct allocation occurrence IDs within each stage only. FAPs and untrusted NEP primary titles excluded. Same normalized official PAP and either qualified municipality/province or same implementing office required. At least three shared distinctive nonnumeric title tokens required. Same base title after trailing geographic metadata removal, or ≥0.94 SequenceMatcher similarity with qualified municipality/province AND identical distinctive token sets, produces a candidate. Changed route-endpoint or other distinctive scope tokens veto even when text similarity is high. Different explicit bridge numbers identify different structures and veto a pair, even on the same bypass road. Direction, qualified-location and tranche conflicts veto. Explicit disjoint ranges veto. Printed range endpoints are assumed to be ordered min/max. Mixed bare/plus ranges retain an unknown endpoint: a known maximum at or below another range’s known minimum excludes positive overlap, without resolving length. Other mixed ranges remain incomplete; possible overlap is not certified overlap. No amount-equality requirement. Missing chainage never proves scope overlap.",
   "limits": [
     "Matching allocation occurrences does not establish duplicate contracts, duplicate payment, fraud or authorship. Different engineering components and legitimate amendments can share titles.",
     "Office-only agreement is weaker than site evidence. Unresolved locations are never inferred from similar names.",
