@@ -84,11 +84,11 @@
       "rank": 7,
       "id": "length-coverage",
       "title": "Length and chainage gaps limit budget scrutiny",
-      "lead": "Roads: 51.14% · Bridges: 94.74% · FMR: 99.75% without usable extracted length",
+      "lead": "Roads: 51.14% · Bridges: 94.74% · FMR: 99.69% without usable extracted length",
       "basis": "Extracted metadata coverage; original-document completeness unverified",
       "page": "cost-per-km.html#cost-coverage",
       "question": "Can the funded segment and engineering length be established for every allocation?",
-      "evidence": "Roads: 3,175/6,498 lines have derivable stated lengths · Bridges: 60/1,140 lines have derivable stated lengths · FMR: 2/795 lines have derivable stated lengths. Official programs have separate denominators on the supporting page.",
+      "evidence": "Roads: 3,175/6,498 lines have derivable stated lengths · Bridges: 60/1,140 lines have derivable stated lengths · FMR: 3/964 lines have derivable stated lengths. Official programs have separate denominators on the supporting page.",
       "alternative": "Lengths may be recorded in engineering schedules or continuation text not recovered by this extraction; incomplete metadata need not reflect deliberate omission.",
       "next": "Inspect original source pages and obtain funded-segment boundaries, complete chainage, project quantities and bridge spans; reconcile extraction gaps before alleging disclosure failures.",
       "caution": "Missing includes absent and unusable extracted evidence, not proof the original documents lack length. Coordinate distances do not establish construction length; mixed scopes are separate."
@@ -241,13 +241,13 @@
       {
         "category": "FMR",
         "program": "All selected programs · coverage only",
-        "lineItems": 795,
-        "withLength": 2,
-        "withoutLength": 793,
-        "missingPct": 99.75,
-        "withRate": 2,
-        "allocationPesos": 14035375000,
-        "unusableLengthAllocationPesos": 14010375000
+        "lineItems": 964,
+        "withLength": 3,
+        "withoutLength": 961,
+        "missingPct": 99.69,
+        "withRate": 3,
+        "allocationPesos": 19628100000,
+        "unusableLengthAllocationPesos": 19593100000
       },
       {
         "category": "Mixed roads / bridges",
@@ -387,7 +387,7 @@
     },
     {
       "file": "hgab-revision-data.json",
-      "sha256": "bfea0955da461b2f86bd00d0c94dceac5fd2466235fb87a471a4f58af670e34c"
+      "sha256": "bfdae5d29d9554c75be93bc63aed87fef5290e7af8a9dfbff4044758b209d486"
     },
     {
       "file": "hb_nep_comparison_3rd.csv",
