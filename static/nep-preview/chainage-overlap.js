@@ -79,8 +79,12 @@
     scheduled=false;
     for(const row of document.querySelectorAll('table tr')){
       if(!/\boverlap\b/i.test(row.textContent))continue;
+      const table=row.closest('table'),header=table.querySelector('thead tr')||table.querySelector('tr');
+      const column=Array.from(header?.cells||[]).findIndex(cell=>['chainage / tranche check','stated segment evidence'].includes(normalized(cell.textContent)));
+      const evidenceCell=column>=0?row.cells[column]:null;
+      if(!evidenceCell||evidenceCell.tagName!=='TD')continue;
       const items=matches(row);if(!items.length)continue;
-      for(const cell of row.querySelectorAll('td')){
+      for(const cell of [evidenceCell]){
         const walker=document.createTreeWalker(cell,NodeFilter.SHOW_TEXT,{acceptNode:node=>node.parentElement.closest('button,a,script,style')?NodeFilter.FILTER_REJECT:/\boverlap\b/i.test(node.textContent)?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT});
         const nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);
         for(const node of nodes){
