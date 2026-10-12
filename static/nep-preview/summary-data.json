@@ -84,11 +84,11 @@
       "rank": 7,
       "id": "length-coverage",
       "title": "Length and chainage gaps limit budget scrutiny",
-      "lead": "Roads: 49.25% · Bridges: 94.74% · FMR: 99.69% without usable extracted length",
+      "lead": "Roads: 48.69% · Bridges: 94.74% · FMR: 99.69% without usable extracted length",
       "basis": "Extracted metadata coverage; original-document completeness unverified",
       "page": "cost-per-km.html#cost-coverage",
       "question": "Can the funded segment and engineering length be established for every allocation?",
-      "evidence": "Roads: 3,298/6,498 lines have derivable stated lengths · Bridges: 60/1,140 lines have derivable stated lengths · FMR: 3/964 lines have derivable stated lengths. Official programs have separate denominators on the supporting page.",
+      "evidence": "Roads: 3,334/6,498 lines have derivable stated lengths · Bridges: 60/1,140 lines have derivable stated lengths · FMR: 3/964 lines have derivable stated lengths. Official programs have separate denominators on the supporting page.",
       "alternative": "Lengths may be recorded in engineering schedules or continuation text not recovered by this extraction; incomplete metadata need not reflect deliberate omission.",
       "next": "Inspect original source pages and obtain funded-segment boundaries, complete chainage, project quantities and bridge spans; reconcile extraction gaps before alleging disclosure failures.",
       "caution": "Missing includes absent and unusable extracted evidence, not proof the original documents lack length. Coordinate distances do not establish construction length; mixed scopes are separate."
@@ -97,7 +97,7 @@
       "rank": 8,
       "id": "cost-per-km",
       "title": "Allocation per stated meter: inspect scope before comparing rates",
-      "lead": "216 road and 2 bridge high-rate candidates · FMR peers insufficient",
+      "lead": "220 road and 2 bridge high-rate candidates · FMR peers insufficient",
       "basis": "Descriptive allocation/segment-length proxy; comparable engineering costs unavailable",
       "page": "cost-per-km.html#length-density-groups",
       "question": "Do apparently high rates reflect short printed segments, structures, broader funded scope, or unusually costly comparable work?",
@@ -220,12 +220,12 @@
         "category": "Roads",
         "program": "All selected programs · coverage only",
         "lineItems": 6498,
-        "withLength": 3298,
-        "withoutLength": 3200,
-        "missingPct": 49.25,
-        "withRate": 3298,
+        "withLength": 3334,
+        "withoutLength": 3164,
+        "missingPct": 48.69,
+        "withRate": 3334,
         "allocationPesos": 270361659000,
-        "unusableLengthAllocationPesos": 86352653000
+        "unusableLengthAllocationPesos": 83886989000
       },
       {
         "category": "Bridges",
@@ -253,17 +253,17 @@
         "category": "Mixed roads / bridges",
         "program": "All selected programs · coverage only",
         "lineItems": 117,
-        "withLength": 44,
-        "withoutLength": 73,
-        "missingPct": 62.39,
+        "withLength": 45,
+        "withoutLength": 72,
+        "missingPct": 61.54,
         "withRate": 0,
         "allocationPesos": 12178486000,
-        "unusableLengthAllocationPesos": 5902037000
+        "unusableLengthAllocationPesos": 5837037000
       }
     ],
     "highRateScreen": {
-      "candidates": 218,
-      "graphExtremeRecords": 124,
+      "candidates": 222,
+      "graphExtremeRecords": 131,
       "method": "Peers share category, official PAP and a data-derived length band; at least 20 peers with stated length ≥10m. Candidate rate exceeds both 2× peer median and Q3+1.5×IQR. Chart extremes exceed max(2×median,Q3+3×IQR); sub-10m printed ranges also stay off rate charts.",
       "limits": "Exploratory relative-rate screen, not proof of overpricing. Width, terrain, structures, engineering quantities and funded extent remain unverified. Missing or insufficient peers produce no high-rate conclusion."
     },
@@ -271,18 +271,18 @@
       {
         "category": "Roads",
         "allLines": 6498,
-        "knownLengths": 3298,
-        "below100m": 218,
-        "below100PctOfKnown": 6.61,
-        "medianMeters": 826.0,
+        "knownLengths": 3334,
+        "below100m": 221,
+        "below100PctOfKnown": 6.63,
+        "medianMeters": 828.25,
         "top25HighRateRows": 25,
         "below100InTop25HighRates": 20,
         "bins": {
           "<10m": 5,
-          "10–<100m": 213,
-          "100–<1,000m": 1608,
-          "1,000–<5,000m": 1356,
-          "≥5,000m": 116
+          "10–<100m": 216,
+          "100–<1,000m": 1619,
+          "1,000–<5,000m": 1376,
+          "≥5,000m": 118
         }
       },
       {
@@ -322,16 +322,16 @@
       {
         "category": "Mixed roads / bridges",
         "allLines": 117,
-        "knownLengths": 44,
+        "knownLengths": 45,
         "below100m": 15,
-        "below100PctOfKnown": 34.09,
-        "medianMeters": 139.5,
+        "below100PctOfKnown": 33.33,
+        "medianMeters": 138.0,
         "top25HighRateRows": 0,
         "below100InTop25HighRates": 0,
         "bins": {
           "<10m": 1,
           "10–<100m": 14,
-          "100–<1,000m": 26,
+          "100–<1,000m": 27,
           "1,000–<5,000m": 3,
           "≥5,000m": 0
         }
@@ -339,19 +339,19 @@
     ],
     "lineItemReviewQueue": {
       "sourceOccurrences": 16275,
-      "flaggedOccurrences": 12147,
+      "flaggedOccurrences": 12146,
       "flagTypes": {
         "insertion": 5549,
         "amount_group": 10519,
         "historical_title": 351,
         "chainage_overlap": 17,
-        "high_meter_rate": 218
+        "high_meter_rate": 222
       },
       "flagCountDistribution": {
         "4": 6,
-        "3": 137,
-        "2": 4215,
-        "1": 7789
+        "3": 138,
+        "2": 4218,
+        "1": 7784
       },
       "top25Occurrences": 25
     },
