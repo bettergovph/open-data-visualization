@@ -78,10 +78,13 @@
   function decorate(){
     scheduled=false;
     for(const row of document.querySelectorAll('table tr')){
-      if(!/\boverlap\b/i.test(row.textContent))continue;
       const table=row.closest('table'),header=table.querySelector('thead tr')||table.querySelector('tr');
       const column=Array.from(header?.cells||[]).findIndex(cell=>['chainage / tranche check','stated segment evidence'].includes(normalized(cell.textContent)));
       const evidenceCell=column>=0?row.cells[column]:null;
+      for(const button of row.querySelectorAll('.chainage-overlap-link')){
+        if(button.closest('td')!==evidenceCell)button.replaceWith(document.createTextNode(button.textContent));
+      }
+      if(!/\boverlap\b/i.test(row.textContent))continue;
       if(!evidenceCell||evidenceCell.tagName!=='TD')continue;
       const items=matches(row);if(!items.length)continue;
       for(const cell of [evidenceCell]){
