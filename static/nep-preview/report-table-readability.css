@@ -23,3 +23,7 @@
 @media print{.report-table-pagination{display:none!important}.report-table-scroll tr.report-page-hidden{display:table-row!important}}
 
 .tablewrap:has(>.report-table-scroll),.table-wrap:has(>.report-table-scroll),.table-scroll:has(>.report-table-scroll),.table-container:has(>.report-table-scroll){max-height:none!important;overflow:visible!important;min-width:0!important;max-width:100%!important}
+
+.report-table-scroll th.report-distance-column{width:9%!important;text-align:right!important}
+.report-table-scroll td.report-distance-value{text-align:right!important;font-weight:650!important;font-variant-numeric:tabular-nums}
+@media(min-width:900px){.report-table-scroll td.report-distance-value{white-space:nowrap!important;overflow-wrap:normal!important}}
