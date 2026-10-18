@@ -2,7 +2,7 @@
 'use strict';
 const normalize=v=>String(v||'').normalize('NFKC').replace(/\s+/g,' ').trim();
 const route=location.pathname.includes('/static/nep-preview/')?'project-documents.html':'/static/nep-preview/project-documents.html';
-const style=document.createElement('style');style.textContent='.transparency-record-status{font-size:12px;line-height:1.4;overflow-wrap:anywhere}.transparency-record-status[data-status="incomplete_documents"],.transparency-record-status[data-status="unmatched"]{color:#85490b}.transparency-record-status a{display:block;text-decoration:underline}.transparency-coverage-method{font-size:13px;padding:12px;border:1px solid #b5c8c5;border-radius:6px;background:#f5f8f7}';document.head.append(style);
+const style=document.createElement('style');style.textContent='.transparency-record-status{font-size:12px;line-height:1.4;overflow-wrap:anywhere}.transparency-record-status[data-status="incomplete_documents"],.transparency-record-status[data-status="unmatched"]{color:#85490b}.transparency-record-status a{display:block;text-decoration:underline}.transparency-coverage-method{display:block!important;font-size:13px;padding:12px;border:1px solid #b5c8c5;border-radius:6px;background:#f5f8f7}';document.head.append(style);
 fetch('/static/nep-preview/project-document-index.json').then(r=>{if(!r.ok)throw Error('Document index unavailable');return r.json()}).then(d=>{
  const coverage=d.coverage;if(!coverage)return;
  const index=new Map(Object.entries(coverage.titles)),codes=new Map(Object.values(coverage.titles).filter(r=>r.code&&r.status!=='candidate_match').map(r=>[r.code,r])),unmatched=new Set(['not_found','no_verified_match','candidate_match','ambiguous_match']);
@@ -11,6 +11,8 @@ fetch('/static/nep-preview/project-document-index.json').then(r=>{if(!r.ok)throw
  const description=document.createElement('p');description.textContent='FY2027 NEP listing snapshot, retrieved '+coverage.snapshotRetrievedAtUtc+'. Unmatched takes precedence over document counts. It means no verified portal counterpart; it does not establish that a project is absent from the live portal. Otherwise the column shows listed documents against a minimum of '+coverage.expectedMinimumDocuments+'. Fewer than five is incomplete under this screening threshold. Five or more does not establish document types, readable PDFs or verified contents. A listed record with zero documents is separate from an unmatched project.';note.append(description);
  const methods=document.createElement('p');methods.textContent=coverage.methodology.join(' ')+' For a comparison row containing two FY2027 projects, any unmatched project takes precedence. If both match, the lowest document count is shown; individual counts and matching details are available in the cell tooltip. Historical GAA comparison projects are excluded.';note.append(methods);
  const source=document.createElement('a');source.href='https://github.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS/tree/'+coverage.sourceCommit;source.textContent='Retained source and reconciliation snapshot ↗';source.target='_blank';source.rel='noopener';note.append(source);
+ const hgabPage=location.pathname.endsWith('/dpwh-hgab.html');
+ function projectHeader(header){return /^(?:Extracted HGAB record|HGAB project|NEP project|FY2027 NEP line item|Project title)$/i.test(header)}
  function entries(row,headers){
   const found=[];
   [...row.cells].forEach((cell,i)=>{
@@ -19,7 +21,8 @@ fetch('/static/nep-preview/project-document-index.json').then(r=>{if(!r.ok)throw
    const raw=normalize(cell.textContent);
    if(/GAA source|GAA-202[0-6]|FY202[0-6]/i.test(raw))return;
    const title=raw.replace(/\s*·\s*(?:p\d+:r\d+|2027DPWH-Proposal-\d+|NEP source|HB10858|\d+- HB|GAA-20\d\d).*$/,'').trim(),code=raw.match(/\b2027DPWH-Proposal-\d{5}\b/)?.[0],entry=code?codes.get(code)||index.get(title):index.get(title);
-   if(entry&&!found.some(r=>r.title===title))found.push({title,...entry});
+   const resolved=entry||(hgabPage&&projectHeader(header)&&title?{status:row.closest('#foreign-assisted-review')?'outside_snapshot_scope':'no_verified_match',code:null,documentCount:null,matchBasis:'No verified portal counterpart for this displayed project title; title differences or scope changes remain unresolved'}:null);
+   if(resolved&&!found.some(r=>r.title===title))found.push({title,...resolved});
   });return found;
  }
  function paint(cell,items){
@@ -42,7 +45,8 @@ fetch('/static/nep-preview/project-document-index.json').then(r=>{if(!r.ok)throw
   const headerRow=table.tHead?.rows[table.tHead.rows.length-1];if(!headerRow)return;
   const headers=[...headerRow.cells].filter(h=>!h.classList.contains('transparency-status-heading')).map(h=>normalize(h.textContent));
   const pending=[...table.tBodies].flatMap(body=>[...body.rows]).filter(row=>!row.querySelector('.transparency-record-status')).map(row=>({row,items:entries(row,headers)}));
-  if(!headerRow.querySelector('.transparency-status-heading')&&!pending.some(r=>r.items.length))return;
+  const required=hgabPage&&headers.some(projectHeader);
+  if(!required&&!headerRow.querySelector('.transparency-status-heading')&&!pending.some(r=>r.items.length))return;
   if(!headerRow.querySelector('.transparency-status-heading')){const th=document.createElement('th');th.className='transparency-status-heading';th.scope='col';th.textContent='DPWH transparency';headerRow.append(th)}
   pending.forEach(({row,items})=>{
    if(row.cells.length===1&&row.cells[0].colSpan>1){row.cells[0].colSpan=headers.length+1;return}

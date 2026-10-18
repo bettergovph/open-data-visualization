@@ -1,0 +1,25 @@
+/* Shared report tables: pagination, wrapped columns, distinct header/rows. */
+.report-table-scroll{box-sizing:border-box!important;width:100%!important;max-width:100%!important;min-width:0!important;max-height:none!important;overflow:visible!important;border:1px solid #c6d7d4;border-radius:10px;margin:12px 0;}
+.report-table-scroll:focus-visible{outline:3px solid #278b80;outline-offset:3px}
+.report-table-scroll table{box-sizing:border-box!important;width:100%!important;min-width:0!important;max-width:100%!important;table-layout:fixed!important;border-collapse:separate!important;border-spacing:0!important;margin:0!important}
+.report-table-scroll th,.report-table-scroll td{box-sizing:border-box!important;min-width:0!important;max-width:none!important;width:auto!important;white-space:normal!important;overflow-wrap:anywhere!important;word-break:normal!important;padding:11px 10px!important;vertical-align:top!important;line-height:1.5!important;border:0!important;border-bottom:1px solid #dce6e3!important;font-size:clamp(11px,.9vw,14px)!important;font-variant-numeric:tabular-nums}
+.report-table-scroll thead th{position:static!important;z-index:3!important;background:#173e4b!important;color:#f5fbfa!important;font-weight:650!important;border-bottom:2px solid #54b6a5!important;box-shadow:0 1px 0 #173e4b;text-align:left}
+.report-table-scroll thead th a{color:#c9f0e7!important}
+.report-table-scroll tbody tr:nth-child(odd)>td,.report-table-scroll tbody tr:nth-child(odd)>th{background:#fff!important;color:#203e48!important}
+.report-table-scroll tbody tr:nth-child(even)>td,.report-table-scroll tbody tr:nth-child(even)>th{background:#edf4f2!important;color:#203e48!important}
+.report-table-scroll tbody tr:hover>td,.report-table-scroll tbody tr:hover>th,.report-table-scroll tbody tr:focus-within>td{background:#dceee8!important}
+.report-table-scroll tfoot td,.report-table-scroll tfoot th{background:#daeae5!important;color:#173e4b!important;font-weight:650}
+.report-table-scroll .report-empty-representative{display:none!important}
+.report-table-scroll td.num,.report-table-scroll th.num{text-align:right!important}
+@media(max-width:600px){.report-table-scroll th,.report-table-scroll td{padding:8px 5px!important;font-size:11px!important}}
+@media print{.report-table-scroll{max-height:none!important;overflow:visible!important;border-radius:0}.report-table-scroll thead th{position:static!important}.report-table-scroll tbody tr{break-inside:avoid}}
+
+.report-table-scroll tr.report-page-hidden{display:none!important}
+.report-table-pagination{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:12px 0 22px;font:14px/1.5 system-ui,sans-serif;color:#24434b}
+.report-table-pagination button,.report-table-pagination select{font:inherit;padding:8px 12px;border:1px solid #9fbab3;border-radius:7px;background:#fff;color:#173e4b}
+.report-table-pagination button:disabled{opacity:.45;cursor:default}
+.report-table-pagination button:not(:disabled):hover{background:#dceee8}
+.report-table-pagination button:focus-visible,.report-table-pagination select:focus-visible{outline:3px solid #278b80;outline-offset:2px}
+@media print{.report-table-pagination{display:none!important}.report-table-scroll tr.report-page-hidden{display:table-row!important}}
+
+.tablewrap:has(>.report-table-scroll),.table-wrap:has(>.report-table-scroll),.table-scroll:has(>.report-table-scroll),.table-container:has(>.report-table-scroll){max-height:none!important;overflow:visible!important;min-width:0!important;max-width:100%!important}
