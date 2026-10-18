@@ -84,11 +84,11 @@
       "rank": 7,
       "id": "length-coverage",
       "title": "Length and chainage gaps limit budget scrutiny",
-      "lead": "Roads: 48.69% · Bridges: 94.74% · FMR: 99.69% without usable extracted length",
+      "lead": "Roads: 48.64% · Bridges: 94.39% · FMR: 99.69% without usable extracted length",
       "basis": "Extracted metadata coverage; original-document completeness unverified",
       "page": "cost-per-km.html#cost-coverage",
       "question": "Can the funded segment and engineering length be established for every allocation?",
-      "evidence": "Roads: 3,334/6,498 lines have derivable stated lengths · Bridges: 60/1,140 lines have derivable stated lengths · FMR: 3/964 lines have derivable stated lengths. Official programs have separate denominators on the supporting page.",
+      "evidence": "Roads: 3,329/6,482 lines have derivable stated lengths · Bridges: 65/1,159 lines have derivable stated lengths · FMR: 3/964 lines have derivable stated lengths. Official programs have separate denominators on the supporting page.",
       "alternative": "Lengths may be recorded in engineering schedules or continuation text not recovered by this extraction; incomplete metadata need not reflect deliberate omission.",
       "next": "Inspect original source pages and obtain funded-segment boundaries, complete chainage, project quantities and bridge spans; reconcile extraction gaps before alleging disclosure failures.",
       "caution": "Missing includes absent and unusable extracted evidence, not proof the original documents lack length. Coordinate distances do not establish construction length; mixed scopes are separate."
@@ -101,10 +101,10 @@
       "basis": "Descriptive allocation/segment-length proxy; comparable engineering costs unavailable",
       "page": "cost-per-km.html#length-density-groups",
       "question": "Do apparently high rates reflect short printed segments, structures, broader funded scope, or unusually costly comparable work?",
-      "evidence": "Whole HGAB line-item allocation is divided by its derivable stated segment meters. Roads, bridges and FMR are displayed separately, with official work-program filters. Mixed road/bridge lines receive no single-work rate. Data-derived length groups and within-program slope-change screens are provided; no fixed 100-meter boundary is imposed.",
+      "evidence": "Whole HGAB line-item allocation is divided by its derivable stated segment meters. Roads, bridges and FMR are displayed separately, with official work-program filters. Mixed road/bridge lines receive no single-work rate. Data-derived length groups and within-program slope-change screens are provided; no fixed 100-meter boundary is imposed. Lane evidence now supports 3 title-stated lane rates, 279 stated-length inventory lane estimates, and 390 existing-bridge asset lane estimates. These bases are shown separately and are not pooled into the per-meter flags.",
       "alternative": "Terrain, width, structures, approaches, rehabilitation scope and components outside the stated segment can explain large differences. Tiny printed ranges or parser errors can produce extreme ratios.",
       "next": "Verify station endpoints on original pages, then compare quantities, width, funded extent, designs and bill-of-quantity costs within the same work type. Investigate unusually short denominators before interpreting extreme ratios.",
-      "caution": "These are appropriations per stated segment meter, not verified construction unit costs. Bridge chainage is not necessarily bridge span. No cross-category average, overpricing estimate or corruption probability is established."
+      "caution": "These are appropriations per stated segment meter, not verified construction unit costs. Bridge chainage is not necessarily bridge span. No cross-category average, overpricing estimate or corruption probability is established. Inventory lanes are existing asset characteristics, not verified funded quantities; widening needs additional funded lanes. Overpasses, flyovers and viaducts use bridge peers."
     },
     {
       "rank": 9,
@@ -219,24 +219,24 @@
       {
         "category": "Roads",
         "program": "All selected programs · coverage only",
-        "lineItems": 6498,
-        "withLength": 3334,
-        "withoutLength": 3164,
-        "missingPct": 48.69,
-        "withRate": 3334,
-        "allocationPesos": 270361659000,
-        "unusableLengthAllocationPesos": 83886989000
+        "lineItems": 6482,
+        "withLength": 3329,
+        "withoutLength": 3153,
+        "missingPct": 48.64,
+        "withRate": 3329,
+        "allocationPesos": 269747159000,
+        "unusableLengthAllocationPesos": 83622489000
       },
       {
         "category": "Bridges",
         "program": "All selected programs · coverage only",
-        "lineItems": 1140,
-        "withLength": 60,
-        "withoutLength": 1080,
-        "missingPct": 94.74,
-        "withRate": 60,
-        "allocationPesos": 54971153000,
-        "unusableLengthAllocationPesos": 49629846000
+        "lineItems": 1159,
+        "withLength": 65,
+        "withoutLength": 1094,
+        "missingPct": 94.39,
+        "withRate": 65,
+        "allocationPesos": 55624118000,
+        "unusableLengthAllocationPesos": 49932811000
       },
       {
         "category": "FMR",
@@ -252,21 +252,59 @@
       {
         "category": "Mixed roads / bridges",
         "program": "All selected programs · coverage only",
-        "lineItems": 117,
+        "lineItems": 116,
         "withLength": 45,
-        "withoutLength": 72,
-        "missingPct": 61.54,
+        "withoutLength": 71,
+        "missingPct": 61.21,
         "withRate": 0,
-        "allocationPesos": 12178486000,
-        "unusableLengthAllocationPesos": 5837037000
+        "allocationPesos": 12171021000,
+        "unusableLengthAllocationPesos": 5829572000
       }
     ],
     "highRateScreen": {
       "candidates": 222,
-      "graphExtremeRecords": 131,
-      "method": "Peers share category, official PAP and a data-derived length band; at least 20 peers with stated length ≥10m. Candidate rate exceeds both 2× peer median and Q3+1.5×IQR. Chart extremes exceed max(2×median,Q3+3×IQR); sub-10m printed ranges also stay off rate charts.",
+      "graphExtremeRecords": 127,
+      "method": "Peers share category, structure group (overpasses/flyovers, viaducts and pedestrian structures separated), official PAP and a data-derived length band; at least 20 peers with stated length ≥10m. Candidate rate exceeds both 2× peer median and Q3+1.5×IQR. Chart extremes exceed max(2×median,Q3+3×IQR); sub-10m printed ranges also stay off rate charts. Lane inventory estimates do not enter these per-meter flags.",
       "limits": "Exploratory relative-rate screen, not proof of overpricing. Width, terrain, structures, engineering quantities and funded extent remain unverified. Missing or insufficient peers produce no high-rate conclusion."
     },
+    "laneCostCoverage": [
+      {
+        "category": "Roads",
+        "lineItems": 6482,
+        "titleLaneRateRecords": 3,
+        "inventoryMatchedRecords": 471,
+        "inventoryProxyRateRecords": 279,
+        "existingAssetLaneRateRecords": 0,
+        "withoutTitleLaneRatePct": 99.95
+      },
+      {
+        "category": "Bridges",
+        "lineItems": 1159,
+        "titleLaneRateRecords": 0,
+        "inventoryMatchedRecords": 753,
+        "inventoryProxyRateRecords": 0,
+        "existingAssetLaneRateRecords": 390,
+        "withoutTitleLaneRatePct": 100.0
+      },
+      {
+        "category": "FMR",
+        "lineItems": 964,
+        "titleLaneRateRecords": 0,
+        "inventoryMatchedRecords": 0,
+        "inventoryProxyRateRecords": 0,
+        "existingAssetLaneRateRecords": 0,
+        "withoutTitleLaneRatePct": 100.0
+      },
+      {
+        "category": "Mixed roads / bridges",
+        "lineItems": 116,
+        "titleLaneRateRecords": 0,
+        "inventoryMatchedRecords": 0,
+        "inventoryProxyRateRecords": 0,
+        "existingAssetLaneRateRecords": 0,
+        "withoutTitleLaneRatePct": 100.0
+      }
+    ],
     "shortSegments": [
       {
         "category": "Roads",
@@ -349,9 +387,9 @@
       },
       "flagCountDistribution": {
         "4": 6,
-        "3": 138,
-        "2": 4218,
-        "1": 7784
+        "3": 139,
+        "2": 4216,
+        "1": 7785
       },
       "top25Occurrences": 25
     },
@@ -416,7 +454,8 @@
       ],
       "historicalMatch": "Identical full normalized title after complete trailing metadata removal; same qualified municipality/province; direction/location/tranche conflict and disjoint stated chainage excluded.",
       "weights": "One point per flag type. Multiple historical years do not add points.",
-      "highMeterRate": "Peers share category, official PAP and a data-derived length band; at least 20 peers with stated length ≥10m. Candidate rate exceeds both 2× peer median and Q3+1.5×IQR. Chart extremes exceed max(2×median,Q3+3×IQR); sub-10m printed ranges also stay off rate charts.",
+      "highMeterRate": "Peers share category, structure group (overpasses/flyovers, viaducts and pedestrian structures separated), official PAP and a data-derived length band; at least 20 peers with stated length ≥10m. Candidate rate exceeds both 2× peer median and Q3+1.5×IQR. Chart extremes exceed max(2×median,Q3+3×IQR); sub-10m printed ranges also stay off rate charts. Lane inventory estimates do not enter these per-meter flags.",
+      "laneEvidence": "Title lane rates, inventory lane estimates and existing-bridge asset estimates are separate contextual measures. None adds a ranking point or replaces a missing funded length. Lane and station evidence is retained in lengthReview.",
       "evidenceGaps": "Missing length, sub-10m printed ranges and insufficient peers are cautions, not points. Extreme rates require denominator/scope review and are omitted from rate charts.",
       "summaryCoverage": "Nine summary findings are not nine independent line-item flags. RCS equal amounts use the amount-group flag; MPB is a program scope; INSPIRE is outside this DPWH queue. Length gaps and very short printed ranges are evidence cautions. Historical recurrence and overlap support the repeat finding.",
       "dependence": "Historical recurrence and chainage overlap are related indicators; scores are descriptive triage, not independent evidence or probabilities.",
