@@ -21,7 +21,41 @@ def candidate(cells,page,method,bbox=None):
     if not re.search(r'[A-Za-z]',unit):return None
     printed_unit_price=values[1][1] if len(values)==3 else None
     diff=abs(q*printed_unit_price-total) if printed_unit_price is not None else None
-    return {'itemCode':cells[0],'description':' '.join(cells[1:qi]),'quantity':float(q),'unit':unit,'printedUnitCostPesos':float(printed_unit_price) if printed_unit_price is not None else None,'calculatedUnitCostPesos':float(total/q),'amountPesos':float(total),'sourcePage':page,'sourceCells':cells,'sourceBbox':bbox,'extractionMethod':method,'quantityTimesUnitCostDifferencePesos':float(diff) if diff is not None else None,'arithmeticStatus':'Printed unit cost unavailable; amount/quantity is derived' if diff is None else 'Within rounding tolerance' if diff<=max(Decimal('1'),abs(total)*Decimal('.001')) else 'Quantity × unit cost does not reproduce amount; review source','verificationStatus':'Machine-extracted candidate; verify source page'}
+    rounding_tolerance=q*Decimal(1).scaleb(printed_unit_price.as_tuple().exponent)/2+Decimal('.01') if printed_unit_price is not None else None
+    return {'itemCode':cells[0],'description':' '.join(cells[1:qi]),'quantity':float(q),'unit':unit,'printedUnitCostPesos':float(printed_unit_price) if printed_unit_price is not None else None,'calculatedUnitCostPesos':float(total/q),'amountPesos':float(total),'sourcePage':page,'sourceCells':cells,'sourceBbox':bbox,'extractionMethod':method,'quantityTimesUnitCostDifferencePesos':float(diff) if diff is not None else None,'arithmeticStatus':'Printed unit cost unavailable; amount/quantity is derived' if diff is None else 'Within rounding tolerance' if diff<=rounding_tolerance else 'Quantity × unit cost does not reproduce amount; review source','verificationStatus':'Machine-extracted candidate; verify source page'}
+
+def itemized_rows(grid,page,bbox):
+    """Recognize the submitted/evaluated DPWH itemized bill, not unit-price analyses."""
+    clean=[[re.sub(r'\s+',' ',str(c or '')).strip() for c in row] for row in grid]
+    header=next((i for i,row in enumerate(clean) if 'ITEM NO.' in row and 'DESCRIPTION' in row and 'QUANTITY' in row and 'DIRECT COST' in row and any('TOTAL UNIT COST' in c for c in row)),None)
+    if header is None:return None
+    headings=clean[header];q=headings.index('QUANTITY');unit=headings.index('UNIT');direct=headings.index('DIRECT COST')
+    following=clean[header+1:header+5]
+    sub=next((row for row in following if 'TOTAL' in row and 'UNIT COST' in row),None)
+    basis=next((row for row in following if 'AS SUBMITTED' in row and 'AS EVALUATED' in row),None)
+    if not sub or not basis:return None
+    total=sub.index('TOTAL');price=sub.index('UNIT COST');indirect=next(i for i,c in enumerate(headings) if 'TOTAL UNIT COST' in c)
+    if not (q<unit<=direct<=total<price<indirect):return None
+    records=[];controls=[]
+    def column(start,end,label):return next((i for i in range(start,min(end,len(basis))) if basis[i]==label),None)
+    for label in ('AS SUBMITTED','AS EVALUATED'):
+        qi=column(q,unit,label);ai=column(total,price,label);pi=column(price,indirect,label)
+        if qi is None or ai is None:continue
+        for cells in clean[header+1:]:
+            if len(cells)<=max(qi,ai,unit):continue
+            if ITEM.fullmatch(cells[0]) and amount(cells[qi]) is not None and amount(cells[ai]) is not None:
+                values=[cells[0],cells[1],cells[qi],cells[unit]]
+                printed=cells[pi] if pi is not None and pi<len(cells) else ''
+                if amount(printed) is not None:values.append(printed)
+                values.append(cells[ai]);row=candidate(values,page,'native DPWH itemized bill · mapped submitted/evaluated columns',bbox)
+                if not row:continue
+                row.update({'sourceCells':cells,'costBasis':label.lower().replace(' ','_'),'amountBasis':'Direct cost total; excludes markup, VAT and EAO','columnMapping':{'quantity':qi,'unit':unit,'directCostTotal':ai,'directUnitCost':pi}})
+                records.append(row)
+            elif 'GRAND TOTAL' in cells and amount(cells[ai]) is not None:
+                printed=float(amount(cells[ai]));subset=[r for r in records if r['costBasis']==label.lower().replace(' ','_')]
+                recovered=round(sum(r['amountPesos'] for r in subset),2)
+                controls.append({'sourcePage':page,'basis':label.lower().replace(' ','_'),'amountBasis':'Itemized direct-cost subtotal only','printedPesos':printed,'recoveredItemRows':len(subset),'recoveredPesos':recovered,'differencePesos':round(recovered-printed,2),'reconciled':bool(subset) and abs(recovered-printed)<=.01,'sourceCells':cells})
+    return {'rows':records,'controls':controls}
 
 def word_rows(words,width,page,method):
     # Header-qualified BOQ pages only. Unit-price analyses, estimates and
@@ -46,9 +80,9 @@ def word_rows(words,width,page,method):
     return result
 
 def parse_pdf(path,output,allocation_pesos=None):
-    try:import fitz
+    try:import pymupdf as fitz
     except ImportError:return {'status':'parser_dependency_missing','message':'Install project_documents/requirements.txt in the document-service environment.','rows':[]}
-    output.mkdir(parents=True,exist_ok=True);document=fitz.open(path);rows=[];pages=[];vision=None
+    output.mkdir(parents=True,exist_ok=True);document=fitz.open(path);rows=[];pages=[];vision=None;itemized_controls=[];source_tables=[]
     if sys.platform=='darwin' and shutil.which('swift') and any(len(p.get_text().strip())<40 for p in document):
         try:
             environment={**os.environ,'CLANG_MODULE_CACHE_PATH':str(output/'swift-module-cache'),'SWIFT_MODULECACHE_PATH':str(output/'swift-module-cache')}
@@ -69,7 +103,11 @@ def parse_pdf(path,output,allocation_pesos=None):
         if method.startswith('native'):
             try:
                 for table in page.find_tables().tables:
-                    grid=table.extract();context=' '.join(str(c or '') for r in grid[:4] for c in r)
+                    grid=table.extract();source_tables.append({'page':number+1,'bbox':list(table.bbox),'cells':grid})
+                    itemized=itemized_rows(grid,number+1,list(table.bbox))
+                    if itemized is not None:
+                        page_rows.extend(itemized['rows']);itemized_controls.extend(itemized['controls']);continue
+                    context=' '.join(str(c or '') for r in grid[:4] for c in r)
                     if not re.search(r'quantity',context,re.I) or not re.search(r'(?:amount|total\s+cost)',context,re.I):continue
                     if re.search(r'detailed\s+(?:unit\s+price|cost)\s+analysis',text,re.I):continue
                     for cells in grid:
@@ -82,15 +120,16 @@ def parse_pdf(path,output,allocation_pesos=None):
     # Retain repeated observations rather than summing duplicate page/table views.
     grouped={}
     for row in rows:
-        key=json.dumps([row[k] for k in ['itemCode','description','quantity','unit','amountPesos']],ensure_ascii=False)
+        key=json.dumps([row[k] for k in ['itemCode','description','quantity','unit','amountPesos']]+[row.get('costBasis'),row.get('amountBasis')],ensure_ascii=False)
         if key in grouped:grouped[key]['observedPages'].append(row['sourcePage'])
         else:row['observedPages']=[row['sourcePage']];grouped[key]=row
+    (output/'pow-native-tables.json').write_text(json.dumps(source_tables,ensure_ascii=False,indent=2)+'\n')
     result=list(grouped.values());result.sort(key=lambda r:-r['amountPesos'])
     for row in result:row['shareOfNepAllocationPct']=round(100*row['amountPesos']/allocation_pesos,4) if allocation_pesos else None
-    return {'status':'candidate_rows' if result else 'needs_ocr' if any(p['status']=='needs_ocr' for p in pages) else 'no_bill_rows_recovered','pdfSha256':hashlib.sha256(path.read_bytes()).hexdigest(),'pageCount':len(document),'pagesProcessed':len(pages),'pages':pages,'rows':result,'rowObservations':len(rows),'uniqueCandidateRows':len(result),'sumOfUniqueCandidateAmountsPesos':sum(r['amountPesos'] for r in result),'reconciledPowTotal':False,'limits':['Candidate row extraction is not a complete or reconciled POW ledger. A largest recovered row is not necessarily the largest row in the full document.','Shares use the NEP allocation, not a confirmed POW grand total, contract payment or engineering valuation.','Quantities, material units, indirect costs and engineering scope require original-page verification. Structural concrete is not cement mass.','Repeated identical row observations are grouped with page references; no budget amount is inferred from a missing cell.']}
+    return {'status':'candidate_rows' if result else 'needs_ocr' if any(p['status']=='needs_ocr' for p in pages) else 'no_bill_rows_recovered','pdfSha256':hashlib.sha256(path.read_bytes()).hexdigest(),'pageCount':len(document),'pagesProcessed':len(pages),'pages':pages,'rows':result,'rowObservations':len(rows),'uniqueCandidateRows':len(result),'sumOfUniqueCandidateAmountsPesos':sum(r['amountPesos'] for r in result),'reconciledPowTotal':False,'itemizedDirectCostControls':itemized_controls,'amountBasis':'Each item records its cost basis; direct costs are not inclusive project costs.','limits':['Reconciled itemized direct-cost subtotals, when available, do not reconcile the complete POW including indirect costs, VAT and EAO. Candidate row extraction is not a complete or reconciled POW ledger. A largest recovered row is not necessarily the largest row in the full document.','Shares use the NEP allocation, not a confirmed POW grand total, contract payment or engineering valuation.','Quantities, material units, indirect costs and engineering scope require original-page verification. Structural concrete is not cement mass.','Repeated identical row observations are grouped with page references; no budget amount is inferred from a missing cell.']}
 
 def render_photos(path,output):
-    try:import fitz
+    try:import pymupdf as fitz
     except ImportError:return {'status':'renderer_dependency_missing','pages':[]}
     output.mkdir(parents=True,exist_ok=True);document=fitz.open(path);pages=[]
     for index,page in enumerate(document):
