@@ -63,6 +63,11 @@ def state(code):
     return {'project':{**data,'nepAllocationPesos':allocation},'job':job or {'status':'ready' if result else 'not_requested'},'result':result,'reviewedRows':reviewed(code,allocation),'stage':'NEP FY2027 proposal documents; not an awarded-contract or as-built record'}
 
 def process(code,refresh=False):
+    from .cache_lock import project_lock
+    storage_guard()
+    with project_lock(CACHE/code):return _process(code,refresh)
+
+def _process(code,refresh=False):
     output={'projectCode':code,'documents':[],'preparedAtUtc':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())}
     try:
         storage_guard()
