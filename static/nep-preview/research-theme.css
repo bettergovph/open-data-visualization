@@ -34,3 +34,8 @@ body.bettergov-research{--research-ink:#173744;--research-muted:#546c73;--resear
 @media print{body.bettergov-research{background:#fff!important}.bettergov-research main :is(section.card:not(.repeat-hero):not(#report-hero),article.card:not(.repeat-hero):not(#report-hero),.investigation-evidence){box-shadow:none!important}.bettergov-research .toolbar{background:#fff!important}}
 
 .bettergov-research :is(.repeat-hero,.driver-hero) :is(h2,h3){color:#f5fbfa!important}
+
+.bettergov-research footer:has(#report-source-links){padding:22px clamp(16px,2vw,32px);margin:30px 0 0;border-top:1px solid var(--research-line);background:#e9f1ee;color:#546c73}
+.bettergov-research #report-source-links{font-size:13px;line-height:1.7}
+.bettergov-research #report-source-links p{margin:8px 0}
+.bettergov-research #report-source-links a{color:#076b66;text-underline-offset:3px}
