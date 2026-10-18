@@ -61,8 +61,16 @@ function update(table){
   rows.forEach(row=>{if(row.cells.length===header.cells.length)row.cells[i].classList.toggle('report-empty-representative',hide)});
  });
 }
+// Resolve direct evidence fragments after asynchronous sections are created.
+// This is anchor navigation, not a redirect or a bookmark compatibility layer.
+let anchorPending=location.hash.slice(1),anchorResolved=false;
+try{anchorPending=decodeURIComponent(anchorPending)}catch(e){anchorPending=''}
+const cancelAnchor=()=>{anchorResolved=true};
+window.addEventListener('wheel',cancelAnchor,{passive:true});window.addEventListener('touchstart',cancelAnchor,{passive:true});
+window.addEventListener('hashchange',()=>{try{anchorPending=decodeURIComponent(location.hash.slice(1))}catch(e){anchorPending=''}anchorResolved=false;scan()});
+function resolveAnchor(){if(!anchorPending||anchorResolved)return;const target=document.getElementById(anchorPending);if(target&&target.getClientRects().length){anchorResolved=true;requestAnimationFrame(()=>target.scrollIntoView({block:'start'}))}}
 let pending=false;
 const observer=new MutationObserver(()=>{if(!pending){pending=true;requestAnimationFrame(scan)}});
-function scan(){pending=false;observer.disconnect();document.querySelectorAll('table').forEach(update);observer.observe(document.body,{childList:true,subtree:true,characterData:true})}
+function scan(){pending=false;observer.disconnect();document.querySelectorAll('table').forEach(update);resolveAnchor();observer.observe(document.body,{childList:true,subtree:true,characterData:true})}
 scan();
 })();

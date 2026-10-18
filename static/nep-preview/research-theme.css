@@ -39,3 +39,8 @@ body.bettergov-research{--research-ink:#173744;--research-muted:#546c73;--resear
 .bettergov-research #report-source-links{font-size:13px;line-height:1.7}
 .bettergov-research #report-source-links p{margin:8px 0}
 .bettergov-research #report-source-links a{color:#076b66;text-underline-offset:3px}
+
+.bettergov-research .finding h2 a{color:inherit!important;text-decoration:none}
+.bettergov-research .finding h2 a:hover{color:#087e78!important;text-decoration:underline;text-underline-offset:4px}
+.bettergov-research .summary-evidence-links{display:flex;flex-wrap:wrap;gap:8px 12px;line-height:1.7}
+.bettergov-research main :is(section,article)[id]{scroll-margin-top:20px}
