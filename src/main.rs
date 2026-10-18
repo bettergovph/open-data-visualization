@@ -6,6 +6,7 @@ use actix_web::{web, App, Error as ActixError, HttpRequest, HttpResponse, HttpSe
 use tera::{Tera, Context};
 
 mod utils;
+mod project_documents;
 use utils::*;
 use serde::Deserialize;
 use std::path::Path;
@@ -733,6 +734,7 @@ async fn main() -> std::io::Result<()> {
             .allow_any_header();
 
         App::new()
+            .configure(project_documents::configure)
             .wrap(cors)
             .service(
                 fs::Files::new("/static/nep-preview", "./static/nep-preview/")

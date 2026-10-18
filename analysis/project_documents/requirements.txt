@@ -1,0 +1,7 @@
+# Isolated worker dependency; keep the main ODV Python environment unchanged.
+PyMuPDF>=1.24.2,<2
+# Image-only POWs additionally need the operating-system tesseract executable
+# and English language data; no quantities are guessed when OCR is unavailable.
+
+# Optional Chrome retrieval for PH browser/VPN access.
+playwright>=1.49,<2
