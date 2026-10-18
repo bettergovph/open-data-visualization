@@ -7,13 +7,14 @@ Agreement between local maps is a screening rule, not official boundary proof.
 from __future__ import annotations
 
 import json
+import hashlib
 import re
 import unicodedata
 from collections import defaultdict
 from pathlib import Path
 from ph_location_text import text_key, confirmed_name_key, place_key, geographic_title, barangay_key
 
-VERSION = "qualified-location-consensus-v5-balanced-address-metadata"
+VERSION = "qualified-location-consensus-v6-inventory-asset-context"
 
 
 def seat_key(value):
@@ -105,6 +106,23 @@ class GeographicAttribution:
             else:
                 self.labels[jurisdiction].add("province of " + jurisdiction)
 
+        self.inventory_context = {}
+        self.inventory_context_status = 'not_available'
+        context_file = data_root / 'inventory_location_contexts.json'
+        if context_file.exists():
+            supplement = json.loads(context_file.read_text())
+            dependencies = supplement.get('mapHashes', {})
+            hierarchy_file = data_root.parents[1] / 'city_barangays_mapping.json'
+            fresh = (set(dependencies) == {'districts.json', 'districts_generated.json', '20th_congress_representatives.json'}
+                     and all(hashlib.sha256((data_root/name).read_bytes()).hexdigest() == digest for name,digest in dependencies.items())
+                     and hierarchy_file.exists()
+                     and hashlib.sha256(hierarchy_file.read_bytes()).hexdigest() == supplement.get('hierarchySha256'))
+            if fresh:
+                self.inventory_context = supplement.get('contexts', {})
+                self.inventory_context_status = 'matching_dependencies'
+            else:
+                self.inventory_context_status = 'stale_dependencies_fallback_disabled'
+
     def municipality(self, parent, locality):
         a = self.primary_towns[parent].get(locality, set())
         b = self.alternate_towns[parent].get(locality, set())
@@ -178,6 +196,20 @@ class GeographicAttribution:
         result=self._resolve_geographic(dict(project,projectName=title))
         if metadata:
             result['evidence'].append({'basis':'Trailing station/coordinate metadata excluded from address matching only; original project title and construction scope retained','metadata':metadata})
+        context = self.inventory_context.get(text_key(project.get('projectName', '')))
+        if not result['indices'] and context:
+            # Recheck screened asset locations through current maps. Never copy
+            # old LEG polygon labels or stored representative names.
+            located = self._resolve_geographic({'projectName': context['contextTitle']})
+            expected = {(text_key(j), seat_key(s)) for j,s in context['seatKeys']}
+            indices = {self.seats[pair] for pair in expected if pair in self.seats}
+            if len(indices) == 1 and set(located['indices']) == indices:
+                located['evidence'].append({'basis': context['basis'],
+                    'contextTitle': context['contextTitle'], 'municipalObjectId': context['municipalObjectId'],
+                    'inventoryEvidence': context['inventoryEvidence'],
+                    'originalTextResolutionReasons': result['reasons'],
+                    'limit': 'Inventory geographic context, not proof of funded quantities, sponsorship or historical district boundaries'})
+                result = located
         return result
 
     def _resolve_geographic(self, project):

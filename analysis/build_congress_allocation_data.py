@@ -145,6 +145,7 @@ def main() -> None:
         "sourceWarning": source.get("metadata", {}).get("warning", "Candidate extraction; check cited bill pages."),
         "unit": "pesos",
         "attributionMethod": VERSION,
+        "inventoryLocationEvidenceStatus": geography.inventory_context_status,
         "attributionWarning": "Conservative location-based coverage, not complete district budgets or evidence of a representative's sponsorship. Exact municipality + province fields require agreement between both local district maps. Multi-seat cities require explicitly named barangays and agreeing maps. Shared lines, conflicts and missing scope stay outside the ranking. Local map agreement is a screening rule, not independent official boundary verification. A zero means no accepted attribution, not no allocation.",
         "unresolvedReasons": [{"reason": k, **v} for k, v in sorted(unresolved_reasons.items(), key=lambda kv: -kv[1]["totalPesos"])],
         "summary": {
@@ -171,6 +172,8 @@ def main() -> None:
         output["locationDatabaseReview"] = supplement["summary"]
         output["attributionMethod"] += "+location-db-scope-review-v1"
         output["attributionWarning"] += " The private location evidence database supplies qualified-place evidence and scope exclusions. Undated LEG claims and historical GAA project names do not establish new current district assignments."
+    if geography.inventory_context_status == 'matching_dependencies':
+        output['attributionWarning'] += ' Additional qualified context comes from exact inventory assets checked wholly inside one municipality, then screened through current local maps. Old LEG polygon labels are not used. Inventory positions are not proof of funded quantities or project sponsorship; borderline and conflicting locations remain unresolved.'
     print(json.dumps(output["summary"], indent=2))
     if args.write:
         OUT_FILE.write_text(json.dumps(output, ensure_ascii=False, separators=(",", ":")) + "\n")
@@ -181,6 +184,8 @@ def main() -> None:
                    Path(__file__), ROOT / "analysis/strict_congress_geography.py"]
         if args.geographic_decisions:
             sources.append(args.geographic_decisions)
+        if (ROOT / 'static/data/inventory_location_contexts.json').exists():
+            sources.append(ROOT / 'static/data/inventory_location_contexts.json')
         provenance = [{"file": str(path), "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
                       for path in sources if path.exists()]
         args.audit.write_text(json.dumps({"method": VERSION, "warning": output["attributionWarning"],
