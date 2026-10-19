@@ -686,6 +686,29 @@ async fn api_dpwh2026_summary_proxy() -> Result<HttpResponse, ActixError> {
 
 
 
+// Secret FY2027 budget trivia entry: use the existing user-agent detector to select the mobile page.
+async fn budget_trivia_entry(req: HttpRequest) -> Result<HttpResponse, ActixError> {
+    if is_mobile(&req) {
+        return Ok(HttpResponse::Found()
+            .append_header(("Location", "/budget-trivia-mobile"))
+            .finish());
+    }
+    let file = fs::NamedFile::open("static/nep-preview/budget-trivia.html")
+        .map_err(|e| actix_web::error::ErrorNotFound(e))?;
+    Ok(file.into_response(&req))
+}
+
+async fn budget_trivia_mobile(req: HttpRequest) -> Result<HttpResponse, ActixError> {
+    if !is_mobile(&req) {
+        return Ok(HttpResponse::Found()
+            .append_header(("Location", "/static/nep-preview/budget-trivia.html"))
+            .finish());
+    }
+    let file = fs::NamedFile::open("templates/mobile/budget-trivia.html")
+        .map_err(|e| actix_web::error::ErrorNotFound(e))?;
+    Ok(file.into_response(&req))
+}
+
 // DPWH 2026 Page
 async fn dpwh2026(req: HttpRequest) -> Result<HttpResponse, ActixError> {
     let tera = Tera::new("templates/**/*").map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
@@ -736,6 +759,8 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .configure(project_documents::configure)
             .wrap(cors)
+            .service(web::resource("/static/nep-preview/budget-trivia.html").to(budget_trivia_entry))
+            .service(web::resource("/budget-trivia-mobile").to(budget_trivia_mobile))
             .service(
                 fs::Files::new("/static/nep-preview", "./static/nep-preview/")
                     .index_file("index.html")
