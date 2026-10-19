@@ -52,7 +52,7 @@
       "basis": "Parser- and matching-dependent program screen",
       "page": "mpb.html#mpb-insertions",
       "question": "Which MPB lines are genuinely new, and what documented facility needs and designs support them?",
-      "evidence": "The HGAB MPB PAP contains 5,765 lines carrying ₱83.707B. 620 counterpart cases remain separate from insertion candidates. The historical screen has 329 comparison pairs covering 301 distinct NEP proposals.",
+      "evidence": "The HGAB MPB PAP contains 5,765 lines carrying ₱83.707B. 620 counterpart cases remain separate from insertion candidates. The historical screen has 819 comparison pairs covering 587 distinct NEP proposals.",
       "alternative": "Renaming, combined occurrences and legitimate phased construction can explain unmatched or recurring titles. Similar amounts can reflect standard designs.",
       "next": "Audit original NEP/HGAB pages; obtain building purpose, floor area, design, quantities, contract scope and completion records.",
       "caution": "MPB overlaps the full DPWH insertion/repeat findings; do not add their amounts. Equal allocations are not equal construction unit prices.",
@@ -67,11 +67,11 @@
       "rank": 4,
       "id": "repeats",
       "title": "Recurring project titles: inspect overlapping work before alleging duplication",
-      "lead": "634 of 736 NEP comparison pairs clearly retained in HGAB",
+      "lead": "1855 of 2135 NEP comparison pairs clearly retained in HGAB",
       "basis": "Scope-screened comparison candidates",
       "page": "repeats.html#repeat-hgab-survival",
       "question": "Are new appropriations paying for already-funded components or legitimate continuation?",
-      "evidence": "591 of 685 distinct NEP repeat-screen proposals have clear HGAB links. 22 proposals have explicit overlapping historical chainage. ₱27.255B is the unique NEP proposal allocation, not alleged loss.",
+      "evidence": "1194 of 1379 distinct NEP repeat-screen proposals have clear HGAB links. 24 proposals have explicit overlapping historical chainage. ₱48.207B is the unique NEP proposal allocation, not alleged loss.",
       "alternative": "Multi-year implementation, rehabilitation and distinct components can share names and segments.",
       "next": "Prioritize explicitly overlapping retained proposals and high amounts; compare contracts, quantities, tranche scopes and completion.",
       "caution": "The 737 headline counts NEP–old GAA comparison pairs. Potential retention and missing counterparts remain separate.",
@@ -260,20 +260,20 @@
       "correlation": "Undefined: allocation variance is zero; no correlation p-value reported."
     },
     "repeats": {
-      "comparisonPairs": 736,
-      "uniqueCurrentProposals": 685,
-      "uniqueCurrentPesos": 27255271750,
+      "comparisonPairs": 2135,
+      "uniqueCurrentProposals": 1379,
+      "uniqueCurrentPesos": 48206650750,
       "chainageStatuses": {
-        "overlap": 22,
-        "not stated": 160,
-        "incomplete": 225,
-        "not applicable": 329
+        "overlap": 24,
+        "not stated": 641,
+        "incomplete": 651,
+        "not applicable": 819
       },
-      "overlapUniqueProposals": 22,
+      "overlapUniqueProposals": 24,
       "trancheStatuses": {
-        "not stated": 723,
-        "same tranche": 2,
-        "one side stated": 11
+        "not stated": 2110,
+        "same tranche": 9,
+        "one side stated": 16
       }
     },
     "fiveMillion": {
@@ -312,17 +312,17 @@
       "districtCount": 254
     },
     "repeatRetention": {
-      "comparisonPairs": 736,
-      "uniqueNEPProposals": 685,
+      "comparisonPairs": 2135,
+      "uniqueNEPProposals": 1379,
       "pairStatuses": {
-        "Potential retained link": 55,
-        "Clear retained link": 634,
-        "No selected or cited counterpart": 47
+        "Potential retained link": 118,
+        "Clear retained link": 1855,
+        "No selected or cited counterpart": 162
       },
       "uniqueStatuses": {
-        "Potential retained link": 50,
-        "Clear retained link": 591,
-        "No selected or cited counterpart": 44
+        "Potential retained link": 76,
+        "Clear retained link": 1194,
+        "No selected or cited counterpart": 109
       }
     },
     "mpb": {
@@ -332,8 +332,8 @@
       "insertionPesos": 38746744000,
       "ambiguousLines": 620,
       "ambiguousPesos": 11114224000,
-      "repeatPairs": 329,
-      "repeatProposals": 301,
+      "repeatPairs": 819,
+      "repeatProposals": 587,
       "removalCandidates": 137,
       "removalPesos": 2560500000,
       "adjustedLines": 127
@@ -565,7 +565,7 @@
         "insertion": 6105,
         "missing_documents": 15228,
         "amount_group": 10519,
-        "historical_title": 351,
+        "historical_title": 638,
         "chainage_overlap": 17,
         "high_meter_rate": 191,
         "missing_photos": 109,
@@ -576,10 +576,10 @@
       },
       "flagCountDistribution": {
         "5": 6,
-        "4": 163,
-        "3": 4681,
-        "2": 7117,
-        "1": 4116
+        "4": 275,
+        "3": 4725,
+        "2": 6980,
+        "1": 4097
       },
       "top25Occurrences": 25
     },
@@ -595,7 +595,7 @@
   "sources": [
     {
       "file": "dpwh-data.json",
-      "sha256": "4de172bdca00d15bc4e5ceb8abb415733472c3ecc0ed24b3f1439c32421cd861"
+      "sha256": "2dc4b6e4171452030c521a0e6398e342766dcf5e91889bd460ee12b1a406ff6c"
     },
     {
       "file": "rcs-data.json",
@@ -640,6 +640,11 @@
       "amountGroupMinimumNamedOffices": 3,
       "amountGroupScope": "Identical PAP and positive exact peso amount; counts are allocation occurrences, not certified distinct construction contracts.",
       "historicalYears": [
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
         2025,
         2026
       ],
@@ -693,7 +698,7 @@
       "limitations": [
         "Uniform packages can be legitimate. Exact appropriation amounts are not unit costs.",
         "Strict historical matching misses paraphrased titles and unresolved locations; no icon means this screen did not identify a review trigger, not that the project is verified.",
-        "The prior-year search uses locally available DPWH road, bridge, building and flood records, not every agency/year.",
+        "The prior-year search uses locally available DPWH road, bridge, building and flood records from FY2020–FY2026; it is not a search of every project type or every agency.",
         "Matching/parser errors can produce insertion flags. Top 25 overlap other findings; do not sum them as losses.",
         "Current office, representative, role and party do not contribute any points."
       ]

@@ -48,6 +48,28 @@ def component_contexts(text):
     schools=[value for value in contexts if re.search(r'\bschool\b',value,re.I)]
     return schools or contexts
 
+def cost_category_totals(text,page,method):
+    """Read printed category share/amount summaries without treating them as bill rows."""
+    found=[]
+    pattern=re.compile(
+        r"(?P<label>[A-Za-z][A-Za-z0-9 &'()/.,-]{2,100}?)\s+"
+        r"(?P<share>\d{1,3}(?:\.\d{1,4})?)\s*%\s*"
+        r"(?:₱|PHP|PhP|P\s*)?\s*(?P<amount>\d[\d,]*(?:\.\d{2})?)",
+        re.I)
+    for line in str(text or '').splitlines():
+        line=re.sub(r'\s+',' ',line).strip()
+        for match in pattern.finditer(line):
+            label=re.sub(r'\s+',' ',match.group('label')).strip(' .,:;|-')
+            if len(label)<4 or re.search(r'\b(?:I\.?S\.?|O\.?C\.?M\.?|VAT|CONTINGENCY|GRAND TOTAL)\b',label,re.I):continue
+            if re.match(r'^(?:\d{2,}|[A-Z]?\.?\d)',label,re.I):continue
+            share=float(match.group('share'));amount_value=amount(match.group('amount'))
+            if not 0<share<=100 or amount_value is None or amount_value<=0:continue
+            row={'label':label,'sharePct':share,'amountPesos':float(amount_value),
+                 'sourcePage':page,'extractionMethod':method,
+                 'verificationStatus':'Machine-extracted printed category total; verify cited POW page'}
+            if not any(r['label'].casefold()==label.casefold() and r['amountPesos']==row['amountPesos'] for r in found):found.append(row)
+    return found
+
 def itemized_rows(grid,page,bbox,context_text=''):
     """Recognize the submitted/evaluated DPWH itemized bill, not unit-price analyses."""
     clean=[[re.sub(r'\s+',' ',str(c or '')).strip() for c in row] for row in grid]
@@ -187,7 +209,7 @@ def parse_pdf(path,output,allocation_pesos=None):
             response=subprocess.run(['swift',str(Path(__file__).with_name('ocr_vision.swift')),str(path),'100'],capture_output=True,text=True,check=True,timeout=240,env=environment)
             vision=json.loads(response.stdout);(output/'pow-ocr-vision.json').write_text(response.stdout)
         except Exception:vision=None
-    current_context=None
+    current_context=None;cost_categories=[]
     for number,page in enumerate(document):
         if number>=100:break
         text=page.get_text();words=page.get_text('words');method='native PDF text/table';ocr_width=page.rect.width
@@ -215,6 +237,13 @@ def parse_pdf(path,output,allocation_pesos=None):
                 record=next(p for p in vision['pages'] if p['page']==number+1);words=record['words'];text=' '.join(w[4] for w in words);ocr_width=record.get('width',page.rect.width);rotation=record.get('rotation',0);method='OCR · Apple Vision'+(' · rotated scan '+str(rotation)+'°' if rotation else '')+'; original boxes/confidence retained'
             else:
                 pages.append({'page':number+1,'status':'needs_ocr','message':'Image-only page; OCR required before ranking bill rows.'});continue
+        category_text=text
+        if method.startswith('OCR') and words:
+            category_lines={}
+            for word in words:category_lines.setdefault(round(word[1]/5),[]).append(word)
+            category_text='\n'.join(' '.join(w[4] for w in sorted(line,key=lambda x:x[0]))
+                                    for _,line in sorted(category_lines.items()))
+        cost_categories.extend(cost_category_totals(category_text,number+1,method))
         page_rows=[]
         current_context=component_context(text) or current_context
         if method.startswith('native'):
@@ -257,7 +286,11 @@ def parse_pdf(path,output,allocation_pesos=None):
     for row in result:
         allocation_share=row.get('shareOfNepAllocationPct')
         row['lowShareParsingIndicator']=bool(allocation_share is not None and allocation_share<1)
-    return {'status':'candidate_rows' if result else 'needs_ocr' if any(p['status']=='needs_ocr' for p in pages) else 'needs_manual_review' if any(p['status']=='needs_manual_review' for p in pages) else 'no_bill_rows_recovered','pdfSha256':hashlib.sha256(path.read_bytes()).hexdigest(),'pageCount':len(document),'pagesProcessed':len(pages),'pages':pages,'rows':result,'rowObservations':len(rows),'uniqueCandidateRows':len(result),'sumOfUniqueCandidateAmountsPesos':sum(r['amountPesos'] for r in result),'reconciledPowTotal':False,'itemizedDirectCostControls':itemized_controls,'amountBasis':'Each item records its cost basis; direct costs are not inclusive project costs.','limits':['Reconciled itemized direct-cost subtotals, when available, do not reconcile the complete POW including indirect costs, VAT and EAO. Candidate row extraction is not a complete or reconciled POW ledger. A largest recovered row is not necessarily the largest row in the full document.','Shares use the NEP allocation, not a confirmed POW grand total, contract payment or engineering valuation.','Quantities, material units, indirect costs and engineering scope require original-page verification. Structural concrete is not cement mass.','Repeated identical row observations are grouped with page references; no budget amount is inferred from a missing cell.']}
+    unique_categories=[]
+    for row in cost_categories:
+        if not any(r['label'].casefold()==row['label'].casefold() and r['amountPesos']==row['amountPesos'] for r in unique_categories):unique_categories.append(row)
+    unique_categories.sort(key=lambda r:-r['amountPesos'])
+    return {'status':'candidate_rows' if result else 'needs_ocr' if any(p['status']=='needs_ocr' for p in pages) else 'needs_manual_review' if any(p['status']=='needs_manual_review' for p in pages) else 'no_bill_rows_recovered','pdfSha256':hashlib.sha256(path.read_bytes()).hexdigest(),'pageCount':len(document),'pagesProcessed':len(pages),'pages':pages,'rows':result,'costCategoryBreakdown':unique_categories,'rowObservations':len(rows),'uniqueCandidateRows':len(result),'sumOfUniqueCandidateAmountsPesos':sum(r['amountPesos'] for r in result),'reconciledPowTotal':False,'itemizedDirectCostControls':itemized_controls,'amountBasis':'Each item records its cost basis; direct costs are not inclusive project costs. Printed category shares are preserved as separate summary evidence and are not added to itemized rows.','limits':['Reconciled itemized direct-cost subtotals, when available, do not reconcile the complete POW including indirect costs, VAT and EAO. Candidate row extraction is not a complete or reconciled POW ledger. A largest recovered row is not necessarily the largest row in the full document.','Shares use the NEP allocation, not a confirmed POW grand total, contract payment or engineering valuation.','Quantities, material units, indirect costs and engineering scope require original-page verification. Structural concrete is not cement mass.','Printed category summaries and itemized bill rows are separate evidence and must not be summed together.','Repeated identical row observations are grouped with page references; no budget amount is inferred from a missing cell.']}
 
 def render_photos(path,output):
     try:import pymupdf as fitz
