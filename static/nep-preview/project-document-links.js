@@ -1,5 +1,8 @@
 (()=>{
 'use strict';
+// The summary review queue already exposes transparency evidence in the
+// per-project flag dialog. Keep its project table free of a duplicate column.
+if(location.pathname.endsWith('/summary.html'))return;
 const normalize=v=>String(v||'').normalize('NFKC').replace(/\s+/g,' ').trim();
 const route=location.pathname.includes('/static/nep-preview/')?'project-documents.html':'/static/nep-preview/project-documents.html';
 const style=document.createElement('style');style.textContent='.transparency-record-status{font-size:12px;line-height:1.4;overflow-wrap:anywhere}.transparency-record-status[data-status="incomplete_documents"],.transparency-record-status[data-status="unmatched"]{color:#85490b}.transparency-record-status a{display:block;text-decoration:underline}.transparency-coverage-method{display:block!important;font-size:13px;padding:12px;border:1px solid #b5c8c5;border-radius:6px;background:#f5f8f7}';document.head.append(style);
