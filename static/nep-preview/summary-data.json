@@ -14,7 +14,6 @@
       "alternative": "Standard package costs or a minimum coverage policy may justify equal allocations. Rainfall alone does not measure demand.",
       "next": "Obtain siting, design capacity, water demand, catchment area and existing RCS inventory.",
       "caution": "DEO is not LEG; province rainfall is not a district observation. Returning FY2026 program.",
-      "congressional_representatives": [],
       "detailLinks": [
         {
           "page": "rcs.html#rcs-statistical-evidence",
@@ -38,7 +37,6 @@
       "alternative": "Wrapped titles, OCR, changes in office or PAP, renaming and aggregated occurrences can hide counterparts.",
       "next": "Stratified original-page adjudication; estimate false positives before extrapolating counts.",
       "caution": "Do not adopt another analyst’s additions count as ground truth. FAPs take a separate review path.",
-      "congressional_representatives": [],
       "detailLinks": [
         {
           "page": "dpwh-hgab.html#hgab-insertion",
@@ -58,7 +56,6 @@
       "alternative": "Renaming, combined occurrences and legitimate phased construction can explain unmatched or recurring titles. Similar amounts can reflect standard designs.",
       "next": "Audit original NEP/HGAB pages; obtain building purpose, floor area, design, quantities, contract scope and completion records.",
       "caution": "MPB overlaps the full DPWH insertion/repeat findings; do not add their amounts. Equal allocations are not equal construction unit prices.",
-      "congressional_representatives": [],
       "detailLinks": [
         {
           "page": "mpb.html#mpb-insertions",
@@ -78,7 +75,6 @@
       "alternative": "Multi-year implementation, rehabilitation and distinct components can share names and segments.",
       "next": "Prioritize explicitly overlapping retained proposals and high amounts; compare contracts, quantities, tranche scopes and completion.",
       "caution": "The 737 headline counts NEP–old GAA comparison pairs. Potential retention and missing counterparts remain separate.",
-      "congressional_representatives": [],
       "detailLinks": [
         {
           "page": "repeats.html#repeat-hgab-survival",
@@ -98,7 +94,6 @@
       "alternative": "Common specifications, office workload and project mix can create clustering.",
       "next": "Pre-specify work-type and workload controls; inspect quantities and comparable prior-year prices.",
       "caution": "Threshold/category selection was post hoc. Association does not establish procurement splitting or intent.",
-      "congressional_representatives": [],
       "detailLinks": [
         {
           "page": "repeats.html#dpwh-investigation-evidence",
@@ -118,7 +113,6 @@
       "alternative": "A legitimate phased project can require multiple appropriations.",
       "next": "Obtain total project cost, phases, progress, obligations, disbursements and procurement records.",
       "caution": "Appropriations are not actual spending; stage/year sums do not prove duplication.",
-      "congressional_representatives": [],
       "detailLinks": [
         {
           "page": "budget-innovations.html#innovation-investigation-evidence",
@@ -138,7 +132,6 @@
       "alternative": "Lengths may be recorded in engineering schedules or continuation text not recovered by this extraction; incomplete metadata need not reflect deliberate omission.",
       "next": "Inspect original source pages and obtain funded-segment boundaries, complete chainage, project quantities and bridge spans; reconcile extraction gaps before alleging disclosure failures.",
       "caution": "Missing includes absent and unusable extracted evidence, not proof the original documents lack length. Coordinate distances do not establish construction length; mixed scopes are separate.",
-      "congressional_representatives": [],
       "detailLinks": [
         {
           "page": "cost-matching.html#cost-coverage",
@@ -158,7 +151,6 @@
       "alternative": "Terrain, width, structures, approaches, rehabilitation scope and components outside the stated segment can explain large differences. Tiny printed ranges or parser errors can produce extreme ratios.",
       "next": "Verify station endpoints on original pages, then compare quantities, width, funded extent, designs and bill-of-quantity costs within the same work type. Investigate unusually short denominators before interpreting extreme ratios.",
       "caution": "These are appropriations per stated segment meter, not verified construction unit costs. Bridge chainage is not necessarily bridge span. No cross-category average, overpricing estimate or corruption probability is established. Inventory lanes are existing asset characteristics, not verified funded quantities; widening needs additional funded lanes. Overpasses, flyovers and viaducts use bridge peers.",
-      "congressional_representatives": [],
       "detailLinks": [
         {
           "page": "cost-per-km.html#cost-roads",
@@ -186,11 +178,67 @@
       "alternative": "A source-document typo, station convention, short component within a larger project, or broader funded scope can explain these values. A very short printed range does not establish the physical length actually funded.",
       "next": "Request corrected or certified station endpoints, funded-segment plans, engineering quantities and allocation scope; verify notation before interpreting extreme allocation-per-meter rates.",
       "caution": "This is a printed-range/denominator issue, not evidence that most road projects are short or overpriced. Sampled title agreement rules out a title-transcription mismatch for those examples, not source errors or engineering ambiguity. Bridge lengths require separate interpretation.",
-      "congressional_representatives": [],
       "detailLinks": [
         {
           "page": "cost-matching.html#short-segment-evidence",
           "label": "Original-source short-range examples"
+        }
+      ]
+    },
+    {
+      "rank": 10,
+      "id": "hgab-no-nep-counterpart",
+      "title": "HGAB 3rd projects without a selected NEP counterpart",
+      "lead": "6,105 / 15,979 project rows · 38.2%",
+      "basis": "One-to-one stage matching screen; unmatched rows require source review",
+      "page": "dpwh.html#hgab-coverage",
+      "question": "Which HGAB 3rd projects are genuinely absent from NEP after title, scope and occurrence review?",
+      "evidence": "The current one-to-one comparison selected no NEP counterpart for these project rows. The comparison uses title and scope signals; unresolved and unmatched cases are not proof of new projects.",
+      "alternative": "Renaming, title wrapping, scope changes, occurrence aggregation and parser errors can prevent counterpart selection.",
+      "next": "Review NEP and HGAB source pages side by side, then reconcile project scope, office, location and amount.",
+      "caution": "No selected counterpart means a review candidate, not a confirmed insertion.",
+      "detailLinks": [
+        {
+          "page": "dpwh.html#hgab-coverage",
+          "label": "HGAB 3rd NEP-counterpart coverage"
+        }
+      ]
+    },
+    {
+      "rank": 11,
+      "id": "hgab-no-listed-documents",
+      "title": "HGAB 3rd projects with no listed DPWH Transparency documents",
+      "lead": "15,228 / 15,979 project rows · 95.3%",
+      "basis": "DPWH Transparency FY2027 snapshot; local title reconciliation",
+      "page": "dpwh.html#hgab-coverage",
+      "question": "Are project documents available through another route, or should document links be added to the Transparency record?",
+      "evidence": "Rows without a matched transparency entry listing one or more documents are counted, including titles that do not match the snapshot.",
+      "alternative": "Documents may be available on another official page or not yet indexed in the captured snapshot.",
+      "next": "Verify the project identifier and query the responsible DPWH office for POW, geotagged photos and RDC records.",
+      "caution": "No listed document is a disclosure gap in this snapshot; it does not establish that no document exists.",
+      "detailLinks": [
+        {
+          "page": "dpwh.html#hgab-coverage",
+          "label": "DPWH Transparency document coverage"
+        }
+      ]
+    },
+    {
+      "rank": 12,
+      "id": "hgab-missing-document-types",
+      "title": "Incomplete documentation: missing POW, geotagged photos or RDC",
+      "lead": "519 / 750 inspected attachment lists · 69.2%",
+      "basis": "Locally inspected attachment metadata; HGAB 3rd title matches",
+      "page": "dpwh.html#hgab-coverage",
+      "question": "Which listed attachment types are absent, and can DPWH provide the missing POW, photos or RDC?",
+      "evidence": "Counts cover only title-matched HGAB projects whose attachment metadata is locally inspected. The supporting section breaks missing POW, photos and RDC out separately.",
+      "alternative": "The local snapshot may be incomplete, and an attachment may be indexed under another type or record.",
+      "next": "Review each project’s transparency entry and request missing categories from the implementing office.",
+      "caution": "Uninspected projects are unknown, not counted as missing; the missing-type groups can overlap.",
+      "detailLinks": [
+        {
+          "page": "dpwh.html#hgab-coverage",
+          "label": "POW, photo and RDC attachment coverage"
         }
       ]
     }
@@ -512,20 +560,26 @@
     ],
     "lineItemReviewQueue": {
       "sourceOccurrences": 16275,
-      "flaggedOccurrences": 12133,
+      "flaggedOccurrences": 16083,
       "flagTypes": {
-        "insertion": 5549,
+        "insertion": 6105,
+        "missing_documents": 15228,
         "amount_group": 10519,
         "historical_title": 351,
         "chainage_overlap": 17,
         "high_meter_rate": 191,
+        "missing_photos": 109,
+        "missing_rdc": 501,
+        "missing_pow": 44,
+        "very_short_range": 8,
         "rehab_good_fair": 2
       },
       "flagCountDistribution": {
-        "4": 6,
-        "3": 139,
-        "2": 4200,
-        "1": 7788
+        "5": 6,
+        "4": 163,
+        "3": 4681,
+        "2": 7117,
+        "1": 4116
       },
       "top25Occurrences": 25
     },
@@ -581,6 +635,7 @@
     "ranking": "Flag count descending, allocation pesos descending, occurrence ID ascending for exact ties.",
     "scope": "Domestic DPWH HGAB 3rd-reading occurrences only; not a ranking of the entire national budget.",
     "method": {
+      "maximumPossibleFlags": 12,
       "amountGroupMinimumOccurrences": 10,
       "amountGroupMinimumNamedOffices": 3,
       "amountGroupScope": "Identical PAP and positive exact peso amount; counts are allocation occurrences, not certified distinct construction contracts.",
@@ -632,12 +687,12 @@
         "method": "Condition flag: rehabilitation/reconstruction/major repair only, full matched road range assessed Good/Fair with a known pre-budget assessment year. Recent-surfacing flag: rehabilitation, preventive maintenance or other explicitly described pavement work where the full matched range has a positive recorded last-surfacing year within five budget years; unknown/zero values are not filled. Widening, approaches, slope/drainage and off-carriageway scopes excluded. Bridge condition is displayed, but an unknown assessment year prevents the dated flag.",
         "limits": "Review leads, not proof of waste or incorrect prioritization. Assessment and budget dates differ; later deterioration, structural/safety work or different funded components may justify rehabilitation. Last-surfacing inventory is older and cannot establish that no later work occurred."
       },
-      "evidenceGaps": "Missing length, sub-10m printed ranges and insufficient peers are cautions, not points. Extreme rates require denominator/scope review and are omitted from rate charts.",
-      "summaryCoverage": "Nine summary findings are not nine independent line-item flags. RCS equal amounts use the amount-group flag; MPB is a program scope; INSPIRE is outside this DPWH queue. Length gaps and very short printed ranges are evidence cautions. Historical recurrence and overlap support the repeat finding.",
+      "evidenceGaps": "Missing length and insufficient peers are cautions, not points. A sub-10m printed range gets a separate denominator-warning point and remains subject to source verification. Extreme rates require denominator/scope review and are omitted from rate charts.",
+      "summaryCoverage": "The queue has up to twelve possible flags: the prior nine screening types plus separate incomplete-documentation flags for missing POW, geotagged photos, and RDC among locally inspected attachment records. Potential NEP counterpart and no listed documents are separate flags; document-type flags are unknown outside inspected metadata.",
       "dependence": "Historical recurrence and chainage overlap are related indicators; scores are descriptive triage, not independent evidence or probabilities.",
       "limitations": [
         "Uniform packages can be legitimate. Exact appropriation amounts are not unit costs.",
-        "Strict historical matching misses paraphrased titles and unresolved locations; no flag means insufficient evidence, not clearance.",
+        "Strict historical matching misses paraphrased titles and unresolved locations; no icon means this screen did not identify a review trigger, not that the project is verified.",
         "The prior-year search uses locally available DPWH road, bridge, building and flood records, not every agency/year.",
         "Matching/parser errors can produce insertion flags. Top 25 overlap other findings; do not sum them as losses.",
         "Current office, representative, role and party do not contribute any points."
@@ -701,6 +756,5 @@
       "adjustmentPesos": null,
       "limit": "Comparable NEP school baseline not built"
     }
-  ],
-  "congressional_representatives": []
+  ]
 }

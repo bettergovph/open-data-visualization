@@ -1,1 +1,175 @@
-{"sourcePolicy":{"preferredExtraction":"csiiiv documented reviewed NIA/HFEP/FMR datasets","source":"https://github.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS","commit":"34ef5d8cbbacda92f6503ffd9a428569f157f64d","rule":"Documented human adjudication takes precedence over conflicting older local automated extraction. Preserve source/raw values, repair history and unresolved flags. This does not imply every row was manually reviewed. Project identity and geographic attribution remain separate from PDF extraction quality."},"nia":{"previousHouseRows":423,"houseRows":828,"housePesos":17999305000,"nepRows":791,"nepPesos":17598181000},"hfep":{"nepFacilities":464,"houseFacilities":513},"fmr":[{"file":"nep_fmr_coordinates_normalized.json","beforeSha256":"869f58b5cda1bc2d36d888a8ee74a0fbbe8cb1c16848b588d2c3eb802f0af774","previousAdoptedSha256":"53d76f3a3bd928a355e9c25b641ed156820b4aeee4a4d3308ff6f951441ce2fc","afterSha256":"53d76f3a3bd928a355e9c25b641ed156820b4aeee4a4d3308ff6f951441ce2fc"},{"file":"nep_fmr_audit.json","beforeSha256":"91b81d302590332b21490c4243b6ad3942945c6e53b7a21377f47b2de3880cc4","previousAdoptedSha256":"91b81d302590332b21490c4243b6ad3942945c6e53b7a21377f47b2de3880cc4","afterSha256":"91b81d302590332b21490c4243b6ad3942945c6e53b7a21377f47b2de3880cc4"},{"file":"nep_fmr_coordinate_normalization_audit.json","beforeSha256":"7242ba06bbca67bfc39aebb547c14c9969a893b9d691adcb9a9ad8b245b8ee18","previousAdoptedSha256":"bf47aa3fa5713aaa1872c34e0a2092d28d57565c2b7932fdd9c894962de2f5d9","afterSha256":"bf47aa3fa5713aaa1872c34e0a2092d28d57565c2b7932fdd9c894962de2f5d9"},{"file":"hgab_fmr_coordinates_normalized.json","beforeSha256":"b2089edcd681c52fcb07ecef50332d01e6416f098ae5cce81996b1ef85515582","previousAdoptedSha256":"c8c360514ad9ac908f435c7782bca879cfda01d26b102c97f2348f58dd7243c0","afterSha256":"c8c360514ad9ac908f435c7782bca879cfda01d26b102c97f2348f58dd7243c0"},{"file":"hgab_fmr_audit.json","beforeSha256":"01937423755db88e20fe1aadef597a69f4dcf19f0b08cfb3f254de55e86b74c4","previousAdoptedSha256":"0baf668185f83838fb9e4eab84a6ad40a16e55a2c2392ffb5440f25a506f9440","afterSha256":"0baf668185f83838fb9e4eab84a6ad40a16e55a2c2392ffb5440f25a506f9440"},{"file":"hgab_fmr_coordinate_normalization_audit.json","beforeSha256":"bf308f3c1c65883e75d899a48b53d801df2a8bc2b24fe1f8f321f6518ff7be33","previousAdoptedSha256":"21a7c976dd81d07237bfddbbbdc57f92a697f1a6262c82c3c0513bac90d0d56c","afterSha256":"21a7c976dd81d07237bfddbbbdc57f92a697f1a6262c82c3c0513bac90d0d56c"}],"annexEquivalence":{"pdfSha256":["a82800c4cc2684566a37f7780d8f9131d2e7b2c97444d335d94df012dec065b6","4cc0f17e472d1af380ea6d3972561f6bb241137826fd85ed7e7e70bcd92986b9"],"sources":["HB 10858 FOR 2ND READING/2 - HB 10858 VOL IB.pdf","HB 10858 FOR 3RD READING/2- HB 10858 FOR 3RD READING VOL I-B.pdf"],"annexes":{"nia":{"pdfPages":[896,941],"normalizedTextSha256":["fb94b672d1fac20c3a139089f9b538d885561b4538f45a42169db7d735cec801","fb94b672d1fac20c3a139089f9b538d885561b4538f45a42169db7d735cec801"],"equal":true},"hfep":{"pdfPages":[877,893],"normalizedTextSha256":["50fa570930e3529eabc577de20788f1e23fdb76316ee1e1ee7d15bf0241e3b89","50fa570930e3529eabc577de20788f1e23fdb76316ee1e1ee7d15bf0241e3b89"],"equal":true}},"allEqual":true,"normalization":"Remove InDesign production footer lines containing .indd; collapse whitespace. No project rows removed.","limits":"Bounded reading equivalence only; source extraction retains the analyst’s manual decisions and unresolved flags."},"inputs":[{"repositoryPath":"analysis-nia/data/nep_nia_dataset.json","sourceUrl":"https://raw.githubusercontent.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS/34ef5d8cbbacda92f6503ffd9a428569f157f64d/analysis-nia/data/nep_nia_dataset.json","sha256":"685dabfc819030a02d6e53b43a038bea59b11dd872e9a4bb262cf13e8a4aa50c","localPath":"data_sources/csiiiv/snapshots/34ef5d8cbbacda92f6503ffd9a428569f157f64d/analysis-nia/data/nep_nia_dataset.json"},{"repositoryPath":"analysis-nia/data/hgab_nia_tree.json","sourceUrl":"https://raw.githubusercontent.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS/34ef5d8cbbacda92f6503ffd9a428569f157f64d/analysis-nia/data/hgab_nia_tree.json","sha256":"5c4808b5e28745b405b5222b0b4a3c2fca536ee0d32a7bb20bf81051787cac4f","localPath":"data_sources/csiiiv/snapshots/34ef5d8cbbacda92f6503ffd9a428569f157f64d/analysis-nia/data/hgab_nia_tree.json"},{"repositoryPath":"analysis-nia/data/hgab_nia_audit.json","sourceUrl":"https://raw.githubusercontent.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS/34ef5d8cbbacda92f6503ffd9a428569f157f64d/analysis-nia/data/hgab_nia_audit.json","sha256":"90c2bffadbbc899a126d282e86e3c80baa28be3284a62fdccdce86f35148b2b8","localPath":"data_sources/csiiiv/snapshots/34ef5d8cbbacda92f6503ffd9a428569f157f64d/analysis-nia/data/hgab_nia_audit.json"},{"repositoryPath":"analysis-hfep/data/nep_hfep_data_list.json","sourceUrl":"https://raw.githubusercontent.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS/34ef5d8cbbacda92f6503ffd9a428569f157f64d/analysis-hfep/data/nep_hfep_data_list.json","sha256":"3edd1cdb8cc62c4ef4e17a9a18f93862222a3e01ad5c94cfffd0f66b0864b74d","localPath":"data_sources/csiiiv/snapshots/34ef5d8cbbacda92f6503ffd9a428569f157f64d/analysis-hfep/data/nep_hfep_data_list.json"},{"repositoryPath":"analysis-hfep/data/hgab_hfep_data_list.json","sourceUrl":"https://raw.githubusercontent.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS/34ef5d8cbbacda92f6503ffd9a428569f157f64d/analysis-hfep/data/hgab_hfep_data_list.json","sha256":"0d8cfb9b7edd32805ec9c54981b6099d32301f0ca202c16a2b33a998dbde3277","localPath":"data_sources/csiiiv/snapshots/34ef5d8cbbacda92f6503ffd9a428569f157f64d/analysis-hfep/data/hgab_hfep_data_list.json"},{"repositoryPath":"other-analysis/data/nep_fmr_coordinates_normalized.json","sourceUrl":"https://raw.githubusercontent.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS/34ef5d8cbbacda92f6503ffd9a428569f157f64d/other-analysis/data/nep_fmr_coordinates_normalized.json","sha256":"53d76f3a3bd928a355e9c25b641ed156820b4aeee4a4d3308ff6f951441ce2fc","localPath":"data_sources/csiiiv/snapshots/34ef5d8cbbacda92f6503ffd9a428569f157f64d/other-analysis/data/nep_fmr_coordinates_normalized.json"},{"repositoryPath":"other-analysis/data/nep_fmr_audit.json","sourceUrl":"https://raw.githubusercontent.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS/34ef5d8cbbacda92f6503ffd9a428569f157f64d/other-analysis/data/nep_fmr_audit.json","sha256":"91b81d302590332b21490c4243b6ad3942945c6e53b7a21377f47b2de3880cc4","localPath":"data_sources/fmr_analyst/nep_fmr_audit.json"},{"repositoryPath":"other-analysis/data/nep_fmr_coordinate_normalization_audit.json","sourceUrl":"https://raw.githubusercontent.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS/34ef5d8cbbacda92f6503ffd9a428569f157f64d/other-analysis/data/nep_fmr_coordinate_normalization_audit.json","sha256":"bf47aa3fa5713aaa1872c34e0a2092d28d57565c2b7932fdd9c894962de2f5d9","localPath":"data_sources/csiiiv/snapshots/34ef5d8cbbacda92f6503ffd9a428569f157f64d/other-analysis/data/nep_fmr_coordinate_normalization_audit.json"},{"repositoryPath":"other-analysis/data/hgab_fmr_coordinates_normalized.json","sourceUrl":"https://raw.githubusercontent.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS/34ef5d8cbbacda92f6503ffd9a428569f157f64d/other-analysis/data/hgab_fmr_coordinates_normalized.json","sha256":"c8c360514ad9ac908f435c7782bca879cfda01d26b102c97f2348f58dd7243c0","localPath":"data_sources/csiiiv/snapshots/34ef5d8cbbacda92f6503ffd9a428569f157f64d/other-analysis/data/hgab_fmr_coordinates_normalized.json"},{"repositoryPath":"other-analysis/data/hgab_fmr_audit.json","sourceUrl":"https://raw.githubusercontent.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS/34ef5d8cbbacda92f6503ffd9a428569f157f64d/other-analysis/data/hgab_fmr_audit.json","sha256":"0baf668185f83838fb9e4eab84a6ad40a16e55a2c2392ffb5440f25a506f9440","localPath":"data_sources/csiiiv/snapshots/34ef5d8cbbacda92f6503ffd9a428569f157f64d/other-analysis/data/hgab_fmr_audit.json"},{"repositoryPath":"other-analysis/data/hgab_fmr_coordinate_normalization_audit.json","sourceUrl":"https://raw.githubusercontent.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS/34ef5d8cbbacda92f6503ffd9a428569f157f64d/other-analysis/data/hgab_fmr_coordinate_normalization_audit.json","sha256":"21a7c976dd81d07237bfddbbbdc57f92a697f1a6262c82c3c0513bac90d0d56c","localPath":"data_sources/csiiiv/snapshots/34ef5d8cbbacda92f6503ffd9a428569f157f64d/other-analysis/data/hgab_fmr_coordinate_normalization_audit.json"}]}
+{
+  "sourcePolicy": {
+    "preferredExtraction": "csiiiv documented reviewed NIA/HFEP/FMR datasets",
+    "source": "https://github.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS",
+    "commit": "34ef5d8cbbacda92f6503ffd9a428569f157f64d",
+    "rule": "Documented human adjudication takes precedence over conflicting older local automated extraction. Preserve source/raw values, repair history and unresolved flags. This does not imply every row was manually reviewed. Project identity and geographic attribution remain separate from PDF extraction quality.",
+    "mainStageDataProvider": "csiiiv/DPWH-NEP-HB-2027-ANALYSIS",
+    "preferredBudgetStages": [
+      "NEP",
+      "HGAB",
+      "GAB",
+      "Bicam",
+      "GAA"
+    ],
+    "documentaryAuthority": "Official budget documents remain the underlying evidence; csiiiv is the preferred working dataset provider.",
+    "researchFocus": "Complement upstream with reproducible project-level case files, asset/engineering context, strict geographic attribution, supporting and contrary evidence, and actionable verification steps.",
+    "reuseRule": "Consume upstream extraction, identifiers, stage comparisons and existing analyses where adequate; implement only a documented missing enrichment or source correction.",
+    "availabilityRule": "A stage not available upstream remains unavailable; do not substitute another stage or infer final appropriations.",
+    "migrationStatus": "NIA/HFEP/FMR reviewed annex inputs adopted; remaining DPWH source and general matching paths still require migration to upstream outputs."
+  },
+  "nia": {
+    "previousHouseRows": 423,
+    "houseRows": 828,
+    "housePesos": 17999305000,
+    "nepRows": 791,
+    "nepPesos": 17598181000
+  },
+  "hfep": {
+    "nepFacilities": 464,
+    "houseFacilities": 513
+  },
+  "fmr": [
+    {
+      "file": "nep_fmr_coordinates_normalized.json",
+      "beforeSha256": "869f58b5cda1bc2d36d888a8ee74a0fbbe8cb1c16848b588d2c3eb802f0af774",
+      "previousAdoptedSha256": "53d76f3a3bd928a355e9c25b641ed156820b4aeee4a4d3308ff6f951441ce2fc",
+      "afterSha256": "53d76f3a3bd928a355e9c25b641ed156820b4aeee4a4d3308ff6f951441ce2fc"
+    },
+    {
+      "file": "nep_fmr_audit.json",
+      "beforeSha256": "91b81d302590332b21490c4243b6ad3942945c6e53b7a21377f47b2de3880cc4",
+      "previousAdoptedSha256": "91b81d302590332b21490c4243b6ad3942945c6e53b7a21377f47b2de3880cc4",
+      "afterSha256": "91b81d302590332b21490c4243b6ad3942945c6e53b7a21377f47b2de3880cc4"
+    },
+    {
+      "file": "nep_fmr_coordinate_normalization_audit.json",
+      "beforeSha256": "7242ba06bbca67bfc39aebb547c14c9969a893b9d691adcb9a9ad8b245b8ee18",
+      "previousAdoptedSha256": "bf47aa3fa5713aaa1872c34e0a2092d28d57565c2b7932fdd9c894962de2f5d9",
+      "afterSha256": "bf47aa3fa5713aaa1872c34e0a2092d28d57565c2b7932fdd9c894962de2f5d9"
+    },
+    {
+      "file": "hgab_fmr_coordinates_normalized.json",
+      "beforeSha256": "b2089edcd681c52fcb07ecef50332d01e6416f098ae5cce81996b1ef85515582",
+      "previousAdoptedSha256": "c8c360514ad9ac908f435c7782bca879cfda01d26b102c97f2348f58dd7243c0",
+      "afterSha256": "c8c360514ad9ac908f435c7782bca879cfda01d26b102c97f2348f58dd7243c0"
+    },
+    {
+      "file": "hgab_fmr_audit.json",
+      "beforeSha256": "01937423755db88e20fe1aadef597a69f4dcf19f0b08cfb3f254de55e86b74c4",
+      "previousAdoptedSha256": "0baf668185f83838fb9e4eab84a6ad40a16e55a2c2392ffb5440f25a506f9440",
+      "afterSha256": "0baf668185f83838fb9e4eab84a6ad40a16e55a2c2392ffb5440f25a506f9440"
+    },
+    {
+      "file": "hgab_fmr_coordinate_normalization_audit.json",
+      "beforeSha256": "bf308f3c1c65883e75d899a48b53d801df2a8bc2b24fe1f8f321f6518ff7be33",
+      "previousAdoptedSha256": "21a7c976dd81d07237bfddbbbdc57f92a697f1a6262c82c3c0513bac90d0d56c",
+      "afterSha256": "21a7c976dd81d07237bfddbbbdc57f92a697f1a6262c82c3c0513bac90d0d56c"
+    }
+  ],
+  "annexEquivalence": {
+    "pdfSha256": [
+      "a82800c4cc2684566a37f7780d8f9131d2e7b2c97444d335d94df012dec065b6",
+      "4cc0f17e472d1af380ea6d3972561f6bb241137826fd85ed7e7e70bcd92986b9"
+    ],
+    "sources": [
+      "HB 10858 FOR 2ND READING/2 - HB 10858 VOL IB.pdf",
+      "HB 10858 FOR 3RD READING/2- HB 10858 FOR 3RD READING VOL I-B.pdf"
+    ],
+    "annexes": {
+      "nia": {
+        "pdfPages": [
+          896,
+          941
+        ],
+        "normalizedTextSha256": [
+          "fb94b672d1fac20c3a139089f9b538d885561b4538f45a42169db7d735cec801",
+          "fb94b672d1fac20c3a139089f9b538d885561b4538f45a42169db7d735cec801"
+        ],
+        "equal": true
+      },
+      "hfep": {
+        "pdfPages": [
+          877,
+          893
+        ],
+        "normalizedTextSha256": [
+          "50fa570930e3529eabc577de20788f1e23fdb76316ee1e1ee7d15bf0241e3b89",
+          "50fa570930e3529eabc577de20788f1e23fdb76316ee1e1ee7d15bf0241e3b89"
+        ],
+        "equal": true
+      }
+    },
+    "allEqual": true,
+    "normalization": "Remove InDesign production footer lines containing .indd; collapse whitespace. No project rows removed.",
+    "limits": "Bounded reading equivalence only; source extraction retains the analyst’s manual decisions and unresolved flags."
+  },
+  "inputs": [
+    {
+      "repositoryPath": "analysis-nia/data/nep_nia_dataset.json",
+      "sourceUrl": "https://raw.githubusercontent.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS/34ef5d8cbbacda92f6503ffd9a428569f157f64d/analysis-nia/data/nep_nia_dataset.json",
+      "sha256": "685dabfc819030a02d6e53b43a038bea59b11dd872e9a4bb262cf13e8a4aa50c",
+      "localPath": "data_sources/csiiiv/snapshots/34ef5d8cbbacda92f6503ffd9a428569f157f64d/analysis-nia/data/nep_nia_dataset.json"
+    },
+    {
+      "repositoryPath": "analysis-nia/data/hgab_nia_tree.json",
+      "sourceUrl": "https://raw.githubusercontent.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS/34ef5d8cbbacda92f6503ffd9a428569f157f64d/analysis-nia/data/hgab_nia_tree.json",
+      "sha256": "5c4808b5e28745b405b5222b0b4a3c2fca536ee0d32a7bb20bf81051787cac4f",
+      "localPath": "data_sources/csiiiv/snapshots/34ef5d8cbbacda92f6503ffd9a428569f157f64d/analysis-nia/data/hgab_nia_tree.json"
+    },
+    {
+      "repositoryPath": "analysis-nia/data/hgab_nia_audit.json",
+      "sourceUrl": "https://raw.githubusercontent.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS/34ef5d8cbbacda92f6503ffd9a428569f157f64d/analysis-nia/data/hgab_nia_audit.json",
+      "sha256": "90c2bffadbbc899a126d282e86e3c80baa28be3284a62fdccdce86f35148b2b8",
+      "localPath": "data_sources/csiiiv/snapshots/34ef5d8cbbacda92f6503ffd9a428569f157f64d/analysis-nia/data/hgab_nia_audit.json"
+    },
+    {
+      "repositoryPath": "analysis-hfep/data/nep_hfep_data_list.json",
+      "sourceUrl": "https://raw.githubusercontent.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS/34ef5d8cbbacda92f6503ffd9a428569f157f64d/analysis-hfep/data/nep_hfep_data_list.json",
+      "sha256": "3edd1cdb8cc62c4ef4e17a9a18f93862222a3e01ad5c94cfffd0f66b0864b74d",
+      "localPath": "data_sources/csiiiv/snapshots/34ef5d8cbbacda92f6503ffd9a428569f157f64d/analysis-hfep/data/nep_hfep_data_list.json"
+    },
+    {
+      "repositoryPath": "analysis-hfep/data/hgab_hfep_data_list.json",
+      "sourceUrl": "https://raw.githubusercontent.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS/34ef5d8cbbacda92f6503ffd9a428569f157f64d/analysis-hfep/data/hgab_hfep_data_list.json",
+      "sha256": "0d8cfb9b7edd32805ec9c54981b6099d32301f0ca202c16a2b33a998dbde3277",
+      "localPath": "data_sources/csiiiv/snapshots/34ef5d8cbbacda92f6503ffd9a428569f157f64d/analysis-hfep/data/hgab_hfep_data_list.json"
+    },
+    {
+      "repositoryPath": "other-analysis/data/nep_fmr_coordinates_normalized.json",
+      "sourceUrl": "https://raw.githubusercontent.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS/34ef5d8cbbacda92f6503ffd9a428569f157f64d/other-analysis/data/nep_fmr_coordinates_normalized.json",
+      "sha256": "53d76f3a3bd928a355e9c25b641ed156820b4aeee4a4d3308ff6f951441ce2fc",
+      "localPath": "data_sources/csiiiv/snapshots/34ef5d8cbbacda92f6503ffd9a428569f157f64d/other-analysis/data/nep_fmr_coordinates_normalized.json"
+    },
+    {
+      "repositoryPath": "other-analysis/data/nep_fmr_audit.json",
+      "sourceUrl": "https://raw.githubusercontent.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS/34ef5d8cbbacda92f6503ffd9a428569f157f64d/other-analysis/data/nep_fmr_audit.json",
+      "sha256": "91b81d302590332b21490c4243b6ad3942945c6e53b7a21377f47b2de3880cc4",
+      "localPath": "data_sources/fmr_analyst/nep_fmr_audit.json"
+    },
+    {
+      "repositoryPath": "other-analysis/data/nep_fmr_coordinate_normalization_audit.json",
+      "sourceUrl": "https://raw.githubusercontent.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS/34ef5d8cbbacda92f6503ffd9a428569f157f64d/other-analysis/data/nep_fmr_coordinate_normalization_audit.json",
+      "sha256": "bf47aa3fa5713aaa1872c34e0a2092d28d57565c2b7932fdd9c894962de2f5d9",
+      "localPath": "data_sources/csiiiv/snapshots/34ef5d8cbbacda92f6503ffd9a428569f157f64d/other-analysis/data/nep_fmr_coordinate_normalization_audit.json"
+    },
+    {
+      "repositoryPath": "other-analysis/data/hgab_fmr_coordinates_normalized.json",
+      "sourceUrl": "https://raw.githubusercontent.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS/34ef5d8cbbacda92f6503ffd9a428569f157f64d/other-analysis/data/hgab_fmr_coordinates_normalized.json",
+      "sha256": "c8c360514ad9ac908f435c7782bca879cfda01d26b102c97f2348f58dd7243c0",
+      "localPath": "data_sources/csiiiv/snapshots/34ef5d8cbbacda92f6503ffd9a428569f157f64d/other-analysis/data/hgab_fmr_coordinates_normalized.json"
+    },
+    {
+      "repositoryPath": "other-analysis/data/hgab_fmr_audit.json",
+      "sourceUrl": "https://raw.githubusercontent.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS/34ef5d8cbbacda92f6503ffd9a428569f157f64d/other-analysis/data/hgab_fmr_audit.json",
+      "sha256": "0baf668185f83838fb9e4eab84a6ad40a16e55a2c2392ffb5440f25a506f9440",
+      "localPath": "data_sources/csiiiv/snapshots/34ef5d8cbbacda92f6503ffd9a428569f157f64d/other-analysis/data/hgab_fmr_audit.json"
+    },
+    {
+      "repositoryPath": "other-analysis/data/hgab_fmr_coordinate_normalization_audit.json",
+      "sourceUrl": "https://raw.githubusercontent.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS/34ef5d8cbbacda92f6503ffd9a428569f157f64d/other-analysis/data/hgab_fmr_coordinate_normalization_audit.json",
+      "sha256": "21a7c976dd81d07237bfddbbbdc57f92a697f1a6262c82c3c0513bac90d0d56c",
+      "localPath": "data_sources/csiiiv/snapshots/34ef5d8cbbacda92f6503ffd9a428569f157f64d/other-analysis/data/hgab_fmr_coordinate_normalization_audit.json"
+    }
+  ]
+}
