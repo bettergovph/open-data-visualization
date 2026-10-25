@@ -1,1 +1,782 @@
-{"title":"Investigative talking points","rankingMethod":"Editorial triage by evidence strength, allocation scale and verifiable next question; not corruption likelihood or a statistical risk score. Amounts overlap; do not add them.","findings":[{"rank":1,"id":"rcs","title":"RCS: identical budget packages across unequal rainfall proxies","lead":"199 offices × ₱4.2M = ₱835.800M","basis":"Direct allocation observation; rainfall need remains a proxy","page":"rcs.html#rcs-statistical-evidence","question":"What policy or engineering design justifies one identical budget unit per office?","evidence":"All district-office RCS lines have the same amount. Province/regional rainfall proxies differ by 2.59×. Alternative formulas move different numbers of budget units. All 199 DEO lines are retained unchanged in HGAB; no differentiated needs weighting is visible in the amounts.","alternative":"Standard package costs or a minimum coverage policy may justify equal allocations. Rainfall alone does not measure demand.","next":"Obtain siting, design capacity, water demand, catchment area and existing RCS inventory.","caution":"DEO is not LEG; province rainfall is not a district observation. Returning FY2026 program.","detailLinks":[{"page":"rcs.html#rcs-statistical-evidence","label":"Uniform allocation and rainfall evidence"},{"page":"rcs.html#rcs-stage-evidence","label":"All 199 NEP → HGAB allocation traces"}],"congressional_representatives":[]},{"rank":2,"id":"insertions","title":"Two NEP matching screens give different candidate counts","lead":"5,549 supplied-comparison rows vs 6,105 / 15,979 native project rows","basis":"Source and matcher reconciliation; not a confirmed insertion count","page":"dpwh-hgab.html#hgab-insertion","question":"Which source rows explain the difference between the supplied comparison and the native one-to-one screen?","evidence":"The supplied comparison marks 5,549 domestic rows without a plausible NEP title counterpart, carrying ₱158.363B. The native one-to-one screen selects no NEP counterpart for 6,105 of 15,979 HGAB project rows. The 556-row difference is not a count of missing projects: the screens use different matching rules and row populations.","alternative":"Different project filters, grouped occurrences, parser boundaries, source versions and matching rules can change candidate counts.","next":"Reconcile project IDs and source pages, align project-level denominators, then adjudicate a sample against the original NEP and HGAB pages.","caution":"Neither count is a certified insertion total, and the counts are not independent confirmations of the same set of projects.","detailLinks":[{"page":"dpwh-hgab.html#hgab-insertion","label":"Domestic insertion candidate table"}],"congressional_representatives":[]},{"rank":3,"id":"mpb","title":"Multi-purpose buildings: a large share needs NEP counterpart review","lead":"2,835 potential insertion candidates · ₱38.747B","basis":"Parser- and matching-dependent program screen","page":"mpb.html#mpb-insertions","question":"Which MPB lines are genuinely new, and what documented facility needs and designs support them?","evidence":"The HGAB MPB PAP contains 5,765 lines carrying ₱83.707B. 620 counterpart cases remain separate from insertion candidates. The historical screen has 819 comparison pairs covering 587 distinct NEP proposals.","alternative":"Renaming, combined occurrences and legitimate phased construction can explain unmatched or recurring titles. Similar amounts can reflect standard designs.","next":"Audit original NEP/HGAB pages; obtain building purpose, floor area, design, quantities, contract scope and completion records.","caution":"MPB overlaps the full DPWH insertion/repeat findings; do not add their amounts. Equal allocations are not equal construction unit prices.","detailLinks":[{"page":"mpb.html#mpb-insertions","label":"MPB insertion candidate table"}],"congressional_representatives":[]},{"rank":4,"id":"repeats","title":"Recurring project titles: inspect overlapping work before alleging duplication","lead":"1855 of 2135 NEP comparison pairs clearly retained in HGAB","basis":"Scope-screened comparison candidates","page":"repeats.html#repeat-hgab-survival","question":"Are new appropriations paying for already-funded components or legitimate continuation?","evidence":"1194 of 1379 distinct NEP repeat-screen proposals have clear HGAB links. 24 proposals have explicit overlapping historical chainage. ₱48.207B is the unique NEP proposal allocation, not alleged loss.","alternative":"Multi-year implementation, rehabilitation and distinct components can share names and segments.","next":"Prioritize explicitly overlapping retained proposals and high amounts; compare contracts, quantities, tranche scopes and completion.","caution":"The 737 headline counts NEP–old GAA comparison pairs. Potential retention and missing counterparts remain separate.","detailLinks":[{"page":"repeats.html#repeat-hgab-survival","label":"Repeat-candidate HGAB retention evidence"}],"congressional_representatives":[]},{"rank":5,"id":"prices","title":"Exact ₱5M road and flood allocations cluster in the same offices","lead":"35 overlapping offices vs 21.7 expected under independence","basis":"Exploratory statistical association","page":"repeats.html#dpwh-investigation-evidence","question":"Does standard design, office workload or coordinated allocation explain the co-occurrence?","evidence":"Office odds ratio 5.34; unadjusted exact p=5.07e-06. Region-controlled result is also unusual under its stated null.","alternative":"Common specifications, office workload and project mix can create clustering.","next":"Pre-specify work-type and workload controls; inspect quantities and comparable prior-year prices.","caution":"Threshold/category selection was post hoc. Association does not establish procurement splitting or intent.","detailLinks":[{"page":"repeats.html#dpwh-investigation-evidence","label":"Exact ₱5M clustering statistics"}],"congressional_representatives":[]},{"rank":6,"id":"inspire","title":"INSPIRE: a large returning named appropriation needs a whole-project ledger","lead":"₱835.000M proposed in FY2027","basis":"Direct appropriation history; scope unresolved","page":"budget-innovations.html#innovation-investigation-evidence","question":"What is the total approved cost and which unfinished components explain the new appropriation?","evidence":"Named GAA lines exist in FY2023 and FY2025; FY2027 is not a first appearance.","alternative":"A legitimate phased project can require multiple appropriations.","next":"Obtain total project cost, phases, progress, obligations, disbursements and procurement records.","caution":"Appropriations are not actual spending; stage/year sums do not prove duplication.","detailLinks":[{"page":"budget-innovations.html#innovation-investigation-evidence","label":"INSPIRE appropriation history"}],"congressional_representatives":[]},{"rank":7,"id":"length-coverage","title":"Length and chainage gaps limit budget scrutiny","lead":"Roads: 48.64% · Bridges: 94.39% · FMR: 99.69% without usable extracted length","basis":"Extracted metadata coverage; original-document completeness unverified","page":"cost-matching.html#cost-coverage","question":"Can the funded segment and engineering length be established for every allocation?","evidence":"Roads: 3,329/6,482 lines have derivable stated lengths · Bridges: 65/1,159 lines have derivable stated lengths · FMR: 3/964 lines have derivable stated lengths. Official programs have separate denominators on the supporting page.","alternative":"Lengths may be recorded in engineering schedules or continuation text not recovered by this extraction; incomplete metadata need not reflect deliberate omission.","next":"Inspect original source pages and obtain funded-segment boundaries, complete chainage, project quantities and bridge spans; reconcile extraction gaps before alleging disclosure failures.","caution":"Missing includes absent and unusable extracted evidence, not proof the original documents lack length. Coordinate distances do not establish construction length; mixed scopes are separate.","detailLinks":[{"page":"cost-matching.html#cost-coverage","label":"Missing-length coverage by category and program"}],"congressional_representatives":[]},{"rank":8,"id":"cost-per-km","title":"Allocation per stated meter: inspect scope before comparing rates","lead":"189 road and 2 bridge high-rate candidates · FMR peers insufficient","basis":"Descriptive allocation/segment-length proxy; comparable engineering costs unavailable","page":"cost-per-km.html#cost-roads","question":"Do apparently high rates reflect short printed segments, structures, broader funded scope, or unusually costly comparable work?","evidence":"Whole HGAB line-item allocation is divided by its derivable stated segment meters. Roads, bridges and FMR are displayed separately, with official work-program filters. Mixed road/bridge lines receive no single-work rate. Data-derived length groups and within-program slope-change screens are provided; no fixed 100-meter boundary is imposed. Lane evidence now supports 3 title-stated lane rates, 279 stated-length inventory lane estimates, and 390 existing-bridge asset lane estimates. These bases are shown separately and are not pooled into the per-meter flags. Recorded-condition screening identifies 2 rehabilitation lines on fully matched Good/Fair assessed road segments and 0 pavement-work lines within the disclosed five-budget-year surfacing window. These are review leads; later deterioration and different work scope may justify the allocations.","alternative":"Terrain, width, structures, approaches, rehabilitation scope and components outside the stated segment can explain large differences. Tiny printed ranges or parser errors can produce extreme ratios.","next":"Verify station endpoints on original pages, then compare quantities, width, funded extent, designs and bill-of-quantity costs within the same work type. Investigate unusually short denominators before interpreting extreme ratios.","caution":"These are appropriations per stated segment meter, not verified construction unit costs. Bridge chainage is not necessarily bridge span. No cross-category average, overpricing estimate or corruption probability is established. Inventory lanes are existing asset characteristics, not verified funded quantities; widening needs additional funded lanes. Overpasses, flyovers and viaducts use bridge peers.","detailLinks":[{"page":"cost-per-km.html#cost-roads","label":"Road high-rate candidate table"},{"page":"cost-per-km.html#cost-bridges","label":"Bridge high-rate candidate table"},{"page":"cost-per-km.html#length-density-groups","label":"Peer groups and screening methodology"}],"congressional_representatives":[]},{"rank":9,"id":"short-printed-ranges","title":"Very short printed road ranges need engineering clarification","lead":"3 checked road ranges imply less than 5 meters","basis":"Original PDF text agreement; funded engineering extent unresolved","page":"cost-matching.html#short-segment-evidence","question":"Do the printed station endpoints correctly describe the funded segment, or do notation and scope need correction?","evidence":"Original-page visible text agrees with sampled road titles whose station differences calculate to 0.587 meters, 1.49 meters, 4.67 meters. Across all 3,175 known road lengths, only 204 (6.43%) are below 100 meters; high-rate sorting concentrates short denominators at the top.","alternative":"A source-document typo, station convention, short component within a larger project, or broader funded scope can explain these values. A very short printed range does not establish the physical length actually funded.","next":"Request corrected or certified station endpoints, funded-segment plans, engineering quantities and allocation scope; verify notation before interpreting extreme allocation-per-meter rates.","caution":"This is a printed-range/denominator issue, not evidence that most road projects are short or overpriced. Sampled title agreement rules out a title-transcription mismatch for those examples, not source errors or engineering ambiguity. Bridge lengths require separate interpretation.","detailLinks":[{"page":"cost-matching.html#short-segment-evidence","label":"Original-source short-range examples"}],"congressional_representatives":[]},{"rank":10,"id":"hgab-no-nep-counterpart","title":"HGAB 3rd projects without a selected NEP counterpart","lead":"6,105 / 15,979 project rows · 38.2%","basis":"One-to-one stage matching screen; unmatched rows require source review","page":"dpwh.html#hgab-coverage","question":"Which HGAB 3rd projects are genuinely absent from NEP after title, scope and occurrence review?","evidence":"The current one-to-one comparison selected no NEP counterpart for these project rows. The comparison uses title and scope signals; unresolved and unmatched cases are not proof of new projects.","alternative":"Renaming, title wrapping, scope changes, occurrence aggregation and parser errors can prevent counterpart selection.","next":"Review NEP and HGAB source pages side by side, then reconcile project scope, office, location and amount.","caution":"No selected counterpart means a review candidate, not a confirmed insertion.","detailLinks":[{"page":"dpwh.html#hgab-coverage","label":"HGAB 3rd NEP-counterpart coverage"}],"congressional_representatives":[]},{"rank":11,"id":"hgab-no-listed-documents","title":"HGAB 3rd projects with no listed DPWH Transparency documents","lead":"15,228 / 15,979 project rows · 95.3%","basis":"DPWH Transparency FY2027 snapshot; local title reconciliation","page":"dpwh.html#hgab-coverage","question":"Are project documents available through another route, or should document links be added to the Transparency record?","evidence":"Rows without a matched transparency entry listing one or more documents are counted, including titles that do not match the snapshot.","alternative":"Documents may be available on another official page or not yet indexed in the captured snapshot.","next":"Verify the project identifier and query the responsible DPWH office for POW, geotagged photos and RDC records.","caution":"No listed document is a disclosure gap in this snapshot; it does not establish that no document exists.","detailLinks":[{"page":"dpwh.html#hgab-coverage","label":"DPWH Transparency document coverage"}],"congressional_representatives":[]},{"rank":12,"id":"hgab-missing-document-types","title":"Incomplete documentation: missing POW, geotagged photos or RDC","lead":"520 / 751 inspected attachment lists · 69.2%","basis":"Locally inspected attachment metadata; HGAB 3rd title matches","page":"dpwh.html#hgab-coverage","question":"Which listed attachment types are absent, and can DPWH provide the missing POW, photos or RDC?","evidence":"Counts cover only title-matched HGAB projects whose attachment metadata is locally inspected. The supporting section breaks missing POW, photos and RDC out separately.","alternative":"The local snapshot may be incomplete, and an attachment may be indexed under another type or record.","next":"Review each project’s transparency entry and request missing categories from the implementing office.","caution":"Uninspected projects are unknown, not counted as missing; the missing-type groups can overlap.","detailLinks":[{"page":"dpwh.html#hgab-coverage","label":"POW, photo and RDC attachment coverage"}],"congressional_representatives":[]}],"statistics":{"rcs":{"offices":199,"poolPesos":835800000,"allocationCV":0,"rainfallProxyCV":0.19125774992682673,"minimumRainMm":1564.0,"maximumRainMm":4045.0,"wettestToDriestRatio":2.586317135549872,"officeMeanUnitsMoved":0.0,"provinceMeanUnitsMoved":44.0,"officeMedianUnitsMoved":0.0,"meanMedianDifferentOfficeUnits":0,"regionalFallbackOffices":1,"correlation":"Undefined: allocation variance is zero; no correlation p-value reported."},"repeats":{"comparisonPairs":2135,"uniqueCurrentProposals":1379,"uniqueCurrentPesos":48206650750,"chainageStatuses":{"overlap":24,"not stated":641,"incomplete":651,"not applicable":819},"overlapUniqueProposals":24,"trancheStatuses":{"not stated":2110,"same tranche":9,"one side stated":16}},"fiveMillion":{"N":199,"roadOffices":96,"floodOffices":45,"overlap":35,"expectedOverlap":21.70854271356784,"hypergeometricP":5.067002321181279e-06,"oddsRatio":5.336065573770492,"wald95CI":[2.4621913292960116,11.56433111789073],"regionalPermutationP":0.0003199968000319997,"regionalPermutationRepetitions":100000,"postSelectionAdjusted":false},"strictCoverage":{"candidateLineItems":16275,"candidateTotalPesos":587075661000,"excludedScheduleLines":0,"excludedScheduleAmountPesos":0,"sourceLineItems":16275,"sourceTotalPesos":587075661000,"uniquelyAssignedLines":9328,"sharedAssignedLines":2,"unassignedLines":6945,"unassignedAmountPesos":343708513000,"sharedSourceAmountPesos":375000000,"assignedSourceAmountPesos":243367148000,"strictAssignedPesos":242992148000,"strictExcludedLines":6947,"strictExcludedAmountPesos":344083513000,"strictCoveragePct":41.39,"printedCoordinateBoundaryAssignments":640,"printedCoordinateBoundaryAssignmentPesos":16673304000,"strictCoverageBeforePrintedCoordinatePct":38.55,"districtCount":254},"repeatRetention":{"comparisonPairs":2135,"uniqueNEPProposals":1379,"pairStatuses":{"Potential retained link":118,"Clear retained link":1855,"No selected or cited counterpart":162},"uniqueStatuses":{"Potential retained link":76,"Clear retained link":1194,"No selected or cited counterpart":109}},"mpb":{"hgabLines":5765,"hgabPesos":83706551000,"insertionCandidates":2835,"insertionPesos":38746744000,"ambiguousLines":620,"ambiguousPesos":11114224000,"repeatPairs":819,"repeatProposals":587,"historicalRepeatProjects":548,"removalCandidates":137,"removalPesos":2560500000,"adjustedLines":127},"lengthCoverage":[{"category":"Roads","program":"All selected programs · coverage only","lineItems":6482,"withLength":3329,"withoutLength":3153,"missingPct":48.64,"withRate":3329,"allocationPesos":269747159000,"unusableLengthAllocationPesos":83622489000},{"category":"Bridges","program":"All selected programs · coverage only","lineItems":1159,"withLength":65,"withoutLength":1094,"missingPct":94.39,"withRate":65,"allocationPesos":55624118000,"unusableLengthAllocationPesos":49932811000},{"category":"FMR","program":"All selected programs · coverage only","lineItems":964,"withLength":3,"withoutLength":961,"missingPct":99.69,"withRate":3,"allocationPesos":19628100000,"unusableLengthAllocationPesos":19593100000},{"category":"Mixed roads / bridges","program":"All selected programs · coverage only","lineItems":116,"withLength":45,"withoutLength":71,"missingPct":61.21,"withRate":0,"allocationPesos":12171021000,"unusableLengthAllocationPesos":5829572000}],"highRateScreen":{"candidates":191,"graphExtremeRecords":111,"method":"Peers share category, structure group (overpasses/flyovers, viaducts and pedestrian structures separated), official PAP, a data-derived length band, and matched surface/condition/assessment-year context. Unknown context is pooled only with unknown context and remains explicitly unadjusted. At least 20 peers with stated length ≥10m. Candidate rate exceeds both 2× peer median and Q3+1.5×IQR. Chart extremes exceed max(2×median,Q3+3×IQR); sub-10m printed ranges also stay off rate charts. Lane inventory estimates do not enter these per-meter flags.","limits":"Exploratory relative-rate screen, not proof of overpricing. Width, terrain, structures, engineering quantities and funded extent remain unverified. Missing or insufficient peers produce no high-rate conclusion."},"laneCostCoverage":[{"category":"Roads","lineItems":6482,"titleLaneRateRecords":3,"inventoryMatchedRecords":596,"inventorySegmentLaneMatchedRecords":471,"assetLengthRecords":595,"assetLaneRecords":595,"assetWidthRecords":595,"missingStatedLengthWithAssetLengthRecords":9,"inventoryProxyRateRecords":279,"existingAssetLaneRateRecords":0,"withoutTitleLaneRatePct":99.95},{"category":"Bridges","lineItems":1159,"titleLaneRateRecords":0,"inventoryMatchedRecords":754,"inventorySegmentLaneMatchedRecords":753,"assetLengthRecords":754,"assetLaneRecords":753,"assetWidthRecords":754,"missingStatedLengthWithAssetLengthRecords":754,"inventoryProxyRateRecords":0,"existingAssetLaneRateRecords":390,"withoutTitleLaneRatePct":100.0},{"category":"FMR","lineItems":964,"titleLaneRateRecords":0,"inventoryMatchedRecords":0,"inventorySegmentLaneMatchedRecords":0,"assetLengthRecords":0,"assetLaneRecords":0,"assetWidthRecords":0,"missingStatedLengthWithAssetLengthRecords":0,"inventoryProxyRateRecords":0,"existingAssetLaneRateRecords":0,"withoutTitleLaneRatePct":100.0},{"category":"Mixed roads / bridges","lineItems":116,"titleLaneRateRecords":0,"inventoryMatchedRecords":0,"inventorySegmentLaneMatchedRecords":0,"assetLengthRecords":0,"assetLaneRecords":0,"assetWidthRecords":0,"missingStatedLengthWithAssetLengthRecords":0,"inventoryProxyRateRecords":0,"existingAssetLaneRateRecords":0,"withoutTitleLaneRatePct":100.0}],"assetConditionContext":{"byCategory":{"Roads":{"lineItems":6482,"withContext":471,"fullyAssessedRoadRecords":358,"rehabGoodFairCandidates":2,"recentSurfacingCandidates":0,"bridgeGoodFairUndatedContext":0},"Bridges":{"lineItems":1159,"withContext":649,"fullyAssessedRoadRecords":0,"rehabGoodFairCandidates":0,"recentSurfacingCandidates":0,"bridgeGoodFairUndatedContext":167},"FMR":{"lineItems":964,"withContext":0,"fullyAssessedRoadRecords":0,"rehabGoodFairCandidates":0,"recentSurfacingCandidates":0,"bridgeGoodFairUndatedContext":0},"Mixed roads / bridges":{"lineItems":116,"withContext":0,"fullyAssessedRoadRecords":0,"rehabGoodFairCandidates":0,"recentSurfacingCandidates":0,"bridgeGoodFairUndatedContext":0}},"budgetYear":2027,"recentSurfacingWindowYears":5,"method":"Condition flag: rehabilitation/reconstruction/major repair only, full matched road range assessed Good/Fair with a known pre-budget assessment year. Recent-surfacing flag: rehabilitation, preventive maintenance or other explicitly described pavement work where the full matched range has a positive recorded last-surfacing year within five budget years; unknown/zero values are not filled. Widening, approaches, slope/drainage and off-carriageway scopes excluded. Bridge condition is displayed, but an unknown assessment year prevents the dated flag.","limits":"Review leads, not proof of waste or incorrect prioritization. Assessment and budget dates differ; later deterioration, structural/safety work or different funded components may justify rehabilitation. Last-surfacing inventory is older and cannot establish that no later work occurred."},"shortSegments":[{"category":"Roads","allLines":6498,"knownLengths":3334,"below100m":221,"below100PctOfKnown":6.63,"medianMeters":828.25,"top25HighRateRows":25,"below100InTop25HighRates":20,"bins":{"<10m":5,"10–<100m":216,"100–<1,000m":1619,"1,000–<5,000m":1376,"≥5,000m":118}},{"category":"Bridges","allLines":1140,"knownLengths":60,"below100m":37,"below100PctOfKnown":61.67,"medianMeters":61.0,"top25HighRateRows":25,"below100InTop25HighRates":23,"bins":{"<10m":2,"10–<100m":35,"100–<1,000m":21,"1,000–<5,000m":2,"≥5,000m":0}},{"category":"FMR","allLines":964,"knownLengths":3,"below100m":0,"below100PctOfKnown":0.0,"medianMeters":650.0,"top25HighRateRows":3,"below100InTop25HighRates":0,"bins":{"<10m":0,"10–<100m":0,"100–<1,000m":2,"1,000–<5,000m":1,"≥5,000m":0}},{"category":"Mixed roads / bridges","allLines":117,"knownLengths":45,"below100m":15,"below100PctOfKnown":33.33,"medianMeters":138.0,"top25HighRateRows":0,"below100InTop25HighRates":0,"bins":{"<10m":1,"10–<100m":14,"100–<1,000m":27,"1,000–<5,000m":3,"≥5,000m":0}}],"lineItemReviewQueue":{"sourceOccurrences":16275,"flaggedOccurrences":16083,"flagTypes":{"insertion":6105,"missing_documents":15228,"amount_group":10519,"historical_title":638,"chainage_overlap":17,"high_meter_rate":191,"missing_photos":109,"missing_rdc":501,"missing_pow":44,"very_short_range":8,"rehab_good_fair":2},"flagCountDistribution":{"5":6,"4":275,"3":4725,"2":6980,"1":4097},"top25Occurrences":25},"rcsStageTrace":{"districtOfficeLines":199,"unchangedInHGAB":199,"withoutSelectedCounterpart":0,"allocationDecreases":0,"provinceFirstScenarioZeroUnitOffices":44,"confirmedLEGLosses":null}},"sources":[{"file":"dpwh-data.json","sha256":"e805739dee77028658b2af48ef2731b156d70e3ffa20684007172f5243873733"},{"file":"rcs-data.json","sha256":"8ed653b26c110fce2dda6136094d00080d1b31c7866048865faa57bffdb2c4a9"},{"file":"congress-data.json","sha256":"d10596a9186fa091509c2d6f56d49527c4d3d812f894e4a5d818329a2f52300c"},{"file":"budget-innovations-data.json","sha256":"2731ef00f0d0d593046ede795c0624af3b4527e051a6523f08719e6027f9c167"},{"file":"dpwh-hgab-comparison.json","sha256":"d635192cb29a871dea752758a421b7c54460719b835e8f777fcc4a98d6c636f5"},{"file":"hgab-revision-data.json","sha256":"d3e15aba1a4e8db5bc61c1b94606385df3a7fd6b5d577d2797bff59baf98ccfc"},{"file":"hb_nep_comparison_3rd.csv","sha256":"6358f901c9416f7c6cde9328e5a65ac05f6d8962f0bdf6bab3c5f0ef124d36c9"}],"scope":"FY2027 NEP/HGAB 3rd reading; historical GAA comparisons where locally available. No GAB/GAA 2027 outcome inferred.","budgetStages":["NEP","HGAB (House)","GAB (Senate)","Bicam (House/Senate reconciliation)","GAA (enacted)"],"lineItemReviewQueue":{"data":"line-item-review-queue.json","ranking":"Flag count descending, allocation pesos descending, occurrence ID ascending for exact ties.","scope":"Domestic DPWH HGAB 3rd-reading occurrences only; not a ranking of the entire national budget.","method":{"maximumPossibleFlags":12,"amountGroupMinimumOccurrences":10,"amountGroupMinimumNamedOffices":3,"amountGroupScope":"Identical PAP and positive exact peso amount; counts are allocation occurrences, not certified distinct construction contracts.","historicalYears":[2020,2021,2022,2023,2024,2025,2026],"historicalMatch":"Identical full normalized title after complete trailing metadata removal; same qualified municipality/province; direction/location/tranche conflict and disjoint stated chainage excluded.","weights":"One point per flag type. Multiple historical years do not add points.","highMeterRate":"Peers share category, structure group (overpasses/flyovers, viaducts and pedestrian structures separated), official PAP, a data-derived length band, and matched surface/condition/assessment-year context. Unknown context is pooled only with unknown context and remains explicitly unadjusted. At least 20 peers with stated length ≥10m. Candidate rate exceeds both 2× peer median and Q3+1.5×IQR. Chart extremes exceed max(2×median,Q3+3×IQR); sub-10m printed ranges also stay off rate charts. Lane inventory estimates do not enter these per-meter flags.","laneEvidence":"Title lane rates, inventory lane estimates and existing-bridge asset estimates are separate contextual measures. None adds a ranking point or replaces a missing funded length. Lane and station evidence is retained in lengthReview.","conditionAndSurfacing":{"byCategory":{"Roads":{"lineItems":6482,"withContext":471,"fullyAssessedRoadRecords":358,"rehabGoodFairCandidates":2,"recentSurfacingCandidates":0,"bridgeGoodFairUndatedContext":0},"Bridges":{"lineItems":1159,"withContext":649,"fullyAssessedRoadRecords":0,"rehabGoodFairCandidates":0,"recentSurfacingCandidates":0,"bridgeGoodFairUndatedContext":167},"FMR":{"lineItems":964,"withContext":0,"fullyAssessedRoadRecords":0,"rehabGoodFairCandidates":0,"recentSurfacingCandidates":0,"bridgeGoodFairUndatedContext":0},"Mixed roads / bridges":{"lineItems":116,"withContext":0,"fullyAssessedRoadRecords":0,"rehabGoodFairCandidates":0,"recentSurfacingCandidates":0,"bridgeGoodFairUndatedContext":0}},"budgetYear":2027,"recentSurfacingWindowYears":5,"method":"Condition flag: rehabilitation/reconstruction/major repair only, full matched road range assessed Good/Fair with a known pre-budget assessment year. Recent-surfacing flag: rehabilitation, preventive maintenance or other explicitly described pavement work where the full matched range has a positive recorded last-surfacing year within five budget years; unknown/zero values are not filled. Widening, approaches, slope/drainage and off-carriageway scopes excluded. Bridge condition is displayed, but an unknown assessment year prevents the dated flag.","limits":"Review leads, not proof of waste or incorrect prioritization. Assessment and budget dates differ; later deterioration, structural/safety work or different funded components may justify rehabilitation. Last-surfacing inventory is older and cannot establish that no later work occurred."},"evidenceGaps":"Missing length and insufficient peers are cautions, not points. A sub-10m printed range gets a separate denominator-warning point and remains subject to source verification. Extreme rates require denominator/scope review and are omitted from rate charts.","summaryCoverage":"The queue has up to twelve possible flags: the prior nine screening types plus separate incomplete-documentation flags for missing POW, geotagged photos, and RDC among locally inspected attachment records. Potential NEP counterpart and no listed documents are separate flags; document-type flags are unknown outside inspected metadata.","dependence":"Historical recurrence and chainage overlap are related indicators; scores are descriptive triage, not independent evidence or probabilities.","limitations":["Uniform packages can be legitimate. Exact appropriation amounts are not unit costs.","Strict historical matching misses paraphrased titles and unresolved locations; no icon means this screen did not identify a review trigger, not that the project is verified.","The prior-year search uses locally available DPWH road, bridge, building and flood records from FY2020–FY2026; it is not a search of every project type or every agency.","Matching/parser errors can produce insertion flags. Top 25 overlap other findings; do not sum them as losses.","Current office, representative, role and party do not contribute any points."]}},"districtComparisonPolicy":{"scope":"All district rows are available for reader selection in the all-district ranking. No selected-district section or person-specific defaults.","data":"congress-benchmark.json"},"allDistrictComparison":{"districts":254,"totalStrictLines":9328},"localDatasetInventory":[{"file":"database/poverty.json","use":"Potential socio-economic context; no year/definition recorded in the inspected rows, so not used as a needs control.","sha256":"a0fd7fc2eee547085dd432e1ad055d6ba929ab1ddd9e72900a0155e3caafaeae"},{"file":"static/data/flood_summary.json","coverage":"2016–2024 projects","use":"Historical project reference; not a current flood-exposure or FY2027 needs denominator.","sha256":"167b27c7bb9b2ceb13b371903a71a2bce93b8c82d7863956d394bd721bf7aa46"}],"agencyComparisonCoverage":[{"scope":"FMR annex","nepPesos":16000000000,"hgabPesos":19628100000,"adjustmentPesos":3628100000,"limit":"Programme controls; individual counterpart confidence stays separate"},{"scope":"NIA exact named-title subset","nepPesos":10355321000,"hgabPesos":8855321000,"adjustmentPesos":-1500000000,"limit":"Matched subset only; not the whole NIA budget"},{"scope":"HFEP programme total","nepPesos":14539832000,"hgabPesos":10088832000,"adjustmentPesos":-4451000000,"limit":"MOOE and Capital Outlays matched at programme level"},{"scope":"NIA irrigation annex","nepPesos":17598181000,"hgabPesos":17999305000,"adjustmentPesos":401124000,"limit":"Reviewed detailed annex controls; project identity remains separate"},{"scope":"DepEd school operations","nepPesos":null,"hgabPesos":102670874000,"adjustmentPesos":null,"limit":"Comparable NEP school baseline not built"}],"congressional_representatives":[]}
+{
+  "title": "Investigative talking points",
+  "rankingMethod": "Editorial triage by evidence strength, allocation scale and verifiable next question; not corruption likelihood or a statistical risk score. Amounts overlap; do not add them.",
+  "findings": [
+    {
+      "rank": 1,
+      "id": "rcs",
+      "title": "RCS: identical budget packages across unequal rainfall proxies",
+      "lead": "199 offices × ₱4.2M = ₱835.800M",
+      "basis": "Direct allocation observation; rainfall need remains a proxy",
+      "page": "rcs.html#rcs-statistical-evidence",
+      "question": "What policy or engineering design justifies one identical budget unit per office?",
+      "evidence": "All district-office RCS lines have the same amount. Province/regional rainfall proxies differ by 2.59×. Alternative formulas move different numbers of budget units. All 199 DEO lines are retained unchanged in HGAB; no differentiated needs weighting is visible in the amounts.",
+      "alternative": "Standard package costs or a minimum coverage policy may justify equal allocations. Rainfall alone does not measure demand.",
+      "next": "Obtain siting, design capacity, water demand, catchment area and existing RCS inventory.",
+      "caution": "DEO is not LEG; province rainfall is not a district observation. Returning FY2026 program.",
+      "detailLinks": [
+        {
+          "page": "rcs.html#rcs-statistical-evidence",
+          "label": "Uniform allocation and rainfall evidence"
+        },
+        {
+          "page": "rcs.html#rcs-stage-evidence",
+          "label": "All 199 NEP → HGAB allocation traces"
+        }
+      ],
+      "congressional_representatives": []
+    },
+    {
+      "rank": 2,
+      "id": "insertions",
+      "title": "Two NEP matching screens give different candidate counts",
+      "lead": "5,549 supplied-comparison rows vs 6,105 / 15,979 native project rows",
+      "basis": "Source and matcher reconciliation; not a confirmed insertion count",
+      "page": "dpwh-hgab.html#hgab-insertion",
+      "question": "Which source rows explain the difference between the supplied comparison and the native one-to-one screen?",
+      "evidence": "The supplied comparison marks 5,549 domestic rows without a plausible NEP title counterpart, carrying ₱158.363B. The native one-to-one screen selects no NEP counterpart for 6,105 of 15,979 HGAB project rows. The 556-row difference is not a count of missing projects: the screens use different matching rules and row populations.",
+      "alternative": "Different project filters, grouped occurrences, parser boundaries, source versions and matching rules can change candidate counts.",
+      "next": "Reconcile project IDs and source pages, align project-level denominators, then adjudicate a sample against the original NEP and HGAB pages.",
+      "caution": "Neither count is a certified insertion total, and the counts are not independent confirmations of the same set of projects.",
+      "detailLinks": [
+        {
+          "page": "dpwh-hgab.html#hgab-insertion",
+          "label": "Domestic insertion candidate table"
+        }
+      ],
+      "congressional_representatives": []
+    },
+    {
+      "rank": 3,
+      "id": "mpb",
+      "title": "Multi-purpose buildings: a large share needs NEP counterpart review",
+      "lead": "2,835 potential insertion candidates · ₱38.747B",
+      "basis": "Parser- and matching-dependent program screen",
+      "page": "mpb.html#mpb-insertions",
+      "question": "Which MPB lines are genuinely new, and what documented facility needs and designs support them?",
+      "evidence": "The HGAB MPB PAP contains 5,765 lines carrying ₱83.707B. 620 counterpart cases remain separate from insertion candidates. The historical screen has 819 comparison pairs covering 587 distinct NEP proposals.",
+      "alternative": "Renaming, combined occurrences and legitimate phased construction can explain unmatched or recurring titles. Similar amounts can reflect standard designs.",
+      "next": "Audit original NEP/HGAB pages; obtain building purpose, floor area, design, quantities, contract scope and completion records.",
+      "caution": "MPB overlaps the full DPWH insertion/repeat findings; do not add their amounts. Equal allocations are not equal construction unit prices.",
+      "detailLinks": [
+        {
+          "page": "mpb.html#mpb-insertions",
+          "label": "MPB insertion candidate table"
+        }
+      ],
+      "congressional_representatives": []
+    },
+    {
+      "rank": 4,
+      "id": "repeats",
+      "title": "Recurring project titles: inspect overlapping work before alleging duplication",
+      "lead": "1855 of 2135 NEP comparison pairs clearly retained in HGAB",
+      "basis": "Scope-screened comparison candidates",
+      "page": "repeats.html#repeat-hgab-survival",
+      "question": "Are new appropriations paying for already-funded components or legitimate continuation?",
+      "evidence": "1194 of 1379 distinct NEP repeat-screen proposals have clear HGAB links. 24 proposals have explicit overlapping historical chainage. ₱48.207B is the unique NEP proposal allocation, not alleged loss.",
+      "alternative": "Multi-year implementation, rehabilitation and distinct components can share names and segments.",
+      "next": "Prioritize explicitly overlapping retained proposals and high amounts; compare contracts, quantities, tranche scopes and completion.",
+      "caution": "The 737 headline counts NEP–old GAA comparison pairs. Potential retention and missing counterparts remain separate.",
+      "detailLinks": [
+        {
+          "page": "repeats.html#repeat-hgab-survival",
+          "label": "Repeat-candidate HGAB retention evidence"
+        }
+      ],
+      "congressional_representatives": []
+    },
+    {
+      "rank": 5,
+      "id": "prices",
+      "title": "Exact ₱5M road and flood allocations cluster in the same offices",
+      "lead": "35 overlapping offices vs 21.7 expected under independence",
+      "basis": "Exploratory statistical association",
+      "page": "repeats.html#dpwh-investigation-evidence",
+      "question": "Does standard design, office workload or coordinated allocation explain the co-occurrence?",
+      "evidence": "Office odds ratio 5.34; unadjusted exact p=5.07e-06. Region-controlled result is also unusual under its stated null.",
+      "alternative": "Common specifications, office workload and project mix can create clustering.",
+      "next": "Pre-specify work-type and workload controls; inspect quantities and comparable prior-year prices.",
+      "caution": "Threshold/category selection was post hoc. Association does not establish procurement splitting or intent.",
+      "detailLinks": [
+        {
+          "page": "repeats.html#dpwh-investigation-evidence",
+          "label": "Exact ₱5M clustering statistics"
+        }
+      ],
+      "congressional_representatives": []
+    },
+    {
+      "rank": 6,
+      "id": "inspire",
+      "title": "INSPIRE: a large returning named appropriation needs a whole-project ledger",
+      "lead": "₱835.000M proposed in FY2027",
+      "basis": "Direct appropriation history; scope unresolved",
+      "page": "budget-innovations.html#innovation-investigation-evidence",
+      "question": "What is the total approved cost and which unfinished components explain the new appropriation?",
+      "evidence": "Named GAA lines exist in FY2023 and FY2025; FY2027 is not a first appearance.",
+      "alternative": "A legitimate phased project can require multiple appropriations.",
+      "next": "Obtain total project cost, phases, progress, obligations, disbursements and procurement records.",
+      "caution": "Appropriations are not actual spending; stage/year sums do not prove duplication.",
+      "detailLinks": [
+        {
+          "page": "budget-innovations.html#innovation-investigation-evidence",
+          "label": "INSPIRE appropriation history"
+        }
+      ],
+      "congressional_representatives": []
+    },
+    {
+      "rank": 7,
+      "id": "length-coverage",
+      "title": "Length and chainage gaps limit budget scrutiny",
+      "lead": "Roads: 48.64% · Bridges: 94.39% · FMR: 99.69% without usable extracted length",
+      "basis": "Extracted metadata coverage; original-document completeness unverified",
+      "page": "cost-matching.html#cost-coverage",
+      "question": "Can the funded segment and engineering length be established for every allocation?",
+      "evidence": "Roads: 3,329/6,482 lines have derivable stated lengths · Bridges: 65/1,159 lines have derivable stated lengths · FMR: 3/964 lines have derivable stated lengths. Official programs have separate denominators on the supporting page.",
+      "alternative": "Lengths may be recorded in engineering schedules or continuation text not recovered by this extraction; incomplete metadata need not reflect deliberate omission.",
+      "next": "Inspect original source pages and obtain funded-segment boundaries, complete chainage, project quantities and bridge spans; reconcile extraction gaps before alleging disclosure failures.",
+      "caution": "Missing includes absent and unusable extracted evidence, not proof the original documents lack length. Coordinate distances do not establish construction length; mixed scopes are separate.",
+      "detailLinks": [
+        {
+          "page": "cost-matching.html#cost-coverage",
+          "label": "Missing-length coverage by category and program"
+        }
+      ],
+      "congressional_representatives": []
+    },
+    {
+      "rank": 8,
+      "id": "cost-per-km",
+      "title": "Allocation per stated meter: inspect scope before comparing rates",
+      "lead": "189 road and 2 bridge high-rate candidates · FMR peers insufficient",
+      "basis": "Descriptive allocation/segment-length proxy; comparable engineering costs unavailable",
+      "page": "cost-per-km.html#cost-roads",
+      "question": "Do apparently high rates reflect short printed segments, structures, broader funded scope, or unusually costly comparable work?",
+      "evidence": "Whole HGAB line-item allocation is divided by its derivable stated segment meters. Roads, bridges and FMR are displayed separately, with official work-program filters. Mixed road/bridge lines receive no single-work rate. Data-derived length groups and within-program slope-change screens are provided; no fixed 100-meter boundary is imposed. Lane evidence now supports 3 title-stated lane rates, 279 stated-length inventory lane estimates, and 390 existing-bridge asset lane estimates. These bases are shown separately and are not pooled into the per-meter flags. Recorded-condition screening identifies 2 rehabilitation lines on fully matched Good/Fair assessed road segments and 0 pavement-work lines within the disclosed five-budget-year surfacing window. These are review leads; later deterioration and different work scope may justify the allocations.",
+      "alternative": "Terrain, width, structures, approaches, rehabilitation scope and components outside the stated segment can explain large differences. Tiny printed ranges or parser errors can produce extreme ratios.",
+      "next": "Verify station endpoints on original pages, then compare quantities, width, funded extent, designs and bill-of-quantity costs within the same work type. Investigate unusually short denominators before interpreting extreme ratios.",
+      "caution": "These are appropriations per stated segment meter, not verified construction unit costs. Bridge chainage is not necessarily bridge span. No cross-category average, overpricing estimate or corruption probability is established. Inventory lanes are existing asset characteristics, not verified funded quantities; widening needs additional funded lanes. Overpasses, flyovers and viaducts use bridge peers.",
+      "detailLinks": [
+        {
+          "page": "cost-per-km.html#cost-roads",
+          "label": "Road high-rate candidate table"
+        },
+        {
+          "page": "cost-per-km.html#cost-bridges",
+          "label": "Bridge high-rate candidate table"
+        },
+        {
+          "page": "cost-per-km.html#length-density-groups",
+          "label": "Peer groups and screening methodology"
+        }
+      ],
+      "congressional_representatives": []
+    },
+    {
+      "rank": 9,
+      "id": "short-printed-ranges",
+      "title": "Very short printed road ranges need engineering clarification",
+      "lead": "3 checked road ranges imply less than 5 meters",
+      "basis": "Original PDF text agreement; funded engineering extent unresolved",
+      "page": "cost-matching.html#short-segment-evidence",
+      "question": "Do the printed station endpoints correctly describe the funded segment, or do notation and scope need correction?",
+      "evidence": "Original-page visible text agrees with sampled road titles whose station differences calculate to 0.587 meters, 1.49 meters, 4.67 meters. Across all 3,175 known road lengths, only 204 (6.43%) are below 100 meters; high-rate sorting concentrates short denominators at the top.",
+      "alternative": "A source-document typo, station convention, short component within a larger project, or broader funded scope can explain these values. A very short printed range does not establish the physical length actually funded.",
+      "next": "Request corrected or certified station endpoints, funded-segment plans, engineering quantities and allocation scope; verify notation before interpreting extreme allocation-per-meter rates.",
+      "caution": "This is a printed-range/denominator issue, not evidence that most road projects are short or overpriced. Sampled title agreement rules out a title-transcription mismatch for those examples, not source errors or engineering ambiguity. Bridge lengths require separate interpretation.",
+      "detailLinks": [
+        {
+          "page": "cost-matching.html#short-segment-evidence",
+          "label": "Original-source short-range examples"
+        }
+      ],
+      "congressional_representatives": []
+    },
+    {
+      "rank": 10,
+      "id": "hgab-no-nep-counterpart",
+      "title": "HGAB 3rd projects without a selected NEP counterpart",
+      "lead": "6,105 / 15,979 project rows · 38.2%",
+      "basis": "One-to-one stage matching screen; unmatched rows require source review",
+      "page": "dpwh.html#hgab-coverage",
+      "question": "Which HGAB 3rd projects are genuinely absent from NEP after title, scope and occurrence review?",
+      "evidence": "The current one-to-one comparison selected no NEP counterpart for these project rows. The comparison uses title and scope signals; unresolved and unmatched cases are not proof of new projects.",
+      "alternative": "Renaming, title wrapping, scope changes, occurrence aggregation and parser errors can prevent counterpart selection.",
+      "next": "Review NEP and HGAB source pages side by side, then reconcile project scope, office, location and amount.",
+      "caution": "No selected counterpart means a review candidate, not a confirmed insertion.",
+      "detailLinks": [
+        {
+          "page": "dpwh.html#hgab-coverage",
+          "label": "HGAB 3rd NEP-counterpart coverage"
+        }
+      ],
+      "congressional_representatives": []
+    },
+    {
+      "rank": 11,
+      "id": "hgab-no-listed-documents",
+      "title": "HGAB 3rd projects with no listed DPWH Transparency documents",
+      "lead": "15,228 / 15,979 project rows · 95.3%",
+      "basis": "DPWH Transparency FY2027 snapshot; local title reconciliation",
+      "page": "dpwh.html#hgab-coverage",
+      "question": "Are project documents available through another route, or should document links be added to the Transparency record?",
+      "evidence": "Rows without a matched transparency entry listing one or more documents are counted, including titles that do not match the snapshot.",
+      "alternative": "Documents may be available on another official page or not yet indexed in the captured snapshot.",
+      "next": "Verify the project identifier and query the responsible DPWH office for POW, geotagged photos and RDC records.",
+      "caution": "No listed document is a disclosure gap in this snapshot; it does not establish that no document exists.",
+      "detailLinks": [
+        {
+          "page": "dpwh.html#hgab-coverage",
+          "label": "DPWH Transparency document coverage"
+        }
+      ],
+      "congressional_representatives": []
+    },
+    {
+      "rank": 12,
+      "id": "hgab-missing-document-types",
+      "title": "Incomplete documentation: missing POW, geotagged photos or RDC",
+      "lead": "520 / 751 inspected attachment lists · 69.2%",
+      "basis": "Locally inspected attachment metadata; HGAB 3rd title matches",
+      "page": "dpwh.html#hgab-coverage",
+      "question": "Which listed attachment types are absent, and can DPWH provide the missing POW, photos or RDC?",
+      "evidence": "Counts cover only title-matched HGAB projects whose attachment metadata is locally inspected. The supporting section breaks missing POW, photos and RDC out separately.",
+      "alternative": "The local snapshot may be incomplete, and an attachment may be indexed under another type or record.",
+      "next": "Review each project’s transparency entry and request missing categories from the implementing office.",
+      "caution": "Uninspected projects are unknown, not counted as missing; the missing-type groups can overlap.",
+      "detailLinks": [
+        {
+          "page": "dpwh.html#hgab-coverage",
+          "label": "POW, photo and RDC attachment coverage"
+        }
+      ],
+      "congressional_representatives": []
+    }
+  ],
+  "statistics": {
+    "rcs": {
+      "offices": 199,
+      "poolPesos": 835800000,
+      "allocationCV": 0,
+      "rainfallProxyCV": 0.19125774992682673,
+      "minimumRainMm": 1564.0,
+      "maximumRainMm": 4045.0,
+      "wettestToDriestRatio": 2.586317135549872,
+      "officeMeanUnitsMoved": 0.0,
+      "provinceMeanUnitsMoved": 44.0,
+      "officeMedianUnitsMoved": 0.0,
+      "meanMedianDifferentOfficeUnits": 0,
+      "regionalFallbackOffices": 1,
+      "correlation": "Undefined: allocation variance is zero; no correlation p-value reported."
+    },
+    "repeats": {
+      "comparisonPairs": 2135,
+      "uniqueCurrentProposals": 1379,
+      "uniqueCurrentPesos": 48206650750,
+      "chainageStatuses": {
+        "overlap": 24,
+        "not stated": 641,
+        "incomplete": 651,
+        "not applicable": 819
+      },
+      "overlapUniqueProposals": 24,
+      "trancheStatuses": {
+        "not stated": 2110,
+        "same tranche": 9,
+        "one side stated": 16
+      }
+    },
+    "fiveMillion": {
+      "N": 199,
+      "roadOffices": 96,
+      "floodOffices": 45,
+      "overlap": 35,
+      "expectedOverlap": 21.70854271356784,
+      "hypergeometricP": 5.067002321181279e-06,
+      "oddsRatio": 5.336065573770492,
+      "wald95CI": [
+        2.4621913292960116,
+        11.56433111789073
+      ],
+      "regionalPermutationP": 0.0003199968000319997,
+      "regionalPermutationRepetitions": 100000,
+      "postSelectionAdjusted": false
+    },
+    "strictCoverage": {
+      "candidateLineItems": 16275,
+      "candidateTotalPesos": 587075661000,
+      "excludedScheduleLines": 0,
+      "excludedScheduleAmountPesos": 0,
+      "sourceLineItems": 16275,
+      "sourceTotalPesos": 587075661000,
+      "uniquelyAssignedLines": 9328,
+      "sharedAssignedLines": 2,
+      "unassignedLines": 6945,
+      "unassignedAmountPesos": 343708513000,
+      "sharedSourceAmountPesos": 375000000,
+      "assignedSourceAmountPesos": 243367148000,
+      "strictAssignedPesos": 242992148000,
+      "strictExcludedLines": 6947,
+      "strictExcludedAmountPesos": 344083513000,
+      "strictCoveragePct": 41.39,
+      "printedCoordinateBoundaryAssignments": 640,
+      "printedCoordinateBoundaryAssignmentPesos": 16673304000,
+      "strictCoverageBeforePrintedCoordinatePct": 38.55,
+      "districtCount": 254
+    },
+    "repeatRetention": {
+      "comparisonPairs": 2135,
+      "uniqueNEPProposals": 1379,
+      "pairStatuses": {
+        "Potential retained link": 118,
+        "Clear retained link": 1855,
+        "No selected or cited counterpart": 162
+      },
+      "uniqueStatuses": {
+        "Potential retained link": 76,
+        "Clear retained link": 1194,
+        "No selected or cited counterpart": 109
+      }
+    },
+    "mpb": {
+      "hgabLines": 5765,
+      "hgabPesos": 83706551000,
+      "insertionCandidates": 2835,
+      "insertionPesos": 38746744000,
+      "ambiguousLines": 620,
+      "ambiguousPesos": 11114224000,
+      "repeatPairs": 819,
+      "repeatProposals": 587,
+      "historicalRepeatProjects": 548,
+      "removalCandidates": 137,
+      "removalPesos": 2560500000,
+      "adjustedLines": 127
+    },
+    "lengthCoverage": [
+      {
+        "category": "Roads",
+        "program": "All selected programs · coverage only",
+        "lineItems": 6482,
+        "withLength": 3329,
+        "withoutLength": 3153,
+        "missingPct": 48.64,
+        "withRate": 3329,
+        "allocationPesos": 269747159000,
+        "unusableLengthAllocationPesos": 83622489000
+      },
+      {
+        "category": "Bridges",
+        "program": "All selected programs · coverage only",
+        "lineItems": 1159,
+        "withLength": 65,
+        "withoutLength": 1094,
+        "missingPct": 94.39,
+        "withRate": 65,
+        "allocationPesos": 55624118000,
+        "unusableLengthAllocationPesos": 49932811000
+      },
+      {
+        "category": "FMR",
+        "program": "All selected programs · coverage only",
+        "lineItems": 964,
+        "withLength": 3,
+        "withoutLength": 961,
+        "missingPct": 99.69,
+        "withRate": 3,
+        "allocationPesos": 19628100000,
+        "unusableLengthAllocationPesos": 19593100000
+      },
+      {
+        "category": "Mixed roads / bridges",
+        "program": "All selected programs · coverage only",
+        "lineItems": 116,
+        "withLength": 45,
+        "withoutLength": 71,
+        "missingPct": 61.21,
+        "withRate": 0,
+        "allocationPesos": 12171021000,
+        "unusableLengthAllocationPesos": 5829572000
+      }
+    ],
+    "highRateScreen": {
+      "candidates": 191,
+      "graphExtremeRecords": 111,
+      "method": "Peers share category, structure group (overpasses/flyovers, viaducts and pedestrian structures separated), official PAP, a data-derived length band, and matched surface/condition/assessment-year context. Unknown context is pooled only with unknown context and remains explicitly unadjusted. At least 20 peers with stated length ≥10m. Candidate rate exceeds both 2× peer median and Q3+1.5×IQR. Chart extremes exceed max(2×median,Q3+3×IQR); sub-10m printed ranges also stay off rate charts. Lane inventory estimates do not enter these per-meter flags.",
+      "limits": "Exploratory relative-rate screen, not proof of overpricing. Width, terrain, structures, engineering quantities and funded extent remain unverified. Missing or insufficient peers produce no high-rate conclusion."
+    },
+    "laneCostCoverage": [
+      {
+        "category": "Roads",
+        "lineItems": 6482,
+        "titleLaneRateRecords": 3,
+        "inventoryMatchedRecords": 596,
+        "inventorySegmentLaneMatchedRecords": 471,
+        "assetLengthRecords": 595,
+        "assetLaneRecords": 595,
+        "assetWidthRecords": 595,
+        "missingStatedLengthWithAssetLengthRecords": 9,
+        "inventoryProxyRateRecords": 279,
+        "existingAssetLaneRateRecords": 0,
+        "withoutTitleLaneRatePct": 99.95
+      },
+      {
+        "category": "Bridges",
+        "lineItems": 1159,
+        "titleLaneRateRecords": 0,
+        "inventoryMatchedRecords": 754,
+        "inventorySegmentLaneMatchedRecords": 753,
+        "assetLengthRecords": 754,
+        "assetLaneRecords": 753,
+        "assetWidthRecords": 754,
+        "missingStatedLengthWithAssetLengthRecords": 754,
+        "inventoryProxyRateRecords": 0,
+        "existingAssetLaneRateRecords": 390,
+        "withoutTitleLaneRatePct": 100.0
+      },
+      {
+        "category": "FMR",
+        "lineItems": 964,
+        "titleLaneRateRecords": 0,
+        "inventoryMatchedRecords": 0,
+        "inventorySegmentLaneMatchedRecords": 0,
+        "assetLengthRecords": 0,
+        "assetLaneRecords": 0,
+        "assetWidthRecords": 0,
+        "missingStatedLengthWithAssetLengthRecords": 0,
+        "inventoryProxyRateRecords": 0,
+        "existingAssetLaneRateRecords": 0,
+        "withoutTitleLaneRatePct": 100.0
+      },
+      {
+        "category": "Mixed roads / bridges",
+        "lineItems": 116,
+        "titleLaneRateRecords": 0,
+        "inventoryMatchedRecords": 0,
+        "inventorySegmentLaneMatchedRecords": 0,
+        "assetLengthRecords": 0,
+        "assetLaneRecords": 0,
+        "assetWidthRecords": 0,
+        "missingStatedLengthWithAssetLengthRecords": 0,
+        "inventoryProxyRateRecords": 0,
+        "existingAssetLaneRateRecords": 0,
+        "withoutTitleLaneRatePct": 100.0
+      }
+    ],
+    "assetConditionContext": {
+      "byCategory": {
+        "Roads": {
+          "lineItems": 6482,
+          "withContext": 471,
+          "fullyAssessedRoadRecords": 358,
+          "rehabGoodFairCandidates": 2,
+          "recentSurfacingCandidates": 0,
+          "bridgeGoodFairUndatedContext": 0
+        },
+        "Bridges": {
+          "lineItems": 1159,
+          "withContext": 649,
+          "fullyAssessedRoadRecords": 0,
+          "rehabGoodFairCandidates": 0,
+          "recentSurfacingCandidates": 0,
+          "bridgeGoodFairUndatedContext": 167
+        },
+        "FMR": {
+          "lineItems": 964,
+          "withContext": 0,
+          "fullyAssessedRoadRecords": 0,
+          "rehabGoodFairCandidates": 0,
+          "recentSurfacingCandidates": 0,
+          "bridgeGoodFairUndatedContext": 0
+        },
+        "Mixed roads / bridges": {
+          "lineItems": 116,
+          "withContext": 0,
+          "fullyAssessedRoadRecords": 0,
+          "rehabGoodFairCandidates": 0,
+          "recentSurfacingCandidates": 0,
+          "bridgeGoodFairUndatedContext": 0
+        }
+      },
+      "budgetYear": 2027,
+      "recentSurfacingWindowYears": 5,
+      "method": "Condition flag: rehabilitation/reconstruction/major repair only, full matched road range assessed Good/Fair with a known pre-budget assessment year. Recent-surfacing flag: rehabilitation, preventive maintenance or other explicitly described pavement work where the full matched range has a positive recorded last-surfacing year within five budget years; unknown/zero values are not filled. Widening, approaches, slope/drainage and off-carriageway scopes excluded. Bridge condition is displayed, but an unknown assessment year prevents the dated flag.",
+      "limits": "Review leads, not proof of waste or incorrect prioritization. Assessment and budget dates differ; later deterioration, structural/safety work or different funded components may justify rehabilitation. Last-surfacing inventory is older and cannot establish that no later work occurred."
+    },
+    "shortSegments": [
+      {
+        "category": "Roads",
+        "allLines": 6498,
+        "knownLengths": 3334,
+        "below100m": 221,
+        "below100PctOfKnown": 6.63,
+        "medianMeters": 828.25,
+        "top25HighRateRows": 25,
+        "below100InTop25HighRates": 20,
+        "bins": {
+          "<10m": 5,
+          "10–<100m": 216,
+          "100–<1,000m": 1619,
+          "1,000–<5,000m": 1376,
+          "≥5,000m": 118
+        }
+      },
+      {
+        "category": "Bridges",
+        "allLines": 1140,
+        "knownLengths": 60,
+        "below100m": 37,
+        "below100PctOfKnown": 61.67,
+        "medianMeters": 61.0,
+        "top25HighRateRows": 25,
+        "below100InTop25HighRates": 23,
+        "bins": {
+          "<10m": 2,
+          "10–<100m": 35,
+          "100–<1,000m": 21,
+          "1,000–<5,000m": 2,
+          "≥5,000m": 0
+        }
+      },
+      {
+        "category": "FMR",
+        "allLines": 964,
+        "knownLengths": 3,
+        "below100m": 0,
+        "below100PctOfKnown": 0.0,
+        "medianMeters": 650.0,
+        "top25HighRateRows": 3,
+        "below100InTop25HighRates": 0,
+        "bins": {
+          "<10m": 0,
+          "10–<100m": 0,
+          "100–<1,000m": 2,
+          "1,000–<5,000m": 1,
+          "≥5,000m": 0
+        }
+      },
+      {
+        "category": "Mixed roads / bridges",
+        "allLines": 117,
+        "knownLengths": 45,
+        "below100m": 15,
+        "below100PctOfKnown": 33.33,
+        "medianMeters": 138.0,
+        "top25HighRateRows": 0,
+        "below100InTop25HighRates": 0,
+        "bins": {
+          "<10m": 1,
+          "10–<100m": 14,
+          "100–<1,000m": 27,
+          "1,000–<5,000m": 3,
+          "≥5,000m": 0
+        }
+      }
+    ],
+    "lineItemReviewQueue": {
+      "sourceOccurrences": 16275,
+      "flaggedOccurrences": 16083,
+      "flagTypes": {
+        "insertion": 6105,
+        "missing_documents": 15228,
+        "amount_group": 10519,
+        "historical_title": 638,
+        "chainage_overlap": 17,
+        "high_meter_rate": 191,
+        "missing_photos": 109,
+        "missing_rdc": 501,
+        "missing_pow": 44,
+        "very_short_range": 8,
+        "rehab_good_fair": 2
+      },
+      "flagCountDistribution": {
+        "5": 6,
+        "4": 275,
+        "3": 4725,
+        "2": 6980,
+        "1": 4097
+      },
+      "top25Occurrences": 25
+    },
+    "rcsStageTrace": {
+      "districtOfficeLines": 199,
+      "unchangedInHGAB": 199,
+      "withoutSelectedCounterpart": 0,
+      "allocationDecreases": 0,
+      "provinceFirstScenarioZeroUnitOffices": 44,
+      "confirmedLEGLosses": null
+    }
+  },
+  "sources": [
+    {
+      "file": "dpwh-data.json",
+      "sha256": "e805739dee77028658b2af48ef2731b156d70e3ffa20684007172f5243873733"
+    },
+    {
+      "file": "rcs-data.json",
+      "sha256": "8ed653b26c110fce2dda6136094d00080d1b31c7866048865faa57bffdb2c4a9"
+    },
+    {
+      "file": "congress-data.json",
+      "sha256": "d10596a9186fa091509c2d6f56d49527c4d3d812f894e4a5d818329a2f52300c"
+    },
+    {
+      "file": "budget-innovations-data.json",
+      "sha256": "2731ef00f0d0d593046ede795c0624af3b4527e051a6523f08719e6027f9c167"
+    },
+    {
+      "file": "dpwh-hgab-comparison.json",
+      "sha256": "d635192cb29a871dea752758a421b7c54460719b835e8f777fcc4a98d6c636f5"
+    },
+    {
+      "file": "hgab-revision-data.json",
+      "sha256": "d3e15aba1a4e8db5bc61c1b94606385df3a7fd6b5d577d2797bff59baf98ccfc"
+    },
+    {
+      "file": "hb_nep_comparison_3rd.csv",
+      "sha256": "6358f901c9416f7c6cde9328e5a65ac05f6d8962f0bdf6bab3c5f0ef124d36c9"
+    }
+  ],
+  "scope": "FY2027 NEP/HGAB 3rd reading; historical GAA comparisons where locally available. No GAB/GAA 2027 outcome inferred.",
+  "budgetStages": [
+    "NEP",
+    "HGAB (House)",
+    "GAB (Senate)",
+    "Bicam (House/Senate reconciliation)",
+    "GAA (enacted)"
+  ],
+  "lineItemReviewQueue": {
+    "data": "line-item-review-queue.json",
+    "ranking": "Flag count descending, allocation pesos descending, occurrence ID ascending for exact ties.",
+    "scope": "Domestic DPWH HGAB 3rd-reading occurrences only; not a ranking of the entire national budget.",
+    "method": {
+      "maximumPossibleFlags": 12,
+      "amountGroupMinimumOccurrences": 10,
+      "amountGroupMinimumNamedOffices": 3,
+      "amountGroupScope": "Identical PAP and positive exact peso amount; counts are allocation occurrences, not certified distinct construction contracts.",
+      "historicalYears": [
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025,
+        2026
+      ],
+      "historicalMatch": "Identical full normalized title after complete trailing metadata removal; same qualified municipality/province; direction/location/tranche conflict and disjoint stated chainage excluded.",
+      "weights": "One point per flag type. Multiple historical years do not add points.",
+      "highMeterRate": "Peers share category, structure group (overpasses/flyovers, viaducts and pedestrian structures separated), official PAP, a data-derived length band, and matched surface/condition/assessment-year context. Unknown context is pooled only with unknown context and remains explicitly unadjusted. At least 20 peers with stated length ≥10m. Candidate rate exceeds both 2× peer median and Q3+1.5×IQR. Chart extremes exceed max(2×median,Q3+3×IQR); sub-10m printed ranges also stay off rate charts. Lane inventory estimates do not enter these per-meter flags.",
+      "laneEvidence": "Title lane rates, inventory lane estimates and existing-bridge asset estimates are separate contextual measures. None adds a ranking point or replaces a missing funded length. Lane and station evidence is retained in lengthReview.",
+      "conditionAndSurfacing": {
+        "byCategory": {
+          "Roads": {
+            "lineItems": 6482,
+            "withContext": 471,
+            "fullyAssessedRoadRecords": 358,
+            "rehabGoodFairCandidates": 2,
+            "recentSurfacingCandidates": 0,
+            "bridgeGoodFairUndatedContext": 0
+          },
+          "Bridges": {
+            "lineItems": 1159,
+            "withContext": 649,
+            "fullyAssessedRoadRecords": 0,
+            "rehabGoodFairCandidates": 0,
+            "recentSurfacingCandidates": 0,
+            "bridgeGoodFairUndatedContext": 167
+          },
+          "FMR": {
+            "lineItems": 964,
+            "withContext": 0,
+            "fullyAssessedRoadRecords": 0,
+            "rehabGoodFairCandidates": 0,
+            "recentSurfacingCandidates": 0,
+            "bridgeGoodFairUndatedContext": 0
+          },
+          "Mixed roads / bridges": {
+            "lineItems": 116,
+            "withContext": 0,
+            "fullyAssessedRoadRecords": 0,
+            "rehabGoodFairCandidates": 0,
+            "recentSurfacingCandidates": 0,
+            "bridgeGoodFairUndatedContext": 0
+          }
+        },
+        "budgetYear": 2027,
+        "recentSurfacingWindowYears": 5,
+        "method": "Condition flag: rehabilitation/reconstruction/major repair only, full matched road range assessed Good/Fair with a known pre-budget assessment year. Recent-surfacing flag: rehabilitation, preventive maintenance or other explicitly described pavement work where the full matched range has a positive recorded last-surfacing year within five budget years; unknown/zero values are not filled. Widening, approaches, slope/drainage and off-carriageway scopes excluded. Bridge condition is displayed, but an unknown assessment year prevents the dated flag.",
+        "limits": "Review leads, not proof of waste or incorrect prioritization. Assessment and budget dates differ; later deterioration, structural/safety work or different funded components may justify rehabilitation. Last-surfacing inventory is older and cannot establish that no later work occurred."
+      },
+      "evidenceGaps": "Missing length and insufficient peers are cautions, not points. A sub-10m printed range gets a separate denominator-warning point and remains subject to source verification. Extreme rates require denominator/scope review and are omitted from rate charts.",
+      "summaryCoverage": "The queue has up to twelve possible flags: the prior nine screening types plus separate incomplete-documentation flags for missing POW, geotagged photos, and RDC among locally inspected attachment records. Potential NEP counterpart and no listed documents are separate flags; document-type flags are unknown outside inspected metadata.",
+      "dependence": "Historical recurrence and chainage overlap are related indicators; scores are descriptive triage, not independent evidence or probabilities.",
+      "limitations": [
+        "Uniform packages can be legitimate. Exact appropriation amounts are not unit costs.",
+        "Strict historical matching misses paraphrased titles and unresolved locations; no icon means this screen did not identify a review trigger, not that the project is verified.",
+        "The prior-year search uses locally available DPWH road, bridge, building and flood records from FY2020–FY2026; it is not a search of every project type or every agency.",
+        "Matching/parser errors can produce insertion flags. Top 25 overlap other findings; do not sum them as losses.",
+        "Current office, representative, role and party do not contribute any points."
+      ]
+    }
+  },
+  "districtComparisonPolicy": {
+    "scope": "All district rows are available for reader selection in the all-district ranking. No selected-district section or person-specific defaults.",
+    "data": "congress-benchmark.json"
+  },
+  "allDistrictComparison": {
+    "districts": 254,
+    "totalStrictLines": 9328
+  },
+  "localDatasetInventory": [
+    {
+      "file": "database/poverty.json",
+      "use": "Potential socio-economic context; no year/definition recorded in the inspected rows, so not used as a needs control.",
+      "sha256": "a0fd7fc2eee547085dd432e1ad055d6ba929ab1ddd9e72900a0155e3caafaeae"
+    },
+    {
+      "file": "static/data/flood_summary.json",
+      "coverage": "2016–2024 projects",
+      "use": "Historical project reference; not a current flood-exposure or FY2027 needs denominator.",
+      "sha256": "167b27c7bb9b2ceb13b371903a71a2bce93b8c82d7863956d394bd721bf7aa46"
+    }
+  ],
+  "agencyComparisonCoverage": [
+    {
+      "scope": "FMR annex",
+      "nepPesos": 16000000000,
+      "hgabPesos": 19628100000,
+      "adjustmentPesos": 3628100000,
+      "limit": "Programme controls; individual counterpart confidence stays separate"
+    },
+    {
+      "scope": "NIA exact named-title subset",
+      "nepPesos": 10355321000,
+      "hgabPesos": 8855321000,
+      "adjustmentPesos": -1500000000,
+      "limit": "Matched subset only; not the whole NIA budget"
+    },
+    {
+      "scope": "HFEP programme total",
+      "nepPesos": 14539832000,
+      "hgabPesos": 10088832000,
+      "adjustmentPesos": -4451000000,
+      "limit": "MOOE and Capital Outlays matched at programme level"
+    },
+    {
+      "scope": "NIA irrigation annex",
+      "nepPesos": 17598181000,
+      "hgabPesos": 17999305000,
+      "adjustmentPesos": 401124000,
+      "limit": "Reviewed detailed annex controls; project identity remains separate"
+    },
+    {
+      "scope": "DepEd school operations",
+      "nepPesos": null,
+      "hgabPesos": 102670874000,
+      "adjustmentPesos": null,
+      "limit": "Comparable NEP school baseline not built"
+    }
+  ],
+  "congressional_representatives": []
+}
