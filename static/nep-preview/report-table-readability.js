@@ -6,6 +6,7 @@ function label(table){const section=table.closest('section,article');return norm
 const pagination=new WeakMap();
 const titleHeader=text=>{
  const value=normalize(text).toLowerCase();
+ if(value==='enacted gaa line item')return false;
  if(/\b(?:amount|allocation|cost|rate|price|count|entries|project id)\b/.test(value))return false;
  return /\bproject\b/.test(value)||(/\b(?:closest|prior|current|nep|hgab|gaa)\b.*\btitle\b/.test(value)&&!/\bsimilarity\b/.test(value))||/\b(?:nep|hgab|gaa)\b.*\bline(?: item)?\b/.test(value)||/^extracted hgab record$/.test(value)||/^(?:(?:2nd|3rd|first|second|third) reading line|title)$/.test(value)||/^(?:facility|school\s*\/\s*building|named project)$/.test(value);
 };
@@ -31,7 +32,7 @@ function openProjectDetails(table,row,titleIndexes){
  const fields=[];
  [...head.cells].forEach((th,index)=>{
   const label=normalize(th.innerText||th.textContent),value=cellText(row.cells[index]);
-  if(!value||!label||titleIndexes.includes(index))return;
+  if(!value||!label||index===titleIndexes[0])return;
   fields.push(`<div class="report-project-field"><dt>${escapeHTML(label)}</dt><dd>${escapeHTML(value)}</dd></div>`);
  });
  const links=safeLinks(row);
@@ -43,20 +44,14 @@ function openProjectDetails(table,row,titleIndexes){
 function escapeHTML(value){return String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]))}
 document.addEventListener('click',event=>{
  const trigger=event.target.closest('.report-project-details-trigger');
- const cell=trigger?.closest('td')||event.target.closest('td[data-report-project-title]');
+ const cell=trigger?.closest('td');
  if(!cell||event.target.closest('[data-mpb-project-id]'))return;
  const table=cell.closest('table'),head=table?.tHead?.rows[table.tHead.rows.length-1];
  if(!head)return;
- const indexes=[...head.cells].map((th,index)=>titleHeader(th.textContent)?index:-1).filter(index=>index>=0).slice(0,2);
+ const indexes=[...head.cells].map((th,index)=>titleHeader(th.textContent)?index:-1).filter(index=>index>=0).slice(0,1);
  if(!indexes.length)return;
  event.preventDefault();event.stopPropagation();openProjectDetails(table,cell.parentElement,indexes);
 },true);
-document.addEventListener('keydown',event=>{
- if(event.key!=='Enter'&&event.key!==' ')return;
- const cell=event.target.closest('td[data-report-project-title]');if(!cell)return;
- event.preventDefault();const table=cell.closest('table'),head=table?.tHead?.rows[table.tHead.rows.length-1];if(!head)return;
- const indexes=[...head.cells].map((th,index)=>titleHeader(th.textContent)?index:-1).filter(index=>index>=0).slice(0,2);openProjectDetails(table,cell.parentElement,indexes);
-});
 function paginate(table,wrap){
  const rows=[...table.tBodies].flatMap(body=>[...body.rows]);
  let state=pagination.get(table);
@@ -117,7 +112,7 @@ function update(table){
 }
 function updateProjectTable(table,header,rows){
  const titleIndexes=[...header.cells].map((th,index)=>titleHeader(th.textContent)?index:-1).filter(index=>index>=0);
- const visible=new Set();titleIndexes.slice(0,2).forEach(index=>visible.add(index));
+ const visible=new Set();if(titleIndexes.length)visible.add(titleIndexes[0]);
  if(titleIndexes.length){
   const candidates=[...header.cells].map((th,index)=>({index,label:normalize(th.textContent).toLowerCase(),width:Math.max(normalize(th.textContent).length,...rows.map(row=>row.cells.length===header.cells.length?Math.min(100,cellText(row.cells[index]).length):0))})).filter(item=>!titleIndexes.includes(item.index));
   const score=label=>{
@@ -133,17 +128,18 @@ function updateProjectTable(table,header,rows){
   candidates.slice(0,Math.max(1,3-visible.size)).forEach(item=>visible.add(item.index));
  }
  [...header.cells].forEach((cell,index)=>{
-  const isTitle=titleIndexes.includes(index),isVisible=visible.has(index);
+  const isPrimaryTitle=index===titleIndexes[0],isVisible=visible.has(index);
   cell.classList.toggle('report-card-hidden-column',!isVisible&&titleIndexes.length>0);
-  cell.classList.toggle('report-project-title-column',isTitle);
+  cell.classList.toggle('report-project-title-column',isPrimaryTitle);
  });
  rows.forEach(row=>{
   if(row.cells.length!==header.cells.length)return;
   [...row.cells].forEach((cell,index)=>{
-   const isTitle=titleIndexes.includes(index),isVisible=visible.has(index);
+   const isPrimaryTitle=index===titleIndexes[0],isVisible=visible.has(index);
    cell.classList.toggle('report-card-hidden-column',!isVisible&&titleIndexes.length>0);
-   cell.classList.toggle('report-project-title-cell',isTitle);
-   if(!isTitle||cell.querySelector('.report-project-details-trigger'))return;
+   cell.classList.toggle('report-project-title-cell',isPrimaryTitle);
+   if(!isPrimaryTitle){cell.removeAttribute('data-report-project-title');cell.querySelectorAll('.report-project-details-trigger').forEach(node=>node.remove());return}
+   if(cell.querySelector('.report-project-details-trigger'))return;
    cell.dataset.reportProjectTitle='true';
    if(!cell.querySelector('[data-mpb-project-id]')){
     const button=document.createElement('button');button.type='button';button.className='report-project-details-trigger';button.textContent='Details';
@@ -155,14 +151,14 @@ function updateProjectTable(table,header,rows){
  let group=table.querySelector(':scope > colgroup.report-project-colgroup');
  if(!group){group=document.createElement('colgroup');group.className='report-project-colgroup';table.insertBefore(group,table.firstChild)}
  if(group.children.length!==header.cells.length){group.replaceChildren(...[...header.cells].map(()=>document.createElement('col')))}
- const titleShare=titleIndexes.length>1?72:66;
- const metaIndexes=[...visible].filter(index=>!titleIndexes.includes(index));
+ const titleShare=66;
+ const metaIndexes=[...visible].filter(index=>index!==titleIndexes[0]);
  const metaWidths=metaIndexes.map(index=>Math.max(5,normalize(header.cells[index].textContent).length,...rows.map(row=>row.cells.length===header.cells.length?Math.min(40,cellText(row.cells[index]).length):0)));
  const metaTotal=metaWidths.reduce((a,b)=>a+b,0)||metaWidths.length;
  [...group.children].forEach((col,index)=>{
   let width='0%';
-  const ti=titleIndexes.slice(0,2).indexOf(index),mi=metaIndexes.indexOf(index);
-  if(ti>=0)width=`${(titleShare/Math.min(2,titleIndexes.length)).toFixed(2)}%`;
+  const ti=index===titleIndexes[0]?0:-1,mi=metaIndexes.indexOf(index);
+  if(ti>=0)width=`${titleShare.toFixed(2)}%`;
   else if(mi>=0)width=`${((100-titleShare)*metaWidths[mi]/metaTotal).toFixed(2)}%`;
   if(col.style.width!==width)col.style.width=width;
   col.classList.toggle('report-project-title-col',ti>=0);

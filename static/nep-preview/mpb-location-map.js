@@ -98,19 +98,21 @@
   }
   const facebookLink = document.getElementById('mpbMapFacebook');
   const shareStatus = document.getElementById('mpbMapShareStatus');
-  const updateShareLinks = () => {
+  function cachedShareTarget() {
     const cachedPage = source.sharePages?.[select.value];
-    const shareTarget = cachedPage ? new URL(cachedPage, document.baseURI).href : shareUrl();
-    if (facebookLink) facebookLink.href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareTarget)}`;
+    return cachedPage ? new URL(cachedPage, document.baseURI).href : shareUrl();
+  }
+  const updateShareLinks = () => {
+    if (facebookLink) facebookLink.href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(cachedShareTarget())}`;
   };
   updateShareLinks();
   document.getElementById('mpbMapCopyLink')?.addEventListener('click', async () => {
     try {
-      await navigator.clipboard.writeText(shareUrl());
+      await navigator.clipboard.writeText(cachedShareTarget());
       if (shareStatus) shareStatus.textContent = 'Map link copied.';
     } catch {
       const field = document.createElement('textarea');
-      field.value = shareUrl(); document.body.append(field); field.select();
+      field.value = cachedShareTarget(); document.body.append(field); field.select();
       const copied = document.execCommand('copy'); field.remove();
       if (shareStatus) shareStatus.textContent = copied ? 'Map link copied.' : 'Copy failed; copy the page address from your browser.';
     }
