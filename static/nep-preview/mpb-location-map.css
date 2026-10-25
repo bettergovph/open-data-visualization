@@ -49,9 +49,13 @@
 .mpb-project-review-repeats th:nth-child(1),.mpb-project-review-repeats td:nth-child(1),.mpb-project-review-repeats th:nth-child(4),.mpb-project-review-repeats td:nth-child(4){width:30%}
 .mpb-project-mode-context{margin-top:14px}.mpb-project-mode-facts{display:grid;grid-template-columns:minmax(130px,.3fr) 1fr;gap:6px 14px;margin:10px 0 0}.mpb-project-mode-facts dt{font-weight:700}.mpb-project-mode-facts dd{margin:0}
 .mpb-transparency-documents{margin:12px 0;padding:12px;border:1px solid #d4dfdc;border-radius:10px;background:#fff}.mpb-transparency-documents ul{display:flex;gap:8px 16px;flex-wrap:wrap;margin:8px 0 0;padding-left:18px}.mpb-transparency-documents li{max-width:100%;overflow-wrap:anywhere}
-.mpb-map-canvas{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(360px,.9fr);gap:16px;align-items:start}
+.mpb-map-canvas{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(360px,.9fr);gap:16px;align-items:start;scroll-margin-block-start:clamp(16px,calc(50vh - 300px),30vh)}
 .mpb-map-project-card{position:sticky;top:12px;right:auto;bottom:auto;width:auto;max-height:none;overflow:visible;margin:0;box-shadow:0 4px 18px #142e3b20}
 @media(max-width:1000px){.mpb-map-canvas{grid-template-columns:minmax(0,1fr)}.mpb-map-project-card{position:static;width:auto;max-height:none;overflow:visible;margin:10px 0 0}}
 .mpb-map-project-card--viewport{position:fixed!important;z-index:10000!important;top:50%!important;left:50%!important;right:auto!important;bottom:auto!important;transform:translate(-50%,-50%);width:min(900px,calc(100vw - 32px))!important;max-height:calc(100vh - 32px)!important;overflow:auto!important;margin:0!important;box-shadow:0 0 0 100vmax rgba(8,20,28,.46),0 16px 50px rgba(8,20,28,.42)!important}
 .mpb-map-project-preview{max-height:210px;margin:0 0 14px;padding:6px;border:1px solid #d6e2df;border-radius:10px;background:#f7faf9;overflow:hidden}
 .mpb-map-project-preview svg{display:block;width:100%;height:198px;max-height:198px}
+.mpb-location-jumps{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:14px}
+.mpb-location-jumps a{display:inline-block;padding:8px 12px;border:1px solid #9bb7af;border-radius:8px;background:#f7faf9;color:#18303b;font-weight:650;text-decoration:none}
+.mpb-location-jumps a:hover{background:#e7f1ee}
+.mpb-location-jumps a:focus-visible{outline:3px solid #278b80;outline-offset:2px}
