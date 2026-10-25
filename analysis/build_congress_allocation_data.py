@@ -300,7 +300,7 @@ def main() -> None:
         "unit": "pesos",
         "attributionMethod": VERSION,
         "inventoryLocationEvidenceStatus": geography.inventory_context_status,
-        "attributionWarning": "Conservative location-based coverage, not complete district budgets or evidence of a representative's sponsorship. Exact municipality + province fields require agreement between both local district maps. Multi-seat cities require explicitly named barangays and agreeing maps. Shared lines, conflicts and missing scope stay outside the ranking. For otherwise unresolved projects, a printed coordinate can support a district assignment only when the title names a locality, the point falls inside its matching DPWH boundary feature, and that feature identifies exactly one current roster seat. Coordinates and boundary classifications are not independently verified project locations. A zero means no accepted attribution, not no allocation.",
+        "attributionWarning": "Conservative location-based coverage, not complete district budgets or evidence of a representative's sponsorship. Exact municipality + province fields require agreement between both local district maps. Multi-seat cities require explicitly named barangays and agreeing maps. Shared lines, conflicts and missing scope stay outside the ranking. For otherwise unresolved projects, a printed coordinate can support a district assignment only when the title names a locality, the point falls inside its matching DPWH boundary feature, and that feature identifies exactly one current roster seat. An exact bridge ID may also use the ArcGIS bridge record's listed DEO and CONG_DIST when that district maps uniquely to the current roster; conflicting title geography stays unresolved by this source. Coordinates and boundary classifications are not independently verified project locations. A zero means no accepted attribution, not no allocation.",
         "unresolvedReasons": [{"reason": k, **v} for k, v in sorted(unresolved_reasons.items(), key=lambda kv: -kv[1]["totalPesos"])],
         "summary": {
             "candidateLineItems": len(projects), "candidateTotalPesos": candidate_total,
@@ -332,7 +332,7 @@ def main() -> None:
     if coordinate_assignments:
         output["attributionMethod"] += "+printed-coordinate-locality-boundary-v1"
     if geography.inventory_context_status == 'matching_dependencies':
-        output['attributionWarning'] += ' Additional qualified context comes from exact inventory assets checked wholly inside one municipality, then screened through current local maps. Old LEG polygon labels are not used. Inventory positions are not proof of funded quantities or project sponsorship; borderline and conflicting locations remain unresolved.'
+        output['attributionWarning'] += ' Additional qualified context comes from exact inventory assets checked wholly inside one municipality, then screened through current local maps. For exact bridge IDs, the ArcGIS record can supply a DEO and LEG roster match when title geography is unresolved; the DEO is not treated as a one-to-one LEG crosswalk. Inventory positions and source-listed districts are not proof of funded quantities or project sponsorship; borderline and conflicting locations remain unresolved.'
     print(json.dumps(output["summary"], indent=2))
     if args.write:
         OUT_FILE.write_text(json.dumps(output, ensure_ascii=False, separators=(",", ":")) + "\n")
