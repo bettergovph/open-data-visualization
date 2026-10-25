@@ -299,16 +299,19 @@
       "excludedScheduleAmountPesos": 0,
       "sourceLineItems": 16275,
       "sourceTotalPesos": 587075661000,
-      "uniquelyAssignedLines": 8688,
+      "uniquelyAssignedLines": 9328,
       "sharedAssignedLines": 2,
-      "unassignedLines": 7585,
-      "unassignedAmountPesos": 360381817000,
+      "unassignedLines": 6945,
+      "unassignedAmountPesos": 343708513000,
       "sharedSourceAmountPesos": 375000000,
-      "assignedSourceAmountPesos": 226693844000,
-      "strictAssignedPesos": 226318844000,
-      "strictExcludedLines": 7587,
-      "strictExcludedAmountPesos": 360756817000,
-      "strictCoveragePct": 38.55,
+      "assignedSourceAmountPesos": 243367148000,
+      "strictAssignedPesos": 242992148000,
+      "strictExcludedLines": 6947,
+      "strictExcludedAmountPesos": 344083513000,
+      "strictCoveragePct": 41.39,
+      "printedCoordinateBoundaryAssignments": 640,
+      "printedCoordinateBoundaryAssignmentPesos": 16673304000,
+      "strictCoverageBeforePrintedCoordinatePct": 38.55,
       "districtCount": 254
     },
     "repeatRetention": {
@@ -334,6 +337,7 @@
       "ambiguousPesos": 11114224000,
       "repeatPairs": 819,
       "repeatProposals": 587,
+      "historicalRepeatProjects": 548,
       "removalCandidates": 137,
       "removalPesos": 2560500000,
       "adjustedLines": 127
@@ -595,7 +599,7 @@
   "sources": [
     {
       "file": "dpwh-data.json",
-      "sha256": "2dc4b6e4171452030c521a0e6398e342766dcf5e91889bd460ee12b1a406ff6c"
+      "sha256": "e805739dee77028658b2af48ef2731b156d70e3ffa20684007172f5243873733"
     },
     {
       "file": "rcs-data.json",
@@ -603,7 +607,7 @@
     },
     {
       "file": "congress-data.json",
-      "sha256": "b758483c9d308392d43cd45d96375922231de2470e48510801ca1f2a015c91c5"
+      "sha256": "d10596a9186fa091509c2d6f56d49527c4d3d812f894e4a5d818329a2f52300c"
     },
     {
       "file": "budget-innovations-data.json",
@@ -710,7 +714,7 @@
   },
   "allDistrictComparison": {
     "districts": 254,
-    "totalStrictLines": 8688
+    "totalStrictLines": 9328
   },
   "localDatasetInventory": [
     {
