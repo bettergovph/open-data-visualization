@@ -1,0 +1,31 @@
+.mpb-local-map{margin:24px 0;padding:clamp(16px,2.5vw,28px);border:1px solid #c9d8d5;border-radius:14px;background:#f7faf9}
+.mpb-local-map h3{margin:0 0 8px}
+.mpb-local-map label{font-weight:700}
+.mpb-local-map select{max-width:100%;min-width:min(100%,320px);padding:8px 10px;font:inherit;border:1px solid #8da49e;border-radius:8px;background:#fff;color:#18303b}
+.mpb-map-story{display:grid;gap:12px;margin:18px 0}
+.mpb-story-lead{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:18px;align-items:center;padding:clamp(18px,3vw,30px);border-radius:14px;background:#142e3b;color:#fff;border-left:7px solid #e6b953}
+.mpb-story-kicker{color:#a7ddd1;font-size:12px;font-weight:750;letter-spacing:.08em;text-transform:uppercase}
+.mpb-story-lead h4{margin:8px 0;font-size:clamp(20px,3vw,32px);line-height:1.2}
+.mpb-story-lead p{margin:8px 0;color:#e5eff0}
+.mpb-story-lead ol{margin:12px 0 0;padding-left:22px;color:#f5f8f8}
+.mpb-story-lead li{margin:6px 0}
+.mpb-story-lead small{display:block;color:#b9d2d0;font-size:12px}
+.mpb-story-distance{display:grid;justify-items:center;color:#f3c967;font-size:clamp(48px,8vw,76px);line-height:.9;white-space:nowrap}
+.mpb-story-distance span{margin-top:10px;color:#d8e5e4;font-size:15px;font-weight:650}
+.mpb-nearby-lead{display:flex;align-items:center;gap:14px;padding:14px 18px;border:1px solid #e1c2bc;border-radius:12px;background:#fff3f0;color:#51312c}
+.mpb-nearby-lead strong{color:#a32f2f;font-size:34px;line-height:1}
+#mpbMapSummary{font-weight:650}
+#mpbMunicipalityPlot{overflow-x:auto;border:1px solid #d3dfdc;border-radius:10px;background:#fff}
+#mpbMunicipalityPlot svg{display:block;width:100%;min-width:620px;height:auto;max-height:none}
+.mpb-map-legend{display:flex;gap:8px 18px;flex-wrap:wrap;margin:12px 0;font-size:13px}
+.mpb-map-legend span{display:inline-flex;align-items:center;gap:6px}
+.mpb-map-legend i{display:inline-block;width:11px;height:11px;border-radius:50%;background:#168277}
+.mpb-map-legend i.same-site{background:#bd3e3e}
+.mpb-map-legend i.near-site{background:#d78a0d}
+.mpb-map-legend i.extreme-site{background:#7839a8}
+.mpb-map-legend i.boundary-inside{background:#173b49}
+.mpb-map-legend i.boundary-outside{background:#bd3e3e}
+.mpb-project-list{width:100%;border-collapse:collapse;margin-top:16px;font-size:13px}
+.mpb-project-list th,.mpb-project-list td{padding:8px;border-bottom:1px solid #d5e0dd;text-align:left;vertical-align:top;overflow-wrap:anywhere}
+.mpb-project-list th{background:#eaf1ef}
+@media(max-width:650px){.mpb-local-map{padding:14px}.mpb-project-list{font-size:12px}.mpb-story-lead{grid-template-columns:1fr}.mpb-story-distance{justify-items:start;font-size:54px}.mpb-nearby-lead{align-items:flex-start}}
