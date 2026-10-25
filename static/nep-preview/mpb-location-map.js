@@ -4,6 +4,7 @@
   const plot = document.getElementById('mpbMunicipalityPlot');
   const summary = document.getElementById('mpbMapSummary');
   const story = document.getElementById('mpbMapStory');
+  const projectCard = document.getElementById('mpbMapProjectCard');
   if (!dataNode || !select || !plot || !summary) return;
 
   const init = boundaryData => {
@@ -27,6 +28,7 @@
   const spread = rows => Math.max(0, ...rows.map(row => Number(row.distanceMeters) || 0));
   const sortedGroups = [...groups.entries()].sort((a, b) => spread(b[1]) - spread(a[1]) || a[0].localeCompare(b[0]));
   const boundaries = new Map((boundaryData?.features || []).map(feature => [feature.municipalityGroup, feature]));
+  const projectDetails = source.projectDetails || {};
   function insideBoundary(point, feature) {
     if (!feature?.rings?.length) return null;
     let inside = false;
@@ -61,7 +63,52 @@
     option.textContent = `${prettyPlace(name)} · ${rows.length} pair${rows.length === 1 ? '' : 's'} · max ${formatDistance(spread(rows))}`;
     select.append(option);
   }
-  select.value = sortedGroups[0][0];
+  const requestedPlace = new URLSearchParams(location.search).get('place');
+  select.value = groups.has(requestedPlace) ? requestedPlace : sortedGroups[0][0];
+
+  function shareUrl() {
+    const url = new URL(location.href);
+    url.searchParams.set('place', select.value);
+    url.hash = 'mpb-coordinate-proximity';
+    return url.href;
+  }
+  const facebookLink = document.getElementById('mpbMapFacebook');
+  const shareStatus = document.getElementById('mpbMapShareStatus');
+  const updateShareLinks = () => {
+    if (facebookLink) facebookLink.href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl())}`;
+  };
+  updateShareLinks();
+  document.getElementById('mpbMapCopyLink')?.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(shareUrl());
+      if (shareStatus) shareStatus.textContent = 'Map link copied.';
+    } catch {
+      const field = document.createElement('textarea');
+      field.value = shareUrl(); document.body.append(field); field.select();
+      const copied = document.execCommand('copy'); field.remove();
+      if (shareStatus) shareStatus.textContent = copied ? 'Map link copied.' : 'Copy failed; copy the page address from your browser.';
+    }
+  });
+
+  function showProject(projectId) {
+    const detail = projectDetails[projectId];
+    if (!projectCard || !detail) return;
+    const memberCard = member => {
+      const name = member.name || member.officialName || 'Representative not resolved';
+      const portrait = member.photoUrl
+        ? `<a class="mpb-member-portrait-link" href="${esc(member.profileUrl || '#')}" target="_blank" rel="noopener" aria-label="Open official House profile for ${esc(name)}"><img class="mpb-member-portrait" src="${esc(member.photoUrl)}" alt="Portrait of ${esc(name)}" loading="lazy"></a>`
+        : '<span class="mpb-member-portrait-empty">Portrait unavailable</span>';
+      if (member.resolutionStatus === 'ambiguous_multiple_listed') {
+        return `<div class="mpb-member-association"><strong>${esc(member.district)}</strong><p class="mpb-member-caution">The source lists multiple candidates for this seat; none is selected.</p><div class="mpb-member-candidates">${(member.candidates || []).map(candidate => `<article>${candidate.photoUrl ? `<a href="${esc(candidate.profileUrl || '#')}" target="_blank" rel="noopener"><img class="mpb-member-portrait" src="${esc(candidate.photoUrl)}" alt="Portrait of ${esc(candidate.name)}" loading="lazy"></a>` : ''}<span>${esc(candidate.name)}</span></article>`).join('')}</div></div>`;
+      }
+      return `<div class="mpb-member-association">${portrait}<div><strong>${esc(name)}</strong><span>${esc(member.district || '')}</span>${member.officialName && member.officialName !== name ? `<small>Official roster name: ${esc(member.officialName)}</small>` : ''}${member.profileUrl ? `<a href="${esc(member.profileUrl)}" target="_blank" rel="noopener">House profile ↗</a>` : ''}${member.resolutionStatus === 'no_exact_csiiiv_seat_match' ? '<small>Portrait not matched to a seat in the CSIIIV profile snapshot.</small>' : ''}</div></div>`;
+    };
+    const place = detail.place || 'Place unresolved';
+    const point = detail.coordinate ? `${detail.coordinate.latitude}, ${detail.coordinate.longitude}` : 'No usable printed coordinate';
+    projectCard.innerHTML = `<div class="mpb-map-project-head"><div><span class="mpb-map-project-kicker">Selected MPB project · ${esc(projectId)}</span><h4>${esc(detail.projectName)}</h4></div><button type="button" class="mpb-map-project-close" aria-label="Close project details">×</button></div><dl class="mpb-map-project-facts"><dt>Allocation</dt><dd>₱${Number(detail.amountPesos || 0).toLocaleString('en-PH')}</dd><dt>Implementing office</dt><dd>${esc(detail.office || 'Not stated')}</dd><dt>Listed location</dt><dd>${esc(place)} <small>${esc(detail.placeEvidence || '')}</small></dd><dt>Printed coordinate</dt><dd>${esc(point)}</dd><dt>NEP comparison</dt><dd>${esc(detail.insertionStatus)}</dd><dt>Source</dt><dd>${esc(detail.sourceVolume || 'HGAB 3rd reading')} · p. ${esc(detail.sourcePage || 'not recorded')}</dd></dl><h5>Geographic congressional association</h5><p class="mpb-map-project-caution">District association follows the project location in the PH location DB. It describes geographic coverage; it does not imply sponsorship or control.</p>${detail.representativeCards?.length ? `<div class="mpb-member-associations">${detail.representativeCards.map(memberCard).join('')}</div>` : '<p>No unique legislative district was resolved for this project.</p>'}<p class="mpb-profile-source">Representative portraits and House profile links: <a href="https://github.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS/tree/main/DEO2LEG" target="_blank" rel="noopener">CSIIIV DEO2LEG source</a> · ${esc(source.representativeProfileSource?.commit || '')}</p>`;
+    projectCard.hidden = false;
+    projectCard.querySelector('.mpb-map-project-close').addEventListener('click', () => { projectCard.hidden = true; });
+  }
 
   function formatDistance(meters) {
     return meters >= 1000 ? `${(meters / 1000).toFixed(1)} km` : `${Math.round(meters)} m`;
@@ -81,7 +128,7 @@
       if (!pointsBySource.has(key)) {
         const coord = side === 'left' ? row.leftCoordinates : row.rightCoordinates;
         pointsBySource.set(key, {
-          key, sourceId,
+          key, sourceId, hgabId: sourceId.split(' · ', 1)[0],
           title: side === 'left' ? row.projectName : row.otherProject,
           amount: side === 'left' ? row.currentAllocationPesos : row.otherAllocationPesos,
           lat: Number(coord.latitude), lon: Number(coord.longitude), raw: coord.raw
@@ -129,7 +176,7 @@
     const dots = coordinates.map(({ p, x, y }) => {
       const fill = p.insideBoundary === false ? '#bd3e3e' : '#173b49';
       const status = p.insideBoundary === false ? 'Outside selected municipal boundary · verify' : p.insideBoundary === true ? 'Inside selected municipal boundary' : 'No matching municipal boundary available';
-      return `<g><circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="9" fill="${fill}" stroke="#fff" stroke-width="2"><title>${esc(status)} · ${esc(p.title)} · ${esc(p.sourceId)} · ${esc(p.raw)}</title></circle><text x="${x.toFixed(1)}" y="${(y + 4).toFixed(1)}" text-anchor="middle" fill="#fff" font-size="10" font-weight="700">${p.number}</text></g>`;
+      return `<g class="mpb-map-marker" data-project-id="${esc(p.hgabId)}" tabindex="0" role="button" aria-label="Open MPB project details: ${esc(p.title)}"><circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="9" fill="${fill}" stroke="#fff" stroke-width="2"><title>${esc(status)} · ${esc(p.title)} · ${esc(p.sourceId)} · ${esc(p.raw)}</title></circle><text x="${x.toFixed(1)}" y="${(y + 4).toFixed(1)}" text-anchor="middle" fill="#fff" font-size="10" font-weight="700">${p.number}</text></g>`;
     }).join('');
     const maxPair = [...group].sort((a, b) => Number(b.distanceMeters) - Number(a.distanceMeters))[0];
     const minPair = [...group].sort((a, b) => Number(a.distanceMeters) - Number(b.distanceMeters))[0];
@@ -146,10 +193,16 @@
     const unitLabel = nice >= 1000 ? `${(nice / 1000).toFixed(nice % 1000 ? 1 : 0)} km` : `${Math.round(nice)} m`;
     const svg = `<svg viewBox="0 0 820 480" role="img" aria-label="${esc(visibleLabel)}: municipality outline, ${points.length} MPB project coordinates and ${group.length} pairwise distances"><title>${esc(visibleLabel)} MPB coordinate view</title><rect x="0" y="0" width="820" height="480" fill="#fff"/><text x="20" y="28" font-size="17" font-weight="700" fill="#18303b">${esc(visibleLabel)}</text><text x="20" y="49" font-size="12" fill="#526773">Municipal outline and project locations from printed coordinates</text><path d="M 785 70 L 785 38 M 785 38 L 779 48 M 785 38 L 791 48" fill="none" stroke="#18303b" stroke-width="2"/><text x="785" y="28" text-anchor="middle" font-size="11" fill="#18303b">N</text><rect x="${box.x}" y="${box.y}" width="${box.w}" height="${box.h}" rx="8" fill="#f7faf9" stroke="#d3dfdc"/>${boundarySvg}${lines}${dots}<line x1="82" y1="448" x2="${(82 + Math.max(15, barPx)).toFixed(1)}" y2="448" stroke="#18303b" stroke-width="4"/><line x1="82" y1="442" x2="82" y2="454" stroke="#18303b" stroke-width="2"/><line x1="${(82 + Math.max(15, barPx)).toFixed(1)}" y1="442" x2="${(82 + Math.max(15, barPx)).toFixed(1)}" y2="454" stroke="#18303b" stroke-width="2"/><text x="${(90 + Math.max(15, barPx)).toFixed(1)}" y="452" font-size="11" fill="#18303b">${unitLabel}</text><text x="770" y="452" text-anchor="end" font-size="11" fill="#526773">${points.length} plotted points</text></svg>`;
     const pairRows = [...group].sort((a, b) => Number(b.distanceMeters) - Number(a.distanceMeters)).map(row => `<tr><td>${esc(row.sourceLabel)}<br>${esc(row.projectName)}</td><td>${esc(row.otherSource)}<br>${esc(row.otherProject)}</td><td>${esc(formatDistance(row.distanceMeters))}</td><td>${esc(row.municipalityEvidence || row.barangayEvidence || '')}</td></tr>`).join('');
-    const pointRows = points.map(point => `<tr><td>${point.number}</td><td>${esc(point.sourceId)}</td><td>${esc(point.title)}</td><td>${esc(point.raw)}</td><td>${point.insideBoundary === false ? 'Outside municipal outline · verify' : point.insideBoundary === true ? 'Inside municipal outline' : 'Boundary unavailable'}</td></tr>`).join('');
+    const pointRows = points.map(point => `<tr><td>${point.number}</td><td>${esc(point.sourceId)}</td><td><button class="mpb-point-open" type="button" data-project-id="${esc(point.hgabId)}">${esc(point.title)}</button></td><td>${esc(point.raw)}</td><td>${point.insideBoundary === false ? 'Outside municipal outline · verify' : point.insideBoundary === true ? 'Inside municipal outline' : 'Boundary unavailable'}</td></tr>`).join('');
     plot.innerHTML = `${svg}<table class="mpb-project-list"><thead><tr><th>Source point</th><th>Project</th><th>Printed coordinate pair</th><th>Boundary check</th></tr></thead><tbody>${pointRows}</tbody></table><h4>Pair distances · farthest first</h4><table class="mpb-project-list"><thead><tr><th>First project · source</th><th>Second project · source</th><th>Straight-line separation</th><th>Place evidence</th></tr></thead><tbody>${pairRows}</tbody></table>`;
+    plot.querySelectorAll('[data-project-id]').forEach(marker => {
+      marker.addEventListener('click', () => showProject(marker.dataset.projectId));
+      marker.addEventListener('keydown', event => {
+        if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); showProject(marker.dataset.projectId); }
+      });
+    });
   }
-  select.addEventListener('change', render);
+  select.addEventListener('change', () => { updateShareLinks(); render(); });
   render();
   };
   fetch('mpb-municipality-boundaries.json?v=20261025-boundary-view')
