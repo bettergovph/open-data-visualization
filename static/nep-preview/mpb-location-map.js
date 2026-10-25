@@ -80,16 +80,6 @@
     summary.textContent = 'No coordinate-ready municipality groups are available.';
     return;
   }
-  if (story) {
-    const farthest = pairs.reduce((best, row) => Number(row.distanceMeters) > Number(best.distanceMeters) ? row : best, pairs[0]);
-    const closePairs = pairs.filter(row => Number(row.distanceMeters) < 50).length;
-    const place = String(farthest.barangay || 'the same barangay label').split(' · ').map(prettyPlace).join(', ');
-    const distanceKm = (Number(farthest.distanceMeters) / 1000).toFixed(1);
-    const feature = boundaries.get(farthest.municipalityGroup);
-    const outside = feature && (insideBoundary({lat:farthest.leftCoordinates.latitude,lon:farthest.leftCoordinates.longitude},feature) === false || insideBoundary({lat:farthest.rightCoordinates.latitude,lon:farthest.rightCoordinates.longitude},feature) === false);
-    const boundaryNote = outside ? ' At least one printed point also plots outside the named municipality outline.' : '';
-    story.innerHTML = `<article class="mpb-story-lead"><div><span class="mpb-story-kicker">A location mismatch to check · HGAB 3rd</span><h4>Both entries name ${esc(place)}. Their listed points are ${distanceKm} km apart.</h4><p>The coordinates printed in these two project titles are ${esc(formatDistance(farthest.distanceMeters))} apart in a straight line.${boundaryNote} Check their source schedule before deciding whether either location is wrong.</p><ol><li>${esc(farthest.projectName)} <small>${esc(farthest.sourceLabel)}</small></li><li>${esc(farthest.otherProject)} <small>${esc(farthest.otherSource)}</small></li></ol></div><strong class="mpb-story-distance">${distanceKm}<span>km apart</span></strong></article><aside class="mpb-nearby-lead"><strong>${closePairs}</strong><span>pairs have printed locations less than 50 m apart. They may refer to one site, separate nearby buildings, or copied coordinates; the project scope needs review.</span></aside>`;
-  }
   for (const [name, rows] of sortedGroups) {
     const option = document.createElement('option');
     option.value = name;
@@ -171,6 +161,16 @@
   }
   function render() {
     const group = groups.get(select.value) || [];
+    if (story && group.length) {
+      const farthest = group.reduce((best, row) => Number(row.distanceMeters) > Number(best.distanceMeters) ? row : best, group[0]);
+      const closePairs = group.filter(row => Number(row.distanceMeters) < 50).length;
+      const place = String(farthest.barangay || select.value).split(' · ').map(prettyPlace).join(', ');
+      const distanceKm = (Number(farthest.distanceMeters) / 1000).toFixed(1);
+      const feature = boundaries.get(farthest.municipalityGroup);
+      const outside = feature && (insideBoundary({lat:farthest.leftCoordinates.latitude,lon:farthest.leftCoordinates.longitude},feature) === false || insideBoundary({lat:farthest.rightCoordinates.latitude,lon:farthest.rightCoordinates.longitude},feature) === false);
+      const boundaryNote = outside ? ' At least one printed point also plots outside the named municipality outline.' : '';
+      story.innerHTML = `<article class="mpb-story-lead"><div><span class="mpb-story-kicker">A location mismatch to check · HGAB 3rd · ${esc(prettyPlace(select.value))}</span><h4>Both entries name ${esc(place)}. Their listed points are ${distanceKm} km apart.</h4><p>The coordinates printed in these two project titles are ${esc(formatDistance(farthest.distanceMeters))} apart in a straight line.${boundaryNote} Check their source schedule before deciding whether either location is wrong.</p><ol><li>${esc(farthest.projectName)} <small>${esc(farthest.sourceLabel)}</small></li><li>${esc(farthest.otherProject)} <small>${esc(farthest.otherSource)}</small></li></ol></div><strong class="mpb-story-distance">${distanceKm}<span>km apart</span></strong></article><aside class="mpb-nearby-lead"><strong>${closePairs}</strong><span>pairs in ${esc(prettyPlace(select.value))} have printed locations less than 50 m apart. They may refer to one site, separate nearby buildings, or copied coordinates; the project scope needs review.</span></aside>`;
+    }
     const pointsBySource = new Map();
     const addPoint = (row, side) => {
       const sourceId = side === 'left' ? row.sourceLabel : row.otherSource;
@@ -216,7 +216,7 @@
       const q=xy({east:(lon-centerLon)*metersPerLonDegree,north:(lat-centerLat)*111320});
       return `${index?'L':'M'}${q.x.toFixed(1)},${q.y.toFixed(1)}`;
     }).join(' ')+' Z').join(' ');
-    const boundarySvg = boundaryPath ? `<path d="${boundaryPath}" fill="#dcece7" fill-rule="evenodd" stroke="#3e8d80" stroke-width="1.5"><title>${esc(prettyPlace(boundary.municipality))}, ${esc(prettyPlace(boundary.province))} municipal boundary</title></path>` : '';
+    const boundarySvg = boundaryPath ? `<path d="${boundaryPath}" fill="#dcece7" fill-rule="evenodd" stroke="#3e8d80" stroke-width="1.5"><title>${esc(prettyPlace(boundary.city || boundary.municipality))}, ${esc(prettyPlace(boundary.province))} ${boundary.adminLevel === 'city' ? 'city' : 'municipal'} boundary</title></path>` : '';
     const lines = plottedPairs.map(({ row, leftKey, rightKey }) => {
       const a = pointByKey.get(leftKey), b = pointByKey.get(rightKey);
       if (!a || !b) return '';
@@ -259,7 +259,7 @@
   select.addEventListener('change', () => { updateShareLinks(); render(); });
   render();
   };
-  fetch('mpb-municipality-boundaries.json?v=20261025-boundary-view')
+  fetch('mpb-municipality-boundaries.json?v=20261025-boundary-view-4')
     .then(response => { if (!response.ok) throw new Error('Boundary data unavailable'); return response.json(); })
     .then(init)
     .catch(() => init(null));

@@ -340,6 +340,7 @@ def main() -> None:
     if args.audit:
         sources = [HGAB_FILE, REVIEW_FILE, reps.ROSTER_PATH, ROOT / "static/data/districts.json",
                    ROOT / "static/data/districts_generated.json", ROOT / "city_barangays_mapping.json",
+                   ROOT / "static/data/administrative_locality_crosswalk.json",
                    BOUNDARY_FILE, Path(__file__), ROOT / "analysis/strict_congress_geography.py"]
         if args.geographic_decisions:
             sources.append(args.geographic_decisions)

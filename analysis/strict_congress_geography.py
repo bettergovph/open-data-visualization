@@ -14,7 +14,7 @@ from collections import defaultdict
 from pathlib import Path
 from ph_location_text import text_key, confirmed_name_key, place_key, geographic_title, barangay_key
 
-VERSION = "qualified-location-consensus-v6-inventory-asset-context"
+VERSION = "qualified-location-consensus-v7-admin-locality-crosswalk"
 
 
 def seat_key(value):
@@ -105,6 +105,22 @@ class GeographicAttribution:
                 self.labels[jurisdiction].update([key + " city", "city of " + key])
             else:
                 self.labels[jurisdiction].add("province of " + jurisdiction)
+
+        # Administrative areas such as Malate are not Manila's numbered
+        # barangays. Keep their parent-qualified mappings in a separate,
+        # sourced crosswalk so homonyms elsewhere cannot supply a city district.
+        self.administrative_localities = defaultdict(set)
+        self.administrative_locality_sources = {}
+        locality_file = data_root / "administrative_locality_crosswalk.json"
+        if locality_file.exists():
+            for row in json.loads(locality_file.read_text()).get("records", []):
+                jurisdiction = text_key(row.get("jurisdiction"))
+                locality = place_key(row.get("locality", ""))
+                seat = seat_key(row.get("districtLabel", ""))
+                if (jurisdiction, seat) in self.seats and locality:
+                    index = self.seats[jurisdiction, seat]
+                    self.administrative_localities[jurisdiction, locality].add(index)
+                    self.administrative_locality_sources[jurisdiction, locality] = row
 
         self.inventory_context = {}
         self.inventory_context_status = 'not_available'
@@ -230,6 +246,23 @@ class GeographicAttribution:
         parent = parents[0]
         prefix = ",".join(components[:-1])
         if parent in self.city_names and parent not in province_context:
+            # Accept the exact administrative locality within the title's
+            # city context, even if the project title has other text before it.
+            # Requiring a delimiter after the locality avoids matching a
+            # longer place or person name that merely starts with Malate.
+            prefix_key = text_key(prefix)
+            for (jurisdiction, locality), indices in self.administrative_localities.items():
+                if jurisdiction != parent:
+                    continue
+                pattern = r"(?:^|[,;(])\s*" + re.escape(locality) + r"\s*(?=$|[,;)])"
+                if re.search(pattern, prefix_key):
+                    row = self.administrative_locality_sources[(jurisdiction, locality)]
+                    return dict(indices=sorted(indices), reasons=[], evidence=[{
+                        "level": "administrative_locality", "name": locality,
+                        "city": parent, "district": row.get("districtLabel"),
+                        "basis": row.get("basis"), "sources": row.get("sources", []),
+                        "limit": row.get("limits")
+                    }])
             indices, reasons, evidence = self.city(parent, prefix)
             return dict(indices=indices, reasons=reasons, evidence=evidence)
         if len(components) < 2:

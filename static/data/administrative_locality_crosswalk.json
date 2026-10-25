@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "description": "Explicit administrative localities that are named in project titles but are not barangays in the numbered barangay hierarchy.",
+  "records": [
+    {
+      "locality": "Malate",
+      "jurisdiction": "Manila",
+      "parentCity": "Manila",
+      "districtLabel": "5th District",
+      "level": "administrative_district",
+      "basis": "Malate is an administrative district of Manila and falls in Manila's Fifth Congressional District. DPWH City-Municipal Boundaries also identifies the Malate polygon as Manila City (Fifth District).",
+      "sources": [
+        "https://sites.google.com/deped.gov.ph/sdomanila/about",
+        "https://services1.arcgis.com/IwZZTMxZCmAmFYvF/ArcGIS/rest/services/City_Municipal_Boundaries/FeatureServer/0"
+      ],
+      "limits": "This crosswalk resolves an explicitly named Malate, Manila locality. It does not imply a project point, barangay, sponsorship, or control."
+    }
+  ]
+}

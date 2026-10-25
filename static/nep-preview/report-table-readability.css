@@ -10,6 +10,11 @@
 .report-table-scroll tbody tr:hover>td,.report-table-scroll tbody tr:hover>th,.report-table-scroll tbody tr:focus-within>td{background:#dceee8!important}
 .report-table-scroll tfoot td,.report-table-scroll tfoot th{background:#daeae5!important;color:#173e4b!important;font-weight:650}
 .report-table-scroll .report-empty-representative{display:none!important}
+.report-table-scroll .report-card-hidden-column{display:none!important}
+.report-table-scroll .report-project-title-cell{cursor:pointer}
+.report-project-details-trigger{display:inline-block!important;margin:4px 0 0 8px;padding:3px 8px!important;border:1px solid #8aaca4!important;border-radius:999px!important;background:#edf6f3!important;color:#174d50!important;font:600 11px/1.35 system-ui,sans-serif!important;white-space:nowrap;vertical-align:middle}
+.report-project-details-trigger:hover{background:#d8eee7!important}
+.report-project-details-trigger:focus-visible{outline:3px solid #278b80;outline-offset:2px}
 .report-table-scroll td.num,.report-table-scroll th.num{text-align:right!important}
 @media(max-width:600px){.report-table-scroll th,.report-table-scroll td{padding:8px 5px!important;font-size:11px!important}}
 @media print{.report-table-scroll{max-height:none!important;overflow:visible!important;border-radius:0}.report-table-scroll thead th{position:static!important}.report-table-scroll tbody tr{break-inside:avoid}}
@@ -26,4 +31,20 @@
 
 .report-table-scroll th.report-distance-column{width:9%!important;text-align:right!important}
 .report-table-scroll td.report-distance-value{text-align:right!important;font-weight:650!important;font-variant-numeric:tabular-nums}
+.report-project-dialog{box-sizing:border-box;width:min(1020px,calc(100vw - 32px));max-width:none;max-height:min(88vh,900px);padding:0;border:1px solid #94b4ad;border-radius:16px;background:#f7faf9;color:#18303b;box-shadow:0 24px 80px #102f3e55;overflow:hidden}
+.report-project-dialog::backdrop{background:#102f3e99;backdrop-filter:blur(2px)}
+.report-project-card{max-height:min(88vh,900px);overflow:auto;padding:clamp(18px,3vw,30px)}
+.report-project-card>header{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin:0 0 22px;padding:0;background:transparent;color:inherit}
+.report-project-kicker{display:block;margin-bottom:6px;color:#087e78;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.report-project-card h2{margin:0;color:#173e4b;font-size:clamp(20px,2.5vw,29px);line-height:1.25;overflow-wrap:anywhere}
+.report-project-close{flex:0 0 auto;width:40px;height:40px;padding:0!important;border:1px solid #a9bfbb!important;border-radius:50%!important;background:#fff!important;color:#18303b!important;font-size:26px!important;line-height:1!important}
+.report-project-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 18px}
+.report-project-field{min-width:0;padding:12px 14px;border:1px solid #d7e4e0;border-radius:10px;background:#fff}
+.report-project-field dt{margin-bottom:4px;color:#4c666d;font-size:12px;font-weight:750;letter-spacing:.03em;text-transform:uppercase}
+.report-project-field dd{margin:0;overflow-wrap:anywhere;white-space:pre-wrap}
+.report-project-links{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin-top:16px;padding-top:14px;border-top:1px solid #cbdad6}
+.report-project-links:empty{display:none}
+.report-project-links strong{flex-basis:100%;color:#173e4b}
+.report-project-links a{color:#087e78;font-weight:700}
+@media(max-width:650px){.report-project-fields{grid-template-columns:minmax(0,1fr)}.report-project-dialog{width:calc(100vw - 20px);max-height:90vh}.report-project-card{max-height:90vh;padding:16px}.report-project-card>header{margin-bottom:14px}.report-project-details-trigger{padding:3px 6px!important;font-size:10px!important}}
 @media(min-width:900px){.report-table-scroll td.report-distance-value{white-space:nowrap!important;overflow-wrap:normal!important}}
