@@ -5,6 +5,7 @@
   const summary = document.getElementById('mpbMapSummary');
   const story = document.getElementById('mpbMapStory');
   const projectCard = document.getElementById('mpbMapProjectCard');
+  const shareActions = document.getElementById('mpbMapActions');
   let openProjectCard = null, pendingProject = null;
   document.addEventListener('click', event => {
     const trigger = event.target.closest('[data-mpb-project-id]');
@@ -98,7 +99,9 @@
   const facebookLink = document.getElementById('mpbMapFacebook');
   const shareStatus = document.getElementById('mpbMapShareStatus');
   const updateShareLinks = () => {
-    if (facebookLink) facebookLink.href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl())}`;
+    const cachedPage = source.sharePages?.[select.value];
+    const shareTarget = cachedPage ? new URL(cachedPage, document.baseURI).href : shareUrl();
+    if (facebookLink) facebookLink.href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareTarget)}`;
   };
   updateShareLinks();
   document.getElementById('mpbMapCopyLink')?.addEventListener('click', async () => {
@@ -264,7 +267,8 @@
     const svg = `<svg viewBox="0 0 820 480" role="img" aria-label="${esc(visibleLabel)}: municipality outline, ${points.length} MPB project coordinates and ${group.length} pairwise distances"><title>${esc(visibleLabel)} MPB coordinate view</title><rect x="0" y="0" width="820" height="480" fill="#fff"/><text x="20" y="28" font-size="17" font-weight="700" fill="#18303b">${esc(visibleLabel)}</text><text x="20" y="49" font-size="12" fill="#526773">Municipal outline and project locations from printed coordinates</text><path d="M 785 70 L 785 38 M 785 38 L 779 48 M 785 38 L 791 48" fill="none" stroke="#18303b" stroke-width="2"/><text x="785" y="28" text-anchor="middle" font-size="11" fill="#18303b">N</text><rect x="${box.x}" y="${box.y}" width="${box.w}" height="${box.h}" rx="8" fill="#f7faf9" stroke="#d3dfdc"/>${boundarySvg}${lines}${dots}<line x1="82" y1="448" x2="${(82 + Math.max(15, barPx)).toFixed(1)}" y2="448" stroke="#18303b" stroke-width="4"/><line x1="82" y1="442" x2="82" y2="454" stroke="#18303b" stroke-width="2"/><line x1="${(82 + Math.max(15, barPx)).toFixed(1)}" y1="442" x2="${(82 + Math.max(15, barPx)).toFixed(1)}" y2="454" stroke="#18303b" stroke-width="2"/><text x="${(90 + Math.max(15, barPx)).toFixed(1)}" y="452" font-size="11" fill="#18303b">${unitLabel}</text><text x="770" y="452" text-anchor="end" font-size="11" fill="#526773">${points.length} plotted points</text></svg>`;
     const pairRows = [...group].sort((a, b) => Number(b.distanceMeters) - Number(a.distanceMeters)).map(row => `<tr><td>${esc(row.sourceLabel)}<br>${esc(row.projectName)}</td><td>${esc(row.otherSource)}<br>${esc(row.otherProject)}</td><td>${esc(formatDistance(row.distanceMeters))}</td><td>${esc(row.municipalityEvidence || row.barangayEvidence || '')}</td></tr>`).join('');
     const pointRows = points.map(point => `<tr><td>${point.number}</td><td>${esc(point.sourceId)}</td><td><button class="mpb-point-open" type="button" data-project-id="${esc(point.hgabId)}">${esc(point.title)}</button></td><td>${esc(point.raw)}</td><td>${point.insideBoundary === false ? 'Outside municipal outline · verify' : point.insideBoundary === true ? 'Inside municipal outline' : 'Boundary unavailable'}</td></tr>`).join('');
-    plot.innerHTML = `${svg}<table class="mpb-project-list"><thead><tr><th>Source point</th><th>Project</th><th>Printed coordinate pair</th><th>Boundary check</th></tr></thead><tbody>${pointRows}</tbody></table><h4>Pair distances · farthest first</h4><table class="mpb-project-list"><thead><tr><th>First project · source</th><th>Second project · source</th><th>Straight-line separation</th><th>Place evidence</th></tr></thead><tbody>${pairRows}</tbody></table>`;
+    plot.innerHTML = `${svg}<div id="mpbMapShareSlot"></div><table class="mpb-project-list"><thead><tr><th>Source point</th><th>Project</th><th>Printed coordinate pair</th><th>Boundary check</th></tr></thead><tbody>${pointRows}</tbody></table><h4>Pair distances · farthest first</h4><table class="mpb-project-list"><thead><tr><th>First project · source</th><th>Second project · source</th><th>Straight-line separation</th><th>Place evidence</th></tr></thead><tbody>${pairRows}</tbody></table>`;
+    if (shareActions) plot.querySelector('#mpbMapShareSlot')?.append(shareActions);
     plot.querySelectorAll('[data-project-id]').forEach(marker => {
       marker.addEventListener('click', () => showProject(marker.dataset.projectId));
       marker.addEventListener('keydown', event => {
