@@ -116,6 +116,17 @@
   function showProject(projectId, viewportPopup = false) {
     const detail = projectDetails[projectId];
     if (!projectCard || !detail) return;
+    let hasMatchingMap = false;
+    if (viewportPopup) {
+      const matchingGroup = [...groups.entries()].find(([, rows]) => rows.some(row =>
+        row.sourceLabel?.startsWith(projectId + ' · ') || row.otherSource?.startsWith(projectId + ' · ')));
+      if (matchingGroup) {
+        hasMatchingMap = true;
+        if (select.value !== matchingGroup[0]) {
+          select.value = matchingGroup[0]; updateShareLinks(); render();
+        }
+      }
+    }
     const memberCard = member => {
       const name = member.name || member.officialName || 'Representative not resolved';
       const portrait = member.photoUrl
@@ -136,6 +147,15 @@
       ? `<div class="mpb-transparency-documents"><strong>DPWH Transparency documents</strong><ul>${transparencyLinks.map(link => `<li><a href="${esc(link.url)}" target="_blank" rel="noopener">${esc(link.type || 'Document')} ↗</a></li>`).join('')}</ul></div>`
       : '';
     projectCard.innerHTML = `<div class="mpb-map-project-head"><div><span class="mpb-map-project-kicker">Selected MPB project · ${esc(projectId)}</span><h4>${esc(detail.projectName)}</h4></div><button type="button" class="mpb-map-project-close" aria-label="Close project details">×</button></div><div class="mpb-map-project-columns"><div><dl class="mpb-map-project-facts"><dt>Allocation</dt><dd>₱${Number(detail.amountPesos || 0).toLocaleString('en-PH')}</dd><dt>Implementing office</dt><dd>${esc(detail.office || 'Not stated')}</dd><dt>Printed coordinate</dt><dd>${esc(point)}</dd><dt>Source</dt><dd>${esc(detail.sourceVolume || 'HGAB 3rd reading')} · p. ${esc(detail.sourcePage || 'not recorded')}</dd></dl>${transparencyBlock}<div class="mpb-project-flag-panel"><strong>Current review signals</strong>${flagList}</div></div><aside class="mpb-map-project-representative"><h5>Representative</h5>${detail.representativeCards?.length ? `<div class="mpb-member-associations">${detail.representativeCards.map(memberCard).join('')}</div>` : '<p>No unique legislative district was resolved for this project.</p>'}</aside></div><div class="mpb-project-flag-panel mpb-project-mode-context"><strong>Allocation mode context</strong><dl class="mpb-project-mode-facts"><dt>Mode rank</dt><dd>${detail.modeRank ? `#${Number(detail.modeRank).toLocaleString('en-PH')} of ${Number(detail.modePopulation).toLocaleString('en-PH')} · ${Number(detail.modeMultiple).toFixed(1)}× the ₱${Number(detail.modeAmount).toLocaleString('en-PH')} mode` : 'Not available'}</dd><dt>Same allocation</dt><dd>${Number(detail.sameAmountCount || 0).toLocaleString('en-PH')} MPB project${Number(detail.sameAmountCount) === 1 ? '' : 's'} at this amount, including this one</dd></dl></div><p class="mpb-profile-source">Representative portraits and House profile links: <a href="https://github.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS/tree/main/DEO2LEG" target="_blank" rel="noopener">CSIIIV DEO2LEG source</a> · ${esc(source.representativeProfileSource?.commit || '')}</p>`;
+    if (viewportPopup && hasMatchingMap) {
+      const map = plot.querySelector(':scope > svg');
+      if (map) {
+        const preview = document.createElement('div'); preview.className = 'mpb-map-project-preview';
+        preview.setAttribute('aria-label', 'Map for the selected MPB project');
+        preview.append(map.cloneNode(true));
+        projectCard.querySelector('.mpb-map-project-head').after(preview);
+      }
+    }
     projectCard.classList.toggle('mpb-map-project-card--viewport', viewportPopup);
     projectCard.hidden = false;
     projectCard.querySelector('.mpb-map-project-close').addEventListener('click', () => {
