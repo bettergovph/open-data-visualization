@@ -5,10 +5,18 @@
   const summary = document.getElementById('mpbMapSummary');
   const story = document.getElementById('mpbMapStory');
   const projectCard = document.getElementById('mpbMapProjectCard');
+  let openProjectCard = null, pendingProjectId = null;
+  document.addEventListener('click', event => {
+    const trigger = event.target.closest('[data-mpb-project-id]');
+    if (!trigger) return;
+    if (openProjectCard) openProjectCard(trigger.dataset.mpbProjectId);
+    else pendingProjectId = trigger.dataset.mpbProjectId;
+  });
   if (!dataNode || !select || !plot || !summary) return;
 
   const init = boundaryData => {
-  const source = JSON.parse(dataNode.textContent).coordinateProximity || {};
+  const reportData = JSON.parse(dataNode.textContent);
+  const source = reportData.coordinateProximity || {};
   const pairs = source.current || [];
   const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
@@ -29,6 +37,26 @@
   const sortedGroups = [...groups.entries()].sort((a, b) => spread(b[1]) - spread(a[1]) || a[0].localeCompare(b[0]));
   const boundaries = new Map((boundaryData?.features || []).map(feature => [feature.municipalityGroup, feature]));
   const projectDetails = source.projectDetails || {};
+  const amountCounts = new Map();
+  for (const row of reportData.prices || []) {
+    const amount = Number(row.amountPesos);
+    amountCounts.set(amount, (amountCounts.get(amount) || 0) + Number(row.projects || 0));
+  }
+  const modalAmount = [...amountCounts.entries()].sort((a, b) => b[1] - a[1] || a[0] - b[0])[0]?.[0] || 5000000;
+  const amountRanks = new Map();
+  let projectsAbove = 0;
+  for (const [amount, count] of [...amountCounts.entries()].sort((a, b) => b[0] - a[0])) {
+    amountRanks.set(amount, projectsAbove + 1);
+    projectsAbove += count;
+  }
+  for (const detail of Object.values(projectDetails)) {
+    const amount = Number(detail.amountPesos || 0);
+    detail.modeRank = amountRanks.get(amount) || null;
+    detail.modeAmount = modalAmount;
+    detail.modeMultiple = modalAmount ? amount / modalAmount : null;
+    detail.sameAmountCount = amountCounts.get(amount) || 0;
+    detail.modePopulation = projectsAbove;
+  }
   function insideBoundary(point, feature) {
     if (!feature?.rings?.length) return null;
     let inside = false;
@@ -104,11 +132,18 @@
       return `<div class="mpb-member-association">${portrait}<div><strong>${esc(name)}</strong><span>${esc(member.district || '')}</span>${member.officialName && member.officialName !== name ? `<small>Official roster name: ${esc(member.officialName)}</small>` : ''}${member.profileUrl ? `<a href="${esc(member.profileUrl)}" target="_blank" rel="noopener">House profile ↗</a>` : ''}${member.resolutionStatus === 'no_exact_csiiiv_seat_match' ? '<small>Portrait not matched to a seat in the CSIIIV profile snapshot.</small>' : ''}</div></div>`;
     };
     const point = detail.coordinate ? `${detail.coordinate.latitude}, ${detail.coordinate.longitude}` : 'No usable printed coordinate';
-    projectCard.innerHTML = `<div class="mpb-map-project-head"><div><span class="mpb-map-project-kicker">Selected MPB project · ${esc(projectId)}</span><h4>${esc(detail.projectName)}</h4></div><button type="button" class="mpb-map-project-close" aria-label="Close project details">×</button></div><div class="mpb-map-project-columns"><dl class="mpb-map-project-facts"><dt>Allocation</dt><dd>₱${Number(detail.amountPesos || 0).toLocaleString('en-PH')}</dd><dt>Implementing office</dt><dd>${esc(detail.office || 'Not stated')}</dd><dt>Printed coordinate</dt><dd>${esc(point)}</dd><dt>NEP comparison</dt><dd>${esc(detail.insertionStatus)}</dd><dt>Source</dt><dd>${esc(detail.sourceVolume || 'HGAB 3rd reading')} · p. ${esc(detail.sourcePage || 'not recorded')}</dd></dl><aside class="mpb-map-project-representative"><h5>Representative</h5>${detail.representativeCards?.length ? `<div class="mpb-member-associations">${detail.representativeCards.map(memberCard).join('')}</div>` : '<p>No unique legislative district was resolved for this project.</p>'}</aside></div><p class="mpb-profile-source">Representative portraits and House profile links: <a href="https://github.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS/tree/main/DEO2LEG" target="_blank" rel="noopener">CSIIIV DEO2LEG source</a> · ${esc(source.representativeProfileSource?.commit || '')}</p>`;
+    const flags = detail.reviewFlags || [];
+    const flagList = flags.length
+      ? `<ul class="mpb-project-review-flags">${flags.map(flag => `<li><strong>${esc(flag.label)}</strong><span>${esc(flag.detail)}</span></li>`).join('')}</ul>`
+      : '<p>No current project-level review signals are linked to this row.</p>';
+    projectCard.innerHTML = `<div class="mpb-map-project-head"><div><span class="mpb-map-project-kicker">Selected MPB project · ${esc(projectId)}</span><h4>${esc(detail.projectName)}</h4></div><button type="button" class="mpb-map-project-close" aria-label="Close project details">×</button></div><div class="mpb-map-project-columns"><div><dl class="mpb-map-project-facts"><dt>Allocation</dt><dd>₱${Number(detail.amountPesos || 0).toLocaleString('en-PH')}</dd><dt>Mode rank</dt><dd>${detail.modeRank ? `#${Number(detail.modeRank).toLocaleString('en-PH')} of ${Number(detail.modePopulation).toLocaleString('en-PH')} · ${Number(detail.modeMultiple).toFixed(1)}× the ₱${Number(detail.modeAmount).toLocaleString('en-PH')} mode` : 'Not available'}</dd><dt>Same allocation</dt><dd>${Number(detail.sameAmountCount || 0).toLocaleString('en-PH')} MPB project${Number(detail.sameAmountCount) === 1 ? '' : 's'} at this amount, including this one</dd><dt>Implementing office</dt><dd>${esc(detail.office || 'Not stated')}</dd><dt>Printed coordinate</dt><dd>${esc(point)}</dd><dt>NEP comparison</dt><dd>${esc(detail.insertionStatus)}</dd><dt>Source</dt><dd>${esc(detail.sourceVolume || 'HGAB 3rd reading')} · p. ${esc(detail.sourcePage || 'not recorded')}</dd></dl><div class="mpb-project-flag-panel"><strong>Current review signals</strong>${flagList}</div></div><aside class="mpb-map-project-representative"><h5>Representative</h5>${detail.representativeCards?.length ? `<div class="mpb-member-associations">${detail.representativeCards.map(memberCard).join('')}</div>` : '<p>No unique legislative district was resolved for this project.</p>'}</aside></div><p class="mpb-profile-source">Representative portraits and House profile links: <a href="https://github.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS/tree/main/DEO2LEG" target="_blank" rel="noopener">CSIIIV DEO2LEG source</a> · ${esc(source.representativeProfileSource?.commit || '')}</p>`;
     projectCard.hidden = false;
     projectCard.querySelector('.mpb-map-project-close').addEventListener('click', () => { projectCard.hidden = true; });
     requestAnimationFrame(() => projectCard.scrollIntoView({block: 'center', behavior: 'smooth'}));
   }
+
+  openProjectCard = showProject;
+  if (pendingProjectId) { const projectId = pendingProjectId; pendingProjectId = null; showProject(projectId); }
 
   function formatDistance(meters) {
     return meters >= 1000 ? `${(meters / 1000).toFixed(1)} km` : `${Math.round(meters)} m`;
