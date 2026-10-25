@@ -17,7 +17,7 @@ const detailDialog=(()=>{
  dialog.addEventListener('click',event=>{if(event.target===dialog)dialog.close()});
  return dialog;
 })();
-function cellText(cell){const copy=cell.cloneNode(true);copy.querySelectorAll('.report-project-details-trigger').forEach(node=>node.remove());return normalize(copy.innerText||copy.textContent)}
+function cellText(cell){const copy=cell.cloneNode(true);copy.querySelectorAll('.report-project-details-trigger').forEach(node=>node.remove());return normalize(copy.textContent)}
 function safeLinks(row){
  const links=[];
  row.querySelectorAll('a[href]').forEach(anchor=>{
