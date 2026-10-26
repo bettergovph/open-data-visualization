@@ -5,9 +5,9 @@
       "id": "hgab3-project-row-count",
       "question": "In the October 18, 2026 Transparency snapshot, how many HGAB 3rd project rows were checked for document coverage?",
       "choices": [
-        "9,035",
-        "15,228",
         "16,275",
+        "15,228",
+        "9,035",
         "15,979"
       ],
       "answer": "15,979",
@@ -32,8 +32,8 @@
       "choices": [
         "6,105",
         "751",
-        "1,385",
-        "4,610"
+        "4,610",
+        "1,385"
       ],
       "answer": "6,105",
       "explanation": "These are HGAB 3rd rows without a selected one-to-one NEP counterpart. A missing match is a review lead, not proof the project was newly added.",
@@ -56,9 +56,9 @@
       "question": "Among 751 inspected HGAB 3rd rows with listed documents, how many lacked at least one of the three tracked types?",
       "choices": [
         "44",
-        "109",
+        "501",
         "481",
-        "501"
+        "109"
       ],
       "answer": "481",
       "explanation": "481 inspected rows lacked a POW, geotagged photos, or an RDC endorsement in the 2026-10-18 listing. Uninspected and unlisted source records are not treated as checked.",
@@ -155,9 +155,9 @@
       "id": "hgab3-linked-share",
       "question": "What share of the HGAB 3rd document-coverage rows had a selected Transparency NEP counterpart?",
       "choices": [
-        "38.2%",
-        "69.2%",
         "93.6%",
+        "69.2%",
+        "38.2%",
         "56.5%"
       ],
       "answer": "56.5%",
@@ -180,10 +180,10 @@
       "id": "hgab3-missing-photos",
       "question": "Among the 751 inspected HGAB 3rd rows, how many had no geotagged photos listed in the Transparency record?",
       "choices": [
-        "44",
+        "520",
         "501",
         "95",
-        "520"
+        "44"
       ],
       "answer": "95",
       "explanation": "95 inspected rows had no geotagged photos listed in the 2026-10-18 Transparency metadata snapshot. This describes the listing, not whether a source document exists elsewhere.",
@@ -230,10 +230,10 @@
       "id": "hgab3-missing-docs-share",
       "question": "What share of inspected HGAB 3rd rows with listed documents lacked at least one tracked document type?",
       "choices": [
-        "5.9%",
+        "38.2%",
         "64.0%",
         "14.5%",
-        "38.2%"
+        "5.9%"
       ],
       "answer": "64.0%",
       "explanation": "481 of 751 inspected rows (64.0%) lacked a POW, geotagged photos, or an RDC endorsement in the 2026-10-18 snapshot.",
@@ -339,10 +339,10 @@
       "id": "summary-hero-lead-count",
       "question": "How many investigative leads does the summary hero highlight?",
       "choices": [
+        "4 leads",
         "12 leads",
-        "10 leads",
-        "14 leads",
-        "20 leads"
+        "24 leads",
+        "60 leads"
       ],
       "answer": "12 leads",
       "explanation": "The summary hero highlights 12 investigative leads. They are review leads, not findings of wrongdoing.",
@@ -353,7 +353,7 @@
           "url": "summary.html#ranked-leads"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "questionType": "summary-hero-number",
       "topic": "summary-leads",
       "pool": "summary-leads",
@@ -365,9 +365,9 @@
       "id": "summary-hero-uniform-rcs-offices",
       "question": "How many offices are covered by the uniform RCS packages highlighted in the summary hero?",
       "choices": [
-        "198 offices",
+        "100 offices",
         "199 offices",
-        "200 offices",
+        "500 offices",
         "1,990 offices"
       ],
       "answer": "199 offices",
@@ -379,7 +379,7 @@
           "url": "summary.html#ranked-leads"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "questionType": "summary-hero-number",
       "topic": "summary-leads",
       "pool": "summary-leads",
@@ -393,8 +393,8 @@
       "choices": [
         "137 proposals",
         "1,379 proposals",
-        "1,397 proposals",
-        "1,739 proposals"
+        "5,137 proposals",
+        "13,790 proposals"
       ],
       "answer": "1,379 proposals",
       "explanation": "The hero highlights 1,379 repeat candidates for review; a repeated title does not establish duplicate work.",
@@ -405,7 +405,7 @@
           "url": "summary.html#ranked-leads"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "questionType": "summary-hero-number",
       "topic": "summary-leads",
       "pool": "summary-leads",
@@ -452,7 +452,7 @@
         "₱83,706,551,000"
       ],
       "explanation": "The current MPB analysis totals ₱83,706,551,000 across HGAB 3rd-reading lines; this is an allocation total, not a reported expenditure total.",
-      "difficulty": "hard",
+      "difficulty": "medium",
       "topic": "allocation",
       "pool": "question-hgab3-mpb-amount",
       "sources": [
@@ -462,6 +462,206 @@
         }
       ],
       "stage": "HGAB 3rd reading"
+    },
+    {
+      "id": "fy2027-proposed-total",
+      "question": "How much is the proposed Philippine national budget for 2027?",
+      "choices": [
+        "₱6 trillion",
+        "₱7.2 trillion",
+        "₱8.4 trillion",
+        "₱10 trillion"
+      ],
+      "answer": "₱7.2 trillion",
+      "explanation": "The Department of Budget and Management submitted a proposed FY2027 National Budget of ₱7.2 trillion. This is the proposed NEP total, not the later enacted budget.",
+      "hint": "The cited DBM release gives the proposed total in its headline.",
+      "sources": [
+        {
+          "label": "DBM · Proposed FY2027 National Budget",
+          "url": "https://www.dbm.gov.ph/index.php/management-2/4143-dbm-submits-7-2-t-2027-people-centered-budget-to-congress-puts-education-health-jobs-at-heart-of-marcos-administration-s-final-full-year-spending-plan"
+        }
+      ],
+      "difficulty": "easy",
+      "category": null,
+      "topic": null,
+      "questionType": "national-budget-total",
+      "generatedFromNationalBudget": true,
+      "pool": "question-fy2027-proposed-total"
+    },
+    {
+      "id": "easy-nep-definition",
+      "question": "What does NEP stand for?",
+      "choices": [
+        "New Executive Proposal",
+        "National Expenditure Program",
+        "National Economic Program",
+        "National Expenditure Plan"
+      ],
+      "answer": "National Expenditure Program",
+      "explanation": "NEP means National Expenditure Program, the proposed budget the Executive submits to Congress.",
+      "hint": "Think of the budget stages from the proposed NEP through congressional deliberation to the enacted GAA.",
+      "sources": [
+        {
+          "label": "BetterGov · NEP to HGAB budget-stage comparison",
+          "url": "https://csiiiv.github.io/DPWH-NEP-HB-2027-ANALYSIS/app/#compare"
+        }
+      ],
+      "difficulty": "easy",
+      "category": null,
+      "topic": "budget-basics",
+      "questionType": "budget-stage-definition",
+      "generatedFromBudgetGlossary": true,
+      "pool": "question-easy-nep-definition"
+    },
+    {
+      "id": "easy-hgab-definition",
+      "question": "In our 2027 budget questions, what does HGAB mean?",
+      "choices": [
+        "Higher Government Appropriations Bill",
+        "House General Allocation Budget",
+        "House Government Annual Budget",
+        "House General Appropriations Bill"
+      ],
+      "answer": "House General Appropriations Bill",
+      "explanation": "HGAB refers to the House General Appropriations Bill; this project tracks its third-reading version.",
+      "hint": "Think of the budget stages from the proposed NEP through congressional deliberation to the enacted GAA.",
+      "sources": [
+        {
+          "label": "BetterGov · NEP to HGAB budget-stage comparison",
+          "url": "https://csiiiv.github.io/DPWH-NEP-HB-2027-ANALYSIS/app/#compare"
+        }
+      ],
+      "difficulty": "easy",
+      "category": null,
+      "topic": "budget-basics",
+      "questionType": "budget-stage-definition",
+      "generatedFromBudgetGlossary": true,
+      "pool": "question-easy-hgab-definition"
+    },
+    {
+      "id": "easy-gab-definition",
+      "question": "What does GAB stand for?",
+      "choices": [
+        "General Appropriations Bill",
+        "General Agency Budget",
+        "General Appropriations Act",
+        "Government Allocation Budget"
+      ],
+      "answer": "General Appropriations Bill",
+      "explanation": "GAB means General Appropriations Bill. The House and Senate consider their own bill versions before reconciliation.",
+      "hint": "Think of the budget stages from the proposed NEP through congressional deliberation to the enacted GAA.",
+      "sources": [
+        {
+          "label": "BetterGov · NEP to HGAB budget-stage comparison",
+          "url": "https://csiiiv.github.io/DPWH-NEP-HB-2027-ANALYSIS/app/#compare"
+        }
+      ],
+      "difficulty": "easy",
+      "category": null,
+      "topic": "budget-basics",
+      "questionType": "budget-stage-definition",
+      "generatedFromBudgetGlossary": true,
+      "pool": "question-easy-gab-definition"
+    },
+    {
+      "id": "easy-bicam-definition",
+      "question": "What does “bicam” refer to in the budget process?",
+      "choices": [
+        "The House-Senate conference that reconciles bill differences",
+        "The House’s third-reading vote",
+        "The Executive’s original budget proposal",
+        "The enacted General Appropriations Act"
+      ],
+      "answer": "The House-Senate conference that reconciles bill differences",
+      "explanation": "Bicam is the bicameral conference stage, where the House and Senate reconcile differences between their General Appropriations Bill versions.",
+      "hint": "Think of the budget stages from the proposed NEP through congressional deliberation to the enacted GAA.",
+      "sources": [
+        {
+          "label": "BetterGov · NEP to HGAB budget-stage comparison",
+          "url": "https://csiiiv.github.io/DPWH-NEP-HB-2027-ANALYSIS/app/#compare"
+        }
+      ],
+      "difficulty": "easy",
+      "category": null,
+      "topic": "budget-basics",
+      "questionType": "budget-stage-definition",
+      "generatedFromBudgetGlossary": true,
+      "pool": "question-easy-bicam-definition"
+    },
+    {
+      "id": "easy-gaa-definition",
+      "question": "What does GAA stand for?",
+      "choices": [
+        "Government Allocation Agreement",
+        "Government Annual Allocation",
+        "General Appropriations Act",
+        "General Agency Appropriation"
+      ],
+      "answer": "General Appropriations Act",
+      "explanation": "GAA means General Appropriations Act, the enacted national budget.",
+      "hint": "Think of the budget stages from the proposed NEP through congressional deliberation to the enacted GAA.",
+      "sources": [
+        {
+          "label": "BetterGov · NEP to HGAB budget-stage comparison",
+          "url": "https://csiiiv.github.io/DPWH-NEP-HB-2027-ANALYSIS/app/#compare"
+        }
+      ],
+      "difficulty": "easy",
+      "category": null,
+      "topic": "budget-basics",
+      "questionType": "budget-stage-definition",
+      "generatedFromBudgetGlossary": true,
+      "pool": "question-easy-gaa-definition"
+    },
+    {
+      "id": "easy-nep-bicam-gaa-order",
+      "question": "Which order correctly arranges NEP, Bicam, and GAA?",
+      "choices": [
+        "Bicam → NEP → GAA",
+        "NEP → GAA → Bicam",
+        "NEP → Bicam → GAA",
+        "GAA → Bicam → NEP"
+      ],
+      "answer": "NEP → Bicam → GAA",
+      "explanation": "The NEP is the proposed budget, Bicam reconciles the House and Senate bills later in the process, and the GAA is the enacted budget.",
+      "hint": "Think of the budget stages from the proposed NEP through congressional deliberation to the enacted GAA.",
+      "sources": [
+        {
+          "label": "BetterGov · NEP to HGAB budget-stage comparison",
+          "url": "https://csiiiv.github.io/DPWH-NEP-HB-2027-ANALYSIS/app/#compare"
+        }
+      ],
+      "difficulty": "easy",
+      "category": null,
+      "topic": "budget-basics",
+      "questionType": "budget-stage-definition",
+      "generatedFromBudgetGlossary": true,
+      "pool": "question-easy-nep-bicam-gaa-order"
+    },
+    {
+      "id": "easy-nep-hgab-gab-order",
+      "question": "Which order correctly arranges NEP, HGAB, and GAB?",
+      "choices": [
+        "GAB → HGAB → NEP",
+        "NEP → GAB → HGAB",
+        "NEP → HGAB → GAB",
+        "HGAB → NEP → GAB"
+      ],
+      "answer": "NEP → HGAB → GAB",
+      "explanation": "The NEP is the Executive proposal, HGAB is the House bill, and GAB is the Senate bill in this stage comparison.",
+      "hint": "Think of the budget stages from the proposed NEP through congressional deliberation to the enacted GAA.",
+      "sources": [
+        {
+          "label": "BetterGov · NEP to HGAB budget-stage comparison",
+          "url": "https://csiiiv.github.io/DPWH-NEP-HB-2027-ANALYSIS/app/#compare"
+        }
+      ],
+      "difficulty": "easy",
+      "category": null,
+      "topic": "budget-basics",
+      "questionType": "budget-stage-definition",
+      "generatedFromBudgetGlossary": true,
+      "pool": "question-easy-nep-hgab-gab-order"
     },
     {
       "id": "hgab3-schedule-records",
@@ -610,7 +810,7 @@
           "url": "cost-per-km.html"
         }
       ],
-      "difficulty": "hard",
+      "difficulty": "medium",
       "topic": "cost-per-meter",
       "questionType": "hgab3-data-fact",
       "stage": "HGAB 3rd reading",
@@ -712,7 +912,7 @@
           "url": "mpb.html"
         }
       ],
-      "difficulty": "hard",
+      "difficulty": "medium",
       "topic": "budget",
       "questionType": "hgab3-data-fact",
       "stage": "HGAB 3rd reading",
@@ -1080,7 +1280,7 @@
           "url": "congress.html"
         }
       ],
-      "difficulty": "hard",
+      "difficulty": "medium",
       "topic": "summary-leads",
       "questionType": "hgab3-data-fact",
       "stage": "HGAB 3rd reading",
@@ -1106,7 +1306,7 @@
           "url": "congress.html"
         }
       ],
-      "difficulty": "hard",
+      "difficulty": "medium",
       "topic": "summary-leads",
       "questionType": "hgab3-data-fact",
       "stage": "HGAB 3rd reading",
@@ -1158,7 +1358,7 @@
           "url": "cost-matching.html"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "topic": "geography",
       "questionType": "hgab3-coordinate-anomaly",
       "stage": "HGAB 3rd reading",
@@ -1208,7 +1408,7 @@
           "url": "cost-matching.html"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "topic": "geography",
       "questionType": "hgab3-coordinate-anomaly",
       "stage": "HGAB 3rd reading",
@@ -1258,7 +1458,7 @@
           "url": "cost-matching.html"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "topic": "geography",
       "questionType": "hgab3-coordinate-anomaly",
       "stage": "HGAB 3rd reading",
@@ -1358,7 +1558,7 @@
           "url": "mpb.html"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "topic": "geography",
       "questionType": "hgab3-coordinate-anomaly",
       "stage": "HGAB 3rd reading",
@@ -1408,7 +1608,7 @@
           "url": "cost-per-km.html#roads-3d-plot"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "Roads",
       "topic": "cost-per-meter",
       "questionType": "hgab3-3d-cost-density",
@@ -1436,7 +1636,7 @@
           "url": "cost-per-km.html#roads-3d-plot"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "Roads",
       "topic": "cost-per-meter",
       "questionType": "hgab3-3d-cost-density",
@@ -1464,7 +1664,7 @@
           "url": "cost-per-km.html#roads-3d-plot"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "Roads",
       "topic": "cost-per-meter",
       "questionType": "hgab3-3d-cost-density",
@@ -1492,7 +1692,7 @@
           "url": "cost-per-km.html#roads-3d-plot"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "Roads",
       "topic": "cost-per-meter",
       "questionType": "hgab3-3d-cost-density",
@@ -1520,7 +1720,7 @@
           "url": "cost-per-km.html#roads-3d-plot"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "Roads",
       "topic": "cost-per-meter",
       "questionType": "hgab3-3d-cost-density",
@@ -1548,7 +1748,7 @@
           "url": "cost-per-km.html#roads-3d-plot"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "Roads",
       "topic": "cost-per-meter",
       "questionType": "hgab3-3d-cost-density",
@@ -1576,7 +1776,7 @@
           "url": "cost-per-km.html#roads-3d-plot"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "Roads",
       "topic": "cost-per-meter",
       "questionType": "hgab3-3d-cost-density",
@@ -1604,7 +1804,7 @@
           "url": "cost-per-km.html#roads-3d-plot"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "Roads",
       "topic": "cost-per-meter",
       "questionType": "hgab3-3d-cost-density",
@@ -1632,7 +1832,7 @@
           "url": "cost-per-km.html#roads-3d-plot"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "Roads",
       "topic": "cost-per-meter",
       "questionType": "hgab3-3d-cost-density",
@@ -1660,7 +1860,7 @@
           "url": "cost-per-km.html#roads-3d-plot"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "Roads",
       "topic": "cost-per-meter",
       "questionType": "hgab3-3d-cost-density",
@@ -2248,7 +2448,7 @@
           "url": "cost-per-km.html#bridges-3d-plot"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "Bridges",
       "topic": "cost-per-meter",
       "questionType": "hgab3-3d-cost-density",
@@ -2276,7 +2476,7 @@
           "url": "cost-per-km.html#bridges-3d-plot"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "Bridges",
       "topic": "cost-per-meter",
       "questionType": "hgab3-3d-cost-density",
@@ -2304,7 +2504,7 @@
           "url": "cost-per-km.html#bridges-3d-plot"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "Bridges",
       "topic": "cost-per-meter",
       "questionType": "hgab3-3d-cost-density",
@@ -2332,7 +2532,7 @@
           "url": "cost-per-km.html#bridges-3d-plot"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "Bridges",
       "topic": "cost-per-meter",
       "questionType": "hgab3-3d-cost-density",
@@ -2360,7 +2560,7 @@
           "url": "cost-per-km.html#bridges-3d-plot"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "Bridges",
       "topic": "cost-per-meter",
       "questionType": "hgab3-3d-cost-density",
@@ -2388,7 +2588,7 @@
           "url": "cost-per-km.html#bridges-3d-plot"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "Bridges",
       "topic": "cost-per-meter",
       "questionType": "hgab3-3d-cost-density",
@@ -2416,7 +2616,7 @@
           "url": "cost-per-km.html#bridges-3d-plot"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "Bridges",
       "topic": "cost-per-meter",
       "questionType": "hgab3-3d-cost-density",
@@ -2444,7 +2644,7 @@
           "url": "cost-per-km.html#bridges-3d-plot"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "Bridges",
       "topic": "cost-per-meter",
       "questionType": "hgab3-3d-cost-density",
@@ -2472,7 +2672,7 @@
           "url": "cost-per-km.html#bridges-3d-plot"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "Bridges",
       "topic": "cost-per-meter",
       "questionType": "hgab3-3d-cost-density",
@@ -2500,7 +2700,7 @@
           "url": "cost-per-km.html#bridges-3d-plot"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "Bridges",
       "topic": "cost-per-meter",
       "questionType": "hgab3-3d-cost-density",
@@ -32088,7 +32288,7 @@
           "url": "https://budget.bettergov.ph/hgab/2027/leaderboard/house-bill-largest"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "2027 House bill",
       "topic": "leaderboard-house-bill",
       "questionType": "hgab3-leaderboard-fact",
@@ -32115,7 +32315,7 @@
           "url": "https://budget.bettergov.ph/hgab/2027/leaderboard/house-bill-largest"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "2027 House bill",
       "topic": "leaderboard-house-bill",
       "questionType": "hgab3-leaderboard-fact",
@@ -32142,7 +32342,7 @@
           "url": "https://budget.bettergov.ph/hgab/2027/leaderboard/house-bill-largest"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "2027 House bill",
       "topic": "leaderboard-house-bill",
       "questionType": "hgab3-leaderboard-fact",
@@ -32169,7 +32369,7 @@
           "url": "https://budget.bettergov.ph/hgab/2027/leaderboard/added-budget"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "2027 House bill",
       "topic": "leaderboard-house-bill",
       "questionType": "hgab3-leaderboard-fact",
@@ -32196,7 +32396,7 @@
           "url": "https://budget.bettergov.ph/hgab/2027/leaderboard/added-budget"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "2027 House bill",
       "topic": "leaderboard-house-bill",
       "questionType": "hgab3-leaderboard-fact",
@@ -32223,7 +32423,7 @@
           "url": "https://budget.bettergov.ph/hgab/2027/leaderboard/added-count"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "2027 House bill",
       "topic": "leaderboard-house-bill",
       "questionType": "hgab3-leaderboard-fact",
@@ -32250,7 +32450,7 @@
           "url": "https://budget.bettergov.ph/hgab/2027/leaderboard/added-count"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "2027 House bill",
       "topic": "leaderboard-house-bill",
       "questionType": "hgab3-leaderboard-fact",
@@ -32277,7 +32477,7 @@
           "url": "https://budget.bettergov.ph/hgab/2027/leaderboard/increase"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "2027 House bill",
       "topic": "leaderboard-house-bill",
       "questionType": "hgab3-leaderboard-fact",
@@ -32304,7 +32504,7 @@
           "url": "https://budget.bettergov.ph/hgab/2027/leaderboard/cuts"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "2027 House bill",
       "topic": "leaderboard-house-bill",
       "questionType": "hgab3-leaderboard-fact",
@@ -32331,7 +32531,7 @@
           "url": "https://budget.bettergov.ph/hgab/2027/leaderboard"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "2027 House bill",
       "topic": "leaderboard-house-bill",
       "questionType": "hgab3-leaderboard-fact",
@@ -33168,7 +33368,7 @@
           "url": "https://budget.bettergov.ph/hgab/2027/leaderboard/enacted-total"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "Enacted budget history",
       "topic": "leaderboard-history",
       "questionType": "hgab3-leaderboard-fact",
@@ -33195,7 +33395,7 @@
           "url": "https://budget.bettergov.ph/hgab/2027/leaderboard/enacted-total"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "Enacted budget history",
       "topic": "leaderboard-history",
       "questionType": "hgab3-leaderboard-fact",
@@ -33222,7 +33422,7 @@
           "url": "https://budget.bettergov.ph/hgab/2027/leaderboard/enacted-2026"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "Enacted budget history",
       "topic": "leaderboard-history",
       "questionType": "hgab3-leaderboard-fact",
@@ -33249,7 +33449,7 @@
           "url": "https://budget.bettergov.ph/hgab/2027/leaderboard/enacted-2026"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "Enacted budget history",
       "topic": "leaderboard-history",
       "questionType": "hgab3-leaderboard-fact",
@@ -33276,7 +33476,7 @@
           "url": "https://budget.bettergov.ph/hgab/2027/leaderboard/enacted-total"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "Enacted budget history",
       "topic": "leaderboard-history",
       "questionType": "hgab3-leaderboard-fact",
@@ -33303,7 +33503,7 @@
           "url": "https://budget.bettergov.ph/hgab/2027/leaderboard/enacted-total"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "Enacted budget history",
       "topic": "leaderboard-history",
       "questionType": "hgab3-leaderboard-fact",
@@ -33330,7 +33530,7 @@
           "url": "https://budget.bettergov.ph/hgab/2027/leaderboard/enacted-total"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "Enacted budget history",
       "topic": "leaderboard-history",
       "questionType": "hgab3-leaderboard-fact",
@@ -33357,7 +33557,7 @@
           "url": "https://budget.bettergov.ph/hgab/2027/leaderboard/enacted-total"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "Enacted budget history",
       "topic": "leaderboard-history",
       "questionType": "hgab3-leaderboard-fact",
@@ -33384,7 +33584,7 @@
           "url": "https://budget.bettergov.ph/hgab/2027/leaderboard/enacted-total"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "Enacted budget history",
       "topic": "leaderboard-history",
       "questionType": "hgab3-leaderboard-fact",
@@ -33411,7 +33611,7 @@
           "url": "https://budget.bettergov.ph/hgab/2027/leaderboard/enacted-total"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "Enacted budget history",
       "topic": "leaderboard-history",
       "questionType": "hgab3-leaderboard-fact",
@@ -33978,7 +34178,7 @@
           "url": "https://budget.bettergov.ph/hgab/2027/leaderboard/bills"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "House members",
       "topic": "leaderboard-members",
       "questionType": "hgab3-leaderboard-fact",
@@ -34005,7 +34205,7 @@
           "url": "https://budget.bettergov.ph/hgab/2027/leaderboard/bills"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "House members",
       "topic": "leaderboard-members",
       "questionType": "hgab3-leaderboard-fact",
@@ -34016,7 +34216,7 @@
     },
     {
       "id": "leaderboard-house-members-003",
-      "question": "Who ranks 2th by bills as principal author?",
+      "question": "Who ranks 2nd by bills as principal author?",
       "choices": [
         "Eric Go Yap",
         "Ferdinand Martin G. Romualdez",
@@ -34032,7 +34232,7 @@
           "url": "https://budget.bettergov.ph/hgab/2027/leaderboard/bills"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "House members",
       "topic": "leaderboard-members",
       "questionType": "hgab3-leaderboard-fact",
@@ -34043,7 +34243,7 @@
     },
     {
       "id": "leaderboard-house-members-004",
-      "question": "Who ranks 3th by bills as principal author?",
+      "question": "Who ranks 3rd by bills as principal author?",
       "choices": [
         "Eric Go Yap",
         "Rufus B. Rodriguez",
@@ -34059,7 +34259,7 @@
           "url": "https://budget.bettergov.ph/hgab/2027/leaderboard/bills"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "House members",
       "topic": "leaderboard-members",
       "questionType": "hgab3-leaderboard-fact",
@@ -34086,7 +34286,7 @@
           "url": "https://budget.bettergov.ph/hgab/2027/leaderboard/bills"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "House members",
       "topic": "leaderboard-members",
       "questionType": "hgab3-leaderboard-fact",
@@ -34113,7 +34313,7 @@
           "url": "https://budget.bettergov.ph/hgab/2027/leaderboard/bills"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "House members",
       "topic": "leaderboard-members",
       "questionType": "hgab3-leaderboard-fact",
@@ -34140,7 +34340,7 @@
           "url": "https://budget.bettergov.ph/hgab/2027/leaderboard/bills"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "House members",
       "topic": "leaderboard-members",
       "questionType": "hgab3-leaderboard-fact",
@@ -34167,7 +34367,7 @@
           "url": "https://budget.bettergov.ph/hgab/2027/leaderboard/bills"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "House members",
       "topic": "leaderboard-members",
       "questionType": "hgab3-leaderboard-fact",
@@ -34194,7 +34394,7 @@
           "url": "https://budget.bettergov.ph/hgab/2027/leaderboard/bills"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "House members",
       "topic": "leaderboard-members",
       "questionType": "hgab3-leaderboard-fact",
@@ -34221,7 +34421,7 @@
           "url": "https://budget.bettergov.ph/hgab/2027/leaderboard"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "House members",
       "topic": "leaderboard-members",
       "questionType": "hgab3-leaderboard-fact",
@@ -34367,7 +34567,7 @@
     },
     {
       "id": "leaderboard-house-members-016",
-      "question": "How many bills are listed for the member ranked 2th?",
+      "question": "How many bills are listed for the member ranked 2nd?",
       "choices": [
         "609",
         "360",
@@ -34394,7 +34594,7 @@
     },
     {
       "id": "leaderboard-house-members-017",
-      "question": "How many bills are listed for the member ranked 3th?",
+      "question": "How many bills are listed for the member ranked 3rd?",
       "choices": [
         "360",
         "358",
@@ -34771,6 +34971,222 @@
       "pool": "question-leaderboard-house-members-030"
     },
     {
+      "id": "leaderboard-house-members-031",
+      "question": "Which member of Congress is listed for Ilocos Norte, 1st District?",
+      "choices": [
+        "Bojie Dy",
+        "Mika Suansing",
+        "Rufus B. Rodriguez",
+        "Sandro Marcos"
+      ],
+      "answer": "Sandro Marcos",
+      "explanation": "The leaderboard lists Ferdinand Alexander A. Marcos for Ilocos Norte, 1st District; he is commonly known as Sandro Marcos.",
+      "hint": "Open the cited leaderboard and check its title and ranking measure.",
+      "sources": [
+        {
+          "label": "BetterGov · HGAB 2027 leaderboard · members",
+          "url": "https://budget.bettergov.ph/hgab/2027/leaderboard/bills"
+        }
+      ],
+      "difficulty": "easy",
+      "category": "House members",
+      "topic": "leaderboard-members",
+      "questionType": "hgab3-leaderboard-fact",
+      "stage": "HGAB 3rd reading",
+      "generatedFromLeaderboard": true,
+      "leaderboardBuiltAt": "2026-10-25T23:56:25.114Z",
+      "pool": "easy-member-sandro-marcos"
+    },
+    {
+      "id": "leaderboard-house-members-032",
+      "question": "Who is the Ilocos Norte, 1st District representative on the leaderboard?",
+      "choices": [
+        "Mika Suansing",
+        "Sandro Marcos",
+        "Rufus B. Rodriguez",
+        "Bojie Dy"
+      ],
+      "answer": "Sandro Marcos",
+      "explanation": "The leaderboard lists Ferdinand Alexander A. Marcos for Ilocos Norte, 1st District; he is commonly known as Sandro Marcos.",
+      "hint": "Open the cited leaderboard and check its title and ranking measure.",
+      "sources": [
+        {
+          "label": "BetterGov · HGAB 2027 leaderboard · members",
+          "url": "https://budget.bettergov.ph/hgab/2027/leaderboard/bills"
+        }
+      ],
+      "difficulty": "easy",
+      "category": "House members",
+      "topic": "leaderboard-members",
+      "questionType": "hgab3-leaderboard-fact",
+      "stage": "HGAB 3rd reading",
+      "generatedFromLeaderboard": true,
+      "leaderboardBuiltAt": "2026-10-25T23:56:25.114Z",
+      "pool": "easy-member-sandro-marcos"
+    },
+    {
+      "id": "leaderboard-house-members-033",
+      "question": "Which member of Congress is listed for Nueva Ecija, 1st District?",
+      "choices": [
+        "Mika Suansing",
+        "Sandro Marcos",
+        "Bella Suansing",
+        "Bojie Dy"
+      ],
+      "answer": "Mika Suansing",
+      "explanation": "The leaderboard lists Mikaela Angela B. Suansing for Nueva Ecija, 1st District.",
+      "hint": "Open the cited leaderboard and check its title and ranking measure.",
+      "sources": [
+        {
+          "label": "BetterGov · HGAB 2027 leaderboard · members",
+          "url": "https://budget.bettergov.ph/hgab/2027/leaderboard/bills"
+        }
+      ],
+      "difficulty": "easy",
+      "category": "House members",
+      "topic": "leaderboard-members",
+      "questionType": "hgab3-leaderboard-fact",
+      "stage": "HGAB 3rd reading",
+      "generatedFromLeaderboard": true,
+      "leaderboardBuiltAt": "2026-10-25T23:56:25.114Z",
+      "pool": "easy-member-mika-suansing"
+    },
+    {
+      "id": "leaderboard-house-members-034",
+      "question": "Who is the Nueva Ecija, 1st District representative on the leaderboard?",
+      "choices": [
+        "Bella Suansing",
+        "Mika Suansing",
+        "Sandro Marcos",
+        "Bojie Dy"
+      ],
+      "answer": "Mika Suansing",
+      "explanation": "The leaderboard lists Mikaela Angela B. Suansing for Nueva Ecija, 1st District.",
+      "hint": "Open the cited leaderboard and check its title and ranking measure.",
+      "sources": [
+        {
+          "label": "BetterGov · HGAB 2027 leaderboard · members",
+          "url": "https://budget.bettergov.ph/hgab/2027/leaderboard/bills"
+        }
+      ],
+      "difficulty": "easy",
+      "category": "House members",
+      "topic": "leaderboard-members",
+      "questionType": "hgab3-leaderboard-fact",
+      "stage": "HGAB 3rd reading",
+      "generatedFromLeaderboard": true,
+      "leaderboardBuiltAt": "2026-10-25T23:56:25.114Z",
+      "pool": "easy-member-mika-suansing"
+    },
+    {
+      "id": "leaderboard-house-members-035",
+      "question": "Which member of Congress is listed for Isabela, 6th District?",
+      "choices": [
+        "Bojie Dy",
+        "Sandro Marcos",
+        "Faustino Michael Carlos III Dy",
+        "Mika Suansing"
+      ],
+      "answer": "Bojie Dy",
+      "explanation": "The leaderboard lists Faustino \"Bojie\" III G. Dy for Isabela, 6th District.",
+      "hint": "Open the cited leaderboard and check its title and ranking measure.",
+      "sources": [
+        {
+          "label": "BetterGov · HGAB 2027 leaderboard · members",
+          "url": "https://budget.bettergov.ph/hgab/2027/leaderboard/bills"
+        }
+      ],
+      "difficulty": "easy",
+      "category": "House members",
+      "topic": "leaderboard-members",
+      "questionType": "hgab3-leaderboard-fact",
+      "stage": "HGAB 3rd reading",
+      "generatedFromLeaderboard": true,
+      "leaderboardBuiltAt": "2026-10-25T23:56:25.114Z",
+      "pool": "easy-member-bojie-dy"
+    },
+    {
+      "id": "leaderboard-house-members-036",
+      "question": "Who is the Isabela, 6th District representative on the leaderboard?",
+      "choices": [
+        "Faustino Michael Carlos III Dy",
+        "Mika Suansing",
+        "Bojie Dy",
+        "Sandro Marcos"
+      ],
+      "answer": "Bojie Dy",
+      "explanation": "The leaderboard lists Faustino \"Bojie\" III G. Dy for Isabela, 6th District.",
+      "hint": "Open the cited leaderboard and check its title and ranking measure.",
+      "sources": [
+        {
+          "label": "BetterGov · HGAB 2027 leaderboard · members",
+          "url": "https://budget.bettergov.ph/hgab/2027/leaderboard/bills"
+        }
+      ],
+      "difficulty": "easy",
+      "category": "House members",
+      "topic": "leaderboard-members",
+      "questionType": "hgab3-leaderboard-fact",
+      "stage": "HGAB 3rd reading",
+      "generatedFromLeaderboard": true,
+      "leaderboardBuiltAt": "2026-10-25T23:56:25.114Z",
+      "pool": "easy-member-bojie-dy"
+    },
+    {
+      "id": "leaderboard-house-members-037",
+      "question": "Which member of Congress is listed for Cagayan de Oro City, 2nd District?",
+      "choices": [
+        "Rufus B. Rodriguez",
+        "Mika Suansing",
+        "Sandro Marcos",
+        "Bojie Dy"
+      ],
+      "answer": "Rufus B. Rodriguez",
+      "explanation": "The leaderboard lists Rufus B. Rodriguez for Cagayan de Oro City, 2nd District; he leads the members board by listed principal-author bills.",
+      "hint": "Open the cited leaderboard and check its title and ranking measure.",
+      "sources": [
+        {
+          "label": "BetterGov · HGAB 2027 leaderboard · members",
+          "url": "https://budget.bettergov.ph/hgab/2027/leaderboard/bills"
+        }
+      ],
+      "difficulty": "easy",
+      "category": "House members",
+      "topic": "leaderboard-members",
+      "questionType": "hgab3-leaderboard-fact",
+      "stage": "HGAB 3rd reading",
+      "generatedFromLeaderboard": true,
+      "leaderboardBuiltAt": "2026-10-25T23:56:25.114Z",
+      "pool": "easy-member-rufus-b-rodriguez"
+    },
+    {
+      "id": "leaderboard-house-members-038",
+      "question": "Who is the Cagayan de Oro City, 2nd District representative on the leaderboard?",
+      "choices": [
+        "Sandro Marcos",
+        "Rufus B. Rodriguez",
+        "Mika Suansing",
+        "Bojie Dy"
+      ],
+      "answer": "Rufus B. Rodriguez",
+      "explanation": "The leaderboard lists Rufus B. Rodriguez for Cagayan de Oro City, 2nd District; he leads the members board by listed principal-author bills.",
+      "hint": "Open the cited leaderboard and check its title and ranking measure.",
+      "sources": [
+        {
+          "label": "BetterGov · HGAB 2027 leaderboard · members",
+          "url": "https://budget.bettergov.ph/hgab/2027/leaderboard/bills"
+        }
+      ],
+      "difficulty": "easy",
+      "category": "House members",
+      "topic": "leaderboard-members",
+      "questionType": "hgab3-leaderboard-fact",
+      "stage": "HGAB 3rd reading",
+      "generatedFromLeaderboard": true,
+      "leaderboardBuiltAt": "2026-10-25T23:56:25.114Z",
+      "pool": "easy-member-rufus-b-rodriguez"
+    },
+    {
       "id": "deo-crosswalk-tier-a-count",
       "question": "How many Tier A DEO units appear in the leaderboard crosswalk?",
       "choices": [
@@ -34788,7 +35204,7 @@
           "url": "https://budget.bettergov.ph/hgab/2027/leaderboard"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "DEO crosswalk",
       "topic": "deo",
       "questionType": "hgab3-deo-crosswalk",
@@ -34815,7 +35231,7 @@
           "url": "https://budget.bettergov.ph/hgab/2027/leaderboard"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "DEO crosswalk",
       "topic": "deo",
       "questionType": "hgab3-deo-crosswalk",
@@ -34842,7 +35258,7 @@
           "url": "https://budget.bettergov.ph/hgab/2027/leaderboard"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "DEO crosswalk",
       "topic": "deo",
       "questionType": "hgab3-deo-crosswalk",
@@ -34869,7 +35285,7 @@
           "url": "https://budget.bettergov.ph/hgab/2027/leaderboard"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "DEO crosswalk",
       "topic": "deo",
       "questionType": "hgab3-deo-crosswalk",
@@ -34896,7 +35312,7 @@
           "url": "https://budget.bettergov.ph/hgab/2027/leaderboard"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "DEO crosswalk",
       "topic": "deo",
       "questionType": "hgab3-deo-crosswalk",
@@ -34923,7 +35339,7 @@
           "url": "https://budget.bettergov.ph/hgab/2027/leaderboard"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "DEO crosswalk",
       "topic": "deo",
       "questionType": "hgab3-deo-crosswalk",
@@ -34950,7 +35366,7 @@
           "url": "https://budget.bettergov.ph/hgab/2027/leaderboard"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "DEO crosswalk",
       "topic": "deo",
       "questionType": "hgab3-deo-crosswalk",
@@ -34977,7 +35393,7 @@
           "url": "https://budget.bettergov.ph/hgab/2027/leaderboard"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "DEO crosswalk",
       "topic": "deo",
       "questionType": "hgab3-deo-crosswalk",
@@ -35004,7 +35420,7 @@
           "url": "https://budget.bettergov.ph/hgab/2027/leaderboard"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "DEO crosswalk",
       "topic": "deo",
       "questionType": "hgab3-deo-crosswalk",
@@ -35031,7 +35447,7 @@
           "url": "https://budget.bettergov.ph/hgab/2027/leaderboard"
         }
       ],
-      "difficulty": "easy",
+      "difficulty": "medium",
       "category": "DEO crosswalk",
       "topic": "deo",
       "questionType": "hgab3-deo-crosswalk",
@@ -35597,43 +36013,44 @@
     "leaderboardBuiltAt": "2026-10-25T23:56:25.114Z",
     "leaderboardQuestionCounts": {
       "2027 House bill": {
-        "easy": 10,
-        "medium": 15,
+        "easy": 0,
+        "medium": 25,
         "hard": 15
       },
       "Enacted budget history": {
-        "easy": 10,
-        "medium": 10,
+        "easy": 0,
+        "medium": 20,
         "hard": 10
       },
       "House members": {
-        "easy": 10,
-        "medium": 10,
+        "easy": 8,
+        "medium": 20,
         "hard": 10
       }
     },
-    "leaderboardQuestions": 100,
+    "leaderboardQuestions": 108,
     "geographyQuestions": 10,
     "costPerMeter3dQuestions": 60,
     "costPerMeter3dQuestionCounts": {
       "Roads": {
-        "easy": 10,
-        "medium": 10,
+        "easy": 0,
+        "medium": 20,
         "hard": 10
       },
       "Bridges": {
-        "easy": 10,
-        "medium": 10,
+        "easy": 0,
+        "medium": 20,
         "hard": 10
       }
     },
     "deoCrosswalkQuestions": 30,
     "deoCrosswalkQuestionCounts": {
-      "easy": 10,
-      "medium": 10,
+      "easy": 0,
+      "medium": 20,
       "hard": 10
     },
     "coverageScope": "HGAB 3rd line items linked to the retained DPWH Transparency NEP metadata snapshot; absent listing is not proof of absent documents",
+    "difficultyPolicy": "Difficulty follows the work a player must do, not answer format alone: the fixed national-budget opener, basic budget-stage definitions, and simple representative lookups are easy; specific title/rank/value lookups and contextual facts are medium; multi-step calculations, tight numeric choices, and obscure low-count member identification are hard.",
     "removedQuestionFamilies": [
       "NEP department proposals",
       "NEP POW amounts and quantities",
@@ -35641,7 +36058,7 @@
       "unscoped representative and DEO crosswalk lookup questions",
       "unscoped party-list roster questions"
     ],
-    "currentHGABQuestions": 52,
-    "questionsTotal": 1242
+    "currentHGABQuestions": 60,
+    "questionsTotal": 1258
   }
 }
