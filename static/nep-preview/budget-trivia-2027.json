@@ -5,9 +5,9 @@
       "id": "hgab3-project-row-count",
       "question": "In the October 18, 2026 Transparency snapshot, how many HGAB 3rd project rows were checked for document coverage?",
       "choices": [
-        "16,275",
-        "15,228",
         "9,035",
+        "15,228",
+        "16,275",
         "15,979"
       ],
       "answer": "15,979",
@@ -32,8 +32,8 @@
       "choices": [
         "6,105",
         "751",
-        "4,610",
-        "1,385"
+        "1,385",
+        "4,610"
       ],
       "answer": "6,105",
       "explanation": "These are HGAB 3rd rows without a selected one-to-one NEP counterpart. A missing match is a review lead, not proof the project was newly added.",
@@ -56,9 +56,9 @@
       "question": "Among 751 inspected HGAB 3rd rows with listed documents, how many lacked at least one of the three tracked types?",
       "choices": [
         "44",
-        "501",
+        "109",
         "481",
-        "109"
+        "501"
       ],
       "answer": "481",
       "explanation": "481 inspected rows lacked a POW, geotagged photos, or an RDC endorsement in the 2026-10-18 listing. Uninspected and unlisted source records are not treated as checked.",
@@ -81,9 +81,9 @@
       "question": "Which tracked document type was most often absent among the 751 inspected HGAB 3rd rows?",
       "choices": [
         "RDC endorsement",
-        "BP 202",
         "POW",
-        "Geotagged photos"
+        "Geotagged photos",
+        "BP 202"
       ],
       "answer": "RDC endorsement",
       "explanation": "RDC endorsements were absent for 464 inspected rows in the 2026-10-18 metadata snapshot. This does not prove that a document is unavailable elsewhere.",
@@ -130,10 +130,10 @@
       "id": "hgab3-linked-rows",
       "question": "How many HGAB 3rd rows had a selected DPWH Transparency NEP counterpart in the snapshot?",
       "choices": [
+        "751",
         "6,105",
-        "15,979",
         "9,035",
-        "751"
+        "15,979"
       ],
       "answer": "9,035",
       "explanation": "9,035 of 15,979 coverage rows were linked to the retained NEP/Transparency project list. This is a record match count, not a measure of project completion.",
@@ -155,9 +155,9 @@
       "id": "hgab3-linked-share",
       "question": "What share of the HGAB 3rd document-coverage rows had a selected Transparency NEP counterpart?",
       "choices": [
-        "93.6%",
-        "69.2%",
         "38.2%",
+        "69.2%",
+        "93.6%",
         "56.5%"
       ],
       "answer": "56.5%",
@@ -180,10 +180,10 @@
       "id": "hgab3-missing-photos",
       "question": "Among the 751 inspected HGAB 3rd rows, how many had no geotagged photos listed in the Transparency record?",
       "choices": [
-        "520",
+        "44",
         "501",
         "95",
-        "44"
+        "520"
       ],
       "answer": "95",
       "explanation": "95 inspected rows had no geotagged photos listed in the 2026-10-18 Transparency metadata snapshot. This describes the listing, not whether a source document exists elsewhere.",
@@ -230,10 +230,10 @@
       "id": "hgab3-missing-docs-share",
       "question": "What share of inspected HGAB 3rd rows with listed documents lacked at least one tracked document type?",
       "choices": [
-        "38.2%",
+        "5.9%",
         "64.0%",
         "14.5%",
-        "5.9%"
+        "38.2%"
       ],
       "answer": "64.0%",
       "explanation": "481 of 751 inspected rows (64.0%) lacked a POW, geotagged photos, or an RDC endorsement in the 2026-10-18 snapshot.",
@@ -315,9 +315,9 @@
       "question": "What allocation did each of the 199 district-office Rainwater Collector System lines retain in the HGAB 3rd schedule?",
       "choices": [
         "₱4.2 million",
-        "5,765",
         "587",
-        "2,835"
+        "2,835",
+        "5,765"
       ],
       "answer": "₱4.2 million",
       "explanation": "The stage trace found 199 district-office Rainwater Collector System lines, all retained at ₱4.2 million in the HGAB 3rd schedule. The office title does not locate the funded installation or establish who benefits.",
@@ -446,9 +446,9 @@
       "question": "What total allocation do the HGAB 3rd-reading MPB lines carry in the current analysis?",
       "answer": "₱83,706,551,000",
       "choices": [
-        "₱8,370,655,100",
         "₱837,065,510",
         "₱58,707,566,100",
+        "₱8,370,655,100",
         "₱83,706,551,000"
       ],
       "explanation": "The current MPB analysis totals ₱83,706,551,000 across HGAB 3rd-reading lines; this is an allocation total, not a reported expenditure total.",
@@ -12046,7 +12046,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -12104,7 +12104,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -12220,7 +12220,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -12336,7 +12336,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -12394,7 +12394,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -12510,7 +12510,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -12626,7 +12626,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -12858,7 +12858,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -12916,7 +12916,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -13032,7 +13032,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -13148,7 +13148,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -13264,7 +13264,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -13322,7 +13322,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -13728,7 +13728,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -13786,7 +13786,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -13960,7 +13960,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -14018,7 +14018,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -14076,7 +14076,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -14134,7 +14134,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -14366,7 +14366,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -14482,7 +14482,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -14598,7 +14598,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -14656,7 +14656,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -14714,7 +14714,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -14772,7 +14772,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -15178,7 +15178,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -15410,7 +15410,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -15642,7 +15642,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -15700,7 +15700,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -15758,7 +15758,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -15816,7 +15816,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -16048,7 +16048,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -16280,7 +16280,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -16338,7 +16338,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -16860,7 +16860,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -16976,7 +16976,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -17092,7 +17092,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -17266,7 +17266,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -17324,7 +17324,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -17672,7 +17672,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -17730,7 +17730,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -17846,7 +17846,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -17962,7 +17962,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -18078,7 +18078,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -18310,7 +18310,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -18368,7 +18368,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -18426,7 +18426,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -18484,7 +18484,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -18542,7 +18542,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -18658,7 +18658,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -18716,7 +18716,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -18832,7 +18832,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -18890,7 +18890,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -18948,7 +18948,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -19296,7 +19296,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -19354,7 +19354,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -19586,7 +19586,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -19760,7 +19760,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -19818,7 +19818,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -19934,7 +19934,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -19992,7 +19992,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -20050,7 +20050,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -20456,7 +20456,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -20572,7 +20572,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -20630,7 +20630,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -21036,7 +21036,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -21152,7 +21152,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -21210,7 +21210,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -21326,7 +21326,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -21384,7 +21384,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -21442,7 +21442,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -21500,7 +21500,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -21674,7 +21674,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -21790,7 +21790,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -21906,7 +21906,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -21964,7 +21964,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -22196,7 +22196,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -22254,7 +22254,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -22312,7 +22312,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -22428,7 +22428,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -22486,7 +22486,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -22602,7 +22602,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -22718,7 +22718,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -22776,7 +22776,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -22834,7 +22834,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -23124,7 +23124,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -23240,7 +23240,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -23472,7 +23472,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -23704,7 +23704,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -23762,7 +23762,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -23878,7 +23878,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -24168,7 +24168,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -24400,7 +24400,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -24458,7 +24458,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -24574,7 +24574,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -24632,7 +24632,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -24690,7 +24690,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -24748,7 +24748,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -24806,7 +24806,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -25096,7 +25096,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -25154,7 +25154,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -25270,7 +25270,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -25444,7 +25444,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -25502,7 +25502,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -25560,7 +25560,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -25676,7 +25676,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -25792,7 +25792,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -26024,7 +26024,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -26082,7 +26082,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -26140,7 +26140,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -26314,7 +26314,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -26488,7 +26488,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -26546,7 +26546,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -26604,7 +26604,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -26662,7 +26662,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -26720,7 +26720,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -26836,7 +26836,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -27010,7 +27010,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -27300,7 +27300,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -27416,7 +27416,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -27474,7 +27474,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -27590,7 +27590,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -27706,7 +27706,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -27822,7 +27822,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -27880,7 +27880,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -27996,7 +27996,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -28170,7 +28170,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -28402,7 +28402,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -28460,7 +28460,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -28576,7 +28576,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -28634,7 +28634,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -28692,7 +28692,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -28750,7 +28750,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -28924,7 +28924,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -28982,7 +28982,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -29098,7 +29098,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -29156,7 +29156,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -29214,7 +29214,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -29272,7 +29272,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -29330,7 +29330,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -29388,7 +29388,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -29504,7 +29504,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -29620,7 +29620,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -29678,7 +29678,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -29736,7 +29736,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -29852,7 +29852,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -29910,7 +29910,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -30026,7 +30026,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -30084,7 +30084,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -30142,7 +30142,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -30258,7 +30258,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -30374,7 +30374,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -30606,7 +30606,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -30664,7 +30664,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -30722,7 +30722,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -30838,7 +30838,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -30954,7 +30954,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -31128,7 +31128,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -31244,7 +31244,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -31302,7 +31302,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -31534,7 +31534,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -31708,7 +31708,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -31824,7 +31824,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -31998,7 +31998,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -32056,7 +32056,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -32172,7 +32172,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -32230,7 +32230,7 @@
           "url": "dpwh-hgab.html"
         }
       ],
-      "difficulty": "medium",
+      "difficulty": "easy",
       "category": "HGAB 3rd",
       "topic": "budget",
       "questionType": "hgab3-allocation",
@@ -36001,11 +36001,11 @@
     "stage": "HGAB 3rd reading",
     "stageSource": "HB 10858, General Appropriations Bill FY2027, third-reading extracted schedule; budget-topic project allocation questions use that HGAB 3rd source directly",
     "projectAllocationQuestions": 1000,
-    "projectQuestionMethod": "1,000 sampled project-level HGAB 3rd allocations from hb10858_3rd_dpwh_projects.json only: 300 text-answer project-title recall questions are medium; 700 numeric amount questions are medium or hard based on numeric-choice dispersion; office and regional aggregate rows are excluded to avoid leaderboard duplication; no NEP data is used to select or answer these questions",
+    "projectQuestionMethod": "1,000 sampled project-level HGAB 3rd allocations from hb10858_3rd_dpwh_projects.json only: 300 text-answer project-title recall questions are medium; numeric amount questions with values divisible by ₱10 million are easy, other numeric amount questions are medium or hard based on numeric-choice dispersion; office and regional aggregate rows are excluded to avoid leaderboard duplication; no NEP data is used to select or answer these questions",
     "budgetTopicScope": "Every topic=budget question is tagged with category HGAB 3rd and stage HGAB 3rd reading; allocation questions use the primary HGAB 3rd extracted schedule, not NEP data.",
     "projectAllocationQuestionCounts": {
-      "easy": 0,
-      "medium": 650,
+      "easy": 167,
+      "medium": 483,
       "hard": 350
     },
     "coverageSnapshotRetrievedAt": "2026-10-18",
