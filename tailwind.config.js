@@ -3,8 +3,12 @@ module.exports = {
   content: [
     "./templates/**/*.html",
     "./static/js/**/*.js",
+    "./static/nep-preview/**/*.html",
   ],
   safelist: [
+    'bg-bettergov-blue', 'bg-bettergov-blue-soft', 'bg-bettergov-blue-pale', 'bg-bettergov-red', 'bg-bettergov-red-soft', 'bg-bettergov-gold', 'bg-bettergov-paper',
+    'text-bettergov-blue', 'text-bettergov-red', 'text-bettergov-gold', 'text-bettergov-ink', 'text-bettergov-muted',
+    'border-bettergov-blue', 'border-bettergov-red', 'border-bettergov-gold', 'border-bettergov-line',
     'animate-spin', 'bg-[#17a2b8]', 'bg-[#28a745]', 'bg-[#6c757d]', 'bg-[#dc3545]', 'bg-[#ffc107]',
     'bg-black', 'bg-blue-100', 'bg-blue-50', 'bg-blue-600', 'bg-blue-700', 'bg-blue-800', 'bg-gradient-to-br', 'bg-gradient-to-r',
     'bg-gray-100', 'bg-gray-50', 'bg-gray-600', 'bg-green-100', 'bg-green-50', 'bg-green-600',
@@ -50,7 +54,22 @@ module.exports = {
     'table', 'inline', 'contents', 'flex-wrap', 'resize', 'md:flex', 'md:hidden'
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        bettergov: {
+          blue: '#0038A8',
+          red: '#CE1126',
+          gold: '#FCD116',
+          ink: '#212121',
+          muted: '#616161',
+          line: '#E0E0E0',
+          paper: '#FAFAFA',
+          'blue-soft': '#EAF0FF',
+          'blue-pale': '#DBEAFE',
+          'red-soft': '#FDE8EB',
+        },
+      },
+    },
   },
   plugins: [],
 }

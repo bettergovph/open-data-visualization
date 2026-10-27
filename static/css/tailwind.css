@@ -4,3 +4,12 @@
 .bg-blue-700 { background-color: #1d4ed8; }
 .border-blue-800 { border-color: #1e40af; }
 .text-blue-800 { color: #1e40af; }
+
+/* BetterGov design tokens, also exposed in the checked-in build. */
+:root{--bettergov-blue:#0038A8;--bettergov-red:#CE1126;--bettergov-gold:#FCD116;--bettergov-ink:#212121;--bettergov-muted:#616161;--bettergov-line:#E0E0E0;--bettergov-paper:#FAFAFA;--bettergov-blue-soft:#EAF0FF;--bettergov-blue-pale:#DBEAFE;--bettergov-red-soft:#FDE8EB}
+
+/* BetterGov design tokens and color utilities (source: tailwind-input.css). */
+:root{--bettergov-blue:#0038A8;--bettergov-red:#CE1126;--bettergov-gold:#FCD116;--bettergov-ink:#212121;--bettergov-muted:#616161;--bettergov-line:#E0E0E0;--bettergov-paper:#FAFAFA;--bettergov-blue-soft:#EAF0FF;--bettergov-blue-pale:#DBEAFE;--bettergov-red-soft:#FDE8EB}
+.bg-bettergov-blue{background-color:#0038A8}.bg-bettergov-blue-soft{background-color:#EAF0FF}.bg-bettergov-blue-pale{background-color:#DBEAFE}.bg-bettergov-red{background-color:#CE1126}.bg-bettergov-red-soft{background-color:#FDE8EB}.bg-bettergov-gold{background-color:#FCD116}.bg-bettergov-paper{background-color:#FAFAFA}
+.text-bettergov-blue{color:#0038A8}.text-bettergov-red{color:#CE1126}.text-bettergov-gold{color:#FCD116}.text-bettergov-ink{color:#212121}.text-bettergov-muted{color:#616161}
+.border-bettergov-blue{border-color:#0038A8}.border-bettergov-red{border-color:#CE1126}.border-bettergov-gold{border-color:#FCD116}.border-bettergov-line{border-color:#E0E0E0}
