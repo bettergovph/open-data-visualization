@@ -63,12 +63,19 @@
   }
   function isNamedIntendedLocality(project, feature) {
     const place=feature.city||feature.municipality;
-    return Boolean(place&&norm(project.projectName).includes(norm(place)));
+    if(!place)return false;
+    const base=norm(String(place).replace(/\s*\(capital\)\s*$/i,''));
+    const aliases=new Set([base]);
+    if(base.startsWith('city of ')){const name=base.slice(8);aliases.add(name);aliases.add(`${name} city`);}
+    if(base.endsWith(' city')){const name=base.slice(0,-5);aliases.add(name);aliases.add(`city of ${name}`);}
+    const title=` ${norm(project.projectName)} `;
+    return [...aliases].filter(Boolean).some(name=>title.includes(` ${name} `));
   }
   function isOutsideResolvedIntendedLocality(project) {
     const intended=intendedLocalityFeatures(project).target;
     return Boolean(intended && !pointInRings(project.longitude,project.latitude,intended.rings));
   }
+  function hasInsertionFlag(project) { return (project.analysisFlags||[]).some(flag=>/potential nep insertion/i.test(flag.label||'')); }
   function nearestBoundary(project, features) {
     const radius=6371008.8, lat0=project.latitude*Math.PI/180, cosLat=Math.cos(lat0);
     let best=null;
@@ -190,5 +197,5 @@
   document.getElementById('reset-map').addEventListener('click',()=>{focused=false;renderMap();});
   search.addEventListener('input',renderList);
   countNode.textContent='Checking project coordinates against mapped intended localities…';
-  fetch('out-of-place-boundaries.json').then(r=>r.ok?r.json():Promise.reject()).then(x=>{boundaries=x;projects=allProjects.filter(isOutsideResolvedIntendedLocality);document.getElementById('method').textContent='Shows only projects whose coordinate falls outside a project-named municipality or city. Projects without a resolvable intended locality are omitted because their location cannot be classified as outside.';selected=Math.max(0,projects.findIndex(p=>p.id===params.get('project')));if(!projects.length)status.textContent='No projects fall outside a resolved project-named municipality or city.';renderCard();renderList();renderMap();}).catch(()=>{status.textContent='Mapped boundaries could not load, so outside projects cannot be verified and are not shown.';boundaries={national:[],provinceFeatures:[]};projects=[];selected=0;renderCard();renderList();renderMap();});
+  fetch('out-of-place-boundaries.json').then(r=>r.ok?r.json():Promise.reject()).then(x=>{boundaries=x;projects=allProjects.filter(isOutsideResolvedIntendedLocality);projects.sort((a,b)=>{const insertionOrder=Number(hasInsertionFlag(b))-Number(hasInsertionFlag(a));if(insertionOrder)return insertionOrder;if(hasInsertionFlag(a))return Number(b.amountPesos||0)-Number(a.amountPesos||0);return Number(a.sourcePage||0)-Number(b.sourcePage||0);});document.getElementById('method').textContent='Shows only projects whose coordinate falls outside a project-named municipality or city. Projects without a resolvable intended locality are omitted because their location cannot be classified as outside.';selected=Math.max(0,projects.findIndex(p=>p.id===params.get('project')));if(!projects.length)status.textContent='No projects fall outside a resolved project-named municipality or city.';renderCard();renderList();renderMap();}).catch(()=>{status.textContent='Mapped boundaries could not load, so outside projects cannot be verified and are not shown.';boundaries={national:[],provinceFeatures:[]};projects=[];selected=0;renderCard();renderList();renderMap();});
 })();
