@@ -97,6 +97,7 @@
     return url.href;
   }
   const facebookLink = document.getElementById('mpbMapFacebook');
+  const nativeShareButton = document.getElementById('mpbMapNativeShare');
   const shareStatus = document.getElementById('mpbMapShareStatus');
   function cachedShareTarget() {
     const cachedPage = source.sharePages?.[select.value];
@@ -105,6 +106,20 @@
   const updateShareLinks = () => {
     if (facebookLink) facebookLink.href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(cachedShareTarget())}`;
   };
+  if (nativeShareButton && navigator.share) {
+    nativeShareButton.hidden = false;
+    nativeShareButton.addEventListener('click', async () => {
+      try {
+        await navigator.share({
+          title: `MPB project locations · ${prettyPlace(select.value)}`,
+          text: `MPB project locations, same-site funding comparisons, and municipality boundary review for ${prettyPlace(select.value)}. Location checks are review leads, not findings.`,
+          url: cachedShareTarget()
+        });
+      } catch (error) {
+        if (error?.name !== 'AbortError' && shareStatus) shareStatus.textContent = 'Sharing could not be opened. Use Facebook or copy the map link.';
+      }
+    });
+  }
   updateShareLinks();
   document.getElementById('mpbMapCopyLink')?.addEventListener('click', async () => {
     try {
