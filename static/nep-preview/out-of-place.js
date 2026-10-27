@@ -18,7 +18,7 @@
   document.getElementById('method').textContent = data.method;
   function shareUrl(project) { return project.sharePage || new URL('?project=' + encodeURIComponent(project.id), location.href).href; }
   let focused = true;
-  function mapPoint(lon, lat, bounds, rect={x:0,y:0,w:1200,h:680}) {
+  function mapPoint(lon, lat, bounds, rect={x:0,y:0,w:1200,h:900}) {
     const pad=42,centerLat=(bounds.minLat+bounds.maxLat)/2,cos=Math.max(.2,Math.cos(centerLat*Math.PI/180));
     const rx=Math.max(.002,(bounds.maxLon-bounds.minLon)*cos),ry=Math.max(.002,bounds.maxLat-bounds.minLat),scale=Math.min((rect.w-2*pad)/rx,(rect.h-2*pad)/ry);
     const usedW=rx*scale,usedH=ry*scale,left=rect.x+(rect.w-usedW)/2,bottom=rect.y+(rect.h-usedH)/2;
@@ -132,7 +132,7 @@
     drawComparisonMap([{title:`${intendedTitle} · ${landingTitle} · adjacent localities`,kind:'combined',features:combinedFeatures,target:intendedTarget,landingKey:landingTarget?.key,project}],project);
   }
   function drawComparisonMap(views,selectedProject) {
-    const width=1200,height=680,gap=0,outer=12;
+    const width=1200,height=900,gap=0,outer=12;
     views=views.slice(0,1); // Always render one map canvas with all intended, landing and adjacent areas.
     const viewWidth=width-outer*2;
     let contents='';
