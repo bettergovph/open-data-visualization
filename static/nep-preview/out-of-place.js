@@ -47,6 +47,10 @@
     if(!neighbors.length) neighbors=pool.filter(f=>f!==anchor).map(f=>({f,g:featureGap(anchorBounds,featureBounds(f))})).sort((a,b)=>Math.hypot(a.g.x,a.g.y)-Math.hypot(b.g.x,b.g.y)).slice(0,4).filter(x=>Math.hypot(x.g.x,x.g.y)<.18).map(x=>x.f);
     return {features:[anchor,...neighbors],containing,anchor};
   }
+  function isNamedIntendedLocality(project, feature) {
+    const place=feature.city||feature.municipality;
+    return Boolean(place&&norm(project.projectName).includes(norm(place)));
+  }
   function renderMap() {
     const selectedProject=projects[selected];
     const province=selectedProject?.province;
@@ -60,7 +64,7 @@
     if(!focused){bounds.minLon=116;bounds.maxLon=127.5;bounds.minLat=4;bounds.maxLat=21.5;}
     if(focused&&selectedProject){const padx=Math.max(.025,(bounds.maxLon-bounds.minLon)*.1),pady=Math.max(.025,(bounds.maxLat-bounds.minLat)*.1);bounds.minLon-=padx;bounds.maxLon+=padx;bounds.minLat-=pady;bounds.maxLat+=pady;}
     const localKeys=new Set((local?.features||[]).map(f=>f.key));
-    const featureSvg=activeFeatures.map(f => {const d=(f.rings||[]).map(ring=>'M'+ring.map(([lon,lat],i)=>{const p=mapPoint(lon,lat,bounds);return (i?'L':'')+p.x.toFixed(1)+','+p.y.toFixed(1);}).join(' ')+'Z').join(' ');const cls=f.key===coordinateFeature?.key?'map-feature coordinate-area':local&&localKeys.has(f.key)?'map-feature nearby-feature':'map-feature';return `<path class="${cls}" fill-rule="evenodd" d="${d}"/>`;}).join('');
+    const featureSvg=activeFeatures.map(f => {const d=(f.rings||[]).map(ring=>'M'+ring.map(([lon,lat],i)=>{const p=mapPoint(lon,lat,bounds);return (i?'L':'')+p.x.toFixed(1)+','+p.y.toFixed(1);}).join(' ')+'Z').join(' ');const intended=focused&&selectedProject&&isNamedIntendedLocality(selectedProject,f);const coordinate=f.key===coordinateFeature?.key;const cls=['map-feature',local&&localKeys.has(f.key)&&f!==local.anchor?'nearby-feature':'',intended?'intended-area':'',coordinate?'coordinate-area':''].filter(Boolean).join(' ');return `<path class="${cls}" fill-rule="evenodd" d="${d}"/>`;}).join('');
     const points = projects.map((p,i) => { const q=mapPoint(p.longitude,p.latitude,bounds); const visible=!focused||i===selected||activeFeatures.some(f=>{const b=featureBounds(f);return p.longitude>=b.minLon&&p.longitude<=b.maxLon&&p.latitude>=b.minLat&&p.latitude<=b.maxLat&&pointInRings(p.longitude,p.latitude,f.rings);}); return visible?`<g class="point ${i===selected?'selected':''}" data-index="${i}" role="button" tabindex="0" aria-label="Project ${i+1}: ${esc(p.projectName)}"><title>${i+1}. ${esc(p.projectName)} · ${esc(p.office)}</title><circle cx="${q.x.toFixed(1)}" cy="${q.y.toFixed(1)}" r="${i===selected?12:8}"/><text x="${q.x.toFixed(1)}" y="${q.y.toFixed(1)}">${i+1}</text></g>`:''; }).join('');
     const foundPlace=coordinateFeature?(coordinateFeature.city||coordinateFeature.municipality):null;
     const anchorPlace=local?.anchor?(local.anchor.city||local.anchor.municipality):null;
