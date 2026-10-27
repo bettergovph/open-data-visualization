@@ -1,9 +1,7 @@
 (() => {
   const data = window.OUT_OF_PLACE_DATA;
   const projects = data.projects || [];
-  const intendedMapNode = document.getElementById('map-intended');
-  const coordinateMapNode = document.getElementById('map-coordinate');
-  const adjacentMapNode = document.getElementById('map-adjacent');
+  const mapNode = document.getElementById('map');
   const card = document.getElementById('project-card');
   const listNode = document.getElementById('project-list');
   const countNode = document.getElementById('count');
@@ -19,11 +17,11 @@
   document.getElementById('method').textContent = data.method;
   function shareUrl(project) { return project.sharePage || new URL('?project=' + encodeURIComponent(project.id), location.href).href; }
   let focused = true;
-  function mapPoint(lon, lat, bounds) {
-    const w=1000,h=800,pad=35,centerLat=(bounds.minLat+bounds.maxLat)/2,cos=Math.max(.2,Math.cos(centerLat*Math.PI/180));
-    const rx=Math.max(.002,(bounds.maxLon-bounds.minLon)*cos),ry=Math.max(.002,bounds.maxLat-bounds.minLat),scale=Math.min((w-2*pad)/rx,(h-2*pad)/ry);
-    const usedW=rx*scale,usedH=ry*scale,left=(w-usedW)/2,bottom=(h-usedH)/2;
-    return {x:left+((lon-bounds.minLon)*cos)*scale,y:h-bottom-(lat-bounds.minLat)*scale};
+  function mapPoint(lon, lat, bounds, rect={x:0,y:0,w:1200,h:520}) {
+    const pad=42,centerLat=(bounds.minLat+bounds.maxLat)/2,cos=Math.max(.2,Math.cos(centerLat*Math.PI/180));
+    const rx=Math.max(.002,(bounds.maxLon-bounds.minLon)*cos),ry=Math.max(.002,bounds.maxLat-bounds.minLat),scale=Math.min((rect.w-2*pad)/rx,(rect.h-2*pad)/ry);
+    const usedW=rx*scale,usedH=ry*scale,left=rect.x+(rect.w-usedW)/2,bottom=rect.y+(rect.h-usedH)/2;
+    return {x:left+((lon-bounds.minLon)*cos)*scale,y:rect.y+rect.h-bottom-(lat-bounds.minLat)*scale};
   }
   let boundaryBoxCache = new WeakMap();
   function featureBounds(feature) {
@@ -57,7 +55,7 @@
     const named=all.filter(f=>isNamedIntendedLocality(project,f)).sort((a,b)=>(Number(norm(b.province)===norm(project.province))-Number(norm(a.province)===norm(project.province)))||((b.city||b.municipality||'').length-(a.city||a.municipality||'').length));
     if(named.length){
       const anchor=named[0],pool=all.filter(f=>norm(f.province)===norm(anchor.province));
-      return {features:[anchor],anchor,target:anchor,resolved:true};
+      return {features:[anchor,...neighborsOf(anchor,pool)],anchor,target:anchor,resolved:true};
     }
     const province=all.filter(f=>norm(f.province)===norm(project.province));
     return {features:province,anchor:null,target:null,resolved:false};
@@ -106,56 +104,65 @@
   function renderMap() {
     const project=projects[selected];
     if(!focused||!project){
-      const national=boundaries.national||[];
-      drawMap(intendedMapNode,national,null,'overview');
-      drawMap(coordinateMapNode,national,null,'overview');
-      drawMap(adjacentMapNode,national,null,'overview');
-      document.getElementById('map-view-label').textContent='Philippines overview · select a project for local maps';
-      document.getElementById('intended-map-label').textContent='National boundary overview';
-      document.getElementById('coordinate-map-label').textContent='National boundary overview';
-      document.getElementById('adjacent-map-label').textContent='National boundary overview';
+      drawComparisonMap([{title:'Philippines overview',kind:'overview',features:boundaries.national||[]}],null);
+      document.getElementById('map-view-label').textContent='Philippines overview · select a project point to focus the map';
       return;
     }
-    const intended=intendedLocalityFeatures(project);
-    const landing=localityFeatures(project);
-    const coordinateFeatures=landing.containing?[landing.containing]:[];
-    const adjacentFeatures=landing.features;
-    drawMap(intendedMapNode,intended.features,null,'intended',intended.target);
-    drawMap(coordinateMapNode,coordinateFeatures,project,'coordinate',landing.containing);
-    drawMap(adjacentMapNode,adjacentFeatures,project,'adjacent',landing.containing||landing.anchor);
-    const intendedName=intended.target?(intended.target.city||intended.target.municipality):null;
+    const intended=intendedLocalityFeatures(project),landing=localityFeatures(project);
+    const intendedTarget=intended.target;
+    const landingTarget=landing.containing||null;
+    const intendedName=intendedTarget?(intendedTarget.city||intendedTarget.municipality):null;
     const landingName=landing.containing?(landing.containing.city||landing.containing.municipality):null;
-    document.getElementById('map-view-label').textContent=`Project ${selected+1} of ${projects.length} · intended vs coordinate location`;
-    document.getElementById('intended-map-label').textContent=intendedName?`${intendedName}, ${intended.target.province} · municipality/city boundary`:`${project.province||'Named province'} · locality not resolved; congressional district polygons unavailable`;
-    document.getElementById('coordinate-map-label').textContent=landingName?`Coordinate falls in ${landingName}, ${landing.containing.province}`:'Coordinate not contained by a mapped municipality/city boundary';
-    document.getElementById('adjacent-map-label').textContent=landingName?`${landingName} and neighboring localities around the printed coordinate`:'Nearest mapped locality and adjacent places';
+    document.getElementById('map-view-label').textContent=`Project ${selected+1} of ${projects.length} · intended, landing and adjacent areas`;
+    const samePlace=intendedTarget&&landingTarget&&intendedTarget.key===landingTarget.key;
+    if(samePlace){
+      drawComparisonMap([{title:`Intended and coordinate landing · ${intendedName}, ${landingTarget.province}`,kind:'combined',features:landing.features,target:intendedTarget,landingKey:landingTarget.key,project}],project);
+    } else {
+      const intendedTitle=intendedName?`Intended area · ${intendedName}, ${intendedTarget.province}`:`Intended area · ${project.province||'province not resolved'}; locality not identified`;
+      const landingTitle=landingName?`Coordinate landing · ${landingName}, ${landingTarget.province}`:'Coordinate landing · no containing mapped locality';
+      drawComparisonMap([
+        {title:intendedTitle,kind:'intended',features:intended.features,target:intendedTarget},
+        {title:`${landingTitle} + adjacent localities`,kind:'landing',features:landing.features,target:landingTarget,landingKey:landingTarget?.key,project}
+      ],project);
+    }
   }
-  function drawMap(node, features, project, kind, target) {
-    const selectedProject=project||projects[selected];
-    const activeFeatures=features||[];
-    const bounds={minLon:Infinity,maxLon:-Infinity,minLat:Infinity,maxLat:-Infinity};
-    for(const f of activeFeatures) for(const ring of f.rings||[]) for(const [lon,lat] of ring){bounds.minLon=Math.min(bounds.minLon,lon);bounds.maxLon=Math.max(bounds.maxLon,lon);bounds.minLat=Math.min(bounds.minLat,lat);bounds.maxLat=Math.max(bounds.maxLat,lat);}
-    if(project){bounds.minLon=Math.min(bounds.minLon,project.longitude);bounds.maxLon=Math.max(bounds.maxLon,project.longitude);bounds.minLat=Math.min(bounds.minLat,project.latitude);bounds.maxLat=Math.max(bounds.maxLat,project.latitude);}
-    if(!Number.isFinite(bounds.minLon)){bounds.minLon=116;bounds.maxLon=127.5;bounds.minLat=4;bounds.maxLat=21.5;}
-    if(!focused){bounds.minLon=116;bounds.maxLon=127.5;bounds.minLat=4;bounds.maxLat=21.5;}
-    if(focused&&selectedProject&&activeFeatures.length){const padx=Math.max(.02,(bounds.maxLon-bounds.minLon)*.12),pady=Math.max(.02,(bounds.maxLat-bounds.minLat)*.12);bounds.minLon-=padx;bounds.maxLon+=padx;bounds.minLat-=pady;bounds.maxLat+=pady;}
-    const featureSvg=activeFeatures.map(f=>{
-      const d=(f.rings||[]).map(ring=>'M'+ring.map(([lon,lat],i)=>{const q=mapPoint(lon,lat,bounds);return (i?'L':'')+q.x.toFixed(1)+','+q.y.toFixed(1);}).join(' ')+'Z').join(' ');
-      const isTarget=target&&f.key===target.key,isLanding=kind!=='intended'&&selectedProject&&pointInRings(selectedProject.longitude,selectedProject.latitude,f.rings);
-      const cls=['map-feature',kind==='adjacent'&&f!==target?'nearby-feature':'',kind==='intended'&&isTarget?'intended-area':'',isLanding?'coordinate-area':''].filter(Boolean).join(' ');
-      return `<path class="${cls}" fill-rule="evenodd" d="${d}"/>`;
-    }).join('');
-    let point='';
-    if(project){const q=mapPoint(project.longitude,project.latitude,bounds);point=`<g class="point selected" role="img" aria-label="Printed project coordinate"><title>Printed project coordinate</title><circle cx="${q.x.toFixed(1)}" cy="${q.y.toFixed(1)}" r="12"/><text x="${q.x.toFixed(1)}" y="${q.y.toFixed(1)}">●</text></g>`;}
-    else if(kind==='overview'&&node===coordinateMapNode){point=projects.map((item,index)=>{const q=mapPoint(item.longitude,item.latitude,bounds);return `<g class="point" data-index="${index}" role="button" tabindex="0" aria-label="Project ${index+1}: ${esc(item.projectName)}"><title>${index+1}. ${esc(item.projectName)}</title><circle cx="${q.x.toFixed(1)}" cy="${q.y.toFixed(1)}" r="8"/><text x="${q.x.toFixed(1)}" y="${q.y.toFixed(1)}">${index+1}</text></g>`;}).join('');}
-    node.innerHTML=`<svg viewBox="0 0 1000 800" role="img" aria-label="${esc(kind==='intended'?'Intended project area':kind==='coordinate'?'Coordinate landing area':kind==='adjacent'?'Adjacent localities':'Philippines boundary overview')}"><rect width="1000" height="800" fill="#f8fbfa"/>${featureSvg}${point}</svg>`;
-    node.querySelectorAll('[data-index]').forEach(el=>{el.addEventListener('click',()=>select(Number(el.dataset.index)));el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();select(Number(el.dataset.index));}});});
+  function drawComparisonMap(views,selectedProject) {
+    const width=1200,height=520,gap=18,outer=12;
+    const split=views.length>1,viewWidth=split?(width-outer*2-gap)/2:width-outer*2;
+    let contents='';
+    for(let index=0;index<views.length;index++){
+      const view=views[index],rect={x:outer+index*(viewWidth+gap),y:outer,w:viewWidth,h:height-outer*2};
+      contents+=`<rect x="${rect.x}" y="${rect.y}" width="${rect.w}" height="${rect.h}" rx="12" fill="#fff" stroke="#E0E0E0"/>`;
+      contents+=`<text x="${rect.x+16}" y="${rect.y+25}" class="map-window-title">${esc(view.title)}</text>`;
+      const mapRect={x:rect.x+8,y:rect.y+38,w:rect.w-16,h:rect.h-46},features=view.features||[];
+      const bounds={minLon:Infinity,maxLon:-Infinity,minLat:Infinity,maxLat:-Infinity};
+      for(const f of features)for(const ring of f.rings||[])for(const [lon,lat] of ring){bounds.minLon=Math.min(bounds.minLon,lon);bounds.maxLon=Math.max(bounds.maxLon,lon);bounds.minLat=Math.min(bounds.minLat,lat);bounds.maxLat=Math.max(bounds.maxLat,lat);}
+      const plottedProject=view.project||null;
+      if(plottedProject){bounds.minLon=Math.min(bounds.minLon,plottedProject.longitude);bounds.maxLon=Math.max(bounds.maxLon,plottedProject.longitude);bounds.minLat=Math.min(bounds.minLat,plottedProject.latitude);bounds.maxLat=Math.max(bounds.maxLat,plottedProject.latitude);}
+      if(!Number.isFinite(bounds.minLon)){bounds.minLon=116;bounds.maxLon=127.5;bounds.minLat=4;bounds.maxLat=21.5;}
+      if(view.kind==='overview'){bounds.minLon=116;bounds.maxLon=127.5;bounds.minLat=4;bounds.maxLat=21.5;}
+      if(plottedProject&&features.length){const padx=Math.max(.02,(bounds.maxLon-bounds.minLon)*.12),pady=Math.max(.02,(bounds.maxLat-bounds.minLat)*.12);bounds.minLon-=padx;bounds.maxLon+=padx;bounds.minLat-=pady;bounds.maxLat+=pady;}
+      contents+=features.map(feature=>{
+        const path=(feature.rings||[]).map(ring=>'M'+ring.map(([lon,lat],i)=>{const q=mapPoint(lon,lat,bounds,mapRect);return (i?'L':'')+q.x.toFixed(1)+','+q.y.toFixed(1);}).join(' ')+'Z').join(' ');
+        const intended=(view.kind==='intended'||view.kind==='combined')&&view.target&&feature.key===view.target.key;
+        const landing=view.landingKey&&feature.key===view.landingKey;
+        const adjacent=(view.kind==='landing'||view.kind==='combined')&&feature.key!==view.landingKey&&feature.key!==view.target?.key;
+        const cls=['map-feature',intended?'intended-area':'',landing?'coordinate-area':'',adjacent?'nearby-feature':''].filter(Boolean).join(' ');
+        return `<path class="${cls}" fill-rule="evenodd" d="${path}"/>`;
+      }).join('');
+      if(plottedProject){const q=mapPoint(plottedProject.longitude,plottedProject.latitude,bounds,mapRect);contents+=`<g class="point selected" role="img" aria-label="Printed project coordinate"><title>Printed project coordinate</title><circle cx="${q.x.toFixed(1)}" cy="${q.y.toFixed(1)}" r="12"/><text x="${q.x.toFixed(1)}" y="${q.y.toFixed(1)}">●</text></g>`;}
+      if(view.kind==='overview'){
+        contents+=projects.map((item,projectIndex)=>{const q=mapPoint(item.longitude,item.latitude,bounds,mapRect);return `<g class="point" data-index="${projectIndex}" role="button" tabindex="0" aria-label="Project ${projectIndex+1}: ${esc(item.projectName)}"><title>${projectIndex+1}. ${esc(item.projectName)}</title><circle cx="${q.x.toFixed(1)}" cy="${q.y.toFixed(1)}" r="8"/><text x="${q.x.toFixed(1)}" y="${q.y.toFixed(1)}">${projectIndex+1}</text></g>`;}).join('');
+      }
+    }
+    mapNode.innerHTML=`<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Map showing the intended project area, printed coordinate landing area and adjacent localities"><rect width="${width}" height="${height}" fill="#FAFAFA"/>${contents}</svg>`;
+    mapNode.querySelectorAll('[data-index]').forEach(el=>{el.addEventListener('click',()=>select(Number(el.dataset.index)));el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();select(Number(el.dataset.index));}});});
   }
   function renderCard() {
     const p=projects[selected]; if(!p){card.innerHTML='<p>No matching project.</p>';return;}
     const url=shareUrl(p); const fb='https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(url);
-    const local=localityFeatures(p); const reviewFlags=locationReviewFlags(p,local);
-    const flagsHtml=reviewFlags.length?`<section class="review-flags" aria-label="Location review flags">${reviewFlags.map(flag=>`<div class="review-flag">${esc(flag)}</div>`).join('')}</section>`:'<div class="review-flags"><div class="review-flag clear">No mapped-location red flag identified by this screen</div></div>';
+    const local=localityFeatures(p); const reviewFlags=[...(p.analysisFlags||[]),...locationReviewFlags(p,local).map(label=>({label}))];
+    const flagsHtml=reviewFlags.length?`<section class="review-flags" aria-label="Project review flags">${reviewFlags.map(flag=>`<div class="review-flag"><strong>${esc(flag.label||flag)}</strong>${flag.detail?`<small>${esc(flag.detail)}</small>`:''}</div>`).join('')}</section>`:'<div class="review-flags"><div class="review-flag clear"><strong>No review flags identified by these screens</strong><small>This is not a certification that the project has no issues.</small></div></div>';
     const reps=p.representativeCards||[];
     const facecards=reps.filter(r=>r.photoUrl).map(r=>`<article class="representative-facecard"><a class="face-photo" href="${esc(r.profileUrl||'#')}" target="_blank" rel="noopener"><img src="${esc(r.cachedPhotoUrl || r.photoUrl)}" alt="Official photo of ${esc(r.name||r.officialName||'representative')}" loading="lazy" referrerpolicy="no-referrer"></a><div><strong>${esc(r.name||r.officialName||'Representative')}</strong><span>${esc(r.district||'Geographic district')}</span><a class="face-profile" href="${esc(r.profileUrl||'#')}" target="_blank" rel="noopener">Official House profile ↗</a></div></article>`).join('');
     const facecardHtml=`<section class="representative-section"><h3>Geographic representative</h3>${facecards||'<p>No geographic representative was resolved for this project coordinate.</p>'}<p class="representative-caveat">This is a geographic district association based on the cited location evidence, not evidence of sponsorship.</p></section>`;
