@@ -1,6 +1,7 @@
 (() => {
   const data = window.OUT_OF_PLACE_DATA;
-  const projects = data.projects || [];
+  const allProjects = data.projects || [];
+  let projects = [];
   const mapNode = document.getElementById('map');
   const card = document.getElementById('project-card');
   const listNode = document.getElementById('project-list');
@@ -12,7 +13,7 @@
   function pointInRings(lon,lat,rings){let inside=false;for(const ring of rings||[]){let hit=false;for(let i=0,j=ring.length-1;i<ring.length;j=i++){const [xi,yi]=ring[i],[xj,yj]=ring[j];if((yi>lat)!==(yj>lat)&&lon<(xj-xi)*(lat-yi)/(yj-yi)+xi)hit=!hit;}if(hit)inside=!inside;}return inside;}
   const money = value => '₱' + Number(value || 0).toLocaleString('en-PH');
   const params = new URLSearchParams(location.search);
-  let selected = Math.max(0, projects.findIndex(p => p.id === params.get('project')));
+  let selected = 0;
   let boundaries = {national:[],provinceFeatures:[]};
   document.getElementById('method').textContent = data.method;
   function shareUrl(project) { return project.sharePage || new URL('?project=' + encodeURIComponent(project.id), location.href).href; }
@@ -64,6 +65,10 @@
     const place=feature.city||feature.municipality;
     return Boolean(place&&norm(project.projectName).includes(norm(place)));
   }
+  function isOutsideResolvedIntendedLocality(project) {
+    const intended=intendedLocalityFeatures(project).target;
+    return Boolean(intended && !pointInRings(project.longitude,project.latitude,intended.rings));
+  }
   function nearestBoundary(project, features) {
     const radius=6371008.8, lat0=project.latitude*Math.PI/180, cosLat=Math.cos(lat0);
     let best=null;
@@ -87,7 +92,7 @@
     if(!nearest)return 'Not available from mapped boundaries';
     const place=nearest.feature.city||nearest.feature.municipality||'mapped locality';
     const distance=nearest.meters<1000?`${Math.max(10,Math.round(nearest.meters/10)*10).toLocaleString('en-PH')} m`:`${(nearest.meters/1000).toFixed(2)} km`;
-    return `About ${distance} to ${place} ${nearest.inside?'boundary (coordinate is inside)':'boundary (coordinate is outside mapped localities)'}`;
+    return `About ${distance} from the mapped boundary of ${place}`;
   }
   function locationReviewFlags(project, local) {
     const flags=[];
@@ -105,7 +110,7 @@
     const project=projects[selected];
     if(!focused||!project){
       drawComparisonMap([{title:'Philippines overview',kind:'overview',features:boundaries.national||[]}],null);
-      document.getElementById('map-view-label').textContent='Philippines overview · select a project point to focus the map';
+      document.getElementById('map-view-label').textContent=project?'Philippines overview · select a project point to focus the map':'No projects outside a resolved intended locality';
       return;
     }
     const intended=intendedLocalityFeatures(project),landing=localityFeatures(project);
@@ -114,21 +119,15 @@
     const intendedName=intendedTarget?(intendedTarget.city||intendedTarget.municipality):null;
     const landingName=landing.containing?(landing.containing.city||landing.containing.municipality):null;
     document.getElementById('map-view-label').textContent=`Project ${selected+1} of ${projects.length} · intended, landing and adjacent areas`;
-    const samePlace=intendedTarget&&landingTarget&&intendedTarget.key===landingTarget.key;
-    if(samePlace){
-      drawComparisonMap([{title:`Intended and coordinate landing · ${intendedName}, ${landingTarget.province}`,kind:'combined',features:landing.features,target:intendedTarget,landingKey:landingTarget.key,project}],project);
-    } else {
-      const intendedTitle=intendedName?`Intended area · ${intendedName}, ${intendedTarget.province}`:`Intended area · ${project.province||'province not resolved'}; locality not identified`;
-      const landingTitle=landingName?`Coordinate landing · ${landingName}, ${landingTarget.province}`:'Coordinate landing · no containing mapped locality';
-      drawComparisonMap([
-        {title:intendedTitle,kind:'intended',features:intended.features,target:intendedTarget},
-        {title:`${landingTitle} + adjacent localities`,kind:'landing',features:landing.features,target:landingTarget,landingKey:landingTarget?.key,project}
-      ],project);
-    }
+    const combinedFeatures=[...new Map([...(intended.features||[]),...(landing.features||[])].map(feature=>[feature.key,feature])).values()];
+    const intendedTitle=intendedName?`intended · ${intendedName}, ${intendedTarget.province}`:`intended area · ${project.province||'province not resolved'}`;
+    const landingTitle=landingName?`landing · ${landingName}, ${landingTarget.province}`:'landing · outside mapped municipalities/cities';
+    drawComparisonMap([{title:`${intendedTitle} · ${landingTitle} · adjacent localities`,kind:'combined',features:combinedFeatures,target:intendedTarget,landingKey:landingTarget?.key,project}],project);
   }
   function drawComparisonMap(views,selectedProject) {
-    const width=1200,height=520,gap=18,outer=12;
-    const split=views.length>1,viewWidth=split?(width-outer*2-gap)/2:width-outer*2;
+    const width=1200,height=520,outer=12;
+    views=views.slice(0,1); // Always render one map canvas with all intended, landing and adjacent areas.
+    const viewWidth=width-outer*2;
     let contents='';
     for(let index=0;index<views.length;index++){
       const view=views[index],rect={x:outer+index*(viewWidth+gap),y:outer,w:viewWidth,h:height-outer*2};
@@ -159,14 +158,14 @@
     mapNode.querySelectorAll('[data-index]').forEach(el=>{el.addEventListener('click',()=>select(Number(el.dataset.index)));el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();select(Number(el.dataset.index));}});});
   }
   function renderCard() {
-    const p=projects[selected]; if(!p){card.innerHTML='<p>No matching project.</p>';return;}
+    const p=projects[selected]; if(!p){card.innerHTML='<p>No project has a coordinate outside a resolved project-named municipality or city.</p>';return;}
     const url=shareUrl(p); const fb='https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(url);
     const local=localityFeatures(p); const reviewFlags=[...(p.analysisFlags||[]),...locationReviewFlags(p,local).map(label=>({label}))];
     const flagsHtml=reviewFlags.length?`<section class="review-flags" aria-label="Project review flags">${reviewFlags.map(flag=>`<div class="review-flag"><strong>${esc(flag.label||flag)}</strong>${flag.detail?`<small>${esc(flag.detail)}</small>`:''}</div>`).join('')}</section>`:'<div class="review-flags"><div class="review-flag clear"><strong>No review flags identified by these screens</strong><small>This is not a certification that the project has no issues.</small></div></div>';
     const reps=p.representativeCards||[];
     const facecards=reps.filter(r=>r.photoUrl).map(r=>`<article class="representative-facecard"><a class="face-photo" href="${esc(r.profileUrl||'#')}" target="_blank" rel="noopener"><img src="${esc(r.cachedPhotoUrl || r.photoUrl)}" alt="Official photo of ${esc(r.name||r.officialName||'representative')}" loading="lazy" referrerpolicy="no-referrer"></a><div><strong>${esc(r.name||r.officialName||'Representative')}</strong><span>${esc(r.district||'Geographic district')}</span><a class="face-profile" href="${esc(r.profileUrl||'#')}" target="_blank" rel="noopener">Official House profile ↗</a></div></article>`).join('');
     const facecardHtml=`<section class="representative-section"><h3>Geographic representative</h3>${facecards||'<p>No geographic representative was resolved for this project coordinate.</p>'}<p class="representative-caveat">This is a geographic district association based on the cited location evidence, not evidence of sponsorship.</p></section>`;
-    card.innerHTML=`<div class="card-kicker">Project ${selected+1} of ${projects.length} · ${esc(p.coordinateStatus)}</div><button class="map-focus" type="button" id="zoom-to-locality">Focus all three maps ↗</button><h2>${esc(p.projectName)}</h2><div class="office">Listed office: ${esc(p.office || 'Not stated')}</div>${flagsHtml}<dl class="facts"><div><dt>Allocation in HGAB 3rd</dt><dd>${money(p.amountPesos)}</dd></div><div><dt>Named province</dt><dd>${esc(p.province || 'Not resolved from project/office text')}</dd></div><div><dt>Distance to nearest mapped border</dt><dd>${esc(formatBoundaryDistance(p,localityFeatures(p)))}</dd></div><div><dt>Source</dt><dd>${esc(p.sourceVolume || 'HGAB 3rd DPWH schedule')}, PDF page ${esc(p.sourcePage)}</dd></div><div><dt>Project ID</dt><dd>${esc(p.id)}</dd></div></dl>${facecardHtml}<p>The maps separate the project-named intended area, the coordinate landing area, and neighboring or nearest localities. Border distance is approximate and follows the mapped city/municipality geometry; a plotted point is a review lead, not a finding.</p><div class="share"><button class="primary" type="button" id="native-share">Share project</button><a href="${fb}" target="_blank" rel="noopener" aria-label="Share this project on Facebook"><strong>f</strong> Share on Facebook</a><a class="copy" href="${url}" id="copy-link">Copy project link</a></div>`;
+    card.innerHTML=`<div class="card-kicker">Project ${selected+1} of ${projects.length} · ${esc(p.coordinateStatus)}</div><button class="map-focus" type="button" id="zoom-to-locality">Focus map ↗</button><h2>${esc(p.projectName)}</h2><div class="office">Listed office: ${esc(p.office || 'Not stated')}</div>${flagsHtml}<dl class="facts"><div><dt>Allocation in HGAB 3rd</dt><dd>${money(p.amountPesos)}</dd></div><div><dt>Named province</dt><dd>${esc(p.province || 'Not resolved from project/office text')}</dd></div><div><dt>Distance to nearest mapped border</dt><dd>${esc(formatBoundaryDistance(p,localityFeatures(p)))}</dd></div><div><dt>Source</dt><dd>${esc(p.sourceVolume || 'HGAB 3rd DPWH schedule')}, PDF page ${esc(p.sourcePage)}</dd></div><div><dt>Project ID</dt><dd>${esc(p.id)}</dd></div></dl>${facecardHtml}<p>The map distinguishes the project-named intended area, the coordinate landing area, and neighboring or nearest localities. Border distance is approximate and follows the mapped city/municipality geometry; a plotted point is a review lead, not a finding.</p><div class="share"><button class="primary" type="button" id="native-share">Share project</button><a href="${fb}" target="_blank" rel="noopener" aria-label="Share this project on Facebook"><strong>f</strong> Share on Facebook</a><a class="copy" href="${url}" id="copy-link">Copy project link</a></div>`;
     document.getElementById('zoom-to-locality').addEventListener('click',()=>{focused=true;renderMap();});
     const nativeShare=document.getElementById('native-share');
     if (!navigator.share) nativeShare.hidden=true;
@@ -185,11 +184,11 @@
     listNode.innerHTML=filtered.map(({p,i})=>`<button type="button" data-index="${i}" aria-current="${i===selected}"><strong>${i+1}. ${esc(p.projectName)}</strong><small>${esc(p.office)} · ${esc(p.coordinateRaw)}</small></button>`).join('');
     listNode.querySelectorAll('[data-index]').forEach(node=>node.addEventListener('click',()=>select(Number(node.dataset.index))));
   }
-  function select(index) { selected=(index+projects.length)%projects.length; focused=true; history.replaceState(null,'','?project='+encodeURIComponent(projects[selected].id)); renderMap(); renderCard(); renderList(); }
+  function select(index) { if(!projects.length)return; selected=(index+projects.length)%projects.length; focused=true; history.replaceState(null,'','?project='+encodeURIComponent(projects[selected].id)); renderMap(); renderCard(); renderList(); }
   document.getElementById('previous').addEventListener('click',()=>select(selected-1));
   document.getElementById('next').addEventListener('click',()=>select(selected+1));
   document.getElementById('reset-map').addEventListener('click',()=>{focused=false;renderMap();});
   search.addEventListener('input',renderList);
-  renderCard(); renderList();
-  fetch('out-of-place-boundaries.json').then(r=>r.ok?r.json():Promise.reject()).then(x=>{boundaries=x;renderMap();}).catch(()=>{status.textContent='Cached municipality/city boundaries could not load; project points and cards remain available.';boundaries={national:[],provinceFeatures:[]};renderMap();});
+  countNode.textContent='Checking project coordinates against mapped intended localities…';
+  fetch('out-of-place-boundaries.json').then(r=>r.ok?r.json():Promise.reject()).then(x=>{boundaries=x;projects=allProjects.filter(isOutsideResolvedIntendedLocality);document.getElementById('method').textContent='Shows only projects whose coordinate falls outside a project-named municipality or city. Projects without a resolvable intended locality are omitted because their location cannot be classified as outside.';selected=Math.max(0,projects.findIndex(p=>p.id===params.get('project')));if(!projects.length)status.textContent='No projects fall outside a resolved project-named municipality or city.';renderCard();renderList();renderMap();}).catch(()=>{status.textContent='Mapped boundaries could not load, so outside projects cannot be verified and are not shown.';boundaries={national:[],provinceFeatures:[]};projects=[];selected=0;renderCard();renderList();renderMap();});
 })();
