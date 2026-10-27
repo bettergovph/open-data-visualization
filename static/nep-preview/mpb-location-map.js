@@ -91,7 +91,7 @@
   select.value = groups.has(requestedPlace) ? requestedPlace : sortedGroups[0][0];
 
   function shareUrl() {
-    const url = new URL(location.href);
+    const url = new URL('mpb.html', 'https://research.bettergov.ph/static/nep-preview/');
     url.searchParams.set('place', select.value);
     url.hash = 'mpb-coordinate-proximity';
     return url.href;
@@ -103,7 +103,9 @@
   let preparedShareFile = null;
   function cachedShareTarget() {
     const cachedPage = source.sharePages?.[select.value];
-    return cachedPage ? new URL(cachedPage, document.baseURI).href : shareUrl();
+    // Facebook must receive a publicly reachable URL even when this report is
+    // being previewed from localhost or a file-based workspace.
+    return cachedPage ? new URL(cachedPage, 'https://research.bettergov.ph/static/nep-preview/').href : shareUrl();
   }
   function cachedShareImage() {
     const cachedPage = source.sharePages?.[select.value];
