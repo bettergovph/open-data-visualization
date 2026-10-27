@@ -125,7 +125,7 @@
     drawComparisonMap([{title:`${intendedTitle} · ${landingTitle} · adjacent localities`,kind:'combined',features:combinedFeatures,target:intendedTarget,landingKey:landingTarget?.key,project}],project);
   }
   function drawComparisonMap(views,selectedProject) {
-    const width=1200,height=520,outer=12;
+    const width=1200,height=520,gap=0,outer=12;
     views=views.slice(0,1); // Always render one map canvas with all intended, landing and adjacent areas.
     const viewWidth=width-outer*2;
     let contents='';

@@ -12,7 +12,7 @@ function money(cell){
 }
 function svgNode(tag,attrs={},text){const node=document.createElementNS(ns,tag);Object.entries(attrs).forEach(([key,value])=>node.setAttribute(key,value));if(text!=null)node.textContent=text;return node}
 function fullLabel(svg,row,i,y){
- const text=svgNode('text',{x:8,y:y+8,fill:'#24434b','font-size':16});
+ const text=svgNode('text',{x:8,y:y+8,fill:'#212121','font-size':16});
  const label=`${row.number}. ${row.label}`,parts=label.match(/.{1,36}(?:\s|$)|.{1,36}/g)||[label];
  parts.slice(0,2).forEach((s,j)=>text.append(svgNode('tspan',{x:8,dy:j?20:0},s.trim()+(j===1&&parts.length>2?'…':''))));
  text.append(svgNode('title',{},row.label));svg.append(text);
@@ -22,20 +22,20 @@ function graphic(rows,delta){
  const height=75+rows.length*70,svg=svgNode('svg',{viewBox:`0 0 900 ${height}`,role:'img','aria-label':caption.textContent});
  const peak=Math.max(1,...rows.map(r=>delta?Math.abs(r.house-r.nep):Math.max(r.nep,r.house)));
  const left=335,width=540,zero=left+width/2;
- svg.append(svgNode('line',{x1:delta?zero:left,x2:delta?zero:left,y1:20,y2:height-40,stroke:'#99b4af'}));
- svg.append(svgNode('text',{x:delta?zero:left,y:height-15,'text-anchor':delta?'middle':'start','font-size':16,fill:'#24434b'},delta?'0 · HGAB minus NEP':'Allocation in pesos · common linear scale'));
+ svg.append(svgNode('line',{x1:delta?zero:left,x2:delta?zero:left,y1:20,y2:height-40,stroke:'#BDBDBD'}));
+ svg.append(svgNode('text',{x:delta?zero:left,y:height-15,'text-anchor':delta?'middle':'start','font-size':16,fill:'#212121'},delta?'0 · HGAB minus NEP':'Allocation in pesos · common linear scale'));
  rows.forEach((r,i)=>{
   const y=40+i*70;fullLabel(svg,r,i,y);
   if(delta){
    const change=r.house-r.nep,w=Math.abs(change)/peak*(width/2-15),x=change<0?zero-w:zero;
-   const bar=svgNode('rect',{x,y:y-4,width:Math.max(w,change===0?0:1),height:23,rx:3,fill:change<0?'#b33b35':'#187345'});
+   const bar=svgNode('rect',{x,y:y-4,width:Math.max(w,change===0?0:1),height:23,rx:3,fill:change<0?'#b33b35':'#0038A8'});
    bar.append(svgNode('title',{},`${r.label}: ${change<0?'decrease':'increase'} ${peso(Math.abs(change))}; NEP ${peso(r.nep)}, HGAB ${peso(r.house)}`));svg.append(bar);
-   svg.append(svgNode('text',{x:zero,y:y+38,'text-anchor':'middle','font-size':16,fill:'#24434b'},(change>0?'+':change<0?'−':'')+peso(Math.abs(change))));
+   svg.append(svgNode('text',{x:zero,y:y+38,'text-anchor':'middle','font-size':16,fill:'#212121'},(change>0?'+':change<0?'−':'')+peso(Math.abs(change))));
   }else{
-   [[r.nep,'#426b9b',-6,'NEP'],[r.house,'#087e78',14,'HGAB']].forEach(([amount,color,offset,stage])=>{
+   [[r.nep,'#0038A8',-6,'NEP'],[r.house,'#0038A8',14,'HGAB']].forEach(([amount,color,offset,stage])=>{
     const bar=svgNode('rect',{x:left,y:y+offset,width:Math.max(0,amount/peak*(width-15)),height:16,rx:2,fill:color});bar.append(svgNode('title',{},`${r.label} · ${stage}: ${peso(amount)}`));svg.append(bar);
    });
-   svg.append(svgNode('text',{x:left,y:y+48,'font-size':15,fill:'#24434b'},`${peso(r.nep)} → ${peso(r.house)}`));
+   svg.append(svgNode('text',{x:left,y:y+48,'font-size':15,fill:'#212121'},`${peso(r.nep)} → ${peso(r.house)}`));
   }
  });figure.append(svg);return figure;
 }

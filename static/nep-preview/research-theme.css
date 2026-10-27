@@ -1,33 +1,33 @@
 /* BetterGov research: common visual language for the static investigation pages. */
-body.bettergov-research{--research-ink:#173744;--research-muted:#546c73;--research-teal:#087e78;--research-line:#d3e1dd;--research-paper:#fff;--research-ground:#f2f6f5;background:var(--research-ground)!important;color:var(--research-ink)!important;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;line-height:1.65;text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased}
-.bettergov-research>header{background:linear-gradient(115deg,#102f3e 0%,#174854 100%)!important;border-bottom:3px solid #66bca8;padding-top:28px!important;padding-bottom:24px!important}
+body.bettergov-research{--research-ink:#212121;--research-muted:#616161;--research-teal:#0038A8;--research-line:#E0E0E0;--research-paper:#fff;--research-ground:#FAFAFA;background:var(--research-ground)!important;color:var(--research-ink)!important;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;line-height:1.65;text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased}
+.bettergov-research>header{background:linear-gradient(115deg,#00246A 0%,#0038A8 100%)!important;border-bottom:3px solid #FCD116;padding-top:28px!important;padding-bottom:24px!important}
 .bettergov-research header h1{font-size:clamp(25px,2.7vw,40px)!important;line-height:1.2!important;letter-spacing:-.035em!important;font-weight:750!important;margin:0 0 12px!important}
-.bettergov-research header p{color:#d5e8e5;line-height:1.65}
+.bettergov-research header p{color:#F5F5F5;line-height:1.65}
 .bettergov-research main{padding-top:26px!important;padding-bottom:56px!important;min-width:0}
 .bettergov-research main h2{font-size:clamp(20px,1.7vw,27px)!important;line-height:1.3!important;letter-spacing:-.025em!important;font-weight:720!important;margin:0 0 16px!important;color:var(--research-ink)}
 .bettergov-research main h3{font-size:18px!important;line-height:1.4!important;letter-spacing:-.015em;margin-top:24px;margin-bottom:12px}
 .bettergov-research main p{margin-top:10px;margin-bottom:16px}
 .bettergov-research main a{text-underline-offset:3px;text-decoration-thickness:1px}
 .bettergov-research main a:hover{text-decoration-thickness:2px}
-#report-evidence-notice{display:block!important;margin:0 0 20px!important;padding:12px 16px!important;border-left:4px solid #087e78!important;border-radius:0 9px 9px 0!important;background:#eef5f3!important;color:#28424c!important;font:14px/1.5 system-ui,sans-serif!important;max-width:none!important}
-.bettergov-research main :is(section.card:not(.repeat-hero):not(#report-hero),article.card:not(.repeat-hero):not(#report-hero),.investigation-evidence,.card.scenario){background:var(--research-paper)!important;border:1px solid var(--research-line)!important;border-radius:16px!important;padding:clamp(18px,2vw,28px)!important;margin-top:24px!important;margin-bottom:24px!important;box-shadow:0 3px 14px #17374405}
+#report-evidence-notice{display:block!important;margin:0 0 20px!important;padding:12px 16px!important;border-left:4px solid #0038A8!important;border-radius:0 9px 9px 0!important;background:#EAF0FF!important;color:#212121!important;font:14px/1.5 system-ui,sans-serif!important;max-width:none!important}
+.bettergov-research main :is(section.card:not(.repeat-hero):not(#report-hero),article.card:not(.repeat-hero):not(#report-hero),.investigation-evidence,.card.scenario){background:var(--research-paper)!important;border:1px solid var(--research-line)!important;border-radius:16px!important;padding:clamp(18px,2vw,28px)!important;margin-top:24px!important;margin-bottom:24px!important;box-shadow:0 3px 14px #21212108}
 .bettergov-research main :is(.sub,.muted,.source,.source-note){color:var(--research-muted);line-height:1.65}
 .bettergov-research main :is(.notice,.caution,.note){border-radius:9px;line-height:1.65}
-.bettergov-research .toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px!important;padding:14px!important;margin:18px 0!important;background:#f2f7f5;border:1px solid var(--research-line);border-radius:11px}
-.bettergov-research :is(input[type="search"],input[type="text"],select){box-sizing:border-box;max-width:100%;min-height:40px!important;padding:9px 12px!important;border:1px solid #b4c9c3!important;border-radius:8px!important;background:#fff!important;color:var(--research-ink)!important;font-family:inherit!important;font-size:14px!important;line-height:1.4!important}
+.bettergov-research .toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px!important;padding:14px!important;margin:18px 0!important;background:#F5F5F5;border:1px solid var(--research-line);border-radius:11px}
+.bettergov-research :is(input[type="search"],input[type="text"],select){box-sizing:border-box;max-width:100%;min-height:40px!important;padding:9px 12px!important;border:1px solid #BDBDBD!important;border-radius:8px!important;background:#fff!important;color:var(--research-ink)!important;font-family:inherit!important;font-size:14px!important;line-height:1.4!important}
 .bettergov-research button{font-family:inherit!important;border-radius:8px;min-height:36px;line-height:1.4}
-.bettergov-research :is(.export-btn,.export,button[data-csv],button[id$="Csv"],button[id$="csv"]){background:#a74d09!important;color:#fff!important;border:1px solid #924006!important;padding:10px 15px!important;font-weight:650!important;box-shadow:0 2px 3px #7f370b12}
-.bettergov-research :is(.export-btn,.export,button[data-csv]):hover{background:#873d06!important}
-.bettergov-research :is(button,a,input,select):focus-visible{outline:3px solid #39a595!important;outline-offset:3px!important}
+.bettergov-research :is(.export-btn,.export,button[data-csv],button[id$="Csv"],button[id$="csv"]){background:#0038A8!important;color:#fff!important;border:1px solid #00246A!important;padding:10px 15px!important;font-weight:650!important;box-shadow:0 2px 3px #00246A12}
+.bettergov-research :is(.export-btn,.export,button[data-csv]):hover{background:#001D56!important}
+.bettergov-research :is(button,a,input,select):focus-visible{outline:3px solid #FCD116!important;outline-offset:3px!important}
 .bettergov-research :is(.pager,.pagination,.report-table-pagination){gap:10px;align-items:center;margin-top:14px;margin-bottom:12px;font-size:14px;color:var(--research-muted)}
-.bettergov-research :is(.pager,.pagination) button{padding:8px 13px;border:1px solid #b4c9c3;background:#fff;color:var(--research-ink)}
+.bettergov-research :is(.pager,.pagination) button{padding:8px 13px;border:1px solid #BDBDBD;background:#fff;color:var(--research-ink)}
 .bettergov-research :is(.pager,.pagination) button:disabled{opacity:.45}
-.bettergov-research :is(.comparison-graphic,.nep-hgab-comparison-graphs){border:1px solid var(--research-line)!important;border-radius:12px!important;background:#f7faf9!important;padding:18px!important;margin:20px 0!important}
+.bettergov-research :is(.comparison-graphic,.nep-hgab-comparison-graphs){border:1px solid var(--research-line)!important;border-radius:12px!important;background:#F5F5F5!important;padding:18px!important;margin:20px 0!important}
 .bettergov-research figcaption{font-size:14px;line-height:1.55;color:var(--research-muted);margin-bottom:14px}
 .bettergov-research figcaption strong{display:block;color:var(--research-ink);font-size:15px;margin-bottom:4px}
-.bettergov-research .report-table-scroll{border-color:#c7d9d3!important;border-radius:11px;box-shadow:0 1px 4px #17374405}
+.bettergov-research .report-table-scroll{border-color:#E0E0E0!important;border-radius:11px;box-shadow:0 1px 4px #21212108}
 .bettergov-research .report-table-scroll tbody td:first-child{font-weight:500}
-.bettergov-research .report-table-scroll td a{color:#076b66}
+.bettergov-research .report-table-scroll td a{color:#0038A8}
 .bettergov-research pre{white-space:pre-wrap;overflow-wrap:anywhere;max-width:100%}
 .bettergov-research code{overflow-wrap:anywhere}
 .bettergov-research footer{color:var(--research-muted);border-top:1px solid var(--research-line);padding-top:20px;margin-top:32px;font-size:13px;line-height:1.7}
@@ -36,12 +36,12 @@ body.bettergov-research{--research-ink:#173744;--research-muted:#546c73;--resear
 
 .bettergov-research :is(.repeat-hero,.driver-hero) :is(h2,h3){color:#f5fbfa!important}
 
-.bettergov-research footer:has(#report-source-links){padding:22px clamp(16px,2vw,32px);margin:30px 0 0;border-top:1px solid var(--research-line);background:#e9f1ee;color:#546c73}
+.bettergov-research footer:has(#report-source-links){padding:22px clamp(16px,2vw,32px);margin:30px 0 0;border-top:1px solid var(--research-line);background:#F5F5F5;color:#616161}
 .bettergov-research #report-source-links{font-size:13px;line-height:1.7}
 .bettergov-research #report-source-links p{margin:8px 0}
-.bettergov-research #report-source-links a{color:#076b66;text-underline-offset:3px}
+.bettergov-research #report-source-links a{color:#0038A8;text-underline-offset:3px}
 
 .bettergov-research .finding h2 a{color:inherit!important;text-decoration:none}
-.bettergov-research .finding h2 a:hover{color:#087e78!important;text-decoration:underline;text-underline-offset:4px}
+.bettergov-research .finding h2 a:hover{color:#0038A8!important;text-decoration:underline;text-underline-offset:4px}
 .bettergov-research .summary-evidence-links{display:flex;flex-wrap:wrap;gap:8px 12px;line-height:1.7}
 .bettergov-research main :is(section,article)[id]{scroll-margin-top:20px}
