@@ -97,29 +97,60 @@
     return url.href;
   }
   const facebookLink = document.getElementById('mpbMapFacebook');
+  const downloadLink = document.getElementById('mpbMapDownload');
   const nativeShareButton = document.getElementById('mpbMapNativeShare');
   const shareStatus = document.getElementById('mpbMapShareStatus');
+  let preparedShareFile = null;
   function cachedShareTarget() {
     const cachedPage = source.sharePages?.[select.value];
     return cachedPage ? new URL(cachedPage, document.baseURI).href : shareUrl();
   }
-  const updateShareLinks = () => {
-    if (facebookLink) facebookLink.href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(cachedShareTarget())}`;
-  };
-  if (nativeShareButton && navigator.share) {
-    nativeShareButton.hidden = false;
-    nativeShareButton.addEventListener('click', async () => {
-      try {
-        await navigator.share({
-          title: `MPB project locations · ${prettyPlace(select.value)}`,
-          text: `MPB project locations, same-site funding comparisons, and municipality boundary review for ${prettyPlace(select.value)}. Location checks are review leads, not findings.`,
-          url: cachedShareTarget()
-        });
-      } catch (error) {
-        if (error?.name !== 'AbortError' && shareStatus) shareStatus.textContent = 'Sharing could not be opened. Use Facebook or copy the map link.';
-      }
-    });
+  function cachedShareImage() {
+    const cachedPage = source.sharePages?.[select.value];
+    if (!cachedPage) return null;
+    return new URL(cachedPage.replace(/\.html(?=\?|$)/, '.png'), document.baseURI).href;
   }
+  const canShareImageFiles = () => {
+    if (typeof navigator.share !== 'function' || typeof navigator.canShare !== 'function' || typeof File !== 'function') return false;
+    try {
+      return navigator.canShare({ files: [new File([new Blob([''])], 'map.png', { type: 'image/png' })] });
+    } catch { return false; }
+  };
+  const canShareFiles = canShareImageFiles();
+  if (nativeShareButton) { nativeShareButton.hidden = !canShareFiles; nativeShareButton.disabled = canShareFiles; }
+  const updateShareLinks = () => {
+    const pageUrl = cachedShareTarget();
+    const imageUrl = cachedShareImage();
+    if (facebookLink) facebookLink.href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(pageUrl)}`;
+    preparedShareFile = null;
+    if (nativeShareButton) nativeShareButton.disabled = canShareFiles;
+    if (downloadLink && imageUrl) {
+      downloadLink.href = imageUrl;
+      downloadLink.download = `mpb-locations-${select.value.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.png`;
+    }
+    if (canShareFiles && imageUrl) {
+      fetch(imageUrl, { cache: 'force-cache' }).then(response => {
+        if (!response.ok) throw new Error('Map image unavailable');
+        return response.blob();
+      }).then(blob => {
+        if (cachedShareImage() !== imageUrl) return;
+        const file = new File([blob], downloadLink?.download || 'mpb-locations.png', { type: 'image/png' });
+        if (navigator.canShare({ files: [file] })) { preparedShareFile = file; if (nativeShareButton) nativeShareButton.disabled = false; }
+      }).catch(() => { if (cachedShareImage() === imageUrl && shareStatus) shareStatus.textContent = 'Map image sharing is unavailable. Download the PNG or share the Facebook link.'; });
+    }
+  };
+  nativeShareButton?.addEventListener('click', async () => {
+    const file = preparedShareFile;
+    if (!file) { if (shareStatus) shareStatus.textContent = 'Preparing the map image. Try again in a moment.'; return; }
+    const pageUrl = cachedShareTarget();
+    const payload = { files: [file], title: `MPB project locations · ${prettyPlace(select.value)}`, text: `MPB project locations and same-site funding comparisons for ${prettyPlace(select.value)}. Location checks are review leads, not findings.\n${pageUrl}` };
+    try {
+      if (!navigator.canShare(payload)) throw new Error('Image sharing unsupported');
+      await navigator.share(payload);
+    } catch (error) {
+      if (error?.name !== 'AbortError' && shareStatus) shareStatus.textContent = 'The image could not be shared. Download the PNG or use Facebook.';
+    }
+  });
   updateShareLinks();
   document.getElementById('mpbMapCopyLink')?.addEventListener('click', async () => {
     try {
