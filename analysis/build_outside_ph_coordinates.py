@@ -182,8 +182,6 @@ def main() -> None:
             {"stage": "NEP", "file": NEP_SOURCE.name, "sha256": hashlib.sha256(nep_bytes).hexdigest()},
             {"stage": "NEP FMR / HGAB FMR", "files": fmr_hashes},
         ],
-        "sourceScans": [hgab_scan, nep_scan],
-        "fmrScans": fmr_scans,
         "screeningEnvelope": {
             "latitudeNorth": [LAT_MIN, LAT_MAX],
             "longitudeEast": [LON_MIN, LON_MAX],
@@ -194,7 +192,7 @@ def main() -> None:
         "projects": projects,
     }
     OUTPUT.write_text(json.dumps(result, ensure_ascii=False, separators=(",", ":")) + "\n")
-    print(json.dumps({"projectCount": result["projectCount"], "coordinateCount": result["coordinateCount"], "sourceScans": result["sourceScans"], "fmrScans": result["fmrScans"], "output": str(OUTPUT)}, indent=2))
+    print(json.dumps({"projectCount": result["projectCount"], "coordinateCount": result["coordinateCount"], "output": str(OUTPUT)}, indent=2))
 
 
 if __name__ == "__main__":
