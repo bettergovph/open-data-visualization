@@ -16,7 +16,7 @@ from collections import defaultdict
 from pathlib import Path
 from ph_location_text import text_key, confirmed_name_key, place_key, geographic_title, barangay_key
 
-VERSION = "qualified-location-consensus-v7-admin-locality-crosswalk-bridge-district-authoritative-barangay-ncr-suffix-v1"
+VERSION = "qualified-location-consensus-v7-admin-locality-crosswalk-bridge-district-authoritative-barangay-ncr-suffix-v2"
 
 
 def seat_key(value):
@@ -201,10 +201,11 @@ class GeographicAttribution:
             canonical = confirmed_name_key(head.strip(" ."))
             if canonical != head.strip(" ."):
                 suffix = canonical + suffix[len(head):]
+            boundary = r"(?=$|\s*[,;()/]|\s*-|\s+and\s+(?:barangay|brgy)\b)"
             hits = [(name, seat) for name, seat in b.items()
-                    if re.match(re.escape(name) + r"(?=$|[,;()/]|\s*-|\s+and\s+(?:barangay|brgy)\b)", suffix)]
+                    if re.match(re.escape(name) + boundary, suffix)]
             sourced = [(name, row) for name, row in self.authoritative_barangays[city].items()
-                       if re.match(re.escape(name) + r"(?=$|[,;()/]|\s*-|\s+and\s+(?:barangay|brgy)\b)", suffix)]
+                       if re.match(re.escape(name) + boundary, suffix)]
             if sourced:
                 longest = max(len(name) for name, _ in sourced)
                 for name, row in sourced:
