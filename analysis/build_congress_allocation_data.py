@@ -453,6 +453,24 @@ def main() -> None:
     for rows in scenario_rows.values():
         rows.sort(key=lambda x: (-x["totalPesos"], x["district"]))
 
+    unassigned_by_region = defaultdict(lambda: {"lineItems": 0, "totalPesos": 0})
+    for row in audit_rows:
+        if row["status"] != "unresolved":
+            continue
+        region = str(row.get("region") or "").strip()
+        group = ("Metro Manila (NCR)" if region in {"National Capital Region", "NCR"}
+                 else region or "Region not specified")
+        unassigned_by_region[group]["lineItems"] += 1
+        unassigned_by_region[group]["totalPesos"] += row["amountPesos"]
+    unassigned_by_region = [
+        {"group": group, **values}
+        for group, values in sorted(unassigned_by_region.items(),
+                                    key=lambda item: (-item[1]["totalPesos"], item[0]))
+    ]
+    if (sum(row["lineItems"] for row in unassigned_by_region) != unassigned
+            or sum(row["totalPesos"] for row in unassigned_by_region) != unassigned_amount):
+        raise ValueError("Unassigned region rollup does not reconcile with the source totals")
+
     output = {
         "source": "FY2027 DPWH HGAB 3rd Reading local extraction",
         "roster": "20th Congress roster in ODV static/data/20th_congress_representatives.json",
@@ -461,8 +479,9 @@ def main() -> None:
         "unit": "pesos",
         "attributionMethod": VERSION + "+city-jurisdiction-preserved-v1+caloocan-numbered-barangay-crosswalk-v1+manila-constitutional-barangay-and-zone-crosswalk-v1",
         "inventoryLocationEvidenceStatus": geography.inventory_context_status,
-        "attributionWarning": "Conservative location-based coverage, not complete district budgets or evidence of a representative's sponsorship. Exact municipality + province fields require agreement between both local district maps. Multi-seat cities require explicit location evidence: numbered Manila barangays use statutory ranges, Manila zones and named administrative localities use only cited crosswalks that identify one district, and numbered Caloocan barangays use current statutory crosswalks. Shared lines, conflicts and missing scope stay outside the ranking. For otherwise unresolved projects, a printed coordinate can support a district assignment only when the title names a locality, the point falls inside its matching DPWH boundary feature, and that feature identifies exactly one current roster seat. An exact bridge ID may also use the ArcGIS bridge record's listed DEO and CONG_DIST when that district maps uniquely to the current roster; conflicting title geography stays unresolved by this source. Coordinates and boundary classifications are not independently verified project locations. A zero means no accepted attribution, not no allocation.",
+        "attributionWarning": "Conservative location-based coverage, not complete district budgets or evidence of a representative's sponsorship. Exact municipality + province fields normally require agreement between both local district maps; exact localities listed in the sourced current-law / Senate district crosswalk may resolve map conflicts, and a province with one current rostered legislative district maps to that sole seat. Multi-seat cities require explicit location evidence: numbered Manila barangays use statutory ranges, Manila zones and named administrative localities use cited crosswalks that identify one district, and numbered Caloocan barangays use current statutory crosswalks. Shared lines, conflicts and missing scope stay outside the ranking. For otherwise unresolved projects, a printed coordinate can support a district assignment only when the title names a locality, the point falls inside its matching DPWH boundary feature, and that feature identifies exactly one current roster seat. An exact bridge ID may also use the ArcGIS bridge record's listed DEO and CONG_DIST when that district maps uniquely to the current roster; conflicting title geography stays unresolved by this source. Coordinates and boundary classifications are not independently verified project locations. A zero means no accepted attribution, not no allocation.",
         "unresolvedReasons": [{"reason": k, **v} for k, v in sorted(unresolved_reasons.items(), key=lambda kv: -kv[1]["totalPesos"])],
+        "unassignedByRegion": unassigned_by_region,
         "summary": {
             "candidateLineItems": len(projects), "candidateTotalPesos": candidate_total,
             "excludedScheduleLines": excluded_count, "excludedScheduleAmountPesos": excluded_total,

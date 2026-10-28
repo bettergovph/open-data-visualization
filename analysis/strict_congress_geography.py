@@ -16,7 +16,7 @@ from collections import defaultdict
 from pathlib import Path
 from ph_location_text import text_key, confirmed_name_key, place_key, geographic_title, barangay_key
 
-VERSION = "qualified-location-consensus-v7-admin-locality-crosswalk-bridge-district-authoritative-barangay-ncr-suffix-v2"
+VERSION = "qualified-location-consensus-v8-official-province-locality-crosswalk"
 
 
 def seat_key(value):
@@ -124,6 +124,30 @@ class GeographicAttribution:
                     self.administrative_localities[jurisdiction, locality].add(index)
                     self.administrative_locality_sources[jurisdiction, locality] = row
 
+        # A small set of current law / Senate rule locality lists adjudicates
+        # disagreements between the legacy and generated map crosswalks. These
+        # are exact parent + locality keys; no fuzzy title match is accepted.
+        self.authoritative_municipalities = defaultdict(dict)
+        municipality_file = data_root / "congress_municipality_district_overrides.json"
+        if municipality_file.exists():
+            for jurisdiction, detail in json.loads(municipality_file.read_text()).get("jurisdictions", {}).items():
+                jurisdiction = text_key(jurisdiction)
+                for name, row in detail.get("municipalities", {}).items():
+                    seat = seat_key(row.get("districtLabel", ""))
+                    names = [name, *row.get("aliases", [])]
+                    if (jurisdiction, seat) in self.seats:
+                        for alias in names:
+                            locality = place_key(alias)
+                            if not locality:
+                                continue
+                            self.authoritative_municipalities[jurisdiction][locality] = {
+                                **row,
+                                "basis": row.get("basis", detail.get("basis", detail.get("sourceTitle"))),
+                                "sources": row.get("sources", detail.get("sources", [])),
+                                "limits": row.get("limits", detail.get("limits")),
+                            }
+                            self.town_aliases[locality].add(locality)
+
         # Current city-published legislative barangay lists resolve a few
         # known disagreements in the legacy/generated map crosswalks. These
         # entries are exact-name overrides only; the source and limits travel
@@ -158,6 +182,17 @@ class GeographicAttribution:
                 self.inventory_context_status = 'stale_dependencies_fallback_disabled'
 
     def municipality(self, parent, locality):
+        official = self.authoritative_municipalities[parent].get(locality)
+        if official:
+            seat = seat_key(official.get("districtLabel", ""))
+            if (parent, seat) not in self.seats:
+                return None, "Official municipality seat is absent from the current roster"
+            return self.seats[parent, seat], None
+        # A province represented by one current legislative seat has no internal
+        # municipal split to infer. With an exact municipality and province
+        # field, the sole rostered seat is the only possible district.
+        if self.roster[parent] == {"lone"}:
+            return self.seats[parent, "lone"], None
         a = self.primary_towns[parent].get(locality, set())
         b = self.alternate_towns[parent].get(locality, set())
         if len(a) != 1 or len(b) != 1:
@@ -347,7 +382,16 @@ class GeographicAttribution:
                     reasons.append(reason)
                 else:
                     indices.append(index)
+                official = self.authoritative_municipalities[parent].get(locality)
                 evidence.append(dict(level="municipality", name=locality, province=parent,
+                                     districtBasis=(official.get("basis") if official else
+                                                    "Exact province + municipality; the current roster has one legislative district for this province"
+                                                    if self.roster[parent] == {"lone"} else "Both local district maps agree"),
+                                     district=(official.get("districtLabel") if official else None),
+                                     sources=(official.get("sources", []) if official else
+                                              ["https://www.congress.gov.ph/house-members"]
+                                              if self.roster[parent] == {"lone"} else []),
+                                     limit=(official.get("limits") if official else None),
                                      primaryDistricts=sorted(str(s) for s in self.primary_towns[parent].get(locality, set())),
                                      alternateDistricts=sorted(str(s) for s in self.alternate_towns[parent].get(locality, set()))))
         return dict(indices=[] if reasons else sorted(set(indices)), reasons=sorted(set(reasons)), evidence=evidence)
