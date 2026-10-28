@@ -37,6 +37,49 @@ MANILA_BARANGAY = re.compile(
 )
 MANILA_FOURTH_DISTRICT_ZONE_RANGE = re.compile(r"\bzones?\s*41\s*(?:to|[-–])\s*57\b", re.I)
 MANILA_SIXTH_DISTRICT_ZONE_PAIR = re.compile(r"\bzones?\s*92\s*(?:&|and|,)\s*93\b", re.I)
+ANTIPOLO_PLACE = re.compile(r"\b(?:antipolo(?:\s+city)?|city\s+of\s+antipolo)\b", re.I)
+ANTIPOLO_EXPLICIT_DISTRICT = re.compile(
+    r"\b(1st|2nd|first|second)\s*(?:legislative\s*)?(?:l\.?\s*d\.?|district)\b", re.I
+)
+ANTIPOLO_BARANGAYS = {
+    "1st District": (
+        "bagong nayon", "beverly hills", "dela paz", "mambugan", "mayamot",
+        "munting dilao", "muntindilaw", "san isidro", "sta cruz", "santa cruz",
+    ),
+    "2nd District": (
+        "calawis", "cupang", "dalig", "inarawan", "san jose", "san juan",
+        "san luis", "san roque",
+    ),
+}
+
+
+def _antipolo_barangay_district(title: str):
+    """Resolve Antipolo only from a named statutory barangay or explicit LD."""
+    title = str(title or "")
+    if not ANTIPOLO_PLACE.search(title):
+        return None
+
+    named_districts = set()
+    for district, barangays in ANTIPOLO_BARANGAYS.items():
+        for barangay in barangays:
+            pattern = re.compile(
+                r"\b(?:barangays?|brgys?\.?|bgys?\.?|bgy\.?)\s+"
+                + re.escape(barangay).replace(r"\ ", r"\s+")
+                + r"\b",
+                re.I,
+            )
+            if pattern.search(title):
+                named_districts.add(district)
+
+    explicit_districts = set()
+    for match in ANTIPOLO_EXPLICIT_DISTRICT.finditer(title):
+        token = match.group(1).lower()
+        explicit_districts.add("1st District" if token in {"1st", "first"} else "2nd District")
+
+    clues = named_districts | explicit_districts
+    if len(clues) != 1 or (named_districts and explicit_districts and named_districts != explicit_districts):
+        return None
+    return next(iter(clues)), sorted(named_districts)
 
 
 def _caloocan_barangay_district(title: str):
@@ -413,6 +456,35 @@ def main() -> None:
                     decision["indices"] = [index]
                     decision["reasons"] = []
                 decision["evidence"].extend(evidence for _, evidence in manila_clues)
+        if not overrides.get(project.get("id"), {}).get("holdUnresolved"):
+            antipolo = _antipolo_barangay_district(title)
+            if antipolo:
+                district_label, barangays = antipolo
+                index = next((i for i, seat in enumerate(seats)
+                              if _place_key(seat["province"]) in {_place_key("Antipolo"), _place_key("Antipolo City")}
+                              and seat["districtLabel"] == district_label), None)
+                antipolo_indices = [i for i in decision["indices"]
+                                    if _place_key(seats[i]["province"]) in {_place_key("Antipolo"), _place_key("Antipolo City")}]
+                non_antipolo_indices = [i for i in decision["indices"] if i not in antipolo_indices]
+                if index is not None:
+                    if non_antipolo_indices or (antipolo_indices and antipolo_indices != [index]):
+                        decision["indices"] = []
+                        decision["reasons"] = sorted(set(decision["reasons"] + [
+                            "Antipolo statutory barangay conflicts with geographic attribution; left unassigned pending review"
+                        ]))
+                    else:
+                        decision["indices"] = [index]
+                        decision["reasons"] = []
+                        decision["evidence"].append({
+                            "level": "Antipolo statutory legislative-district crosswalk",
+                            "district": district_label,
+                            "barangays": barangays,
+                            "basis": "The project title names an Antipolo barangay assigned to this legislative district under RA 9232; city-only, ambiguous, and conflicting records remain unresolved.",
+                            "sources": [
+                                "https://issuances-library.senate.gov.ph/legislative%2Bissuances/Republic%20Act%20No.%209232",
+                                "https://lawphil.net/administ/comelec/comres2021/comres_10704_2021.pdf",
+                            ],
+                        })
         coordinate_evidence = None
         held_unresolved = bool(overrides.get(project.get("id"), {}).get("holdUnresolved"))
         if not decision["indices"] and not held_unresolved:
@@ -481,9 +553,9 @@ def main() -> None:
         "extractionMethod": source.get("metadata", {}).get("extractionMethod", "local schedule extraction"),
         "sourceWarning": source.get("metadata", {}).get("warning", "Candidate extraction; check cited bill pages."),
         "unit": "pesos",
-        "attributionMethod": VERSION + "+city-jurisdiction-preserved-v1+caloocan-numbered-barangay-crosswalk-v1+manila-constitutional-barangay-and-zone-crosswalk-v1",
+        "attributionMethod": VERSION + "+city-jurisdiction-preserved-v1+caloocan-numbered-barangay-crosswalk-v1+manila-constitutional-barangay-and-zone-crosswalk-v1+antipolo-ra9232-barangay-crosswalk-v1",
         "inventoryLocationEvidenceStatus": geography.inventory_context_status,
-        "attributionWarning": "Conservative location-based coverage, not complete district budgets or evidence of a representative's sponsorship. Exact municipality + province fields normally require agreement between both local district maps; exact localities listed in the sourced current-law / Senate district crosswalk may resolve map conflicts, and a province with one current rostered legislative district maps to that sole seat. Multi-seat cities require explicit location evidence: numbered Manila barangays use statutory ranges, Manila zones and named administrative localities use cited crosswalks that identify one district, and numbered Caloocan barangays use current statutory crosswalks. Shared lines, conflicts and missing scope stay outside the ranking. For otherwise unresolved projects, a printed coordinate can support a district assignment only when the title names a locality, the point falls inside its matching DPWH boundary feature, and that feature identifies exactly one current roster seat. An exact bridge ID may use the ArcGIS record's CONG_DIST only when its paired DEO district does not conflict; mixed DEO/CONG_DIST records remain irreconcilable and unresolved. Coordinates and boundary classifications are not independently verified project locations. A zero means no accepted attribution, not no allocation.",
+        "attributionWarning": "Conservative location-based coverage, not complete district budgets or evidence of a representative's sponsorship. Exact municipality + province fields normally require agreement between both local district maps; exact localities listed in the sourced current-law / Senate district crosswalk may resolve map conflicts, and a province with one current rostered legislative district maps to that sole seat. Multi-seat cities require explicit location evidence: numbered Manila barangays use statutory ranges, Manila zones and named administrative localities use cited crosswalks that identify one district, numbered Caloocan barangays use current statutory crosswalks, and Antipolo assignments require an explicitly named barangay or legislative district under RA 9232. Shared lines, conflicts and missing scope stay outside the ranking. For otherwise unresolved projects, a printed coordinate can support a district assignment only when the title names a locality, the point falls inside its matching DPWH boundary feature, and that feature identifies exactly one current roster seat. An exact bridge ID may use the ArcGIS record's CONG_DIST only when its paired DEO district does not conflict; mixed DEO/CONG_DIST records remain irreconcilable and unresolved. Coordinates and boundary classifications are not independently verified project locations. A zero means no accepted attribution, not no allocation.",
         "unresolvedReasons": [{"reason": k, **v} for k, v in sorted(unresolved_reasons.items(), key=lambda kv: -kv[1]["totalPesos"])],
         "unassignedByRegion": unassigned_by_region,
         "mixedSignalProjectIds": mixed_signal_project_ids,
