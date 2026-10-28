@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "description": "Explicit administrative localities that are named in project titles but are not barangays in the numbered barangay hierarchy.",
+  "description": "Explicit, source-backed administrative localities and districts named in project titles; these complement numbered-barangay and zone evidence.",
   "records": [
     {
       "locality": "Malate",
@@ -14,6 +14,234 @@
         "https://services1.arcgis.com/IwZZTMxZCmAmFYvF/ArcGIS/rest/services/City_Municipal_Boundaries/FeatureServer/0"
       ],
       "limits": "This crosswalk resolves an explicitly named Malate, Manila locality. It does not imply a project point, barangay, sponsorship, or control."
+    },
+    {
+      "locality": "Tutuban",
+      "jurisdiction": "Manila",
+      "parentCity": "Manila",
+      "districtLabel": "1st District",
+      "level": "administrative_district",
+      "basis": "The official City Council describes Tutuban as located in Manila District I.",
+      "sources": [
+        "https://citycouncilofmanila.com.ph/"
+      ],
+      "limits": "This crosswalk resolves only an explicitly named Tutuban, Manila locality. It does not imply a project point, barangay, sponsorship, or control."
+    },
+    {
+      "locality": "Divisoria",
+      "jurisdiction": "Manila",
+      "parentCity": "Manila",
+      "districtLabel": "1st District",
+      "level": "administrative_district",
+      "basis": "The official City Council describes Divisoria as located in Manila District I.",
+      "sources": [
+        "https://citycouncilofmanila.com.ph/"
+      ],
+      "limits": "This crosswalk resolves only an explicitly named Divisoria, Manila locality. It does not imply a project point, barangay, sponsorship, or control."
+    },
+    {
+      "locality": "Ugbo",
+      "jurisdiction": "Manila",
+      "parentCity": "Manila",
+      "districtLabel": "1st District",
+      "level": "administrative_district",
+      "basis": "The official City Council identifies the Ugbo street-food area within Manila District I.",
+      "sources": [
+        "https://citycouncilofmanila.com.ph/"
+      ],
+      "limits": "This crosswalk resolves only an explicitly named Ugbo, Manila locality. It does not imply a project point, barangay, sponsorship, or control."
+    },
+    {
+      "locality": "Gagalangin",
+      "jurisdiction": "Manila",
+      "parentCity": "Manila",
+      "districtLabel": "2nd District",
+      "level": "administrative_district",
+      "basis": "The official City Council lists Gagalangin Unida Church under its District II section.",
+      "sources": [
+        "https://citycouncilofmanila.com.ph/"
+      ],
+      "limits": "This crosswalk resolves only an explicitly named Gagalangin, Manila locality. It does not imply a project point, barangay, sponsorship, or control."
+    },
+    {
+      "locality": "Binondo",
+      "jurisdiction": "Manila",
+      "parentCity": "Manila",
+      "districtLabel": "3rd District",
+      "level": "administrative_district",
+      "basis": "The official City Council identifies Binondo as part of Manila District III.",
+      "sources": [
+        "https://citycouncilofmanila.com.ph/"
+      ],
+      "limits": "This crosswalk resolves only an explicitly named Binondo, Manila locality. It does not imply a project point, barangay, sponsorship, or control."
+    },
+    {
+      "locality": "Quiapo",
+      "jurisdiction": "Manila",
+      "parentCity": "Manila",
+      "districtLabel": "3rd District",
+      "level": "administrative_district",
+      "basis": "The official City Council identifies Quiapo as part of Manila District III.",
+      "sources": [
+        "https://citycouncilofmanila.com.ph/"
+      ],
+      "limits": "This crosswalk resolves only an explicitly named Quiapo, Manila locality. It does not imply a project point, barangay, sponsorship, or control."
+    },
+    {
+      "locality": "San Nicolas",
+      "jurisdiction": "Manila",
+      "parentCity": "Manila",
+      "districtLabel": "3rd District",
+      "level": "administrative_district",
+      "basis": "The official City Council identifies San Nicolas as part of Manila District III.",
+      "sources": [
+        "https://citycouncilofmanila.com.ph/"
+      ],
+      "limits": "This crosswalk resolves only an explicitly named San Nicolas, Manila locality. It does not imply a project point, barangay, sponsorship, or control."
+    },
+    {
+      "locality": "Sta. Cruz",
+      "jurisdiction": "Manila",
+      "parentCity": "Manila",
+      "districtLabel": "3rd District",
+      "level": "administrative_district",
+      "basis": "The official City Council describes Bambang, Sta. Cruz within the District III section.",
+      "sources": [
+        "https://citycouncilofmanila.com.ph/"
+      ],
+      "limits": "This crosswalk resolves only an explicitly named Sta. Cruz, Manila locality. It does not imply a project point, barangay, sponsorship, or control."
+    },
+    {
+      "locality": "Bambang",
+      "jurisdiction": "Manila",
+      "parentCity": "Manila",
+      "districtLabel": "3rd District",
+      "level": "administrative_district",
+      "basis": "The official City Council describes Bambang, Sta. Cruz within the District III section.",
+      "sources": [
+        "https://citycouncilofmanila.com.ph/"
+      ],
+      "limits": "This crosswalk resolves only an explicitly named Bambang, Manila locality. It does not imply a project point, barangay, sponsorship, or control."
+    },
+    {
+      "locality": "Dangwa",
+      "jurisdiction": "Manila",
+      "parentCity": "Manila",
+      "districtLabel": "4th District",
+      "level": "administrative_district",
+      "basis": "The official City Council locates Dangwa Flower Market in Manila District IV.",
+      "sources": [
+        "https://citycouncilofmanila.com.ph/"
+      ],
+      "limits": "This crosswalk resolves only an explicitly named Dangwa, Manila locality. It does not imply a project point, barangay, sponsorship, or control."
+    },
+    {
+      "locality": "Sampaloc",
+      "jurisdiction": "Manila",
+      "parentCity": "Manila",
+      "districtLabel": "4th District",
+      "level": "administrative_district",
+      "basis": "A Department of Education memorandum identifies school locations in Sampaloc as Manila District IV.",
+      "sources": [
+        "https://www.deped.gov.ph/wp-content/uploads/2018/10/DM_s2007_442.pdf"
+      ],
+      "limits": "This crosswalk resolves only an explicitly named Sampaloc, Manila locality. It does not imply a project point, barangay, sponsorship, or control."
+    },
+    {
+      "locality": "Ermita",
+      "jurisdiction": "Manila",
+      "parentCity": "Manila",
+      "districtLabel": "5th District",
+      "level": "administrative_district",
+      "basis": "The official City Council identifies Ermita as part of Manila District V.",
+      "sources": [
+        "https://citycouncilofmanila.com.ph/"
+      ],
+      "limits": "This crosswalk resolves only an explicitly named Ermita, Manila locality. It does not imply a project point, barangay, sponsorship, or control."
+    },
+    {
+      "locality": "Intramuros",
+      "jurisdiction": "Manila",
+      "parentCity": "Manila",
+      "districtLabel": "5th District",
+      "level": "administrative_district",
+      "basis": "The official City Council identifies Intramuros as located in Manila District V.",
+      "sources": [
+        "https://citycouncilofmanila.com.ph/"
+      ],
+      "limits": "This crosswalk resolves only an explicitly named Intramuros, Manila locality. It does not imply a project point, barangay, sponsorship, or control."
+    },
+    {
+      "locality": "Port Area",
+      "jurisdiction": "Manila",
+      "parentCity": "Manila",
+      "districtLabel": "5th District",
+      "level": "administrative_district",
+      "basis": "Official City Council records identify a Port Area / Barangay 649 location in District V.",
+      "sources": [
+        "https://citycouncilofmanila.com.ph/list-of-accredited-ngos-pos/"
+      ],
+      "limits": "This crosswalk resolves only an explicitly named Port Area, Manila locality. It does not imply a project point, barangay, sponsorship, or control."
+    },
+    {
+      "locality": "Baseco",
+      "jurisdiction": "Manila",
+      "parentCity": "Manila",
+      "districtLabel": "5th District",
+      "level": "administrative_district",
+      "basis": "Official City Council records identify Baseco / Barangay 649 locations in District V.",
+      "sources": [
+        "https://citycouncilofmanila.com.ph/list-of-accredited-ngos-pos/"
+      ],
+      "limits": "This crosswalk resolves only an explicitly named Baseco, Manila locality. It does not imply a project point, barangay, sponsorship, or control."
+    },
+    {
+      "locality": "Paco",
+      "jurisdiction": "Manila",
+      "parentCity": "Manila",
+      "districtLabel": "5th District",
+      "level": "administrative_district",
+      "basis": "A Department of Education memorandum identifies a Paco school location as Manila District V.",
+      "sources": [
+        "https://www.deped.gov.ph/wp-content/uploads/2018/10/DM_s2007_442.pdf"
+      ],
+      "limits": "This crosswalk resolves only an explicitly named Paco, Manila locality. It does not imply a project point, barangay, sponsorship, or control."
+    },
+    {
+      "locality": "Pandacan",
+      "jurisdiction": "Manila",
+      "parentCity": "Manila",
+      "districtLabel": "6th District",
+      "level": "administrative_district",
+      "basis": "The official City Council identifies Pandacan as part of Manila District VI.",
+      "sources": [
+        "https://citycouncilofmanila.com.ph/"
+      ],
+      "limits": "This crosswalk resolves only an explicitly named Pandacan, Manila locality. It does not imply a project point, barangay, sponsorship, or control."
+    },
+    {
+      "locality": "San Miguel",
+      "jurisdiction": "Manila",
+      "parentCity": "Manila",
+      "districtLabel": "6th District",
+      "level": "administrative_district",
+      "basis": "A Department of Education memorandum identifies a San Miguel school location as Manila District VI.",
+      "sources": [
+        "https://www.deped.gov.ph/wp-content/uploads/2018/10/DM_s2007_442.pdf"
+      ],
+      "limits": "This crosswalk resolves only an explicitly named San Miguel, Manila locality. It does not imply a project point, barangay, sponsorship, or control."
+    },
+    {
+      "locality": "Sta. Ana",
+      "jurisdiction": "Manila",
+      "parentCity": "Manila",
+      "districtLabel": "6th District",
+      "level": "administrative_district",
+      "basis": "A Department of Education memorandum identifies a Sta. Ana school location as Manila District VI.",
+      "sources": [
+        "https://www.deped.gov.ph/wp-content/uploads/2018/10/DM_s2007_442.pdf"
+      ],
+      "limits": "This crosswalk resolves only an explicitly named Sta. Ana, Manila locality. It does not imply a project point, barangay, sponsorship, or control."
     }
   ]
 }

@@ -16,7 +16,7 @@ from collections import defaultdict
 from pathlib import Path
 from ph_location_text import text_key, confirmed_name_key, place_key, geographic_title, barangay_key
 
-VERSION = "qualified-location-consensus-v7-admin-locality-crosswalk-bridge-district-v1"
+VERSION = "qualified-location-consensus-v7-admin-locality-crosswalk-bridge-district-authoritative-barangay-ncr-suffix-v1"
 
 
 def seat_key(value):
@@ -124,6 +124,20 @@ class GeographicAttribution:
                     self.administrative_localities[jurisdiction, locality].add(index)
                     self.administrative_locality_sources[jurisdiction, locality] = row
 
+        # Current city-published legislative barangay lists resolve a few
+        # known disagreements in the legacy/generated map crosswalks. These
+        # entries are exact-name overrides only; the source and limits travel
+        # with every resulting assignment.
+        self.authoritative_barangays = defaultdict(dict)
+        authoritative_file = data_root / "congress_barangay_district_overrides.json"
+        if authoritative_file.exists():
+            for jurisdiction, detail in json.loads(authoritative_file.read_text()).get("jurisdictions", {}).items():
+                jurisdiction = text_key(jurisdiction)
+                for name, row in detail.get("barangays", {}).items():
+                    seat = seat_key(row.get("districtLabel", ""))
+                    if (jurisdiction, seat) in self.seats and barangay_key(name):
+                        self.authoritative_barangays[jurisdiction][barangay_key(name)] = row
+
         self.inventory_context = {}
         self.bridge_district_contexts = {}
         self.inventory_context_status = 'not_available'
@@ -172,7 +186,8 @@ class GeographicAttribution:
         if self.roster[city] == {"lone"}:
             return [self.seats[city, "lone"]], [], [dict(level="city", name=city, basis="Explicit single-seat city location")]
         a, b = self.primary_barangays[city], self.alternate_barangays[city]
-        if not b or set().union(*b.values()) != self.roster[city]:
+        if ((not b or set().union(*b.values()) != self.roster[city])
+                and not self.authoritative_barangays[city]):
             return [], ["City barangay crosswalk does not cover all roster districts"], []
         evidence, indices, reasons = [], [], []
         # Only explicitly identified barangays qualify. Section/road/river names
@@ -188,6 +203,23 @@ class GeographicAttribution:
                 suffix = canonical + suffix[len(head):]
             hits = [(name, seat) for name, seat in b.items()
                     if re.match(re.escape(name) + r"(?=$|[,;()/]|\s*-|\s+and\s+(?:barangay|brgy)\b)", suffix)]
+            sourced = [(name, row) for name, row in self.authoritative_barangays[city].items()
+                       if re.match(re.escape(name) + r"(?=$|[,;()/]|\s*-|\s+and\s+(?:barangay|brgy)\b)", suffix)]
+            if sourced:
+                longest = max(len(name) for name, _ in sourced)
+                for name, row in sourced:
+                    if len(name) != longest:
+                        continue
+                    seat = seat_key(row.get("districtLabel", ""))
+                    if (city, seat) not in self.seats:
+                        reasons.append("Authoritative barangay seat absent from current roster")
+                        continue
+                    indices.append(self.seats[city, seat])
+                    evidence.append(dict(level="official legislative barangay crosswalk", name=name,
+                                         city=city, district=row.get("districtLabel"),
+                                         basis=row.get("basis"), sources=row.get("sources", []),
+                                         limit=row.get("limits")))
+                continue
             if not hits:
                 reasons.append("Explicit barangay has no exact city-qualified crosswalk entry")
                 continue
@@ -251,6 +283,13 @@ class GeographicAttribution:
     def _resolve_geographic(self, project):
         title, metadata = geographic_title(project.get("projectName", ""))
         components = [x.strip(" .") for x in title.split(",")]
+        # Some NCR project titles append the region after the city. Treat that
+        # terminal region label as context only when the immediately preceding
+        # complete field is itself an exact known city label.
+        if (len(components) > 1
+                and text_key(components[-1]) in {"metro manila", "national capital region", "ncr"}
+                and any(components[-2] in aliases for aliases in self.labels.values())):
+            components.pop()
         tail = components[-1]
         # A province and a city can share a bare roster/map label. A complete
         # locality + province field supplies province context without treating

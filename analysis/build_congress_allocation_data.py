@@ -35,6 +35,8 @@ MANILA_BARANGAY = re.compile(
     r"(?:\s*(?:to|[-–])\s*(\d{1,4}))?",
     re.I,
 )
+MANILA_FOURTH_DISTRICT_ZONE_RANGE = re.compile(r"\bzones?\s*41\s*(?:to|[-–])\s*57\b", re.I)
+MANILA_SIXTH_DISTRICT_ZONE_PAIR = re.compile(r"\bzones?\s*92\s*(?:&|and|,)\s*93\b", re.I)
 
 
 def _caloocan_barangay_district(title: str):
@@ -103,6 +105,18 @@ def _manila_barangay_seat(number: int):
         return "6th District"
     if 649 <= number <= 828:
         return "5th District"
+    return None
+
+
+def _manila_zone_district(title: str):
+    """Resolve only Manila zone groups with direct, corroborated district evidence."""
+    title = str(title or "")
+    if not re.search(r"\b(?:manila\s+city|city\s+of\s+manila)\b", title, re.I):
+        return None
+    if MANILA_FOURTH_DISTRICT_ZONE_RANGE.search(title):
+        return "4th District", [41, 57]
+    if MANILA_SIXTH_DISTRICT_ZONE_PAIR.search(title):
+        return "6th District", [92, 93]
     return None
 
 
@@ -347,21 +361,54 @@ def main() -> None:
                         "https://elibrary.judiciary.gov.ph/thebookshelf/showdocs/2/14424",
                     ],
                 })
-        manila = _manila_barangay_district(title)
-        if manila and not overrides.get(project.get("id"), {}).get("holdUnresolved"):
-            district_label, barangay_numbers = manila
-            index = next((i for i, seat in enumerate(seats)
-                          if _place_key(seat["province"]) in {_place_key("Manila"), _place_key("Manila City")}
-                          and seat["districtLabel"] == district_label), None)
-            if index is not None:
-                decision["indices"] = [index]
-                decision["reasons"] = []
-                decision["evidence"].append({
+        if not overrides.get(project.get("id"), {}).get("holdUnresolved"):
+            manila_barangay = _manila_barangay_district(title)
+            manila_zone = _manila_zone_district(title)
+            manila_clues = []
+            if manila_barangay:
+                district_label, barangay_numbers = manila_barangay
+                manila_clues.append((district_label, {
                     "level": "explicit numbered Manila barangay statutory crosswalk",
                     "barangayNumbers": barangay_numbers,
                     "basis": "Numbered barangay range follows the six Manila legislative-district ranges in Article VI, Section 2 of the 1987 Constitution.",
                     "sources": ["https://elibrary.judiciary.gov.ph/thebookshelf/showdocs/11/51975"],
-                })
+                }))
+            if manila_zone:
+                district_label, zone_numbers = manila_zone
+                if district_label == "4th District":
+                    zone_basis = "The title's fully stated Zones 41–57 span is District IV under the documented zone crosswalk; City Council resolutions independently identify sample zones within the span as District IV."
+                    zone_sources = [
+                        "https://doi.nrct.go.th/ListDoi/Download/583273?Resolve_DOI=10.14456%2Frjsh.2021.7",
+                        "https://citycouncilofmanila.com.ph/city_resolutions/page/21/",
+                        "https://citycouncilofmanila.com.ph/city_resolutions/page/23/",
+                    ]
+                else:
+                    zone_basis = "The title names both Zones 92 and 93; official City Council records identify both zones in District VI."
+                    zone_sources = [
+                        "https://citycouncilofmanila.com.ph/council_number/13th-city-council/page/7/",
+                        "https://citycouncilofmanila.com.ph/city_resolutions/page/26/",
+                    ]
+                manila_clues.append((district_label, {
+                    "level": "explicit Manila administrative-zone crosswalk",
+                    "zoneNumbers": zone_numbers,
+                    "basis": zone_basis,
+                    "sources": zone_sources,
+                }))
+            if manila_clues:
+                manila_districts = {label for label, _ in manila_clues}
+                index = next((i for i, seat in enumerate(seats)
+                              if _place_key(seat["province"]) in {_place_key("Manila"), _place_key("Manila City")}
+                              and seat["districtLabel"] in manila_districts), None)
+                if len(manila_districts) > 1 or (decision["indices"] and
+                                                  (index is None or decision["indices"] != [index])):
+                    decision["indices"] = []
+                    decision["reasons"] = sorted(set(decision["reasons"] + [
+                        "Manila district evidence conflicts; left unassigned pending review"
+                    ]))
+                elif index is not None:
+                    decision["indices"] = [index]
+                    decision["reasons"] = []
+                decision["evidence"].extend(evidence for _, evidence in manila_clues)
         coordinate_evidence = None
         held_unresolved = bool(overrides.get(project.get("id"), {}).get("holdUnresolved"))
         if not decision["indices"] and not held_unresolved:
@@ -412,9 +459,9 @@ def main() -> None:
         "extractionMethod": source.get("metadata", {}).get("extractionMethod", "local schedule extraction"),
         "sourceWarning": source.get("metadata", {}).get("warning", "Candidate extraction; check cited bill pages."),
         "unit": "pesos",
-        "attributionMethod": VERSION + "+city-jurisdiction-preserved-v1+caloocan-numbered-barangay-crosswalk-v1+manila-constitutional-numbered-barangay-crosswalk-v1",
+        "attributionMethod": VERSION + "+city-jurisdiction-preserved-v1+caloocan-numbered-barangay-crosswalk-v1+manila-constitutional-barangay-and-zone-crosswalk-v1",
         "inventoryLocationEvidenceStatus": geography.inventory_context_status,
-        "attributionWarning": "Conservative location-based coverage, not complete district budgets or evidence of a representative's sponsorship. Exact municipality + province fields require agreement between both local district maps. Multi-seat cities require explicitly named barangays and agreeing maps, with numbered Manila barangays assigned by their explicit statutory ranges in Article VI, Section 2 of the 1987 Constitution, and numbered Caloocan barangays assigned by current statutory crosswalks. Shared lines, conflicts and missing scope stay outside the ranking. For otherwise unresolved projects, a printed coordinate can support a district assignment only when the title names a locality, the point falls inside its matching DPWH boundary feature, and that feature identifies exactly one current roster seat. An exact bridge ID may also use the ArcGIS bridge record's listed DEO and CONG_DIST when that district maps uniquely to the current roster; conflicting title geography stays unresolved by this source. Coordinates and boundary classifications are not independently verified project locations. A zero means no accepted attribution, not no allocation.",
+        "attributionWarning": "Conservative location-based coverage, not complete district budgets or evidence of a representative's sponsorship. Exact municipality + province fields require agreement between both local district maps. Multi-seat cities require explicit location evidence: numbered Manila barangays use statutory ranges, Manila zones and named administrative localities use only cited crosswalks that identify one district, and numbered Caloocan barangays use current statutory crosswalks. Shared lines, conflicts and missing scope stay outside the ranking. For otherwise unresolved projects, a printed coordinate can support a district assignment only when the title names a locality, the point falls inside its matching DPWH boundary feature, and that feature identifies exactly one current roster seat. An exact bridge ID may also use the ArcGIS bridge record's listed DEO and CONG_DIST when that district maps uniquely to the current roster; conflicting title geography stays unresolved by this source. Coordinates and boundary classifications are not independently verified project locations. A zero means no accepted attribution, not no allocation.",
         "unresolvedReasons": [{"reason": k, **v} for k, v in sorted(unresolved_reasons.items(), key=lambda kv: -kv[1]["totalPesos"])],
         "summary": {
             "candidateLineItems": len(projects), "candidateTotalPesos": candidate_total,
