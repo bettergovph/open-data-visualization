@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="../css/tailwind.css?v=2173d9cc1d14">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Outside the Philippines · HGAB 3rd coordinates</title>
+  <meta name="description" content="HGAB 3rd-reading DPWH project title coordinates outside a broad Philippines coordinate envelope, with source project details.">
+  <style>
+    :root{color-scheme:light;--ink:#212121;--muted:#616161;--line:#dedede;--blue:#0038a8;--red:#ce1126;--gold:#fcd116;--paper:#fafafa}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    .outside-header{padding:22px clamp(16px,3vw,42px);background:#00246a;color:#fff;display:flex;align-items:center;gap:16px}.outside-header img{width:108px;max-height:27px;object-fit:contain;background:#fff;border-radius:4px;padding:3px}.outside-headcopy{min-width:0}.eyebrow{color:var(--gold);font-size:12px;font-weight:750;letter-spacing:.08em;text-transform:uppercase}.outside-header h1{margin:3px 0;font-size:clamp(25px,3vw,38px);line-height:1.1}.outside-header p{margin:6px 0 0;color:#f4f4f4}
+    main{width:100%;padding:24px clamp(14px,2vw,30px) 60px}.notice,.panel,.project{border:1px solid var(--line);border-radius:12px;background:#fff}.notice{padding:14px 16px;border-left:4px solid var(--gold);color:#484848}.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:16px 0}.stat{padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:white}.stat strong{display:block;color:var(--blue);font-size:clamp(22px,3vw,32px);line-height:1.15}.stat span{color:var(--muted);font-size:13px}
+    .toolbar{display:flex;align-items:center;gap:12px;margin:18px 0}.toolbar label{font-weight:700}.toolbar input{flex:1;min-width:180px;min-height:44px;padding:9px 12px;border:1px solid #aaa;border-radius:8px;font:inherit}.results{display:grid;gap:14px}.project{overflow:hidden}.project h2{margin:0;padding:16px 18px 8px;font-size:19px;line-height:1.35}.project-meta{display:flex;flex-wrap:wrap;gap:8px 16px;padding:0 18px 14px;color:var(--muted);font-size:13px}.project-meta strong{color:var(--ink)}.source-title{padding:0 18px 15px;font-size:14px}.coords{border-top:1px solid var(--line);padding:14px 18px}.coords h3{margin:0 0 8px;font-size:15px}.coord-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:8px;margin:0;padding:0;list-style:none}.coord{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;background:#f6f7f9;border:1px solid #e2e4e8;border-radius:8px}.coord code{font-size:13px;overflow-wrap:anywhere}.coord a{flex:none;color:var(--blue);font-weight:700;text-decoration:underline}.issue{margin-top:4px;color:#a10d1d;font-size:12px}.empty,.status{color:var(--muted);padding:16px}.source{margin-top:16px;padding:12px 15px;color:var(--muted);font-size:13px}.source a{color:var(--blue)}footer{padding:0 20px 24px;color:var(--muted);font-size:12px}
+    @media(max-width:650px){.outside-header{align-items:flex-start;flex-direction:column;gap:10px}.stats{grid-template-columns:1fr}.toolbar{align-items:stretch;flex-direction:column}.coord{align-items:flex-start;flex-direction:column}}
+  </style>
+</head>
+<body class="bettergov-research">
+  <header class="outside-header">
+    <a href="https://bettergov.ph/" aria-label="BetterGov home"><img src="https://assets.bettergov.ph/logos/webp/horizontal-black.webp" alt="BetterGov"></a>
+    <div class="outside-headcopy"><div class="eyebrow">BetterGov · HGAB 3rd-reading source review</div><h1>Coordinates outside the Philippines?</h1><p>Coordinate strings printed in HGAB 3rd-reading DPWH project titles that fall outside the Philippines screening envelope.</p></div>
+  </header>
+  <main>
+    <aside class="notice"><strong>How to read this list.</strong> This page checks coordinate pairs in the HGAB 3rd-reading DPWH schedule against a broad Philippines coordinate envelope: 4.4°–21.5° N and 116°–127.5° E. The envelope is a screening aid, not an exact national or maritime boundary. Coordinates are reproduced as printed; a mismatch may be a transcription or formatting error and does not establish where work occurred.</aside>
+    <section class="stats" aria-label="Coordinate screening totals"><div class="stat"><strong id="project-count">—</strong><span>HGAB project records</span></div><div class="stat"><strong id="coordinate-count">—</strong><span>Coordinate strings outside the envelope</span></div><div class="stat"><strong>HGAB 3rd</strong><span>Source stage</span></div></section>
+    <div class="toolbar"><label for="search">Find a project, office, page, or coordinate</label><input id="search" type="search" placeholder="Search project title or coordinate"></div>
+    <section id="results" class="results" aria-live="polite"><p class="status">Loading HGAB 3rd coordinate records…</p></section>
+    <aside class="source"><strong>Source:</strong> House Bill No. 10858, FY2027, 3rd-reading DPWH project schedule. Each card gives the source volume and PDF page from the extracted project record. <a href="outside-ph-data.json">Open parsed records ↗</a></aside>
+  </main>
+  <footer>Unlinked review page · not included in the report menu</footer>
+  <script>
+  (()=>{
+    const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const money=v=>'₱'+Number(v||0).toLocaleString('en-PH',{maximumFractionDigits:0});
+    const results=document.getElementById('results'),search=document.getElementById('search');let projects=[];
+    function render(){const q=search.value.trim().toLowerCase(),rows=projects.filter(p=>JSON.stringify([p.projectName,p.office,p.sourceVolume,p.sourcePage,...p.points.map(x=>x.raw)]).toLowerCase().includes(q));results.innerHTML=rows.length?rows.map(p=>'<article class="project"><h2>'+esc(p.projectName)+'</h2><div class="project-meta"><span><strong>'+money(p.amountPesos)+'</strong></span><span>'+esc(p.office||'Office not stated')+'</span><span>'+esc(p.region||'Region not stated')+'</span><span>'+esc(p.id)+'</span></div><div class="source-title"><strong>HGAB source:</strong> '+esc(p.sourceVolume)+' · PDF page '+esc(p.sourcePage)+'</div><section class="coords"><h3>'+p.points.length+' coordinate '+(p.points.length===1?'string':'strings')+' outside the envelope</h3><ul class="coord-list">'+p.points.map((point,i)=>'<li><div class="coord"><div><strong>Point '+(i+1)+'</strong><br><code>'+esc(point.raw)+'</code><div class="issue">'+esc(point.issue)+'</div></div><a target="_blank" rel="noopener" href="'+esc(point.mapUrl)+'">Map point ↗</a></div></li>').join('')+'</ul></section></article>').join(''):'<p class="empty">No projects match this search.</p>'}
+    search.addEventListener('input',render);
+    fetch('outside-ph-data.json?v=hgab3-outside-v1').then(r=>{if(!r.ok)throw Error('Could not load parsed HGAB source records.');return r.json()}).then(data=>{projects=data.projects||[];document.getElementById('project-count').textContent=Number(data.projectCount||0).toLocaleString('en-PH');document.getElementById('coordinate-count').textContent=Number(data.coordinateCount||0).toLocaleString('en-PH');render()}).catch(e=>{results.innerHTML='<p class="status">'+esc(e.message)+'</p>'});
+  })();
+  </script>
+</body>
+</html>
