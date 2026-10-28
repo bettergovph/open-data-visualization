@@ -318,6 +318,7 @@ def main() -> None:
     analyzed_total = 0
     analyzed_count = 0
     audit_rows = []
+    mixed_signal_project_ids = []
     unresolved_reasons = defaultdict(lambda: {"lineItems": 0, "totalPesos": 0})
     shared_source_amount = 0
     coordinate_assignments = 0
@@ -335,6 +336,9 @@ def main() -> None:
         analyzed_count += 1
         analyzed_total += amount
         decision = geography.resolve(project)
+        if any("conflicting DEO and CONG_DIST" in str(reason)
+               for reason in decision.get("reasons", [])):
+            mixed_signal_project_ids.append(str(project.get("id") or ""))
         if project.get("id") in overrides:
             extra = overrides[project["id"]]
             if extra["projectName"] != title or int(extra["amountPesos"]) != amount:
@@ -479,9 +483,10 @@ def main() -> None:
         "unit": "pesos",
         "attributionMethod": VERSION + "+city-jurisdiction-preserved-v1+caloocan-numbered-barangay-crosswalk-v1+manila-constitutional-barangay-and-zone-crosswalk-v1",
         "inventoryLocationEvidenceStatus": geography.inventory_context_status,
-        "attributionWarning": "Conservative location-based coverage, not complete district budgets or evidence of a representative's sponsorship. Exact municipality + province fields normally require agreement between both local district maps; exact localities listed in the sourced current-law / Senate district crosswalk may resolve map conflicts, and a province with one current rostered legislative district maps to that sole seat. Multi-seat cities require explicit location evidence: numbered Manila barangays use statutory ranges, Manila zones and named administrative localities use cited crosswalks that identify one district, and numbered Caloocan barangays use current statutory crosswalks. Shared lines, conflicts and missing scope stay outside the ranking. For otherwise unresolved projects, a printed coordinate can support a district assignment only when the title names a locality, the point falls inside its matching DPWH boundary feature, and that feature identifies exactly one current roster seat. An exact bridge ID may also use the ArcGIS bridge record's listed DEO and CONG_DIST when that district maps uniquely to the current roster; conflicting title geography stays unresolved by this source. Coordinates and boundary classifications are not independently verified project locations. A zero means no accepted attribution, not no allocation.",
+        "attributionWarning": "Conservative location-based coverage, not complete district budgets or evidence of a representative's sponsorship. Exact municipality + province fields normally require agreement between both local district maps; exact localities listed in the sourced current-law / Senate district crosswalk may resolve map conflicts, and a province with one current rostered legislative district maps to that sole seat. Multi-seat cities require explicit location evidence: numbered Manila barangays use statutory ranges, Manila zones and named administrative localities use cited crosswalks that identify one district, and numbered Caloocan barangays use current statutory crosswalks. Shared lines, conflicts and missing scope stay outside the ranking. For otherwise unresolved projects, a printed coordinate can support a district assignment only when the title names a locality, the point falls inside its matching DPWH boundary feature, and that feature identifies exactly one current roster seat. An exact bridge ID may use the ArcGIS record's CONG_DIST only when its paired DEO district does not conflict; mixed DEO/CONG_DIST records remain irreconcilable and unresolved. Coordinates and boundary classifications are not independently verified project locations. A zero means no accepted attribution, not no allocation.",
         "unresolvedReasons": [{"reason": k, **v} for k, v in sorted(unresolved_reasons.items(), key=lambda kv: -kv[1]["totalPesos"])],
         "unassignedByRegion": unassigned_by_region,
+        "mixedSignalProjectIds": mixed_signal_project_ids,
         "summary": {
             "candidateLineItems": len(projects), "candidateTotalPesos": candidate_total,
             "excludedScheduleLines": excluded_count, "excludedScheduleAmountPesos": excluded_total,
@@ -512,7 +517,7 @@ def main() -> None:
     if coordinate_assignments:
         output["attributionMethod"] += "+printed-coordinate-locality-boundary-v1"
     if geography.inventory_context_status == 'matching_dependencies':
-        output['attributionWarning'] += ' Additional qualified context comes from exact inventory assets checked wholly inside one municipality, then screened through current local maps. For exact bridge IDs, the ArcGIS record can supply a DEO and LEG roster match when title geography is unresolved; the DEO is not treated as a one-to-one LEG crosswalk. Inventory positions and source-listed districts are not proof of funded quantities or project sponsorship; borderline and conflicting locations remain unresolved.'
+        output['attributionWarning'] += ' Additional qualified context comes from exact inventory assets checked wholly inside one municipality, then screened through current local maps. For exact bridge IDs, the ArcGIS CONG_DIST may support assignment when title geography is unresolved only if its paired DEO district agrees; conflicting pairs remain irreconcilable and unresolved. Inventory positions and source-listed districts are not proof of funded quantities or project sponsorship; borderline and conflicting locations remain unresolved.'
     print(json.dumps(output["summary"], indent=2))
     if args.write:
         OUT_FILE.write_text(json.dumps(output, ensure_ascii=False, separators=(",", ":")) + "\n")

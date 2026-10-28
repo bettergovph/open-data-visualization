@@ -2,9 +2,10 @@
 
 This deliberately leaves incomplete or conflicting locations unresolved. It does
 not infer a legislative seat from a DEO number, a road name, or a unique token.
-An exact bridge ID may use the paired DEO and CONG_DIST fields in its ArcGIS
-bridge record when title geography is unresolved. Agreement between local maps
-is a screening rule, not official boundary proof.
+An exact bridge ID may use its ArcGIS CONG_DIST when title geography is
+unresolved, but a conflicting district in the paired DEO field leaves the row
+unresolved. Agreement between local maps is a screening rule, not official
+boundary proof.
 """
 from __future__ import annotations
 
@@ -16,12 +17,30 @@ from collections import defaultdict
 from pathlib import Path
 from ph_location_text import text_key, confirmed_name_key, place_key, geographic_title, barangay_key
 
-VERSION = "qualified-location-consensus-v8-official-province-locality-crosswalk"
+VERSION = "qualified-location-consensus-v9-official-province-locality-crosswalk+bridge-office-cong-dist-conflict-hold-v1"
 
 
 def seat_key(value):
     match = re.fullmatch(r"(lone|[1-9](?:st|nd|rd|th))(?: district)?", text_key(value))
     return match.group(1) if match else None
+
+
+def deo_seat_key(value):
+    """Return a district seat named in a DPWH DEO office label, if explicit."""
+    office = re.sub(r"\s+district engineering office$", "", text_key(value))
+    match = re.fullmatch(
+        r"(.+?)\s+(lone|first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|"
+        r"[1-9](?:st|nd|rd|th))",
+        office,
+    )
+    if not match:
+        return None
+    ordinal = {
+        "first": "1st", "second": "2nd", "third": "3rd", "fourth": "4th",
+        "fifth": "5th", "sixth": "6th", "seventh": "7th", "eighth": "8th",
+        "ninth": "9th",
+    }.get(match.group(2), match.group(2))
+    return text_key(match.group(1)), seat_key(ordinal)
 
 
 
@@ -286,22 +305,31 @@ class GeographicAttribution:
             result['evidence'].append({'basis':'Trailing station/coordinate metadata excluded from address matching only; original project title and construction scope retained','metadata':metadata})
         context = self.inventory_context.get(text_key(project.get('projectName', '')))
         bridge_context = self.bridge_district_contexts.get(text_key(project.get('projectName', '')))
+        bridge_conflict = False
         if bridge_context:
             expected = {(text_key(j), seat_key(s)) for j,s in bridge_context.get('seatKeys', [])}
             indices = {self.seats[pair] for pair in expected if pair in self.seats}
             if len(indices) == 1:
-                source_evidence = {'basis': 'Exact bridge ID links this project to an ArcGIS record that lists a DEO and CONG_DIST; the district label maps to one current LEG roster entry.',
+                deo_seat = deo_seat_key(bridge_context.get('deo', ''))
+                bridge_conflict = len(expected) == 1 and deo_seat is not None and deo_seat not in expected
+                source_evidence = {'basis': ('Exact bridge ID links this project to an ArcGIS record whose DEO district conflicts with its CONG_DIST; left irreconcilable and unresolved.'
+                                             if bridge_conflict else
+                                             'Exact bridge ID links this project to an ArcGIS record that lists a DEO and CONG_DIST; the district label maps to one current LEG roster entry.'),
                     'bridgeId': bridge_context.get('bridgeId'), 'arcgisObjectId': bridge_context.get('objectId'),
                     'arcgisDEO': bridge_context.get('deo'), 'arcgisCONG_DIST': bridge_context.get('congDist'),
                     'sourceRegion': bridge_context.get('region'), 'sourceMunicipality': bridge_context.get('municipality'),
                     'sourceProvince': bridge_context.get('province'),
                     'limit': 'The DEO may cover multiple legislative districts. This is a bridge-record association, not proof of sponsorship or the funded work extent.'}
-                if result['indices']:
+                if bridge_conflict:
+                    result = {'indices': [], 'reasons': [
+                        'Exact bridge record has conflicting DEO and CONG_DIST district labels; left irreconcilable pending review'
+                    ], 'evidence': [source_evidence]}
+                elif result['indices']:
                     source_evidence['comparison'] = 'agrees_with_title_geography' if set(result['indices']) == indices else 'conflicts_with_title_geography; title-based result retained'
                     result['evidence'].append(source_evidence)
                 else:
                     result = {'indices': sorted(indices), 'reasons': [], 'evidence': [source_evidence]}
-        if not result['indices'] and context:
+        if not result['indices'] and context and not bridge_conflict:
             # Recheck screened asset locations through current maps. Never copy
             # old LEG polygon labels or stored representative names.
             located = self._resolve_geographic({'projectName': context['contextTitle']})
