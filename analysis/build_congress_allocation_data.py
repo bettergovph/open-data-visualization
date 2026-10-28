@@ -62,9 +62,10 @@ def _antipolo_barangay_district(title: str):
     named_districts = set()
     for district, barangays in ANTIPOLO_BARANGAYS.items():
         for barangay in barangays:
+            barangay_pattern = r"[\s.]+".join(re.escape(part) for part in barangay.split())
             pattern = re.compile(
                 r"\b(?:barangays?|brgys?\.?|bgys?\.?|bgy\.?)\s+"
-                + re.escape(barangay).replace(r"\ ", r"\s+")
+                + barangay_pattern
                 + r"\b",
                 re.I,
             )
@@ -553,7 +554,7 @@ def main() -> None:
         "extractionMethod": source.get("metadata", {}).get("extractionMethod", "local schedule extraction"),
         "sourceWarning": source.get("metadata", {}).get("warning", "Candidate extraction; check cited bill pages."),
         "unit": "pesos",
-        "attributionMethod": VERSION + "+city-jurisdiction-preserved-v1+caloocan-numbered-barangay-crosswalk-v1+manila-constitutional-barangay-and-zone-crosswalk-v1+antipolo-ra9232-barangay-crosswalk-v1+camarines-sur-ra9716-municipality-crosswalk-v1",
+        "attributionMethod": VERSION + "+city-jurisdiction-preserved-v1+caloocan-numbered-barangay-crosswalk-v1+manila-constitutional-barangay-and-zone-crosswalk-v1+antipolo-ra9232-barangay-crosswalk-v1+camarines-sur-ra9716-municipality-crosswalk-v1+negros-occidental-senate-2026-sagay-crosswalk-v1",
         "inventoryLocationEvidenceStatus": geography.inventory_context_status,
         "attributionWarning": "Conservative location-based coverage, not complete district budgets or evidence of a representative's sponsorship. Exact municipality + province fields normally require agreement between both local district maps; exact localities listed in sourced current-law crosswalks may resolve map conflicts, and a province with one current rostered legislative district maps to that sole seat. Camarines Sur municipalities follow the five-district composition in RA 9716; the former fourth district was renamed the fifth. Multi-seat cities require explicit location evidence: numbered Manila barangays use statutory ranges, Manila zones and named administrative localities use cited crosswalks that identify one district, numbered Caloocan barangays use current statutory crosswalks, and Antipolo assignments require an explicitly named barangay or legislative district under RA 9232. Shared lines, conflicts and missing scope stay outside the ranking. For otherwise unresolved projects, a printed coordinate can support a district assignment only when the title names a locality, the point falls inside its matching DPWH boundary feature, and that feature identifies exactly one current roster seat. An exact bridge ID may use the ArcGIS record's CONG_DIST only when its paired DEO district does not conflict; mixed DEO/CONG_DIST records remain irreconcilable and unresolved. Coordinates and boundary classifications are not independently verified project locations. A zero means no accepted attribution, not no allocation.",
         "unresolvedReasons": [{"reason": k, **v} for k, v in sorted(unresolved_reasons.items(), key=lambda kv: -kv[1]["totalPesos"])],
