@@ -30,6 +30,11 @@ COORDINATE_PAIR = re.compile(r"(?<![\d.])([+-]?\d{1,3}\.\d+)\s*°?\s*[,;/]\s*([+
 ORDINALS = {"first":"1st", "second":"2nd", "third":"3rd", "fourth":"4th", "fifth":"5th",
             "sixth":"6th", "seventh":"7th", "eighth":"8th", "ninth":"9th", "tenth":"10th"}
 CALOOCAN_BARANGAY = re.compile(r"\b(?:barangay|brgy\.?|bgy\.?)\s*(?:no\.?\s*)?(\d{1,3})\b", re.I)
+MANILA_BARANGAY = re.compile(
+    r"\b(?:barangays?|brgys?\.?|bgys?\.?)\s*(?:nos?\.?\s*)?(\d{1,4})"
+    r"(?:\s*(?:to|[-–])\s*(\d{1,4}))?",
+    re.I,
+)
 
 
 def _caloocan_barangay_district(title: str):
@@ -46,6 +51,58 @@ def _caloocan_barangay_district(title: str):
         return "1st District", number
     if 5 <= number <= 76 or 86 <= number <= 131:
         return "2nd District", number
+    return None
+
+
+def _manila_barangay_district(title: str):
+    """Use Manila's constitutional numbered-barangay district boundaries."""
+    title = str(title or "")
+    if not re.search(r"\b(?:manila\s+city|city\s+of\s+manila)\b", title, re.I):
+        return None
+    matches = list(MANILA_BARANGAY.finditer(title))
+    if not matches:
+        return None
+
+    numbers = []
+    range_districts = set()
+    for match in matches:
+        first = int(match.group(1))
+        last = int(match.group(2) or first)
+        if not 1 <= first <= last <= 905:
+            return None
+        numbers.extend((first, last))
+        range_districts.update(
+            district for number in range(first, last + 1)
+            if (district := _manila_barangay_seat(number)) is not None
+        )
+        # Support compact lists such as “Barangays 175 and 180” without
+        # mistaking the following Zone number for another barangay.
+        tail = title[match.end():]
+        listed = re.match(r"\s+and\s+(\d{1,4})\b", tail, re.I)
+        if listed:
+            number = int(listed.group(1))
+            numbers.append(number)
+            range_districts.add(_manila_barangay_seat(number))
+
+    districts = range_districts | {_manila_barangay_seat(number) for number in numbers}
+    if len(districts) != 1 or None in districts:
+        return None
+    return next(iter(districts)), numbers
+
+
+def _manila_barangay_seat(number: int):
+    if 1 <= number <= 146:
+        return "1st District"
+    if 147 <= number <= 267:
+        return "2nd District"
+    if 268 <= number <= 394:
+        return "3rd District"
+    if 395 <= number <= 586:
+        return "4th District"
+    if 587 <= number <= 648 or 829 <= number <= 905:
+        return "6th District"
+    if 649 <= number <= 828:
+        return "5th District"
     return None
 
 
@@ -290,6 +347,21 @@ def main() -> None:
                         "https://elibrary.judiciary.gov.ph/thebookshelf/showdocs/2/14424",
                     ],
                 })
+        manila = _manila_barangay_district(title)
+        if manila and not overrides.get(project.get("id"), {}).get("holdUnresolved"):
+            district_label, barangay_numbers = manila
+            index = next((i for i, seat in enumerate(seats)
+                          if _place_key(seat["province"]) in {_place_key("Manila"), _place_key("Manila City")}
+                          and seat["districtLabel"] == district_label), None)
+            if index is not None:
+                decision["indices"] = [index]
+                decision["reasons"] = []
+                decision["evidence"].append({
+                    "level": "explicit numbered Manila barangay statutory crosswalk",
+                    "barangayNumbers": barangay_numbers,
+                    "basis": "Numbered barangay range follows the six Manila legislative-district ranges in Article VI, Section 2 of the 1987 Constitution.",
+                    "sources": ["https://elibrary.judiciary.gov.ph/thebookshelf/showdocs/11/51975"],
+                })
         coordinate_evidence = None
         held_unresolved = bool(overrides.get(project.get("id"), {}).get("holdUnresolved"))
         if not decision["indices"] and not held_unresolved:
@@ -340,9 +412,9 @@ def main() -> None:
         "extractionMethod": source.get("metadata", {}).get("extractionMethod", "local schedule extraction"),
         "sourceWarning": source.get("metadata", {}).get("warning", "Candidate extraction; check cited bill pages."),
         "unit": "pesos",
-        "attributionMethod": VERSION + "+city-jurisdiction-preserved-v1+caloocan-numbered-barangay-crosswalk-v1",
+        "attributionMethod": VERSION + "+city-jurisdiction-preserved-v1+caloocan-numbered-barangay-crosswalk-v1+manila-constitutional-numbered-barangay-crosswalk-v1",
         "inventoryLocationEvidenceStatus": geography.inventory_context_status,
-        "attributionWarning": "Conservative location-based coverage, not complete district budgets or evidence of a representative's sponsorship. Exact municipality + province fields require agreement between both local district maps. Multi-seat cities require explicitly named barangays and agreeing maps. Shared lines, conflicts and missing scope stay outside the ranking. For otherwise unresolved projects, a printed coordinate can support a district assignment only when the title names a locality, the point falls inside its matching DPWH boundary feature, and that feature identifies exactly one current roster seat. An exact bridge ID may also use the ArcGIS bridge record's listed DEO and CONG_DIST when that district maps uniquely to the current roster; conflicting title geography stays unresolved by this source. Coordinates and boundary classifications are not independently verified project locations. A zero means no accepted attribution, not no allocation.",
+        "attributionWarning": "Conservative location-based coverage, not complete district budgets or evidence of a representative's sponsorship. Exact municipality + province fields require agreement between both local district maps. Multi-seat cities require explicitly named barangays and agreeing maps, with numbered Manila barangays assigned by their explicit statutory ranges in Article VI, Section 2 of the 1987 Constitution, and numbered Caloocan barangays assigned by current statutory crosswalks. Shared lines, conflicts and missing scope stay outside the ranking. For otherwise unresolved projects, a printed coordinate can support a district assignment only when the title names a locality, the point falls inside its matching DPWH boundary feature, and that feature identifies exactly one current roster seat. An exact bridge ID may also use the ArcGIS bridge record's listed DEO and CONG_DIST when that district maps uniquely to the current roster; conflicting title geography stays unresolved by this source. Coordinates and boundary classifications are not independently verified project locations. A zero means no accepted attribution, not no allocation.",
         "unresolvedReasons": [{"reason": k, **v} for k, v in sorted(unresolved_reasons.items(), key=lambda kv: -kv[1]["totalPesos"])],
         "summary": {
             "candidateLineItems": len(projects), "candidateTotalPesos": candidate_total,
