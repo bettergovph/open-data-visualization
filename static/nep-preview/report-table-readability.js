@@ -149,9 +149,9 @@ function updateProjectTable(table,header,rows){
  });
  if(!titleIndexes.length)return;
  let group=table.querySelector(':scope > colgroup.report-project-colgroup');
- if(!group){group=document.createElement('colgroup');group.className='report-project-colgroup';table.insertBefore(group,table.firstChild)}
+ if(!group){group=table.querySelector(':scope > colgroup');if(group)group.classList.add('report-project-colgroup');else{group=document.createElement('colgroup');group.className='report-project-colgroup';table.insertBefore(group,table.firstChild)}}
  if(group.children.length!==header.cells.length){group.replaceChildren(...[...header.cells].map(()=>document.createElement('col')))}
- const titleShare=66;
+ const titleShare=Math.max(50,Math.min(85,Number(table.dataset.reportPrimaryTitleShare)||66));
  const metaIndexes=[...visible].filter(index=>index!==titleIndexes[0]);
  const metaWidths=metaIndexes.map(index=>Math.max(5,normalize(header.cells[index].textContent).length,...rows.map(row=>row.cells.length===header.cells.length?Math.min(40,cellText(row.cells[index]).length):0)));
  const metaTotal=metaWidths.reduce((a,b)=>a+b,0)||metaWidths.length;
