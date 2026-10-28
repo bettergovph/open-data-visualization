@@ -29,6 +29,24 @@ DISTRICT_LABELS["9th"] = "9th District"
 COORDINATE_PAIR = re.compile(r"(?<![\d.])([+-]?\d{1,3}\.\d+)\s*°?\s*[,;/]\s*([+-]?\d{1,3}\.\d+)(?![\d.])")
 ORDINALS = {"first":"1st", "second":"2nd", "third":"3rd", "fourth":"4th", "fifth":"5th",
             "sixth":"6th", "seventh":"7th", "eighth":"8th", "ninth":"9th", "tenth":"10th"}
+CALOOCAN_BARANGAY = re.compile(r"\b(?:barangay|brgy\.?|bgy\.?)\s*(?:no\.?\s*)?(\d{1,3})\b", re.I)
+
+
+def _caloocan_barangay_district(title: str):
+    """Use Caloocan's current statutory numbered-barangay district split."""
+    if "caloocan" not in str(title or "").casefold():
+        return None
+    match = CALOOCAN_BARANGAY.search(title)
+    if not match:
+        return None
+    number = int(match.group(1))
+    if 178 <= number <= 188:
+        return "3rd District", number
+    if number in {1, 2, 3, 4} or 77 <= number <= 85 or 132 <= number <= 177:
+        return "1st District", number
+    if 5 <= number <= 76 or 86 <= number <= 131:
+        return "2nd District", number
+    return None
 
 
 def _title_point(title: str):
@@ -149,9 +167,15 @@ def _coordinate_district(project, features, seat_indices):
     if not parsed:
         return None
     ordinal=ORDINALS.get(parsed.group(2).casefold(),parsed.group(2).casefold())
-    jurisdiction=re.sub(r"\s+City$", "", parsed.group(1), flags=re.I).strip()
+    # Preserve a separately rostered city seat when the boundary layer names
+    # one (for example Quezon City vs Quezon Province). Strip "City" only as
+    # a fallback for a jurisdiction that has no city-specific roster seat.
+    jurisdiction=parsed.group(1).strip()
     district_label=f"{ordinal} District" if ordinal!="lone" else "Lone District"
     index=seat_indices.get((_place_key(jurisdiction),district_label))
+    if index is None:
+        jurisdiction=re.sub(r"\s+City$", "", jurisdiction, flags=re.I).strip()
+        index=seat_indices.get((_place_key(jurisdiction),district_label))
     if index is None:
         return None
     matching_localities=sorted({str(feature["locality"]) for feature in matches})
@@ -248,6 +272,24 @@ def main() -> None:
             if extra.get("holdUnresolved"):
                 decision["indices"] = []
                 decision["reasons"] = sorted(set(decision["reasons"] + extra["reasons"]))
+        caloocan = _caloocan_barangay_district(title)
+        if caloocan and not overrides.get(project.get("id"), {}).get("holdUnresolved"):
+            district_label, barangay_number = caloocan
+            index = next((i for i, seat in enumerate(seats)
+                          if _place_key(seat["province"]) in {_place_key("Caloocan"), _place_key("Caloocan City")}
+                          and seat["districtLabel"] == district_label), None)
+            if index is not None:
+                decision["indices"] = [index]
+                decision["reasons"] = []
+                decision["evidence"].append({
+                    "level": "explicit numbered Caloocan barangay statutory crosswalk",
+                    "barangayNumber": barangay_number,
+                    "basis": "Project title names a numbered Caloocan barangay; the current district split is set by RA 11545 and RA 6714.",
+                    "sources": [
+                        "https://elibrary.judiciary.gov.ph/thebookshelf/showdocs/2/93190",
+                        "https://elibrary.judiciary.gov.ph/thebookshelf/showdocs/2/14424",
+                    ],
+                })
         coordinate_evidence = None
         held_unresolved = bool(overrides.get(project.get("id"), {}).get("holdUnresolved"))
         if not decision["indices"] and not held_unresolved:
@@ -298,7 +340,7 @@ def main() -> None:
         "extractionMethod": source.get("metadata", {}).get("extractionMethod", "local schedule extraction"),
         "sourceWarning": source.get("metadata", {}).get("warning", "Candidate extraction; check cited bill pages."),
         "unit": "pesos",
-        "attributionMethod": VERSION,
+        "attributionMethod": VERSION + "+city-jurisdiction-preserved-v1+caloocan-numbered-barangay-crosswalk-v1",
         "inventoryLocationEvidenceStatus": geography.inventory_context_status,
         "attributionWarning": "Conservative location-based coverage, not complete district budgets or evidence of a representative's sponsorship. Exact municipality + province fields require agreement between both local district maps. Multi-seat cities require explicitly named barangays and agreeing maps. Shared lines, conflicts and missing scope stay outside the ranking. For otherwise unresolved projects, a printed coordinate can support a district assignment only when the title names a locality, the point falls inside its matching DPWH boundary feature, and that feature identifies exactly one current roster seat. An exact bridge ID may also use the ArcGIS bridge record's listed DEO and CONG_DIST when that district maps uniquely to the current roster; conflicting title geography stays unresolved by this source. Coordinates and boundary classifications are not independently verified project locations. A zero means no accepted attribution, not no allocation.",
         "unresolvedReasons": [{"reason": k, **v} for k, v in sorted(unresolved_reasons.items(), key=lambda kv: -kv[1]["totalPesos"])],
