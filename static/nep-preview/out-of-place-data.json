@@ -1,6 +1,6 @@
 {
   "title": "Coordinate-bearing DEO/LEG projects in the HGAB 3rd-reading DPWH schedule",
-  "count": 171,
+  "count": 176,
   "method": "Includes project rows whose title, office, or source text contains DEO/LEG text, or is listed in the MPB coordinate audit, and whose title contains exactly one unambiguous decimal coordinate pair within the Philippines. Coordinates are plotted as printed; the point itself does not establish the intended administrative district or prove an error.",
   "source": {
     "file": "hb10858_3rd_dpwh_projects.json",
@@ -13,6 +13,252 @@
     "note": "Counterpart and repeated-amount flags are review signals; exact repeated allocations are not construction unit prices."
   },
   "projects": [
+    {
+      "id": "HB10858-3-0328-004040",
+      "projectName": "Upgrading of Balete Pumping Station, Manila City (14.587813, 120.987103)",
+      "office": "South Manila District Engineering Office",
+      "amountPesos": 50000000,
+      "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf",
+      "sourcePage": 328,
+      "coordinateRaw": "14.587813, 120.987103",
+      "latitude": 14.587813,
+      "longitude": 120.987103,
+      "coordinateStatus": "Usable printed point",
+      "coordinateOrientation": "latitude, longitude",
+      "province": null,
+      "officeAssignmentChange": {
+        "hgabProjectId": "HB10858-3-0328-004040",
+        "title": "Upgrading of Balete Pumping Station, Manila City (14.587813, 120.987103)",
+        "nepOffice": "Central Office",
+        "hgabOffice": "South Manila District Engineering Office",
+        "nepPage": 350,
+        "hgabPage": 328,
+        "nepAmountPesos": 150000000,
+        "hgabAmountPesos": 50000000,
+        "status": "exact_candidate",
+        "confidence": 1,
+        "coordinatePairPrinted": true,
+        "mapUrl": "out-of-place.html?project=HB10858-3-0328-004040"
+      },
+      "nepComparison": {
+        "status": "Exact normalized title found in NEP",
+        "title": "Upgrading of Balete Pumping Station, Manila City (14.587813, 120.987103)",
+        "amountPesos": 150000000,
+        "allocationDeltaPesos": -100000000
+      },
+      "analysisFlags": [
+        {
+          "label": "Allocation decrease: 100,000,000 pesos",
+          "detail": "Compared with the current NEP counterpart amount of ₱150,000,000."
+        },
+        {
+          "label": "Implementing office changed between NEP and HGAB",
+          "detail": "NEP: Central Office → HGAB 3rd: South Manila District Engineering Office. CSIIIV comparison status: exact_candidate."
+        },
+        {
+          "label": "Repeated allocation amount · 113 projects",
+          "detail": "₱50,000,000 also appears in Construction/ Maintenance of Flood Mitigation Structures and Drainage Systems across 41 offices in HGAB 3rd. These are project allocations, not comparable unit prices."
+        }
+      ],
+      "geographicAttributionStatus": "unique",
+      "districts": [
+        "Manila · 5th District"
+      ],
+      "representativeCards": [
+        {
+          "district": "Manila · 5th District",
+          "name": "Irwin Tieng",
+          "officialName": "Tieng, Irwin C.",
+          "resolutionStatus": "resolved",
+          "profileUrl": "https://www.congress.gov.ph/house-members/view/F092",
+          "photoUrl": "https://raw.githubusercontent.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS/ff0f7485ec4b97f92fa627eb1128e9871cc980bf/DEO2LEG/legislative_profiles/photos/tieng-irwin-c.jpg",
+          "candidates": []
+        }
+      ],
+      "geographicEvidence": [
+        {
+          "basis": "Trailing station/coordinate metadata excluded from address matching only; original project title and construction scope retained",
+          "metadata": [
+            "(14.587813, 120.987103)"
+          ]
+        },
+        {
+          "level": "printed-coordinate boundary match",
+          "localities": [
+            "Ermita"
+          ],
+          "district": "Manila City (Fifth District)",
+          "coordinate": "14.587813, 120.987103",
+          "boundarySource": "DPWH ArcGIS City-Municipal Boundaries",
+          "basis": "Unique district polygon containing the printed point; a matching locality name appears in the project title"
+        }
+      ],
+      "shareSlug": "upgrading-of-balete-pumping-station-manila-city-14-5-9f479e9e",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/upgrading-of-balete-pumping-station-manila-city-14-5-9f479e9e.png?v=68a5a24fc89f",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/upgrading-of-balete-pumping-station-manila-city-14-5-9f479e9e.html?v=68a5a24fc89f",
+      "interactivePage": "../out-of-place.html?project=HB10858-3-0328-004040"
+    },
+    {
+      "id": "HB10858-3-0374-004910",
+      "projectName": "Construction of Water Supply, Barangay Batiawan,Subic Zambales (14.931408, 120.411770)",
+      "office": "Central Office",
+      "amountPesos": 60000000,
+      "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf",
+      "sourcePage": 374,
+      "coordinateRaw": "14.931408, 120.411770",
+      "latitude": 14.931408,
+      "longitude": 120.41177,
+      "coordinateStatus": "Usable printed point",
+      "coordinateOrientation": "latitude, longitude",
+      "province": "ZAMBALES",
+      "officeAssignmentChange": {
+        "hgabProjectId": "HB10858-3-0374-004910",
+        "title": "Construction of Water Supply, Barangay Batiawan,Subic Zambales (14.931408, 120.411770)",
+        "nepOffice": "Zambales 2nd District Engineering Office",
+        "hgabOffice": "Central Office",
+        "nepPage": 411,
+        "hgabPage": 374,
+        "nepAmountPesos": 40000000,
+        "hgabAmountPesos": 60000000,
+        "status": "exact_candidate",
+        "confidence": 1,
+        "coordinatePairPrinted": true,
+        "mapUrl": "out-of-place.html?project=HB10858-3-0374-004910"
+      },
+      "nepComparison": {
+        "status": "Exact normalized title found in NEP",
+        "title": "Construction of Water Supply, Barangay Batiawan, Subic Zambales (14.931408, 120.411770)",
+        "amountPesos": 40000000,
+        "allocationDeltaPesos": 20000000
+      },
+      "analysisFlags": [
+        {
+          "label": "Allocation increase: 20,000,000 pesos",
+          "detail": "Compared with the current NEP counterpart amount of ₱40,000,000."
+        },
+        {
+          "label": "Implementing office changed between NEP and HGAB",
+          "detail": "NEP: Zambales 2nd District Engineering Office → HGAB 3rd: Central Office. CSIIIV comparison status: exact_candidate."
+        }
+      ],
+      "geographicAttributionStatus": "unique",
+      "districts": [
+        "Zambales · 1st District"
+      ],
+      "representativeCards": [
+        {
+          "district": "Zambales · 1st District",
+          "name": "Jay Khonghun",
+          "officialName": "Khonghun, Jefferson F.",
+          "resolutionStatus": "resolved",
+          "profileUrl": "https://www.congress.gov.ph/house-members/view/H038",
+          "photoUrl": "https://raw.githubusercontent.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS/ff0f7485ec4b97f92fa627eb1128e9871cc980bf/DEO2LEG/legislative_profiles/photos/khonghun-jefferson-f.jpg",
+          "candidates": []
+        }
+      ],
+      "geographicEvidence": [
+        {
+          "basis": "Trailing station/coordinate metadata excluded from address matching only; original project title and construction scope retained",
+          "metadata": [
+            "(14.931408, 120.411770)"
+          ]
+        },
+        {
+          "level": "printed-coordinate boundary match",
+          "localities": [
+            "Subic"
+          ],
+          "district": "Zambales (First District)",
+          "coordinate": "14.931408, 120.411770",
+          "boundarySource": "DPWH ArcGIS City-Municipal Boundaries",
+          "basis": "Unique district polygon containing the printed point; a matching locality name appears in the project title"
+        }
+      ],
+      "shareSlug": "construction-of-water-supply-barangay-batiawan-subic-15d54a06",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-water-supply-barangay-batiawan-subic-15d54a06.png?v=6a2609ce2e6a",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-water-supply-barangay-batiawan-subic-15d54a06.html?v=6a2609ce2e6a",
+      "interactivePage": "../out-of-place.html?project=HB10858-3-0374-004910"
+    },
+    {
+      "id": "HB10858-3-0374-004911",
+      "projectName": "Construction of Solar Water System in Barangay Salaza, Garreta and Bulawen, Palauig, Zambales 15.455430, 119.956124",
+      "office": "Central Office",
+      "amountPesos": 50000000,
+      "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf",
+      "sourcePage": 374,
+      "coordinateRaw": "15.455430, 119.956124",
+      "latitude": 15.45543,
+      "longitude": 119.956124,
+      "coordinateStatus": "Usable printed point",
+      "coordinateOrientation": "latitude, longitude",
+      "province": "ZAMBALES",
+      "officeAssignmentChange": {
+        "hgabProjectId": "HB10858-3-0374-004911",
+        "title": "Construction of Solar Water System in Barangay Salaza, Garreta and Bulawen, Palauig, Zambales 15.455430, 119.956124",
+        "nepOffice": "Zambales 1st District Engineering Office",
+        "hgabOffice": "Central Office",
+        "nepPage": 411,
+        "hgabPage": 374,
+        "nepAmountPesos": 30000000,
+        "hgabAmountPesos": 50000000,
+        "status": "exact_candidate",
+        "confidence": 1,
+        "coordinatePairPrinted": true,
+        "mapUrl": "out-of-place.html?project=HB10858-3-0374-004911"
+      },
+      "nepComparison": {
+        "status": "Exact normalized title found in NEP",
+        "title": "Construction of Solar Water System in Barangay Salaza, Garreta and Bulawen, Palauig, Zambales 15.455430, 119.956124",
+        "amountPesos": 30000000,
+        "allocationDeltaPesos": 20000000
+      },
+      "analysisFlags": [
+        {
+          "label": "Allocation increase: 20,000,000 pesos",
+          "detail": "Compared with the current NEP counterpart amount of ₱30,000,000."
+        },
+        {
+          "label": "Implementing office changed between NEP and HGAB",
+          "detail": "NEP: Zambales 1st District Engineering Office → HGAB 3rd: Central Office. CSIIIV comparison status: exact_candidate."
+        },
+        {
+          "label": "Repeated allocation amount · 8 projects",
+          "detail": "₱50,000,000 also appears in Water Supply System across 7 offices in HGAB 3rd. These are project allocations, not comparable unit prices."
+        }
+      ],
+      "geographicAttributionStatus": "unique",
+      "districts": [
+        "Zambales · 2nd District"
+      ],
+      "representativeCards": [
+        {
+          "district": "Zambales · 2nd District",
+          "name": "Bing Maniquiz",
+          "officialName": "Maniquiz, Doris \"Nanay Bing\" E.",
+          "resolutionStatus": "resolved",
+          "profileUrl": "https://www.congress.gov.ph/house-members/view/K050",
+          "photoUrl": "https://raw.githubusercontent.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS/ff0f7485ec4b97f92fa627eb1128e9871cc980bf/DEO2LEG/legislative_profiles/photos/maniquiz-doris-nanay-bing-e.jpg",
+          "candidates": [],
+          "cachedPhotoUrl": "out-of-place-share/representative-6b5d90caee36b5b0.png"
+        }
+      ],
+      "geographicEvidence": [
+        {
+          "level": "printed-coordinate boundary match",
+          "localities": [
+            "Palauig"
+          ],
+          "district": "Zambales (Second District)",
+          "coordinate": "15.455430, 119.956124",
+          "boundarySource": "DPWH ArcGIS City-Municipal Boundaries",
+          "basis": "Unique district polygon containing the printed point; a matching locality name appears in the project title"
+        }
+      ],
+      "shareSlug": "construction-of-solar-water-system-in-barangay-salaz-029052a8",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-solar-water-system-in-barangay-salaz-029052a8.png?v=1a64434dd656",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-solar-water-system-in-barangay-salaz-029052a8.html?v=1a64434dd656",
+      "interactivePage": "../out-of-place.html?project=HB10858-3-0374-004911"
+    },
     {
       "id": "HB10858-3-0632-010282",
       "projectName": "Construction of Rosales Multi-Purpose Building, Barangay Tomana West, Rosales, Pangasinan, 15.72833333, 120.6166667",
@@ -75,8 +321,8 @@
         }
       ],
       "shareSlug": "construction-of-rosales-multi-purpose-building-baran-654650bc",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-rosales-multi-purpose-building-baran-654650bc.png?v=ccb5a46c7487",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-rosales-multi-purpose-building-baran-654650bc.html?v=ccb5a46c7487",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-rosales-multi-purpose-building-baran-654650bc.png?v=8bd0d26011e6",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-rosales-multi-purpose-building-baran-654650bc.html?v=8bd0d26011e6",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0632-010282"
     },
     {
@@ -136,8 +382,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-pupose-building-bir-revenue-di-d4daa5aa",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-pupose-building-bir-revenue-di-d4daa5aa.png?v=a58a36691454",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-pupose-building-bir-revenue-di-d4daa5aa.html?v=a58a36691454",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-pupose-building-bir-revenue-di-d4daa5aa.png?v=10246f0ca621",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-pupose-building-bir-revenue-di-d4daa5aa.html?v=10246f0ca621",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0635-010349"
     },
     {
@@ -206,8 +452,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-barangay-sing-27721012",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-sing-27721012.png?v=21f8a87cb794",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-sing-27721012.html?v=21f8a87cb794",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-sing-27721012.png?v=10883ccae113",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-sing-27721012.html?v=10883ccae113",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0643-010457"
     },
     {
@@ -276,8 +522,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-covered-court-56b64d92",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-covered-court-56b64d92.png?v=c3facf5d3a18",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-covered-court-56b64d92.html?v=c3facf5d3a18",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-covered-court-56b64d92.png?v=ec67b92feb8b",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-covered-court-56b64d92.html?v=ec67b92feb8b",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0644-010479"
     },
     {
@@ -342,8 +588,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-barangay-pobl-9b3cefe8",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-pobl-9b3cefe8.png?v=990a66e2cd50",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-pobl-9b3cefe8.html?v=990a66e2cd50",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-pobl-9b3cefe8.png?v=e6d25ec5bf29",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-pobl-9b3cefe8.html?v=e6d25ec5bf29",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0647-010549"
     },
     {
@@ -412,8 +658,8 @@
         }
       ],
       "shareSlug": "completion-of-multi-purpose-building-barangay-poblac-5cce900c",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/completion-of-multi-purpose-building-barangay-poblac-5cce900c.png?v=72997d12aa8f",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/completion-of-multi-purpose-building-barangay-poblac-5cce900c.html?v=72997d12aa8f",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/completion-of-multi-purpose-building-barangay-poblac-5cce900c.png?v=ce8856bdb9ee",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/completion-of-multi-purpose-building-barangay-poblac-5cce900c.html?v=ce8856bdb9ee",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0648-010559"
     },
     {
@@ -482,8 +728,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-barangay-dima-c23c0543",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-dima-c23c0543.png?v=1017646e474e",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-dima-c23c0543.html?v=1017646e474e",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-dima-c23c0543.png?v=af8abe2a0152",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-dima-c23c0543.html?v=af8abe2a0152",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0648-010561"
     },
     {
@@ -552,8 +798,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-barangay-biab-b1cc641a",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-biab-b1cc641a.png?v=b3a8bdfaa540",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-biab-b1cc641a.html?v=b3a8bdfaa540",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-biab-b1cc641a.png?v=529e6c9d36f0",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-biab-b1cc641a.html?v=529e6c9d36f0",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0648-010562"
     },
     {
@@ -622,8 +868,8 @@
         }
       ],
       "shareSlug": "completion-of-multi-purpose-building-barangay-easter-c121a0cd",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/completion-of-multi-purpose-building-barangay-easter-c121a0cd.png?v=0e7efc9e01dc",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/completion-of-multi-purpose-building-barangay-easter-c121a0cd.html?v=0e7efc9e01dc",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/completion-of-multi-purpose-building-barangay-easter-c121a0cd.png?v=336385e2de56",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/completion-of-multi-purpose-building-barangay-easter-c121a0cd.html?v=336385e2de56",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0648-010563"
     },
     {
@@ -677,8 +923,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-barangay-bala-9e6e9357",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-bala-9e6e9357.png?v=aa058ac080a0",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-bala-9e6e9357.html?v=aa058ac080a0",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-bala-9e6e9357.png?v=8c1303a6af99",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-bala-9e6e9357.html?v=8c1303a6af99",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0649-010572"
     },
     {
@@ -747,8 +993,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-barangay-guim-564497c3",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-guim-564497c3.png?v=9fcc8ca3aa92",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-guim-564497c3.html?v=9fcc8ca3aa92",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-guim-564497c3.png?v=cd05ca4c3038",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-guim-564497c3.html?v=cd05ca4c3038",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0649-010574"
     },
     {
@@ -817,8 +1063,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-barangay-rapa-d4d60075",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-rapa-d4d60075.png?v=1e942c8e1d59",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-rapa-d4d60075.html?v=1e942c8e1d59",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-rapa-d4d60075.png?v=7412e0f6c870",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-rapa-d4d60075.html?v=7412e0f6c870",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0649-010575"
     },
     {
@@ -887,8 +1133,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-barangay-kadi-70b635e6",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-kadi-70b635e6.png?v=8106d86661a2",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-kadi-70b635e6.html?v=8106d86661a2",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-kadi-70b635e6.png?v=8182d43c7f31",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-kadi-70b635e6.html?v=8182d43c7f31",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0649-010582"
     },
     {
@@ -942,8 +1188,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-barangay-dila-4c0c6b4c",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-dila-4c0c6b4c.png?v=de0223e46999",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-dila-4c0c6b4c.html?v=de0223e46999",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-dila-4c0c6b4c.png?v=ed1031af5d3e",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-dila-4c0c6b4c.html?v=ed1031af5d3e",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0649-010585"
     },
     {
@@ -1012,8 +1258,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-barangay-tamp-450fa744",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-tamp-450fa744.png?v=e9fdf49f62e8",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-tamp-450fa744.html?v=e9fdf49f62e8",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-tamp-450fa744.png?v=b54bf4b830f6",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-tamp-450fa744.html?v=b54bf4b830f6",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0649-010586"
     },
     {
@@ -1082,8 +1328,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-buadi-parba-m-7e788306",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-buadi-parba-m-7e788306.png?v=6a8de6319928",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-buadi-parba-m-7e788306.html?v=6a8de6319928",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-buadi-parba-m-7e788306.png?v=651a55315674",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-buadi-parba-m-7e788306.html?v=651a55315674",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0649-010587"
     },
     {
@@ -1152,8 +1398,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-barangay-buad-766e2711",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-buad-766e2711.png?v=325f6970923e",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-buad-766e2711.html?v=325f6970923e",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-buad-766e2711.png?v=ae0b5855f91e",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-buad-766e2711.html?v=ae0b5855f91e",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0650-010588"
     },
     {
@@ -1222,8 +1468,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-covered-court-0236691b",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-covered-court-0236691b.png?v=08602d8d7aad",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-covered-court-0236691b.html?v=08602d8d7aad",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-covered-court-0236691b.png?v=f3950d6262bf",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-covered-court-0236691b.html?v=f3950d6262bf",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0664-010856"
     },
     {
@@ -1292,8 +1538,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-barangay-baru-8cccadbc",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-baru-8cccadbc.png?v=d03bde234770",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-baru-8cccadbc.html?v=d03bde234770",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-baru-8cccadbc.png?v=bf3d3c954a28",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-baru-8cccadbc.html?v=bf3d3c954a28",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0664-010867"
     },
     {
@@ -1362,8 +1608,8 @@
         }
       ],
       "shareSlug": "construction-completion-of-multi-purpose-building-co-eb4cafe9",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-co-eb4cafe9.png?v=45a4d12ed8c3",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-co-eb4cafe9.html?v=45a4d12ed8c3",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-co-eb4cafe9.png?v=e18e6aaf1458",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-co-eb4cafe9.html?v=e18e6aaf1458",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0665-010879"
     },
     {
@@ -1431,8 +1677,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-at-la-union-p-3ebdf5a7",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-at-la-union-p-3ebdf5a7.png?v=b636c9b42803",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-at-la-union-p-3ebdf5a7.html?v=b636c9b42803",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-at-la-union-p-3ebdf5a7.png?v=5e303c5b9a4c",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-at-la-union-p-3ebdf5a7.html?v=5e303c5b9a4c",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0677-011112"
     },
     {
@@ -1500,8 +1746,8 @@
         }
       ],
       "shareSlug": "construction-completion-of-multi-purpose-building-ba-3c6983e3",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-3c6983e3.png?v=4117ef90bdc2",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-3c6983e3.html?v=4117ef90bdc2",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-3c6983e3.png?v=f6b1e79569f7",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-3c6983e3.html?v=f6b1e79569f7",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0681-011196"
     },
     {
@@ -1569,8 +1815,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-barangay-pasi-b776569e",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-pasi-b776569e.png?v=41d76031f4c2",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-pasi-b776569e.html?v=41d76031f4c2",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-pasi-b776569e.png?v=323a531415bf",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-pasi-b776569e.html?v=323a531415bf",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0681-011201"
     },
     {
@@ -1638,8 +1884,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-barangay-bayo-8eb889c5",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-bayo-8eb889c5.png?v=9dd1ef1f5339",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-bayo-8eb889c5.html?v=9dd1ef1f5339",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-bayo-8eb889c5.png?v=be0de343bdc7",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-bayo-8eb889c5.html?v=be0de343bdc7",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0682-011205"
     },
     {
@@ -1707,8 +1953,8 @@
         }
       ],
       "shareSlug": "construction-completion-of-multi-purpose-building-ba-bef0da7a",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-bef0da7a.png?v=f9442129ad91",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-bef0da7a.html?v=f9442129ad91",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-bef0da7a.png?v=b860a7892775",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-bef0da7a.html?v=b860a7892775",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0685-011277"
     },
     {
@@ -1776,8 +2022,8 @@
         }
       ],
       "shareSlug": "construction-completion-of-multi-purpose-building-ba-e95f4aa6",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-e95f4aa6.png?v=391c2c9538de",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-e95f4aa6.html?v=391c2c9538de",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-e95f4aa6.png?v=d5e80a21c404",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-e95f4aa6.html?v=d5e80a21c404",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0685-011279"
     },
     {
@@ -1845,8 +2091,8 @@
         }
       ],
       "shareSlug": "construction-completion-of-multi-purpose-building-ba-a4ba2cf3",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-a4ba2cf3.png?v=4dc4ba09cad6",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-a4ba2cf3.html?v=4dc4ba09cad6",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-a4ba2cf3.png?v=8548ef5d90e5",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-a4ba2cf3.html?v=8548ef5d90e5",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0686-011294"
     },
     {
@@ -1914,8 +2160,8 @@
         }
       ],
       "shareSlug": "construction-completion-of-multi-purpose-building-ba-e78293b9",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-e78293b9.png?v=8aa5ec95fa9d",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-e78293b9.html?v=8aa5ec95fa9d",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-e78293b9.png?v=41a32e77e7a1",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-e78293b9.html?v=41a32e77e7a1",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0687-011304"
     },
     {
@@ -1983,8 +2229,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-at-barangay-p-e4a6b11a",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-at-barangay-p-e4a6b11a.png?v=584f666ab351",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-at-barangay-p-e4a6b11a.html?v=584f666ab351",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-at-barangay-p-e4a6b11a.png?v=08f72bd6e763",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-at-barangay-p-e4a6b11a.html?v=08f72bd6e763",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0687-011315"
     },
     {
@@ -2053,8 +2299,8 @@
         }
       ],
       "shareSlug": "construction-completion-of-multi-purpose-building-ba-dc5782ce",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-dc5782ce.png?v=59ab794e8bcf",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-dc5782ce.html?v=59ab794e8bcf",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-dc5782ce.png?v=95f2de0c263e",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-dc5782ce.html?v=95f2de0c263e",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0698-011527"
     },
     {
@@ -2189,8 +2435,8 @@
         }
       ],
       "shareSlug": "construction-of-evacuation-center-at-barangay-pilig-469ddd51",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-evacuation-center-at-barangay-pilig-469ddd51.png?v=2b7252452b1c",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-evacuation-center-at-barangay-pilig-469ddd51.html?v=2b7252452b1c",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-evacuation-center-at-barangay-pilig-469ddd51.png?v=2ad9d0be166d",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-evacuation-center-at-barangay-pilig-469ddd51.html?v=2ad9d0be166d",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0705-011672"
     },
     {
@@ -2259,8 +2505,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-barangay-saui-32ac087f",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-saui-32ac087f.png?v=60a58bc680f0",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-saui-32ac087f.html?v=60a58bc680f0",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-saui-32ac087f.png?v=6ab477a75dcb",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-saui-32ac087f.html?v=6ab477a75dcb",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0705-011675"
     },
     {
@@ -2325,8 +2571,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-barangay-tall-e4884144",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-tall-e4884144.png?v=18bafde8d49c",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-tall-e4884144.html?v=18bafde8d49c",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-tall-e4884144.png?v=a05882637920",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-tall-e4884144.html?v=a05882637920",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0705-011676"
     },
     {
@@ -2391,8 +2637,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-covered-court-1e0a1c5e",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-covered-court-1e0a1c5e.png?v=27478f52d6ab",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-covered-court-1e0a1c5e.html?v=27478f52d6ab",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-covered-court-1e0a1c5e.png?v=3eb6c0c4a9d4",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-covered-court-1e0a1c5e.html?v=3eb6c0c4a9d4",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0705-011682"
     },
     {
@@ -2457,8 +2703,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-multi-purpose-48bce301",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-multi-purpose-48bce301.png?v=5c91e8ba66e7",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-multi-purpose-48bce301.html?v=5c91e8ba66e7",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-multi-purpose-48bce301.png?v=4a4367b40ab0",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-multi-purpose-48bce301.html?v=4a4367b40ab0",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0705-011686"
     },
     {
@@ -2523,8 +2769,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-at-barangay-s-9d42c609",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-at-barangay-s-9d42c609.png?v=c0641966efb5",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-at-barangay-s-9d42c609.html?v=c0641966efb5",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-at-barangay-s-9d42c609.png?v=4ea03569852e",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-at-barangay-s-9d42c609.html?v=4ea03569852e",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0705-011687"
     },
     {
@@ -2589,8 +2835,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-of-barangay-p-53e1d6e3",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-of-barangay-p-53e1d6e3.png?v=d15284d81248",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-of-barangay-p-53e1d6e3.html?v=d15284d81248",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-of-barangay-p-53e1d6e3.png?v=73ca5762febf",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-of-barangay-p-53e1d6e3.html?v=73ca5762febf",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0705-011688"
     },
     {
@@ -2605,7 +2851,7 @@
       "longitude": 121.702639,
       "coordinateStatus": "Usable printed point",
       "coordinateOrientation": "latitude, longitude",
-      "province": "QUIRINO",
+      "province": "ISABELA",
       "nepComparison": {
         "status": "No plausible NEP title counterpart; review candidate",
         "title": "Construction of Multi-Purpose Building, Barangay San Juan, San Narciso, Zambales 15.003452, 120.095337",
@@ -2658,8 +2904,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-barangay-san-40749184",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-san-40749184.png?v=6eefa0b9b5cf",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-san-40749184.html?v=6eefa0b9b5cf",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-san-40749184.png?v=21d2e0dac917",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-san-40749184.html?v=21d2e0dac917",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0706-011701"
     },
     {
@@ -2727,8 +2973,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-barangay-cali-6f768e86",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-cali-6f768e86.png?v=68d2534cd098",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-cali-6f768e86.html?v=68d2534cd098",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-cali-6f768e86.png?v=3ce34987f3bd",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-cali-6f768e86.html?v=3ce34987f3bd",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0707-011710"
     },
     {
@@ -2797,8 +3043,8 @@
         }
       ],
       "shareSlug": "construction-completion-of-multi-purpose-building-is-d0730ab3",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-is-d0730ab3.png?v=0e04dd4acc03",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-is-d0730ab3.html?v=0e04dd4acc03",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-is-d0730ab3.png?v=4b1e322214ab",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-is-d0730ab3.html?v=4b1e322214ab",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0709-011755"
     },
     {
@@ -2867,8 +3113,8 @@
         }
       ],
       "shareSlug": "construction-completion-of-multi-purpose-building-ba-935e0a8f",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-935e0a8f.png?v=16a62a5b9227",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-935e0a8f.html?v=16a62a5b9227",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-935e0a8f.png?v=fe8ec70831d6",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-935e0a8f.html?v=fe8ec70831d6",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0709-011757"
     },
     {
@@ -2937,8 +3183,8 @@
         }
       ],
       "shareSlug": "construction-completion-of-multi-purpose-building-ba-6800c57e",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-6800c57e.png?v=7b98ef18d8f1",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-6800c57e.html?v=7b98ef18d8f1",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-6800c57e.png?v=13c92051580d",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-6800c57e.html?v=13c92051580d",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0709-011759"
     },
     {
@@ -3007,8 +3253,8 @@
         }
       ],
       "shareSlug": "construction-completion-of-multi-purpose-building-ba-0352ab19",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-0352ab19.png?v=351ed86773e8",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-0352ab19.html?v=351ed86773e8",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-0352ab19.png?v=437fa81f98dd",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-0352ab19.html?v=437fa81f98dd",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0709-011760"
     },
     {
@@ -3077,8 +3323,8 @@
         }
       ],
       "shareSlug": "construction-completion-of-multi-purpose-building-ba-5868074b",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-5868074b.png?v=f30babe0ae25",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-5868074b.html?v=f30babe0ae25",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-5868074b.png?v=d78638f0b52a",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-5868074b.html?v=d78638f0b52a",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0709-011762"
     },
     {
@@ -3147,8 +3393,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-barangay-bago-845f5764",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-bago-845f5764.png?v=d62b67be587f",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-bago-845f5764.html?v=d62b67be587f",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-bago-845f5764.png?v=3204c38c0f87",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-bago-845f5764.html?v=3204c38c0f87",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0710-011777"
     },
     {
@@ -3217,8 +3463,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-barangay-lori-c89ed48c",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-lori-c89ed48c.png?v=4ef8868c747a",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-lori-c89ed48c.html?v=4ef8868c747a",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-lori-c89ed48c.png?v=d7e6def5abb6",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-lori-c89ed48c.html?v=d7e6def5abb6",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0710-011778"
     },
     {
@@ -3287,8 +3533,8 @@
         }
       ],
       "shareSlug": "construction-completion-of-multi-purpose-building-ba-23a39898",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-23a39898.png?v=978306bf02ee",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-23a39898.html?v=978306bf02ee",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-23a39898.png?v=503730db2652",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-23a39898.html?v=503730db2652",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0710-011780"
     },
     {
@@ -3357,8 +3603,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-barangay-puro-a1430561",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-puro-a1430561.png?v=f44c6d605906",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-puro-a1430561.html?v=f44c6d605906",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-puro-a1430561.png?v=53d692b9d897",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-puro-a1430561.html?v=53d692b9d897",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0710-011785"
     },
     {
@@ -3427,8 +3673,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-at-barangay-s-a6307a96",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-at-barangay-s-a6307a96.png?v=4728c75d0359",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-at-barangay-s-a6307a96.html?v=4728c75d0359",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-at-barangay-s-a6307a96.png?v=242199871772",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-at-barangay-s-a6307a96.html?v=242199871772",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0710-011786"
     },
     {
@@ -3637,8 +3883,8 @@
         }
       ],
       "shareSlug": "construction-completion-of-multi-purpose-building-ba-35ffea87",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-35ffea87.png?v=cf98329be6a0",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-35ffea87.html?v=cf98329be6a0",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-35ffea87.png?v=4514de76b41d",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-35ffea87.html?v=4514de76b41d",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0713-011850"
     },
     {
@@ -3707,8 +3953,8 @@
         }
       ],
       "shareSlug": "construction-completion-of-multi-purpose-building-bu-8bedcf0c",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-bu-8bedcf0c.png?v=3614bd0cb0b8",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-bu-8bedcf0c.html?v=3614bd0cb0b8",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-bu-8bedcf0c.png?v=fc1181f99f37",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-bu-8bedcf0c.html?v=fc1181f99f37",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0714-011853"
     },
     {
@@ -3777,8 +4023,8 @@
         }
       ],
       "shareSlug": "construction-completion-of-multi-purpose-building-bu-39ac62c2",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-bu-39ac62c2.png?v=6a7e30010ea9",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-bu-39ac62c2.html?v=6a7e30010ea9",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-bu-39ac62c2.png?v=27b84ee1d723",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-bu-39ac62c2.html?v=27b84ee1d723",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0714-011854"
     },
     {
@@ -3847,8 +4093,8 @@
         }
       ],
       "shareSlug": "construction-completion-of-multi-purpose-building-ba-b83ef94e",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-b83ef94e.png?v=e2fb4420ec10",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-b83ef94e.html?v=e2fb4420ec10",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-b83ef94e.png?v=eed285fd183b",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-b83ef94e.html?v=eed285fd183b",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0714-011857"
     },
     {
@@ -3917,8 +4163,8 @@
         }
       ],
       "shareSlug": "construction-completion-of-multi-purpose-building-ba-14feccd7",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-14feccd7.png?v=3cbc4583c0d1",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-14feccd7.html?v=3cbc4583c0d1",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-14feccd7.png?v=8378d5c945e3",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-14feccd7.html?v=8378d5c945e3",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0714-011861"
     },
     {
@@ -3987,8 +4233,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-barangay-divi-905abc71",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-divi-905abc71.png?v=3b2575ba0a87",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-divi-905abc71.html?v=3b2575ba0a87",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-divi-905abc71.png?v=6f25ab4bd0f7",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-divi-905abc71.html?v=6f25ab4bd0f7",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0714-011862"
     },
     {
@@ -4057,8 +4303,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-barangay-lina-58ecf84e",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-lina-58ecf84e.png?v=7d358727cc90",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-lina-58ecf84e.html?v=7d358727cc90",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-lina-58ecf84e.png?v=e5f674d29c67",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-lina-58ecf84e.html?v=e5f674d29c67",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0714-011863"
     },
     {
@@ -4127,8 +4373,8 @@
         }
       ],
       "shareSlug": "construction-completion-of-multi-purpose-building-ba-a2005fbc",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-a2005fbc.png?v=20bcc4545b43",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-a2005fbc.html?v=20bcc4545b43",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-a2005fbc.png?v=31c93db04e76",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-a2005fbc.html?v=31c93db04e76",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0714-011865"
     },
     {
@@ -4197,8 +4443,8 @@
         }
       ],
       "shareSlug": "construction-completion-of-multi-purpose-building-ba-406f70b4",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-406f70b4.png?v=88954f1d3e54",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-406f70b4.html?v=88954f1d3e54",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-406f70b4.png?v=7f6a95d0ff2e",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-406f70b4.html?v=7f6a95d0ff2e",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0714-011866"
     },
     {
@@ -4267,8 +4513,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-barangay-usol-29ab5921",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-usol-29ab5921.png?v=57f1110378f7",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-usol-29ab5921.html?v=57f1110378f7",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-usol-29ab5921.png?v=2cc787685ac2",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-usol-29ab5921.html?v=2cc787685ac2",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0714-011870"
     },
     {
@@ -4337,8 +4583,8 @@
         }
       ],
       "shareSlug": "construction-completion-of-multi-purpose-building-ba-f6130973",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-f6130973.png?v=1e09fc2c4dff",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-f6130973.html?v=1e09fc2c4dff",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-f6130973.png?v=91aef2d2b157",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-f6130973.html?v=91aef2d2b157",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0715-011880"
     },
     {
@@ -4407,8 +4653,8 @@
         }
       ],
       "shareSlug": "construction-completion-of-multi-purpose-building-bu-ad1f05d2",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-bu-ad1f05d2.png?v=db2420796f74",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-bu-ad1f05d2.html?v=db2420796f74",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-bu-ad1f05d2.png?v=ee65e4cd7a7c",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-bu-ad1f05d2.html?v=ee65e4cd7a7c",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0715-011886"
     },
     {
@@ -4477,8 +4723,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-building-2-ba-8019b221",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-building-2-ba-8019b221.png?v=5ae475d17318",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-building-2-ba-8019b221.html?v=5ae475d17318",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-building-2-ba-8019b221.png?v=092c4bb3fa66",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-building-2-ba-8019b221.html?v=092c4bb3fa66",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0716-011893"
     },
     {
@@ -4547,8 +4793,8 @@
         }
       ],
       "shareSlug": "construction-completion-of-multi-purpose-building-ba-5227d586",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-5227d586.png?v=4a6e8f8e80e1",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-5227d586.html?v=4a6e8f8e80e1",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-5227d586.png?v=4f614b007d95",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-5227d586.html?v=4f614b007d95",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0716-011902"
     },
     {
@@ -4617,8 +4863,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-barangay-sta-c1b53ac0",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-sta-c1b53ac0.png?v=fd270de50096",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-sta-c1b53ac0.html?v=fd270de50096",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-sta-c1b53ac0.png?v=2b4bf9b4187b",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-sta-c1b53ac0.html?v=2b4bf9b4187b",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0716-011907"
     },
     {
@@ -4687,8 +4933,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-barangay-cala-b51fd330",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-cala-b51fd330.png?v=f21027c35cca",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-cala-b51fd330.html?v=f21027c35cca",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-cala-b51fd330.png?v=e411c9835846",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-cala-b51fd330.html?v=e411c9835846",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0716-011909"
     },
     {
@@ -4757,8 +5003,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-barangay-doma-b4e28203",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-doma-b4e28203.png?v=4122fd460ed6",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-doma-b4e28203.html?v=4122fd460ed6",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-doma-b4e28203.png?v=5eaeb87a113d",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-doma-b4e28203.html?v=5eaeb87a113d",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0719-011965"
     },
     {
@@ -4827,8 +5073,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-barangaynapo-0108a248",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangaynapo-0108a248.png?v=b23e80fcb2a8",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangaynapo-0108a248.html?v=b23e80fcb2a8",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangaynapo-0108a248.png?v=8f337f546740",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangaynapo-0108a248.html?v=8f337f546740",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0720-011989"
     },
     {
@@ -4897,8 +5143,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-barangay-tibl-cf838afa",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-tibl-cf838afa.png?v=92d922164f9a",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-tibl-cf838afa.html?v=92d922164f9a",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-tibl-cf838afa.png?v=d153899ef900",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-tibl-cf838afa.html?v=d153899ef900",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0720-011991"
     },
     {
@@ -4967,8 +5213,8 @@
         }
       ],
       "shareSlug": "construction-completion-of-multi-purpose-building-si-118c4ba6",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-si-118c4ba6.png?v=f917ba3324ed",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-si-118c4ba6.html?v=f917ba3324ed",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-si-118c4ba6.png?v=1907a0e7f9c2",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-si-118c4ba6.html?v=1907a0e7f9c2",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0725-012079"
     },
     {
@@ -5036,8 +5282,8 @@
         }
       ],
       "shareSlug": "rehabilitation-of-multi-purpose-building-barangay-ca-44b7dc62",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/rehabilitation-of-multi-purpose-building-barangay-ca-44b7dc62.png?v=38b03c1e6f35",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/rehabilitation-of-multi-purpose-building-barangay-ca-44b7dc62.html?v=38b03c1e6f35",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/rehabilitation-of-multi-purpose-building-barangay-ca-44b7dc62.png?v=29d5d2f590b0",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/rehabilitation-of-multi-purpose-building-barangay-ca-44b7dc62.html?v=29d5d2f590b0",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0725-012082"
     },
     {
@@ -5101,8 +5347,8 @@
         }
       ],
       "shareSlug": "rehabilitation-of-multi-purpose-building-covered-cou-a291aedf",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/rehabilitation-of-multi-purpose-building-covered-cou-a291aedf.png?v=298272438016",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/rehabilitation-of-multi-purpose-building-covered-cou-a291aedf.html?v=298272438016",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/rehabilitation-of-multi-purpose-building-covered-cou-a291aedf.png?v=6b16a8916f43",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/rehabilitation-of-multi-purpose-building-covered-cou-a291aedf.html?v=6b16a8916f43",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0727-012130"
     },
     {
@@ -5171,8 +5417,8 @@
         }
       ],
       "shareSlug": "construction-completion-of-multi-purpose-building-ba-f95a065e",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-f95a065e.png?v=a53a4753eae2",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-f95a065e.html?v=a53a4753eae2",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-f95a065e.png?v=b0b5eaf54308",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-f95a065e.html?v=b0b5eaf54308",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0736-012314"
     },
     {
@@ -5241,8 +5487,8 @@
         }
       ],
       "shareSlug": "construction-completion-of-multi-purpose-building-ba-db658828",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-db658828.png?v=982fe4e91e37",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-db658828.html?v=982fe4e91e37",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-db658828.png?v=f6e6f0484bba",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-db658828.html?v=f6e6f0484bba",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0736-012319"
     },
     {
@@ -5311,8 +5557,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-at-city-town-9d30e774",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-at-city-town-9d30e774.png?v=d557601b33dc",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-at-city-town-9d30e774.html?v=d557601b33dc",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-at-city-town-9d30e774.png?v=4523aed24f59",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-at-city-town-9d30e774.html?v=4523aed24f59",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0740-012399"
     },
     {
@@ -5381,8 +5627,8 @@
         }
       ],
       "shareSlug": "construction-completion-of-multi-purpose-building-sa-c82c4fe7",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-sa-c82c4fe7.png?v=1e28189abf97",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-sa-c82c4fe7.html?v=1e28189abf97",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-sa-c82c4fe7.png?v=1d217020016a",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-sa-c82c4fe7.html?v=1d217020016a",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0743-012457"
     },
     {
@@ -5450,8 +5696,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-at-barangay-m-4911ca27",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-at-barangay-m-4911ca27.png?v=cca0eb022e83",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-at-barangay-m-4911ca27.html?v=cca0eb022e83",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-at-barangay-m-4911ca27.png?v=5429a070ae86",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-at-barangay-m-4911ca27.html?v=5429a070ae86",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0743-012460"
     },
     {
@@ -5519,8 +5765,8 @@
         }
       ],
       "shareSlug": "rehabilitation-of-multi-purpose-building-at-san-fran-913fc2f5",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/rehabilitation-of-multi-purpose-building-at-san-fran-913fc2f5.png?v=72e5aa843348",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/rehabilitation-of-multi-purpose-building-at-san-fran-913fc2f5.html?v=72e5aa843348",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/rehabilitation-of-multi-purpose-building-at-san-fran-913fc2f5.png?v=9ff63c7df974",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/rehabilitation-of-multi-purpose-building-at-san-fran-913fc2f5.html?v=9ff63c7df974",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0743-012464"
     },
     {
@@ -5560,8 +5806,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-at-barangay-a-8f328219",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-at-barangay-a-8f328219.png?v=725aa13dcfac",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-at-barangay-a-8f328219.html?v=725aa13dcfac",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-at-barangay-a-8f328219.png?v=48dc757ed885",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-at-barangay-a-8f328219.html?v=48dc757ed885",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0745-012494"
     },
     {
@@ -5630,8 +5876,8 @@
         }
       ],
       "shareSlug": "rehabilitation-of-multi-purpose-building-barangay-sa-55a0aa33",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/rehabilitation-of-multi-purpose-building-barangay-sa-55a0aa33.png?v=825e83558dab",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/rehabilitation-of-multi-purpose-building-barangay-sa-55a0aa33.html?v=825e83558dab",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/rehabilitation-of-multi-purpose-building-barangay-sa-55a0aa33.png?v=d8711c61a188",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/rehabilitation-of-multi-purpose-building-barangay-sa-55a0aa33.html?v=d8711c61a188",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0747-012529"
     },
     {
@@ -5700,8 +5946,8 @@
         }
       ],
       "shareSlug": "rehabilitation-of-multi-purpose-building-barangay-la-c9d8d175",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/rehabilitation-of-multi-purpose-building-barangay-la-c9d8d175.png?v=d8822f80ef28",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/rehabilitation-of-multi-purpose-building-barangay-la-c9d8d175.html?v=d8822f80ef28",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/rehabilitation-of-multi-purpose-building-barangay-la-c9d8d175.png?v=117183b8914b",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/rehabilitation-of-multi-purpose-building-barangay-la-c9d8d175.html?v=117183b8914b",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0747-012531"
     },
     {
@@ -5770,8 +6016,8 @@
         }
       ],
       "shareSlug": "construction-completion-of-multi-purpose-building-ba-5eb8f234",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-5eb8f234.png?v=0914551967a1",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-5eb8f234.html?v=0914551967a1",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-5eb8f234.png?v=c6c3d8011ebb",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-5eb8f234.html?v=c6c3d8011ebb",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0758-012767"
     },
     {
@@ -5840,8 +6086,8 @@
         }
       ],
       "shareSlug": "rehabilitation-completion-of-multi-purpose-building-5e1d567c",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/rehabilitation-completion-of-multi-purpose-building-5e1d567c.png?v=c55855433410",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/rehabilitation-completion-of-multi-purpose-building-5e1d567c.html?v=c55855433410",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/rehabilitation-completion-of-multi-purpose-building-5e1d567c.png?v=2f31b5c86b89",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/rehabilitation-completion-of-multi-purpose-building-5e1d567c.html?v=2f31b5c86b89",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0762-012844"
     },
     {
@@ -5910,8 +6156,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-barangay-yaka-d67d3903",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-yaka-d67d3903.png?v=0748d904306b",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-yaka-d67d3903.html?v=0748d904306b",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-yaka-d67d3903.png?v=08784dd32946",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-yaka-d67d3903.html?v=08784dd32946",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0769-012975"
     },
     {
@@ -5980,8 +6226,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-sta-lucia-nat-f5ef7794",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-sta-lucia-nat-f5ef7794.png?v=dcc18ddba80f",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-sta-lucia-nat-f5ef7794.html?v=dcc18ddba80f",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-sta-lucia-nat-f5ef7794.png?v=7ca4a7f0b290",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-sta-lucia-nat-f5ef7794.html?v=7ca4a7f0b290",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0781-013228"
     },
     {
@@ -6050,8 +6296,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-don-severo-fe-f4b58432",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-don-severo-fe-f4b58432.png?v=7b494d309c8a",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-don-severo-fe-f4b58432.html?v=7b494d309c8a",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-don-severo-fe-f4b58432.png?v=5d48ffcffd9e",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-don-severo-fe-f4b58432.html?v=5d48ffcffd9e",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0781-013229"
     },
     {
@@ -6120,8 +6366,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-san-antonio-c-d870f32d",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-san-antonio-c-d870f32d.png?v=b9dbc9b06e39",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-san-antonio-c-d870f32d.html?v=b9dbc9b06e39",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-san-antonio-c-d870f32d.png?v=3be04f7683da",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-san-antonio-c-d870f32d.html?v=3be04f7683da",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0781-013230"
     },
     {
@@ -6190,8 +6436,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-ilayang-yuni-d04e5894",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-ilayang-yuni-d04e5894.png?v=e2ed99e9dc6f",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-ilayang-yuni-d04e5894.html?v=e2ed99e9dc6f",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-ilayang-yuni-d04e5894.png?v=9c00f0ae0807",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-ilayang-yuni-d04e5894.html?v=9c00f0ae0807",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0782-013246"
     },
     {
@@ -6245,8 +6491,8 @@
         }
       ],
       "shareSlug": "construction-completion-of-multi-purpose-building-ba-7a074923",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-7a074923.png?v=9636ca08dbd9",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-7a074923.html?v=9636ca08dbd9",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-7a074923.png?v=944d72c9606b",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-7a074923.html?v=944d72c9606b",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0782-013251"
     },
     {
@@ -6315,8 +6561,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-at-barangay-l-a7e5ddaa",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-at-barangay-l-a7e5ddaa.png?v=bbf2963e2838",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-at-barangay-l-a7e5ddaa.html?v=bbf2963e2838",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-at-barangay-l-a7e5ddaa.png?v=d31a64419397",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-at-barangay-l-a7e5ddaa.html?v=d31a64419397",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0793-013461"
     },
     {
@@ -6385,8 +6631,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-continuation-e0a1996b",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-continuation-e0a1996b.png?v=eb1224a79e50",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-continuation-e0a1996b.html?v=eb1224a79e50",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-continuation-e0a1996b.png?v=3fa4b95cc9dc",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-continuation-e0a1996b.html?v=3fa4b95cc9dc",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0798-013574"
     },
     {
@@ -6454,8 +6700,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-covered-court-0c5bdf73",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-covered-court-0c5bdf73.png?v=99d337df712f",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-covered-court-0c5bdf73.html?v=99d337df712f",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-covered-court-0c5bdf73.png?v=7f9e8630916e",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-covered-court-0c5bdf73.html?v=7f9e8630916e",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0799-013578"
     },
     {
@@ -6523,8 +6769,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-covered-court-9fd1fef1",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-covered-court-9fd1fef1.png?v=f383466a5e5e",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-covered-court-9fd1fef1.html?v=f383466a5e5e",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-covered-court-9fd1fef1.png?v=125798360d2f",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-covered-court-9fd1fef1.html?v=125798360d2f",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0799-013583"
     },
     {
@@ -6592,8 +6838,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-covered-court-a1aa5612",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-covered-court-a1aa5612.png?v=053c2dbebb09",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-covered-court-a1aa5612.html?v=053c2dbebb09",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-covered-court-a1aa5612.png?v=5a039acdf56b",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-covered-court-a1aa5612.html?v=5a039acdf56b",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0799-013586"
     },
     {
@@ -6661,8 +6907,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-covered-court-169b9fed",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-covered-court-169b9fed.png?v=e1ce5b717ef2",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-covered-court-169b9fed.html?v=e1ce5b717ef2",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-covered-court-169b9fed.png?v=ab74b1445b0a",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-covered-court-169b9fed.html?v=ab74b1445b0a",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0799-013588"
     },
     {
@@ -6730,8 +6976,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-covered-court-ce8b249f",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-covered-court-ce8b249f.png?v=064026f9bd62",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-covered-court-ce8b249f.html?v=064026f9bd62",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-covered-court-ce8b249f.png?v=9da02adaaef0",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-covered-court-ce8b249f.html?v=9da02adaaef0",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0800-013591"
     },
     {
@@ -6800,8 +7046,8 @@
         }
       ],
       "shareSlug": "construction-completion-of-multi-purpose-building-ba-8d97f639",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-8d97f639.png?v=982bffe2cfc0",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-8d97f639.html?v=982bffe2cfc0",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-8d97f639.png?v=e1bdc7df9415",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-8d97f639.html?v=e1bdc7df9415",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0810-013782"
     },
     {
@@ -6870,8 +7116,8 @@
         }
       ],
       "shareSlug": "construction-completion-of-poblacion-multi-purpose-b-5687443a",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-poblacion-multi-purpose-b-5687443a.png?v=f194fd922b8c",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-poblacion-multi-purpose-b-5687443a.html?v=f194fd922b8c",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-poblacion-multi-purpose-b-5687443a.png?v=5dd9bf2f8782",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-poblacion-multi-purpose-b-5687443a.html?v=5dd9bf2f8782",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0810-013794"
     },
     {
@@ -6940,8 +7186,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-barangay-bahi-c2973c54",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-bahi-c2973c54.png?v=00af66782ea2",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-bahi-c2973c54.html?v=00af66782ea2",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-bahi-c2973c54.png?v=ee97e35b7170",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-bahi-c2973c54.html?v=ee97e35b7170",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0814-013873"
     },
     {
@@ -6997,8 +7243,8 @@
         }
       ],
       "shareSlug": "construction-completion-of-multi-purpose-building-ba-c674a253",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-c674a253.png?v=1ee358f35bbb",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-c674a253.html?v=1ee358f35bbb",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-c674a253.png?v=57d0e5daff55",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-c674a253.html?v=57d0e5daff55",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0821-014003"
     },
     {
@@ -7054,8 +7300,8 @@
         }
       ],
       "shareSlug": "construction-completion-of-multi-purpose-building-ba-16375c14",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-16375c14.png?v=553fde926319",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-16375c14.html?v=553fde926319",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-16375c14.png?v=51d9792eb680",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-16375c14.html?v=51d9792eb680",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0822-014022"
     },
     {
@@ -7111,8 +7357,8 @@
         }
       ],
       "shareSlug": "construction-completion-of-multi-purpose-building-ba-5306f5a8",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-5306f5a8.png?v=6f3b718f6189",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-5306f5a8.html?v=6f3b718f6189",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-5306f5a8.png?v=34a920801d1b",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-5306f5a8.html?v=34a920801d1b",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0822-014039"
     },
     {
@@ -7168,8 +7414,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-barangay-jiba-225486d6",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-jiba-225486d6.png?v=f6b72cc9f202",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-jiba-225486d6.html?v=f6b72cc9f202",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-jiba-225486d6.png?v=0e2f6d9209f4",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-jiba-225486d6.html?v=0e2f6d9209f4",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0824-014079"
     },
     {
@@ -7225,8 +7471,8 @@
         }
       ],
       "shareSlug": "construction-completion-of-multi-purpose-building-in-42dffec6",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-in-42dffec6.png?v=defa32f98b36",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-in-42dffec6.html?v=defa32f98b36",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-in-42dffec6.png?v=28f987e5ff93",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-in-42dffec6.html?v=28f987e5ff93",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0827-014127"
     },
     {
@@ -7282,8 +7528,8 @@
         }
       ],
       "shareSlug": "construction-completion-of-multi-purpose-building-in-3deda950",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-in-3deda950.png?v=f03ff6c01e25",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-in-3deda950.html?v=f03ff6c01e25",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-in-3deda950.png?v=39c1f7c6ae95",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-in-3deda950.html?v=39c1f7c6ae95",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0827-014132"
     },
     {
@@ -7339,8 +7585,8 @@
         }
       ],
       "shareSlug": "construction-completion-of-multi-purpose-building-in-68d3e254",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-in-68d3e254.png?v=bada3981d36b",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-in-68d3e254.html?v=bada3981d36b",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-in-68d3e254.png?v=6ec0d7a895ad",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-in-68d3e254.html?v=6ec0d7a895ad",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0827-014133"
     },
     {
@@ -7396,8 +7642,8 @@
         }
       ],
       "shareSlug": "construction-completion-of-multi-purpose-building-in-86d6504c",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-in-86d6504c.png?v=3b07f7d398de",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-in-86d6504c.html?v=3b07f7d398de",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-in-86d6504c.png?v=b3f6b5a7ec24",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-in-86d6504c.html?v=b3f6b5a7ec24",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0827-014142"
     },
     {
@@ -7453,8 +7699,8 @@
         }
       ],
       "shareSlug": "construction-completio-of-multi-purpose-building-in-918839d4",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completio-of-multi-purpose-building-in-918839d4.png?v=6744a5b1d0f4",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completio-of-multi-purpose-building-in-918839d4.html?v=6744a5b1d0f4",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completio-of-multi-purpose-building-in-918839d4.png?v=72391af1bc3d",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completio-of-multi-purpose-building-in-918839d4.html?v=72391af1bc3d",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0828-014143"
     },
     {
@@ -7523,8 +7769,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-barangay-cadi-68afb552",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-cadi-68afb552.png?v=648e8386581d",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-cadi-68afb552.html?v=648e8386581d",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-cadi-68afb552.png?v=a6af5794cc36",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-cadi-68afb552.html?v=a6af5794cc36",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0832-014233"
     },
     {
@@ -7593,8 +7839,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-barangay-bacl-1896cc64",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-bacl-1896cc64.png?v=9cca9918a753",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-bacl-1896cc64.html?v=9cca9918a753",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-bacl-1896cc64.png?v=beceedf864f2",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-bacl-1896cc64.html?v=beceedf864f2",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0834-014279"
     },
     {
@@ -7663,8 +7909,8 @@
         }
       ],
       "shareSlug": "construction-completion-of-multi-purpose-building-s-a8ec2dd9",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-s-a8ec2dd9.png?v=6b0a16e8de96",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-s-a8ec2dd9.html?v=6b0a16e8de96",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-s-a8ec2dd9.png?v=4f06282bea75",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-s-a8ec2dd9.html?v=4f06282bea75",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0837-014320"
     },
     {
@@ -7733,8 +7979,8 @@
         }
       ],
       "shareSlug": "construction-completion-of-multi-purpose-building-ba-e1acfb8f",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-e1acfb8f.png?v=ee6b122474d6",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-e1acfb8f.html?v=ee6b122474d6",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-e1acfb8f.png?v=739463180069",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-e1acfb8f.html?v=739463180069",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0838-014347"
     },
     {
@@ -7803,8 +8049,8 @@
         }
       ],
       "shareSlug": "construction-completion-of-multi-purpose-building-ba-b1a1ca2d",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-b1a1ca2d.png?v=973b6eff4844",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-b1a1ca2d.html?v=973b6eff4844",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-b1a1ca2d.png?v=206cd530f18f",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-b1a1ca2d.html?v=206cd530f18f",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0850-014593"
     },
     {
@@ -7873,8 +8119,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-buidling-barangay-hukn-9735773e",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-buidling-barangay-hukn-9735773e.png?v=8c2bc6436470",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-buidling-barangay-hukn-9735773e.html?v=8c2bc6436470",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-buidling-barangay-hukn-9735773e.png?v=6758636881e7",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-buidling-barangay-hukn-9735773e.html?v=6758636881e7",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0855-014689"
     },
     {
@@ -7943,8 +8189,8 @@
         }
       ],
       "shareSlug": "rehabilitation-of-multi-purpose-building-barangay-sa-72d1fd35",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/rehabilitation-of-multi-purpose-building-barangay-sa-72d1fd35.png?v=60408845b0e3",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/rehabilitation-of-multi-purpose-building-barangay-sa-72d1fd35.html?v=60408845b0e3",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/rehabilitation-of-multi-purpose-building-barangay-sa-72d1fd35.png?v=a0f9bb45e5bc",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/rehabilitation-of-multi-purpose-building-barangay-sa-72d1fd35.html?v=a0f9bb45e5bc",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0855-014699"
     },
     {
@@ -8013,8 +8259,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-barangay-bala-0eb5ad88",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-bala-0eb5ad88.png?v=5bfcd782112b",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-bala-0eb5ad88.html?v=5bfcd782112b",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-bala-0eb5ad88.png?v=4a5c3dd80b4b",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-bala-0eb5ad88.html?v=4a5c3dd80b4b",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0855-014702"
     },
     {
@@ -8083,8 +8329,8 @@
         }
       ],
       "shareSlug": "completion-of-multi-purpose-building-covered-court-b-8d584f45",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/completion-of-multi-purpose-building-covered-court-b-8d584f45.png?v=e39b0b5344a0",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/completion-of-multi-purpose-building-covered-court-b-8d584f45.html?v=e39b0b5344a0",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/completion-of-multi-purpose-building-covered-court-b-8d584f45.png?v=7c12afafd106",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/completion-of-multi-purpose-building-covered-court-b-8d584f45.html?v=7c12afafd106",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0856-014723"
     },
     {
@@ -8148,8 +8394,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-covered-court-f73ef901",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-covered-court-f73ef901.png?v=773619f90e0a",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-covered-court-f73ef901.html?v=773619f90e0a",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-covered-court-f73ef901.png?v=cbda679bd8d9",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-covered-court-f73ef901.html?v=cbda679bd8d9",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0857-014736"
     },
     {
@@ -8213,8 +8459,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-covered-court-db2eba18",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-covered-court-db2eba18.png?v=372c719f624a",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-covered-court-db2eba18.html?v=372c719f624a",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-covered-court-db2eba18.png?v=d5dce53788bb",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-covered-court-db2eba18.html?v=d5dce53788bb",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0857-014737"
     },
     {
@@ -8263,8 +8509,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-covered-court-ae68a68d",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-covered-court-ae68a68d.png?v=9e09249e2db1",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-covered-court-ae68a68d.html?v=9e09249e2db1",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-covered-court-ae68a68d.png?v=01b29752cc88",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-covered-court-ae68a68d.html?v=01b29752cc88",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0858-014747"
     },
     {
@@ -8340,8 +8586,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-barangay-hall-0a5f862d",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-hall-0a5f862d.png?v=0e5b90dbbf3f",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-hall-0a5f862d.html?v=0e5b90dbbf3f",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-hall-0a5f862d.png?v=d7b8f22f18b0",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-hall-0a5f862d.html?v=d7b8f22f18b0",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0858-014750"
     },
     {
@@ -8394,9 +8640,99 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-covered-court-23fa2a40",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-covered-court-23fa2a40.png?v=0c81aa51df05",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-covered-court-23fa2a40.html?v=0c81aa51df05",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-covered-court-23fa2a40.png?v=5037c28bf929",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-covered-court-23fa2a40.html?v=5037c28bf929",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0858-014753"
+    },
+    {
+      "id": "HB10858-3-0858-014760",
+      "projectName": "Construction of Multi-Purpose Building & facilities, Sitio Pungkay, Barangay Patag, Ormoc City, Leyte (11.042047, 124.654852)",
+      "office": "Leyte 4th District Engineering Office",
+      "amountPesos": 50000000,
+      "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf",
+      "sourcePage": 858,
+      "coordinateRaw": "11.042047, 124.654852",
+      "latitude": 11.042047,
+      "longitude": 124.654852,
+      "coordinateStatus": "Usable printed point",
+      "coordinateOrientation": "latitude, longitude",
+      "province": "LEYTE",
+      "officeAssignmentChange": {
+        "hgabProjectId": "HB10858-3-0858-014760",
+        "title": "Construction of Multi-Purpose Building & facilities, Sitio Pungkay, Barangay Patag, Ormoc City, Leyte (11.042047, 124.654852)",
+        "nepOffice": "Leyte 2nd District Engineering Office",
+        "hgabOffice": "Leyte 4th District Engineering Office",
+        "nepPage": 649,
+        "hgabPage": 858,
+        "nepAmountPesos": 50000000,
+        "hgabAmountPesos": 50000000,
+        "status": "exact_candidate",
+        "confidence": 1,
+        "coordinatePairPrinted": true,
+        "mapUrl": "out-of-place.html?project=HB10858-3-0858-014760"
+      },
+      "nepComparison": {
+        "status": "Exact normalized title found in NEP",
+        "title": "Construction of Multi-Purpose Building & facilities, Sitio Pungkay, Barangay Patag, Ormoc City, Leyte (11.042047, 124.654852)",
+        "amountPesos": 50000000,
+        "allocationDeltaPesos": 0
+      },
+      "analysisFlags": [
+        {
+          "label": "Implementing office changed between NEP and HGAB",
+          "detail": "NEP: Leyte 2nd District Engineering Office → HGAB 3rd: Leyte 4th District Engineering Office. CSIIIV comparison status: exact_candidate."
+        },
+        {
+          "label": "Repeated allocation amount · 121 projects",
+          "detail": "₱50,000,000 also appears in BIP - Multi-Purpose Buildings/ Facilities to support Social Services across 60 offices in HGAB 3rd. These are project allocations, not comparable unit prices."
+        }
+      ],
+      "geographicAttributionStatus": "unique",
+      "districts": [
+        "Leyte · 4th District"
+      ],
+      "representativeCards": [
+        {
+          "district": "Leyte · 4th District",
+          "name": "Richard Gomez",
+          "officialName": "Gomez, Richard I., DPA",
+          "resolutionStatus": "resolved",
+          "profileUrl": "https://www.congress.gov.ph/house-members/view/K039",
+          "photoUrl": "https://raw.githubusercontent.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS/ff0f7485ec4b97f92fa627eb1128e9871cc980bf/DEO2LEG/legislative_profiles/photos/gomez-richard-i-dpa.jpg",
+          "candidates": []
+        }
+      ],
+      "geographicEvidence": [
+        {
+          "level": "municipality",
+          "name": "ormoc",
+          "province": "leyte",
+          "primaryDistricts": [],
+          "alternateDistricts": [
+            "4th"
+          ]
+        },
+        {
+          "basis": "Trailing station/coordinate metadata excluded from address matching only; original project title and construction scope retained",
+          "metadata": [
+            "(11.042047, 124.654852)"
+          ]
+        },
+        {
+          "level": "printed-coordinate boundary match",
+          "localities": [
+            "Ormoc City"
+          ],
+          "district": "Leyte (Fourth District)",
+          "coordinate": "11.042047, 124.654852",
+          "boundarySource": "DPWH ArcGIS City-Municipal Boundaries",
+          "basis": "Unique district polygon containing the printed point; a matching locality name appears in the project title"
+        }
+      ],
+      "shareSlug": "construction-of-multi-purpose-building-facilities-si-5add6c7d",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-facilities-si-5add6c7d.png?v=9f2aa56aba90",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-facilities-si-5add6c7d.html?v=9f2aa56aba90",
+      "interactivePage": "../out-of-place.html?project=HB10858-3-0858-014760"
     },
     {
       "id": "HB10858-3-0859-014761",
@@ -8411,6 +8747,20 @@
       "coordinateStatus": "Usable printed point",
       "coordinateOrientation": "latitude, longitude",
       "province": "LEYTE",
+      "officeAssignmentChange": {
+        "hgabProjectId": "HB10858-3-0859-014761",
+        "title": "Construction (Completion) of Multi-Purpose Building (Agrifishery Building), Barangay Macabug, Ormoc City, Leyte (10.95255, 124.65320)",
+        "nepOffice": "Leyte 2nd District Engineering Office",
+        "hgabOffice": "Leyte 4th District Engineering Office",
+        "nepPage": 648,
+        "hgabPage": 859,
+        "nepAmountPesos": 10000000,
+        "hgabAmountPesos": 10000000,
+        "status": "exact_candidate",
+        "confidence": 1,
+        "coordinatePairPrinted": true,
+        "mapUrl": "out-of-place.html?project=HB10858-3-0859-014761"
+      },
       "nepComparison": {
         "status": "Exact normalized title found in NEP",
         "title": "Construction (Completion) of Multi-Purpose Building (Agrifishery Building), Barangay Macabug, Ormoc City, Leyte (10.95255, 124.65320)",
@@ -8418,6 +8768,10 @@
         "allocationDeltaPesos": 0
       },
       "analysisFlags": [
+        {
+          "label": "Implementing office changed between NEP and HGAB",
+          "detail": "NEP: Leyte 2nd District Engineering Office → HGAB 3rd: Leyte 4th District Engineering Office. CSIIIV comparison status: exact_candidate."
+        },
         {
           "label": "Repeated allocation amount · 778 projects",
           "detail": "₱10,000,000 also appears in BIP - Multi-Purpose Buildings/ Facilities to support Social Services across 131 offices in HGAB 3rd. These are project allocations, not comparable unit prices."
@@ -8444,9 +8798,101 @@
         }
       ],
       "shareSlug": "construction-completion-of-multi-purpose-building-ag-9fb8128c",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ag-9fb8128c.png?v=bdd1d03228fc",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ag-9fb8128c.html?v=bdd1d03228fc",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ag-9fb8128c.png?v=5d0ebad38423",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ag-9fb8128c.html?v=5d0ebad38423",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0859-014761"
+    },
+    {
+      "id": "HB10858-3-0859-014762",
+      "projectName": "Construction of Evacuation Center, Barangay San Ignacio, Kananga, Leyte (11.121075, 124.61512)",
+      "office": "Leyte 4th District Engineering Office",
+      "amountPesos": 10000000,
+      "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf",
+      "sourcePage": 859,
+      "coordinateRaw": "11.121075, 124.61512",
+      "latitude": 11.121075,
+      "longitude": 124.61512,
+      "coordinateStatus": "Usable printed point",
+      "coordinateOrientation": "latitude, longitude",
+      "province": "LEYTE",
+      "officeAssignmentChange": {
+        "hgabProjectId": "HB10858-3-0859-014762",
+        "title": "Construction of Evacuation Center, Barangay San Ignacio, Kananga, Leyte (11.121075, 124.61512)",
+        "nepOffice": "Leyte 2nd District Engineering Office",
+        "hgabOffice": "Leyte 4th District Engineering Office",
+        "nepPage": 648,
+        "hgabPage": 859,
+        "nepAmountPesos": 10000000,
+        "hgabAmountPesos": 10000000,
+        "status": "exact_candidate",
+        "confidence": 1,
+        "coordinatePairPrinted": true,
+        "mapUrl": "out-of-place.html?project=HB10858-3-0859-014762"
+      },
+      "nepComparison": {
+        "status": "Exact normalized title found in NEP",
+        "title": "Construction of Evacuation Center, Barangay San Ignacio, Kananga, Leyte (11.121075, 124.61512)",
+        "amountPesos": 10000000,
+        "allocationDeltaPesos": 0
+      },
+      "analysisFlags": [
+        {
+          "label": "Implementing office changed between NEP and HGAB",
+          "detail": "NEP: Leyte 2nd District Engineering Office → HGAB 3rd: Leyte 4th District Engineering Office. CSIIIV comparison status: exact_candidate."
+        },
+        {
+          "label": "Repeated allocation amount · 778 projects",
+          "detail": "₱10,000,000 also appears in BIP - Multi-Purpose Buildings/ Facilities to support Social Services across 131 offices in HGAB 3rd. These are project allocations, not comparable unit prices."
+        }
+      ],
+      "geographicAttributionStatus": "unique",
+      "districts": [
+        "Leyte · 4th District"
+      ],
+      "representativeCards": [
+        {
+          "district": "Leyte · 4th District",
+          "name": "Richard Gomez",
+          "officialName": "Gomez, Richard I., DPA",
+          "resolutionStatus": "resolved",
+          "profileUrl": "https://www.congress.gov.ph/house-members/view/K039",
+          "photoUrl": "https://raw.githubusercontent.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS/ff0f7485ec4b97f92fa627eb1128e9871cc980bf/DEO2LEG/legislative_profiles/photos/gomez-richard-i-dpa.jpg",
+          "candidates": []
+        }
+      ],
+      "geographicEvidence": [
+        {
+          "level": "municipality",
+          "name": "kananga",
+          "province": "leyte",
+          "primaryDistricts": [
+            "6th"
+          ],
+          "alternateDistricts": [
+            "4th"
+          ]
+        },
+        {
+          "basis": "Trailing station/coordinate metadata excluded from address matching only; original project title and construction scope retained",
+          "metadata": [
+            "(11.121075, 124.61512)"
+          ]
+        },
+        {
+          "level": "printed-coordinate boundary match",
+          "localities": [
+            "Kananga"
+          ],
+          "district": "Leyte (Fourth District)",
+          "coordinate": "11.121075, 124.61512",
+          "boundarySource": "DPWH ArcGIS City-Municipal Boundaries",
+          "basis": "Unique district polygon containing the printed point; a matching locality name appears in the project title"
+        }
+      ],
+      "shareSlug": "construction-of-evacuation-center-barangay-san-ignac-a8bb3b2f",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-evacuation-center-barangay-san-ignac-a8bb3b2f.png?v=27e5cefd7623",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-evacuation-center-barangay-san-ignac-a8bb3b2f.html?v=27e5cefd7623",
+      "interactivePage": "../out-of-place.html?project=HB10858-3-0859-014762"
     },
     {
       "id": "HB10858-3-0859-014764",
@@ -8496,8 +8942,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-barangay-cove-87ff6268",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-cove-87ff6268.png?v=0e4e6cfc74e4",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-cove-87ff6268.html?v=0e4e6cfc74e4",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-cove-87ff6268.png?v=6f6b56f342fc",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-cove-87ff6268.html?v=6f6b56f342fc",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0859-014764"
     },
     {
@@ -8548,8 +8994,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-multi-purpose-712803d2",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-multi-purpose-712803d2.png?v=db4498a904ed",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-multi-purpose-712803d2.html?v=db4498a904ed",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-multi-purpose-712803d2.png?v=13a827893919",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-multi-purpose-712803d2.html?v=13a827893919",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0860-014781"
     },
     {
@@ -8598,8 +9044,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-baybay-city-l-e6313030",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-baybay-city-l-e6313030.png?v=5d3b2fbe669e",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-baybay-city-l-e6313030.html?v=5d3b2fbe669e",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-baybay-city-l-e6313030.png?v=39d34a7cd086",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-baybay-city-l-e6313030.html?v=39d34a7cd086",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0860-014785"
     },
     {
@@ -8663,8 +9109,8 @@
         }
       ],
       "shareSlug": "construction-of-evacuation-center-enriquita-lavezare-d21214ad",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-evacuation-center-enriquita-lavezare-d21214ad.png?v=2c3738824f15",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-evacuation-center-enriquita-lavezare-d21214ad.html?v=2c3738824f15",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-evacuation-center-enriquita-lavezare-d21214ad.png?v=5f0828b5f7f6",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-evacuation-center-enriquita-lavezare-d21214ad.html?v=5f0828b5f7f6",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0860-014794"
     },
     {
@@ -8728,8 +9174,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-barangay-merc-181c9945",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-merc-181c9945.png?v=5d0bee331ee6",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-merc-181c9945.html?v=5d0bee331ee6",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-merc-181c9945.png?v=6c56830ac0ff",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-merc-181c9945.html?v=6c56830ac0ff",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0863-014848"
     },
     {
@@ -8798,8 +9244,8 @@
         }
       ],
       "shareSlug": "construction-completion-of-multi-purpose-building-ba-888b3721",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-888b3721.png?v=1d7535f57882",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-888b3721.html?v=1d7535f57882",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-888b3721.png?v=3a5e4d221ca1",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-888b3721.html?v=3a5e4d221ca1",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0865-014894"
     },
     {
@@ -8868,8 +9314,8 @@
         }
       ],
       "shareSlug": "construction-completion-of-multi-purpose-building-ba-fcd6a321",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-fcd6a321.png?v=50e76c02458b",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-fcd6a321.html?v=50e76c02458b",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-fcd6a321.png?v=06f66d88bc52",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-ba-fcd6a321.html?v=06f66d88bc52",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0866-014901"
     },
     {
@@ -8938,8 +9384,8 @@
         }
       ],
       "shareSlug": "construction-of-two-2-units-of-multi-purpose-buildin-bc9a7d94",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-two-2-units-of-multi-purpose-buildin-bc9a7d94.png?v=87b3e13675eb",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-two-2-units-of-multi-purpose-buildin-bc9a7d94.html?v=87b3e13675eb",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-two-2-units-of-multi-purpose-buildin-bc9a7d94.png?v=1369874b87f8",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-two-2-units-of-multi-purpose-buildin-bc9a7d94.html?v=1369874b87f8",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0868-014948"
     },
     {
@@ -9008,8 +9454,8 @@
         }
       ],
       "shareSlug": "construction-of-three-3-units-of-multi-purpose-build-f81c1027",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-three-3-units-of-multi-purpose-build-f81c1027.png?v=601b923348cd",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-three-3-units-of-multi-purpose-build-f81c1027.html?v=601b923348cd",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-three-3-units-of-multi-purpose-build-f81c1027.png?v=6af94c800f3b",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-three-3-units-of-multi-purpose-build-f81c1027.html?v=6af94c800f3b",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0868-014949"
     },
     {
@@ -9073,8 +9519,8 @@
         }
       ],
       "shareSlug": "rehabilitation-of-multi-purpose-building-barangay-ma-e946db79",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/rehabilitation-of-multi-purpose-building-barangay-ma-e946db79.png?v=5cd92bfdbdea",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/rehabilitation-of-multi-purpose-building-barangay-ma-e946db79.html?v=5cd92bfdbdea",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/rehabilitation-of-multi-purpose-building-barangay-ma-e946db79.png?v=a5c860d5a655",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/rehabilitation-of-multi-purpose-building-barangay-ma-e946db79.html?v=a5c860d5a655",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0869-014951"
     },
     {
@@ -9142,8 +9588,8 @@
         }
       ],
       "shareSlug": "construction-of-two-2-units-of-multi-purpose-buildin-031e616c",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-two-2-units-of-multi-purpose-buildin-031e616c.png?v=7133f8cab2c6",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-two-2-units-of-multi-purpose-buildin-031e616c.html?v=7133f8cab2c6",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-two-2-units-of-multi-purpose-buildin-031e616c.png?v=382536a4777c",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-two-2-units-of-multi-purpose-buildin-031e616c.html?v=382536a4777c",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0869-014953"
     },
     {
@@ -9211,8 +9657,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-barangay-pobl-b4bb758d",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-pobl-b4bb758d.png?v=9bb8bde3d953",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-pobl-b4bb758d.html?v=9bb8bde3d953",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-pobl-b4bb758d.png?v=b690f688e3d9",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-pobl-b4bb758d.html?v=b690f688e3d9",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0869-014956"
     },
     {
@@ -9280,8 +9726,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-barangay-kaga-252af632",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-kaga-252af632.png?v=9b7c2e0ef37a",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-kaga-252af632.html?v=9b7c2e0ef37a",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-kaga-252af632.png?v=7933617b207a",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-kaga-252af632.html?v=7933617b207a",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0869-014960"
     },
     {
@@ -9349,8 +9795,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-barangay-dala-d8c3e069",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-dala-d8c3e069.png?v=d39c00704ff1",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-dala-d8c3e069.html?v=d39c00704ff1",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-dala-d8c3e069.png?v=153d49d2b76b",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-barangay-dala-d8c3e069.html?v=153d49d2b76b",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0877-015113"
     },
     {
@@ -9418,8 +9864,8 @@
         }
       ],
       "shareSlug": "construction-of-two-storey-multi-purpose-building-ba-4dcf1ebe",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-two-storey-multi-purpose-building-ba-4dcf1ebe.png?v=18f8113e1901",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-two-storey-multi-purpose-building-ba-4dcf1ebe.html?v=18f8113e1901",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-two-storey-multi-purpose-building-ba-4dcf1ebe.png?v=4f6dd4b8daad",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-two-storey-multi-purpose-building-ba-4dcf1ebe.html?v=4f6dd4b8daad",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0877-015115"
     },
     {
@@ -9487,8 +9933,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-buildings-barangay-mac-6bb23666",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-buildings-barangay-mac-6bb23666.png?v=724d3a64a2bd",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-buildings-barangay-mac-6bb23666.html?v=724d3a64a2bd",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-buildings-barangay-mac-6bb23666.png?v=86da177cfa27",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-buildings-barangay-mac-6bb23666.html?v=86da177cfa27",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0881-015175"
     },
     {
@@ -9556,8 +10002,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-at-corazon-aq-32b17911",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-at-corazon-aq-32b17911.png?v=1668bb845da8",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-at-corazon-aq-32b17911.html?v=1668bb845da8",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-at-corazon-aq-32b17911.png?v=256809659989",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-at-corazon-aq-32b17911.html?v=256809659989",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0889-015339"
     },
     {
@@ -9612,8 +10058,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-at-awao-nhs-b-fba91741",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-at-awao-nhs-b-fba91741.png?v=7ab8a6da747a",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-at-awao-nhs-b-fba91741.html?v=7ab8a6da747a",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-at-awao-nhs-b-fba91741.png?v=4d9cd6a0bbff",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-at-awao-nhs-b-fba91741.html?v=4d9cd6a0bbff",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0890-015348"
     },
     {
@@ -9669,8 +10115,8 @@
         }
       ],
       "shareSlug": "construction-completion-of-multi-purpose-building-8-f5e0abbe",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-8-f5e0abbe.png?v=7f96a8a2231f",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-8-f5e0abbe.html?v=7f96a8a2231f",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-8-f5e0abbe.png?v=16739f8b05b7",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-8-f5e0abbe.html?v=16739f8b05b7",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0915-015833"
     },
     {
@@ -9734,8 +10180,8 @@
         }
       ],
       "shareSlug": "construction-of-mutli-purpose-building-barangay-raja-58d71e9a",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-mutli-purpose-building-barangay-raja-58d71e9a.png?v=0566d3b6a495",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-mutli-purpose-building-barangay-raja-58d71e9a.html?v=0566d3b6a495",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-mutli-purpose-building-barangay-raja-58d71e9a.png?v=27825a3c4fd8",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-mutli-purpose-building-barangay-raja-58d71e9a.html?v=27825a3c4fd8",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0924-016004"
     },
     {
@@ -9794,8 +10240,8 @@
         }
       ],
       "shareSlug": "construction-completion-of-dpwh-cagayan-de-oro-city-bae902e6",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-dpwh-cagayan-de-oro-city-bae902e6.png?v=3eb38597943f",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-dpwh-cagayan-de-oro-city-bae902e6.html?v=3eb38597943f",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-dpwh-cagayan-de-oro-city-bae902e6.png?v=bd324f1db52d",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-dpwh-cagayan-de-oro-city-bae902e6.html?v=bd324f1db52d",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0928-016049"
     },
     {
@@ -9847,8 +10293,8 @@
         }
       ],
       "shareSlug": "construction-of-dpwh-biliran-deo-multi-purpose-build-88d83c3c",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-dpwh-biliran-deo-multi-purpose-build-88d83c3c.png?v=91d1c4a73cc8",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-dpwh-biliran-deo-multi-purpose-build-88d83c3c.html?v=91d1c4a73cc8",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-dpwh-biliran-deo-multi-purpose-build-88d83c3c.png?v=3cb46cc964db",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-dpwh-biliran-deo-multi-purpose-build-88d83c3c.html?v=3cb46cc964db",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0928-016058"
     },
     {
@@ -9876,8 +10322,8 @@
       "representativeCards": [],
       "geographicEvidence": [],
       "shareSlug": "construction-of-dpwh-bulacan-2nd-deo-office-building-3e0c254a",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-dpwh-bulacan-2nd-deo-office-building-3e0c254a.png?v=1c09be3c0b05",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-dpwh-bulacan-2nd-deo-office-building-3e0c254a.html?v=1c09be3c0b05",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-dpwh-bulacan-2nd-deo-office-building-3e0c254a.png?v=af82a100baa9",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-dpwh-bulacan-2nd-deo-office-building-3e0c254a.html?v=af82a100baa9",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0928-016059"
     },
     {
@@ -9936,8 +10382,8 @@
         }
       ],
       "shareSlug": "construction-of-dpwh-cagayan-1st-district-engineerin-9cdb7b00",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-dpwh-cagayan-1st-district-engineerin-9cdb7b00.png?v=19cece1558d6",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-dpwh-cagayan-1st-district-engineerin-9cdb7b00.html?v=19cece1558d6",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-dpwh-cagayan-1st-district-engineerin-9cdb7b00.png?v=870cb4038177",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-dpwh-cagayan-1st-district-engineerin-9cdb7b00.html?v=870cb4038177",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0928-016060"
     },
     {
@@ -10006,8 +10452,8 @@
         }
       ],
       "shareSlug": "construction-of-dpwh-iloilo-6th-deo-compound-baranga-9adc95f4",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-dpwh-iloilo-6th-deo-compound-baranga-9adc95f4.png?v=f8b08607a3a4",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-dpwh-iloilo-6th-deo-compound-baranga-9adc95f4.html?v=f8b08607a3a4",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-dpwh-iloilo-6th-deo-compound-baranga-9adc95f4.png?v=9b88676486fd",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-dpwh-iloilo-6th-deo-compound-baranga-9adc95f4.html?v=9b88676486fd",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0928-016061"
     },
     {
@@ -10067,8 +10513,8 @@
         }
       ],
       "shareSlug": "construction-of-dpwh-mp1st-deo-quality-assurance-off-05c58b3c",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-dpwh-mp1st-deo-quality-assurance-off-05c58b3c.png?v=b2b6a782cd80",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-dpwh-mp1st-deo-quality-assurance-off-05c58b3c.html?v=b2b6a782cd80",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-dpwh-mp1st-deo-quality-assurance-off-05c58b3c.png?v=e7a6d3c56303",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-dpwh-mp1st-deo-quality-assurance-off-05c58b3c.html?v=e7a6d3c56303",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0928-016063"
     },
     {
@@ -10127,8 +10573,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-emergency-ope-01bceac6",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-emergency-ope-01bceac6.png?v=25d5f63d4726",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-emergency-ope-01bceac6.html?v=25d5f63d4726",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-emergency-ope-01bceac6.png?v=1e87c36887e4",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-emergency-ope-01bceac6.html?v=1e87c36887e4",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0930-016106"
     },
     {
@@ -10187,8 +10633,8 @@
         }
       ],
       "shareSlug": "construction-of-new-office-building-bataan-2nd-deo-b-c6979138",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-new-office-building-bataan-2nd-deo-b-c6979138.png?v=f8205ff10648",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-new-office-building-bataan-2nd-deo-b-c6979138.html?v=f8205ff10648",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-new-office-building-bataan-2nd-deo-b-c6979138.png?v=71cc1cb73c65",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-new-office-building-bataan-2nd-deo-b-c6979138.html?v=71cc1cb73c65",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0931-016114"
     },
     {
@@ -10247,8 +10693,8 @@
         }
       ],
       "shareSlug": "construction-of-three-storey-multi-purpose-building-c2adef06",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-three-storey-multi-purpose-building-c2adef06.png?v=d2306f57691b",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-three-storey-multi-purpose-building-c2adef06.html?v=d2306f57691b",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-three-storey-multi-purpose-building-c2adef06.png?v=804cdc2c3597",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-three-storey-multi-purpose-building-c2adef06.html?v=804cdc2c3597",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0931-016119"
     },
     {
@@ -10309,8 +10755,8 @@
         }
       ],
       "shareSlug": "construction-of-dpwh-metro-manila-2nd-deo-field-offi-28cc4e7d",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-dpwh-metro-manila-2nd-deo-field-offi-28cc4e7d.png?v=ac054700987c",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-dpwh-metro-manila-2nd-deo-field-offi-28cc4e7d.html?v=ac054700987c",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-dpwh-metro-manila-2nd-deo-field-offi-28cc4e7d.png?v=ed350f4787e1",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-dpwh-metro-manila-2nd-deo-field-offi-28cc4e7d.html?v=ed350f4787e1",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0932-016146"
     },
     {
@@ -10374,8 +10820,8 @@
         }
       ],
       "shareSlug": "construction-completion-of-office-building-dpwh-iloc-a5114380",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-office-building-dpwh-iloc-a5114380.png?v=e7435489b29b",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-office-building-dpwh-iloc-a5114380.html?v=e7435489b29b",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-office-building-dpwh-iloc-a5114380.png?v=1f2d2ed24200",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-office-building-dpwh-iloc-a5114380.html?v=1f2d2ed24200",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0933-016152"
     },
     {
@@ -10440,8 +10886,8 @@
         }
       ],
       "shareSlug": "construction-completion-of-quality-assurance-section-bc1ff84d",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-quality-assurance-section-bc1ff84d.png?v=d7c24b94d92e",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-quality-assurance-section-bc1ff84d.html?v=d7c24b94d92e",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-quality-assurance-section-bc1ff84d.png?v=e486b320327b",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-quality-assurance-section-bc1ff84d.html?v=e486b320327b",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0933-016156"
     },
     {
@@ -10501,8 +10947,8 @@
         }
       ],
       "shareSlug": "construction-completion-of-upper-kalinga-deo-quarter-dca84397",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-upper-kalinga-deo-quarter-dca84397.png?v=be3ba111645e",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-upper-kalinga-deo-quarter-dca84397.html?v=be3ba111645e",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-upper-kalinga-deo-quarter-dca84397.png?v=c97aab4a0bf9",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-upper-kalinga-deo-quarter-dca84397.html?v=c97aab4a0bf9",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0933-016157"
     },
     {
@@ -10631,8 +11077,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-heavy-equipme-b40b5476",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-heavy-equipme-b40b5476.png?v=c09ebfb8c9e8",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-heavy-equipme-b40b5476.html?v=c09ebfb8c9e8",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-heavy-equipme-b40b5476.png?v=ad9cb646dc61",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-heavy-equipme-b40b5476.html?v=ad9cb646dc61",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0933-016159"
     },
     {
@@ -10691,8 +11137,8 @@
         }
       ],
       "shareSlug": "rehabilitation-of-dpwh-batanes-district-engineering-1059ac3b",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/rehabilitation-of-dpwh-batanes-district-engineering-1059ac3b.png?v=4e490bd61132",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/rehabilitation-of-dpwh-batanes-district-engineering-1059ac3b.html?v=4e490bd61132",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/rehabilitation-of-dpwh-batanes-district-engineering-1059ac3b.png?v=84fcac6622d0",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/rehabilitation-of-dpwh-batanes-district-engineering-1059ac3b.html?v=84fcac6622d0",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0933-016160"
     },
     {
@@ -10757,8 +11203,8 @@
         }
       ],
       "shareSlug": "construction-completion-of-dpwh-quirino-district-eng-29973c2e",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-dpwh-quirino-district-eng-29973c2e.png?v=a6bbe61646c8",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-dpwh-quirino-district-eng-29973c2e.html?v=a6bbe61646c8",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-dpwh-quirino-district-eng-29973c2e.png?v=fc63babe1500",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-dpwh-quirino-district-eng-29973c2e.html?v=fc63babe1500",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0934-016173"
     },
     {
@@ -10823,8 +11269,8 @@
         }
       ],
       "shareSlug": "construction-completion-of-multi-purpose-building-mo-d0ef12c3",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-mo-d0ef12c3.png?v=154db1e1a0b2",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-mo-d0ef12c3.html?v=154db1e1a0b2",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-mo-d0ef12c3.png?v=4b4622d248bf",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-multi-purpose-building-mo-d0ef12c3.html?v=4b4622d248bf",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0935-016183"
     },
     {
@@ -10888,8 +11334,8 @@
         }
       ],
       "shareSlug": "construction-completion-of-dpwh-capiz-1st-deo-office-6cdc9be3",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-dpwh-capiz-1st-deo-office-6cdc9be3.png?v=159670753fe2",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-dpwh-capiz-1st-deo-office-6cdc9be3.html?v=159670753fe2",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-dpwh-capiz-1st-deo-office-6cdc9be3.png?v=130b16cd5fc9",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-dpwh-capiz-1st-deo-office-6cdc9be3.html?v=130b16cd5fc9",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0936-016208"
     },
     {
@@ -10963,8 +11409,8 @@
         }
       ],
       "shareSlug": "construction-of-motorpool-building-dpwh-iloilo-6th-d-2de1f92b",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-motorpool-building-dpwh-iloilo-6th-d-2de1f92b.png?v=f43eee2a2cf1",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-motorpool-building-dpwh-iloilo-6th-d-2de1f92b.html?v=f43eee2a2cf1",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-motorpool-building-dpwh-iloilo-6th-d-2de1f92b.png?v=e19a7b4ff850",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-motorpool-building-dpwh-iloilo-6th-d-2de1f92b.html?v=e19a7b4ff850",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0937-016211"
     },
     {
@@ -11038,8 +11484,8 @@
         }
       ],
       "shareSlug": "construction-of-multi-purpose-building-dpwh-iloilo-6-bc0a52ff",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-dpwh-iloilo-6-bc0a52ff.png?v=dd75c5ef958b",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-dpwh-iloilo-6-bc0a52ff.html?v=dd75c5ef958b",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-dpwh-iloilo-6-bc0a52ff.png?v=9b88457cb6d7",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-multi-purpose-building-dpwh-iloilo-6-bc0a52ff.html?v=9b88457cb6d7",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0937-016212"
     },
     {
@@ -11085,8 +11531,8 @@
         }
       ],
       "shareSlug": "construction-of-dpwh-leyte-1st-district-engineering-853dca23",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-dpwh-leyte-1st-district-engineering-853dca23.png?v=985044ef9b98",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-dpwh-leyte-1st-district-engineering-853dca23.html?v=985044ef9b98",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-dpwh-leyte-1st-district-engineering-853dca23.png?v=9a2fc554ba50",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-dpwh-leyte-1st-district-engineering-853dca23.html?v=9a2fc554ba50",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0937-016222"
     },
     {
@@ -11150,8 +11596,8 @@
         }
       ],
       "shareSlug": "construction-of-dpwh-northern-samar-2nd-deo-annex-bu-aecd03c2",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-dpwh-northern-samar-2nd-deo-annex-bu-aecd03c2.png?v=ed0e9b810ae3",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-dpwh-northern-samar-2nd-deo-annex-bu-aecd03c2.html?v=ed0e9b810ae3",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-dpwh-northern-samar-2nd-deo-annex-bu-aecd03c2.png?v=f0cee03f5cae",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-dpwh-northern-samar-2nd-deo-annex-bu-aecd03c2.html?v=f0cee03f5cae",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0937-016223"
     },
     {
@@ -11208,8 +11654,8 @@
         }
       ],
       "shareSlug": "construction-of-dpwh-lanao-del-norte-2nd-district-en-602f6bcc",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-dpwh-lanao-del-norte-2nd-district-en-602f6bcc.png?v=116edc2334b7",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-dpwh-lanao-del-norte-2nd-district-en-602f6bcc.html?v=116edc2334b7",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-dpwh-lanao-del-norte-2nd-district-en-602f6bcc.png?v=aa498e54875a",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-of-dpwh-lanao-del-norte-2nd-district-en-602f6bcc.html?v=aa498e54875a",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0938-016226"
     },
     {
@@ -11276,8 +11722,8 @@
         }
       ],
       "shareSlug": "construction-completion-of-quality-assurance-buildin-8b72bd52",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-quality-assurance-buildin-8b72bd52.png?v=dc8c56964fd7",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-quality-assurance-buildin-8b72bd52.html?v=dc8c56964fd7",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-quality-assurance-buildin-8b72bd52.png?v=4f84e18b8717",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-quality-assurance-buildin-8b72bd52.html?v=4f84e18b8717",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0939-016244"
     },
     {
@@ -11344,8 +11790,8 @@
         }
       ],
       "shareSlug": "construction-completion-of-records-management-buildi-aedc1643",
-      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-records-management-buildi-aedc1643.png?v=54927ec8d168",
-      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-records-management-buildi-aedc1643.html?v=54927ec8d168",
+      "shareImage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-records-management-buildi-aedc1643.png?v=c54b304306db",
+      "sharePage": "https://research.bettergov.ph/static/nep-preview/out-of-place-share/construction-completion-of-records-management-buildi-aedc1643.html?v=c54b304306db",
       "interactivePage": "../out-of-place.html?project=HB10858-3-0939-016245"
     }
   ]
