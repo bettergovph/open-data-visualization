@@ -3,6 +3,7 @@
 const el=id=>document.getElementById(id),esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const number=v=>Number(v).toLocaleString('en-PH',{maximumFractionDigits:2}),peso=v=>'₱'+number(v),base='/api/nep-documents/';
 let current=null,rows=[],sequence=0;
+if(new URLSearchParams(location.search).get('popup')==='1')document.body.classList.add('popup-view');
 async function json(url,options){const r=await fetch(url,options);if(!r.ok)throw Error('Request unavailable ('+r.status+')');return r.json()}
 function status(text){el('status').textContent=text}
 function sourceUrl(doc){const url=new URL(doc.url);if(url.protocol!=='https:')throw Error('Invalid source URL');return url.href}
