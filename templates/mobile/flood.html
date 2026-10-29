@@ -61,6 +61,17 @@
         text-align: center;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
+
+    .mobile-flood-table-wrap { overflow-x: auto; background: #fff; border-radius: 8px; }
+    .mobile-flood-table { width: 100%; table-layout: fixed; border-collapse: collapse; font-size: 0.72rem; }
+    .mobile-flood-table th { padding: 0.55rem 0.35rem; background: #0038a8; color: #fff; text-align: left; }
+    .mobile-flood-table td { padding: 0.55rem 0.35rem; border-bottom: 1px solid #e5e7eb; overflow-wrap: anywhere; vertical-align: top; }
+    .mobile-flood-table th:nth-child(1), .mobile-flood-table td:nth-child(1) { width: 22%; }
+    .mobile-flood-table th:nth-child(2), .mobile-flood-table td:nth-child(2) { width: 43%; }
+    .mobile-flood-table th:nth-child(3), .mobile-flood-table td:nth-child(3) { width: 19%; }
+    .mobile-flood-table th:nth-child(4), .mobile-flood-table td:nth-child(4) { width: 16%; text-align: right; }
+    .mobile-flood-flag { display: inline-block; margin: 0 0 0.2rem; padding: 0.12rem 0.3rem; border-radius: 999px; background: #fee2e2; color: #991b1b; font-size: 0.62rem; line-height: 1.25; }
+    .mobile-flood-flag-none { background: #f3f4f6; color: #4b5563; }
 </style>
 {% endblock %}
 
@@ -73,13 +84,34 @@
 
     <!-- Tabs -->
     <div class="mobile-flood-tabs">
-        <button class="mobile-tab-btn active" data-tab="proximity">📍 Proximity</button>
+        <button class="mobile-tab-btn active" data-tab="projects">📋 Projects</button>
+        <button class="mobile-tab-btn" data-tab="proximity">📍 Proximity</button>
         <button class="mobile-tab-btn" data-tab="contractors">🏗️ Contractors</button>
         <button class="mobile-tab-btn" data-tab="contractors-web">🕸️ Contractors Web</button>
     </div>
 
+    <!-- Projects Tab -->
+    <div id="projects-tab" class="mobile-tab-panel active">
+        <p class="text-xs text-gray-600 mb-3">Search flood projects by contract ID or project title.</p>
+        <input id="mobile-projects-search" type="search" placeholder="Contract ID or project title"
+            aria-label="Search by contract ID or project title"
+            style="width:100%;padding:0.65rem;border:1px solid #d1d5db;border-radius:6px;font-size:14px;margin-bottom:0.75rem;">
+        <div id="mobile-projects-status" class="text-xs text-gray-600 mb-2" aria-live="polite">Loading projects…</div>
+        <div class="mobile-flood-table-wrap">
+            <table class="mobile-flood-table">
+                <thead><tr><th>Contract ID</th><th>Project</th><th>Flags</th><th>Cost</th></tr></thead>
+                <tbody id="mobile-projects-table-body"><tr><td colspan="4" style="text-align:center">Loading…</td></tr></tbody>
+            </table>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:0.5rem;margin-top:0.75rem;">
+            <button id="mobile-projects-prev" type="button" class="mobile-tab-btn" disabled>← Previous</button>
+            <span id="mobile-projects-page" class="text-xs text-gray-600">Page 1</span>
+            <button id="mobile-projects-next" type="button" class="mobile-tab-btn" disabled>Next →</button>
+        </div>
+    </div>
+
     <!-- Proximity Tab -->
-    <div id="proximity-tab" class="mobile-tab-panel active">
+    <div id="proximity-tab" class="mobile-tab-panel">
         <p class="text-xs text-gray-600 mb-3">
             Projects with same amounts at close locations (proximity analysis)
         </p>
@@ -159,7 +191,9 @@
         document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
         document.getElementById(`${tabName}-tab`).classList.add('active');
 
-        if (tabName === 'proximity' && !proximityLoaded) {
+        if (tabName === 'projects' && !projectsLoaded) {
+            loadMobileProjects();
+        } else if (tabName === 'proximity' && !proximityLoaded) {
             loadProximityData();
         } else if (tabName === 'contractors' && !contractorsLoaded) {
             loadContractorsData('');
@@ -177,6 +211,78 @@
     let proximityLoaded = false;
     let contractorsLoaded = false;
     let contractorsWebLoaded = false;
+    let projectsLoaded = false;
+    let mobileProjects = [];
+    let mobileProjectsPage = 0;
+    const mobileProjectsPageSize = 25;
+
+    function mobileEscapeHtml(value) {
+        const div = document.createElement('div');
+        div.textContent = value == null ? '' : String(value);
+        return div.innerHTML;
+    }
+
+    function renderMobileProjects() {
+        const body = document.getElementById('mobile-projects-table-body');
+        const status = document.getElementById('mobile-projects-status');
+        const pageLabel = document.getElementById('mobile-projects-page');
+        const prev = document.getElementById('mobile-projects-prev');
+        const next = document.getElementById('mobile-projects-next');
+        const query = (document.getElementById('mobile-projects-search')?.value || '').trim().toLowerCase();
+        const filtered = mobileProjects.filter(project => {
+            const contractId = project.ContractID || project.contract_id || project.contractId || '';
+            return !query || String(contractId).toLowerCase().includes(query) || String(project.ProjectDescription || '').toLowerCase().includes(query);
+        });
+        const pages = Math.max(1, Math.ceil(filtered.length / mobileProjectsPageSize));
+        mobileProjectsPage = Math.min(mobileProjectsPage, pages - 1);
+        const rows = filtered.slice(mobileProjectsPage * mobileProjectsPageSize, (mobileProjectsPage + 1) * mobileProjectsPageSize);
+        body.innerHTML = rows.length ? rows.map(project => {
+            const contractId = project.ContractID || project.contract_id || project.contractId || '—';
+            const flags = project.flags || {};
+            const redFlags = Array.isArray(flags.redFlags) ? flags.redFlags : [];
+            const flagHtml = redFlags.length
+                ? redFlags.map(flag => `<span class="mobile-flood-flag">${mobileEscapeHtml(flag?.classification || 'Red Flag')}</span>`).join(' ')
+                : flags.isGreenFlag
+                    ? '<span class="mobile-flood-flag mobile-flood-flag-none">Green</span>'
+                    : '<span class="mobile-flood-flag mobile-flood-flag-none">None</span>';
+            const cost = Number.parseFloat(project.ContractCost);
+            return `<tr><td>${mobileEscapeHtml(contractId)}</td><td>${mobileEscapeHtml(project.ProjectDescription || 'N/A')}</td><td>${flagHtml}</td><td>${Number.isFinite(cost) ? '₱' + cost.toLocaleString('en-PH', { maximumFractionDigits: 0 }) : 'N/A'}</td></tr>`;
+        }).join('') : '<tr><td colspan="4" style="text-align:center;color:#6b7280">No projects match your search.</td></tr>';
+        status.textContent = `${filtered.length.toLocaleString('en-PH')} projects`;
+        pageLabel.textContent = `Page ${mobileProjectsPage + 1} of ${pages}`;
+        prev.disabled = mobileProjectsPage === 0;
+        next.disabled = mobileProjectsPage >= pages - 1;
+    }
+
+    async function loadMobileProjects() {
+        const status = document.getElementById('mobile-projects-status');
+        try {
+            status.textContent = 'Loading projects…';
+            const response = await fetch('/api/flood/projects?limit=20000');
+            if (!response.ok) throw new Error(`Request failed (${response.status})`);
+            const data = await response.json();
+            mobileProjects = data.projects || [];
+            projectsLoaded = true;
+            renderMobileProjects();
+        } catch (error) {
+            console.error('Error loading mobile flood projects:', error);
+            status.textContent = 'Could not load flood projects.';
+            document.getElementById('mobile-projects-table-body').innerHTML = '<tr><td colspan="4" style="text-align:center;color:#991b1b">Project data is unavailable.</td></tr>';
+        }
+    }
+
+    document.getElementById('mobile-projects-search').addEventListener('input', () => {
+        mobileProjectsPage = 0;
+        renderMobileProjects();
+    });
+    document.getElementById('mobile-projects-prev').addEventListener('click', () => {
+        mobileProjectsPage = Math.max(0, mobileProjectsPage - 1);
+        renderMobileProjects();
+    });
+    document.getElementById('mobile-projects-next').addEventListener('click', () => {
+        mobileProjectsPage += 1;
+        renderMobileProjects();
+    });
 
     async function loadProximityData() {
         const loadingEl = document.getElementById('proximity-loading');
@@ -563,8 +669,7 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         console.log('Flood page loaded, initializing...');
-        // Load proximity data on page load since it's the default active tab
-        loadProximityData();
+        loadMobileProjects();
     });
 </script>
 {% endblock %}

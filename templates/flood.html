@@ -909,6 +909,9 @@
                                                         style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">
                                                         Project</th>
                                                     <th
+                                                        style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd; white-space: nowrap;">
+                                                        Contract ID</th>
+                                                    <th
                                                         style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">
                                                         Region</th>
                                                     <th
@@ -927,7 +930,7 @@
                                             </thead>
                                             <tbody id="projects-table-body">
                                                 <tr>
-                                                    <td colspan="7"
+                                                    <td colspan="8"
                                                         style="padding: 40px; text-align: center; color: #666;">
                                                         <div
                                                             style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
@@ -2504,7 +2507,8 @@
 
             filteredTableProjects = allTableProjects.filter(project => {
                 // Project search filter
-                if (projectSearch && !project.ProjectDescription?.toLowerCase().includes(projectSearch)) {
+                const contractId = project.ContractID || project.contract_id || project.contractId || '';
+                if (projectSearch && !project.ProjectDescription?.toLowerCase().includes(projectSearch) && !String(contractId).toLowerCase().includes(projectSearch)) {
                     return false;
                 }
 
@@ -2778,7 +2782,7 @@
             if (projectsToDisplay.length === 0) {
                 html = `
                 <tr>
-                    <td colspan="7" style="padding: 40px; text-align: center; color: #dc3545;">
+                    <td colspan="8" style="padding: 40px; text-align: center; color: #dc3545;">
                         <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
                             <div style="font-size: 24px;">⚠️</div>
                             <div>No projects found matching your criteria.</div>
@@ -2790,6 +2794,7 @@
                 html = projectsToDisplay.map(project => `
                 <tr>
                     <td style="padding: 12px; border-bottom: 1px solid #eee;">${escapeHtml(project.ProjectDescription || 'N/A')}</td>
+                    <td style="padding: 12px; border-bottom: 1px solid #eee; white-space: nowrap;">${escapeHtml(project.ContractID || project.contract_id || project.contractId || 'N/A')}</td>
                     <td style="padding: 12px; border-bottom: 1px solid #eee;">${escapeHtml(project.Region || 'N/A')}</td>
                     <td style="padding: 12px; border-bottom: 1px solid #eee;">${escapeHtml(project.InfraYear || 'N/A')}</td>
                     <td style="padding: 12px; border-bottom: 1px solid #eee;">${escapeHtml(project.TypeofWork || 'N/A')}</td>
@@ -2823,7 +2828,7 @@
 
             let csvContent = "data:text/csv;charset=utf-8,";
             // Added Flags to headers
-            const headers = ["Project Description", "Region", "Province", "Year", "Type of Work", "Flags", "Cost", "Contractor"];
+            const headers = ["Project Description", "Contract ID", "Region", "Province", "Year", "Type of Work", "Flags", "Cost", "Contractor"];
             csvContent += headers.join(",") + "\n";
 
             allTableProjects.forEach(project => {
@@ -2842,6 +2847,7 @@
 
                 const row = [
                     `"${String(project.ProjectDescription || 'N/A').replace(/"/g, '""')}"`,
+                    `"${String(project.ContractID || project.contract_id || project.contractId || 'N/A').replace(/"/g, '""')}"`,
                     `"${String(project.Region || 'N/A').replace(/"/g, '""')}"`,
                     `"${String(project.Province || 'N/A').replace(/"/g, '""')}"`,
                     `"${String(project.InfraYear || 'N/A').replace(/"/g, '""')}"`,
