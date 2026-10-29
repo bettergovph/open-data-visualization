@@ -3,7 +3,7 @@
 const el=id=>document.getElementById(id),esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const number=v=>Number(v).toLocaleString('en-PH',{maximumFractionDigits:2}),peso=v=>'₱'+number(v),base='/api/nep-documents/';
 let current=null,rows=[],sequence=0;
-if(new URLSearchParams(location.search).get('popup')==='1')document.body.classList.add('popup-view');
+if(new URLSearchParams(location.search).get('popup')==='1')document.addEventListener('DOMContentLoaded',()=>{const main=document.querySelector('body>main');if(!main)return;[...document.body.children].forEach(node=>{if(node!==main)node.remove()});document.body.classList.add('popup-view')},{once:true});
 async function json(url,options){const r=await fetch(url,options);if(!r.ok)throw Error('Request unavailable ('+r.status+')');return r.json()}
 function status(text){el('status').textContent=text}
 function sourceUrl(doc){const url=new URL(doc.url);if(url.protocol!=='https:')throw Error('Invalid source URL');return url.href}
@@ -34,7 +34,7 @@ function render(data){
  if(errors.length)status('Document retrieval or processing is incomplete. A PH-connected worker may be required. Original source links remain available.');
 }
 async function open(){const seq=++sequence,code=el('projectCode').value.trim();if(!/^2027DPWH-Proposal-\d{5}$/.test(code)){status('Use a FY2027 DPWH proposal code.');return}
- current=null;el('photos').hidden=true;el('original').hidden=true;el('photoPages').replaceChildren();el('pdf').removeAttribute('src');el('drivers').hidden=true;status('Loading BetterGov metadata; no PDF download requested.');history.replaceState(null,'','?project='+encodeURIComponent(code));
+ current=null;el('photos').hidden=true;el('original').hidden=true;el('photoPages').replaceChildren();el('pdf').removeAttribute('src');el('drivers').hidden=true;status('Loading BetterGov metadata; no PDF download requested.');const query=new URLSearchParams({project:code});if(new URLSearchParams(location.search).get('popup')==='1')query.set('popup','1');history.replaceState(null,'','?'+query.toString());
  // Published parsed evidence remains usable without the optional live worker.
  try{const snapshot=await json('dpwh-in-depth-data.json'),cached=snapshot.projects.find(p=>p.code===code);if(seq!==sequence)return;if(cached?.documents.some(d=>d.rows.length)){render({project:{code:cached.code,projectName:cached.name,office:cached.office,nepAllocationPesos:cached.allocationPesos,documents:cached.documentLinks.map(d=>({documentType:d.type,url:d.url}))},stage:snapshot.stage,result:{documents:cached.documents.map(d=>({...d,metadata:{url:d.url},pow:d.kind==='pow'?{rows:d.rows,itemizedDirectCostControls:d.controls,status:'cached_parsed_rows'}:undefined}))},staticEvidence:true});status('Published parsed cache loaded. Original document links remain available; live processing is optional.');return}}catch(e){}
  try{const d=await json(base+encodeURIComponent(code));if(seq!==sequence)return;render(d);status('Metadata ready. Parse the POW/RDC or open the original photo PDF when needed.')}
