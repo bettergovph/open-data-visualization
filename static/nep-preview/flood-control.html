@@ -74,8 +74,8 @@ body.bettergov-research>header .report-header-heading>p{margin:0!important;paddi
       <div class="chart-panel"><h3>Classified road allocations across districts</h3><p>GAA 2020–2026 compared with HGAB 2027 · assigned amounts, ₱ billions</p><div id="road-annual-chart" class="history-chart"></div></div>
       <div class="chart-panel"><h3>Districts with road allocations above their prior high</h3><p>Top five by amount above the district’s highest observed GAA year · ₱ billions</p><div id="road-district-chart" class="history-chart"></div></div>
     </div>
-    <h3>Does the current riser cluster in a DEO?</h3>
-    <p class="section-intro">These charts group HGAB 2027 lines by their listed office, separately from the historical district trend. “Central Office” is not a DEO. Historical GAA rows in this comparison do not retain DEO labels, so this checks current allocation concentration only; it cannot establish which DEO drove a year-over-year rise or whether an office pattern recurred.</p>
+    <h3>How are current allocations distributed across named offices?</h3>
+    <p class="section-intro">This is a separate allocation-distribution question, not an explanation for the historical changes above. The figures show HGAB 2027 amounts assigned to named offices and the share held by the three largest named DEOs. “Central Office” is reported separately and is not a DEO. Historical GAA rows here do not retain comparable DEO labels, so this snapshot cannot show whether office concentration changed over time.</p>
     <div class="stat-grid" id="deo-cluster-stats"></div>
     <div class="chart-grid">
       <div class="chart-panel"><h3>Road · largest named DEO allocations</h3><p>HGAB 2027 only · blue bars show share of road amounts assigned to named DEOs</p><div id="road-deo-chart"></div></div>
@@ -185,7 +185,7 @@ body.bettergov-research>header .report-header-heading>p{margin:0!important;paddi
     {
       const categories=['Road','Multi-purpose building','Flood control','Bridge'];
       const series=categories.map(c=>allYearSeries[c]||[]),years=[...new Set(series.flat().map(r=>r.year))].sort((a,b)=>a-b);
-      const values=series.flat().map(rows=>rows.map(r=>r.changeVsOtherYearsPct??0)).flat();
+      const values=series.flat().map(r=>r.changeVsOtherYearsPct??0);
       const positiveMax=Math.max(100,...values),maxPct=Math.ceil(positiveMax/50)*50,minPct=-100;
       const W=900,H=350,left=58,right=20,top=25,bottom=68,plotH=H-top-bottom,plotW=W-left-right;
       const zeroY=top+plotH*maxPct/(maxPct-minPct),step=plotW/years.length,bw=Math.min(15,step*.14),yOf=v=>top+(maxPct-Math.max(minPct,Math.min(maxPct,v)))*plotH/(maxPct-minPct);
