@@ -52,6 +52,16 @@ body.bettergov-research>header .report-header-heading>p{margin:0!important;paddi
 
   <aside class="intro report-disclaimer" id="report-evidence-notice" role="note"><strong>Disclaimer.</strong> This page compares patterns in public project and budget records to identify questions for review. A pattern, repeated title, allocation amount, location or comparison candidate does not establish duplication, improper conduct, responsibility or intent. The Bulacan reference uses DPWH contract records; the district comparison uses integrated GAA appropriations and HGAB 2027 3rd-reading amounts. These sources and stages are not directly equivalent. District assignment and project-family classification depend on available text and location evidence; shared, ambiguous and unresolved records may be excluded. Missing years do not mean zero appropriation. This site is updated as records are added and reviewed; calculations are preliminary and open to correction. More source documents, stakeholder input and independent review may improve accuracy or add context. Please inspect the linked records and share corrections.</aside>
 
+  <section class="report-section" aria-label="HGAB 2027 bridge and MPB DEO allocations">
+    <h3>Where are current bridge and MPB allocations concentrated?</h3>
+    <p class="section-intro">These charts show HGAB 2027 allocations by listed office for bridges and MPBs, including each family’s share assigned to its three largest named DEOs. “Central Office” is reported separately and is not a DEO. The historical GAA data does not retain comparable DEO labels, so office concentration is shown for HGAB 2027 only. The comparison-year and district filters in section 1 below provide historical context for the amounts.</p>
+    <div class="stat-grid" id="deo-cluster-stats"></div>
+    <div class="chart-grid">
+      <div class="chart-panel"><h3>Bridge · largest named DEO allocations</h3><p>HGAB 2027 only · blue bars show share of bridge amounts assigned to named DEOs</p><div id="bridge-deo-chart"></div></div>
+      <div class="chart-panel"><h3>MPB · largest named DEO allocations</h3><p>HGAB 2027 only · blue bars show share of MPB amounts assigned to named DEOs</p><div id="mpb-deo-chart"></div></div>
+    </div>
+  </section>
+
   <section class="report-section" aria-labelledby="current-history-title">
     <h2 id="current-history-title">1. Rise and Clustering</h2>
     <p class="section-intro">HGAB 2027 shows the clearest rise in bridge and multi-purpose-building allocations against recent GAA years. Choose a GAA comparison year below to see how those totals differ from HGAB 2027, then inspect the district histories and current office distribution. These are allocation patterns and review leads; they do not explain why funding changed. Missing bars mean no uniquely assigned row was available for that family-year in this snapshot, not a confirmed zero appropriation.</p>
@@ -59,13 +69,6 @@ body.bettergov-research>header .report-header-heading>p{margin:0!important;paddi
     <div class="chart-grid">
       <div class="chart-panel"><h3 id="family-annual-title">Selected family · annual allocations</h3><p>GAA 2020–2026 and HGAB 2027 · assigned amounts, ₱ billions</p><div id="family-annual-chart" class="history-chart"></div></div>
       <div class="chart-panel"><h3 id="family-district-title">Districts with the largest increases</h3><p>Top five increases from the selected GAA year to HGAB 2027 · ₱ billions</p><div id="family-district-chart" class="history-chart"></div></div>
-    </div>
-    <h3>Where are current bridge and MPB allocations concentrated?</h3>
-    <p class="section-intro">These charts show HGAB 2027 allocations by listed office for bridges and MPBs, including each family’s share assigned to its three largest named DEOs. “Central Office” is reported separately and is not a DEO. The historical GAA data does not retain comparable DEO labels; use the year filter above to compare amounts and the district history below to examine how the allocation changed, but office concentration can only be compared for HGAB 2027.</p>
-    <div class="stat-grid" id="deo-cluster-stats"></div>
-    <div class="chart-grid">
-      <div class="chart-panel"><h3>Bridge · largest named DEO allocations</h3><p>HGAB 2027 only · blue bars show share of bridge amounts assigned to named DEOs</p><div id="bridge-deo-chart"></div></div>
-      <div class="chart-panel"><h3>MPB · largest named DEO allocations</h3><p>HGAB 2027 only · blue bars show share of MPB amounts assigned to named DEOs</p><div id="mpb-deo-chart"></div></div>
     </div>
     <div class="chart-panel"><h3 id="rise-chart-title">HGAB 2027 and selected GAA year</h3><p>Classified family totals across assigned districts; amounts are appropriations in the listed budget stages.</p><div id="rise-comparison-chart" class="history-chart"></div></div>
 
@@ -233,10 +236,10 @@ body.bettergov-research>header .report-header-heading>p{margin:0!important;paddi
       document.getElementById('family-annual-chart').innerHTML=svg;
       const rows=scan.currentVsHistory.filter(r=>r.category===category).map(r=>{const base=r.historyPoints.find(p=>p.year===year&&p.stage==='GAA');return {...r,baseAmountPesos:base?.amountPesos||0,increasePesos:r.currentAmountPesos-(base?.amountPesos||0)}}).filter(r=>r.baseAmountPesos>0&&r.increasePesos>0).sort((a,b)=>b.increasePesos-a.increasePesos).slice(0,5);
       document.getElementById('family-district-title').textContent=`Districts with the largest ${category.toLowerCase()} increases`;
-      const rowH=46,chartTop=12,chartH=chartTop+rows.length*rowH+38,chartMax=Math.max(1,...rows.flatMap(r=>[r.baseAmountPesos,r.currentAmountPesos])),chartScale=(W-left-right)/chartMax;
+      const labelLeft=250,barsLeft=labelLeft+12,chartRight=82,rowH=46,chartTop=12,chartH=chartTop+rows.length*rowH+38,chartMax=Math.max(1,...rows.flatMap(r=>[r.baseAmountPesos,r.currentAmountPesos])),chartScale=(W-barsLeft-chartRight)/chartMax;
       let districtSvg=`<svg viewBox="0 0 ${W} ${chartH}" role="img" aria-label="Top ${category} district increases from GAA ${year} to HGAB 2027">`;
-      rows.forEach((r,i)=>{const y=chartTop+i*rowH,name=r.district.replace(' · ',' '),label=name.length>25?name.slice(0,23)+'…':name,baseW=r.baseAmountPesos*chartScale,currentW=r.currentAmountPesos*chartScale;districtSvg+=`<text class="history-label" x="${left-8}" y="${y+13}" text-anchor="end">${escapeHtml(label)}</text><rect class="history-selected" x="${left}" y="${y}" width="${Math.max(1,baseW)}" height="12" rx="3"><title>GAA ${year}: ${peso(r.baseAmountPesos)}</title></rect><rect class="history-current" x="${left}" y="${y+16}" width="${Math.max(1,currentW)}" height="12" rx="3"><title>HGAB 2027: ${peso(r.currentAmountPesos)} · increase ${peso(r.increasePesos)}</title></rect><text class="history-value" x="${Math.min(W-right-45,left+currentW+5)}" y="${y+26}">+${(r.increasePesos/1e9).toFixed(2)}B</text>`});
-      districtSvg+=`<rect class="history-selected" x="${left}" y="${chartH-14}" width="12" height="8"/><text class="history-label" x="${left+17}" y="${chartH-6}">GAA ${year}</text><rect class="history-current" x="${left+100}" y="${chartH-14}" width="12" height="8"/><text class="history-label" x="${left+117}" y="${chartH-6}">HGAB 2027</text></svg>`;
+      rows.forEach((r,i)=>{const y=chartTop+i*rowH,name=r.district.replace(' · ',' '),label=name.length>31?name.slice(0,29)+'…':name,baseW=r.baseAmountPesos*chartScale,currentW=r.currentAmountPesos*chartScale;districtSvg+=`<text class="history-label" x="${labelLeft}" y="${y+13}" text-anchor="end">${escapeHtml(label)}</text><rect class="history-selected" x="${barsLeft}" y="${y}" width="${Math.max(1,baseW)}" height="12" rx="3"><title>GAA ${year}: ${peso(r.baseAmountPesos)}</title></rect><rect class="history-current" x="${barsLeft}" y="${y+16}" width="${Math.max(1,currentW)}" height="12" rx="3"><title>HGAB 2027: ${peso(r.currentAmountPesos)} · increase ${peso(r.increasePesos)}</title></rect><text class="history-value" x="${Math.min(W-chartRight-45,barsLeft+currentW+5)}" y="${y+26}">+${(r.increasePesos/1e9).toFixed(2)}B</text>`});
+      districtSvg+=`<rect class="history-selected" x="${barsLeft}" y="${chartH-14}" width="12" height="8"/><text class="history-label" x="${barsLeft+17}" y="${chartH-6}">GAA ${year}</text><rect class="history-current" x="${barsLeft+100}" y="${chartH-14}" width="12" height="8"/><text class="history-label" x="${barsLeft+117}" y="${chartH-6}">HGAB 2027</text></svg>`;
       document.getElementById('family-district-chart').innerHTML=districtSvg;
     }
     renderFamilyCharts();
