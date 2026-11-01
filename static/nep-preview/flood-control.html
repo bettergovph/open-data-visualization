@@ -61,8 +61,8 @@ body.bettergov-research>header .report-header-heading>p{margin:0!important;paddi
     <div class="callout" id="flood-decline-callout"></div>
     <p class="table-note">This comparison can reveal a rise or fall even when it is separated from other years by a gap. The 2024 MPB low is retained as an observed pause: MPB allocations are above their all-other-years averages in 2025, 2026, and HGAB 2027, making the return visible without assuming annual funding. This is an allocation pattern; it does not establish whether projects were needed, deferred, or delivered in any particular year. The sharp 2026 flood-control change should be read alongside its classified row count and source coverage.</p>
     <div class="chart-grid">
-      <div class="chart-panel"><h3>Classified road allocations across districts</h3><p>GAA 2020–2026 compared with HGAB 2027 · assigned amounts, ₱ billions</p><div id="road-annual-chart" class="history-chart"></div></div>
-      <div class="chart-panel"><h3>Districts with road allocations above their prior high</h3><p>Top five by amount above the district’s highest observed GAA year · ₱ billions</p><div id="road-district-chart" class="history-chart"></div></div>
+      <div class="chart-panel"><h3 id="family-annual-title">Selected family · annual allocations</h3><p>GAA 2020–2026 and HGAB 2027 · assigned amounts, ₱ billions</p><div id="family-annual-chart" class="history-chart"></div></div>
+      <div class="chart-panel"><h3 id="family-district-title">Districts with the largest increases</h3><p>Top five increases from the selected GAA year to HGAB 2027 · ₱ billions</p><div id="family-district-chart" class="history-chart"></div></div>
     </div>
     <h3>Where are current bridge and MPB allocations concentrated?</h3>
     <p class="section-intro">These charts show HGAB 2027 allocations by listed office for bridges and MPBs, including each family’s share assigned to its three largest named DEOs. “Central Office” is reported separately and is not a DEO. The historical GAA data does not retain comparable DEO labels; use the year filter above to compare amounts and the district history below to examine how the allocation changed, but office concentration can only be compared for HGAB 2027.</p>
@@ -189,6 +189,7 @@ body.bettergov-research>header .report-header-heading>p{margin:0!important;paddi
     riseYear.innerHTML=Array.from({length:7},(_,i)=>2020+i).map(y=>`<option value="${y}">GAA ${y}</option>`).join('');
     riseFamily.innerHTML=comparisonFamilies.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
     riseYear.value='2026';
+    riseFamily.value='Bridge';
     function renderRiseComparison(){
       const category=riseFamily.value,year=Number(riseYear.value),points=(scan.nationalFamilyTotals[category]||[]),base=points.find(r=>r.year===year&&r.stage==='GAA'),current=points.find(r=>r.year===2027&&r.stage==='HGAB 3rd');
       const baseAmount=base?.amountPesos||0,currentAmount=current?.amountPesos||0,change=baseAmount?100*(currentAmount/baseAmount-1):null;
@@ -199,7 +200,7 @@ body.bettergov-research>header .report-header-heading>p{margin:0!important;paddi
       [[`GAA ${year}`,baseAmount,'history-bar'],['HGAB 2027',currentAmount,'history-current']].forEach(([label,amount,color],i)=>{const y=top+i*rowH,w=amount*scale;svg+=`<text class="history-label" x="${left-12}" y="${y+18}" text-anchor="end">${label}</text><rect class="${color}" x="${left}" y="${y}" width="${Math.max(1,w)}" height="30" rx="4"><title>${label}: ${peso(amount)}</title></rect><text class="history-value" x="${Math.min(left+w+8,W-right+4)}" y="${y+20}">${billion(amount)}</text>`});svg+='</svg>';
       document.getElementById('rise-comparison-chart').innerHTML=svg;
     }
-    riseYear.addEventListener('change',renderRiseComparison);riseFamily.addEventListener('change',renderRiseComparison);renderRiseComparison();
+    riseYear.addEventListener('change',()=>{renderRiseComparison();renderFamilyCharts()});riseFamily.addEventListener('change',()=>{renderRiseComparison();renderFamilyCharts()});renderRiseComparison();
     const allYearSeries=scan.allOtherYearComparisons;
     {
       const categories=['Road','Multi-purpose building','Flood control','Bridge'];
@@ -219,23 +220,24 @@ body.bettergov-research>header .report-header-heading>p{margin:0!important;paddi
       const floodYears=scan.nationalFamilyTotals['Flood control']||[],flood25=floodYears.find(r=>r.year===2025&&r.stage==='GAA'),flood26=floodYears.find(r=>r.year===2026&&r.stage==='GAA'),flood26Comparison=(allYearSeries['Flood control']||[]).find(r=>r.year===2026);
       if(flood25&&flood26){const change=100*(flood26.amountPesos/flood25.amountPesos-1);document.getElementById('flood-decline-callout').innerHTML=`<strong>2026 flood-control decline:</strong> assigned GAA amounts fell from ${billion(flood25.amountPesos)} across ${flood25.lineItems.toLocaleString()} classified rows in 2025 to ${billion(flood26.amountPesos)} across ${flood26.lineItems.toLocaleString()} in 2026 (${change.toFixed(1)}%). The 2026 amount is also ${flood26Comparison.changeVsOtherYearsPct.toFixed(1)}% below its mean across the other GAA years. This timing follows public exposure of flood-control concerns; the budget totals alone do not establish why allocations changed.`}
     }
-    const roadAnnual=scan.nationalFamilyTotals.Road||[];
     const chartText='fill="#333" font="12px system-ui,sans-serif"';
-    {
-      const W=760,H=260,left=52,right=18,top=18,bottom=42,plotH=H-top-bottom,plotW=W-left-right;
-      const max=Math.max(1,...roadAnnual.map(r=>r.amountPesos||0)),step=plotW/roadAnnual.length,bw=Math.min(48,step*.58);
-      let svg=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Classified road allocations by year across assigned legislative districts">`;
+    function renderFamilyCharts(){
+      const category=riseFamily.value,year=Number(riseYear.value),annual=(scan.nationalFamilyTotals[category]||[]),years=Array.from({length:8},(_,i)=>2020+i),W=760,H=260,left=54,right=18,top=18,bottom=42,plotH=H-top-bottom,plotW=W-left-right;
+      document.getElementById('family-annual-title').textContent=`${category} allocations across districts`;
+      const max=Math.max(1,...annual.map(r=>r.amountPesos||0)),step=plotW/years.length,bw=Math.min(48,step*.58);
+      let svg=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${escapeHtml(category)} annual allocations across assigned districts">`;
       for(let i=0;i<=4;i++){const y=top+plotH*i/4,val=max*(1-i/4);svg+=`<line class="chart-gridline" x1="${left}" x2="${W-right}" y1="${y}" y2="${y}"/><text x="${left-7}" y="${y+4}" text-anchor="end" ${chartText}>${(val/1e9).toFixed(0)}B</text>`}
-      roadAnnual.forEach((r,i)=>{const x=left+step*i+(step-bw)/2,v=r.amountPesos||0,bh=plotH*v/max,y=top+plotH-bh,cls=r.stage==='HGAB 3rd'?'history-current':'history-bar',stage=r.stage==='HGAB 3rd'?'HGAB':'GAA';svg+=`<rect class="${cls}" x="${x}" y="${y}" width="${bw}" height="${bh}" rx="3"><title>${r.year} ${r.stage}: ${peso(v)} · ${r.lineItems.toLocaleString()} classified rows</title></rect><text class="history-value" x="${x+bw/2}" y="${Math.max(14,y-5)}" text-anchor="middle">${(v/1e9).toFixed(1)}</text><text x="${x+bw/2}" y="${H-22}" text-anchor="middle" ${chartText}>${r.year}</text><text x="${x+bw/2}" y="${H-8}" text-anchor="middle" ${chartText}>${stage}</text>`});svg+='</svg>';
-      document.getElementById('road-annual-chart').innerHTML=svg;
+      years.forEach((yearValue,i)=>{const row=annual.find(r=>r.year===yearValue),v=row?.amountPesos||0,x=left+step*i+(step-bw)/2,bh=plotH*v/max,y=top+plotH-bh,cls=yearValue===2027?'history-current':yearValue===year?'history-selected':row?'history-bar':'history-missing',stage=yearValue===2027?'HGAB':'GAA';svg+=`<rect class="${cls}" x="${x}" y="${v?y:top+plotH-4}" width="${bw}" height="${Math.max(v?1:4,bh)}" rx="3"><title>${yearValue} ${stage}: ${row?peso(v)+' · '+row.lineItems.toLocaleString()+' rows':'no assigned rows in snapshot'}</title></rect>${v?`<text class="history-value" x="${x+bw/2}" y="${Math.max(14,y-5)}" text-anchor="middle">${(v/1e9).toFixed(1)}</text>`:''}<text x="${x+bw/2}" y="${H-22}" text-anchor="middle" ${chartText}>${yearValue}</text><text x="${x+bw/2}" y="${H-8}" text-anchor="middle" ${chartText}>${stage}</text>`});svg+='</svg>';
+      document.getElementById('family-annual-chart').innerHTML=svg;
+      const rows=scan.currentVsHistory.filter(r=>r.category===category).map(r=>{const base=r.historyPoints.find(p=>p.year===year&&p.stage==='GAA');return {...r,baseAmountPesos:base?.amountPesos||0,increasePesos:r.currentAmountPesos-(base?.amountPesos||0)}}).filter(r=>r.baseAmountPesos>0&&r.increasePesos>0).sort((a,b)=>b.increasePesos-a.increasePesos).slice(0,5);
+      document.getElementById('family-district-title').textContent=`Districts with the largest ${category.toLowerCase()} increases`;
+      const rowH=46,chartTop=12,chartH=chartTop+rows.length*rowH+38,chartMax=Math.max(1,...rows.flatMap(r=>[r.baseAmountPesos,r.currentAmountPesos])),chartScale=(W-left-right)/chartMax;
+      let districtSvg=`<svg viewBox="0 0 ${W} ${chartH}" role="img" aria-label="Top ${category} district increases from GAA ${year} to HGAB 2027">`;
+      rows.forEach((r,i)=>{const y=chartTop+i*rowH,name=r.district.replace(' · ',' '),label=name.length>25?name.slice(0,23)+'…':name,baseW=r.baseAmountPesos*chartScale,currentW=r.currentAmountPesos*chartScale;districtSvg+=`<text class="history-label" x="${left-8}" y="${y+13}" text-anchor="end">${escapeHtml(label)}</text><rect class="history-selected" x="${left}" y="${y}" width="${Math.max(1,baseW)}" height="12" rx="3"><title>GAA ${year}: ${peso(r.baseAmountPesos)}</title></rect><rect class="history-current" x="${left}" y="${y+16}" width="${Math.max(1,currentW)}" height="12" rx="3"><title>HGAB 2027: ${peso(r.currentAmountPesos)} · increase ${peso(r.increasePesos)}</title></rect><text class="history-value" x="${Math.min(W-right-45,left+currentW+5)}" y="${y+26}">+${(r.increasePesos/1e9).toFixed(2)}B</text>`});
+      districtSvg+=`<rect class="history-selected" x="${left}" y="${chartH-14}" width="12" height="8"/><text class="history-label" x="${left+17}" y="${chartH-6}">GAA ${year}</text><rect class="history-current" x="${left+100}" y="${chartH-14}" width="12" height="8"/><text class="history-label" x="${left+117}" y="${chartH-6}">HGAB 2027</text></svg>`;
+      document.getElementById('family-district-chart').innerHTML=districtSvg;
     }
-    {
-      const rows=scan.topCurrentAboveHistoricalMaxByFamily.Road||[],W=760,rowH=42,left=210,right=74,top=12,H=top+rows.length*rowH+12,max=Math.max(1,...rows.flatMap(r=>[r.currentAmountPesos,r.historicalMaximumPesos])),scale=(W-left-right)/max;
-      let svg=`<svg viewBox="0 0 ${W} ${H+16}" role="img" aria-label="Top road allocation districts compared with their historical GAA highs">`;
-      rows.forEach((r,i)=>{const y=top+i*rowH,name=r.district.replace(' · ',' '),label=name.length>31?name.slice(0,29)+'…':name,oldW=r.historicalMaximumPesos*scale,newW=r.currentAmountPesos*scale;svg+=`<text class="history-label" x="${left-8}" y="${y+13}" text-anchor="end">${escapeHtml(label)}</text><rect class="history-bar" x="${left}" y="${y}" width="${Math.max(1,oldW)}" height="12" rx="3"><title>Prior GAA high (${r.historicalPeakYear}): ${peso(r.historicalMaximumPesos)}</title></rect><rect class="history-current" x="${left}" y="${y+16}" width="${Math.max(1,newW)}" height="12" rx="3"><title>HGAB 2027: ${peso(r.currentAmountPesos)}</title></rect><text class="history-value" x="${Math.min(W-right+3,left+newW+5)}" y="${y+26}">${(r.currentAmountPesos/1e9).toFixed(2)}B</text>`});
-      svg+=`<rect class="history-bar" x="${left}" y="${H-4}" width="12" height="8"/><text class="history-label" x="${left+17}" y="${H+4}">Prior GAA high</text><rect class="history-current" x="${left+150}" y="${H-4}" width="12" height="8"/><text class="history-label" x="${left+167}" y="${H+4}">HGAB 2027</text></svg>`;
-      document.getElementById('road-district-chart').innerHTML=svg;
-    }
+    renderFamilyCharts();
     const historyRows=scan.currentVsHistory;
     const districtSelect=document.getElementById('history-district');
     const familySelect=document.getElementById('history-family');
@@ -266,7 +268,7 @@ body.bettergov-research>header .report-header-heading>p{margin:0!important;paddi
       document.getElementById('history-chart').innerHTML=svg;
       putTable('#history-annual',points,p=>`<tr><td data-label="Year · stage">${p.year} · ${escapeHtml(p.stage)}</td><td class="num" data-label="Project rows">${p.lineItems==null?'—':p.lineItems.toLocaleString()}</td><td class="num" data-label="Associated allocation">${p.amountPesos==null?'—':billion(p.amountPesos)}</td><td data-label="Comparison">${p.year===2027?'Current HGAB 3rd reading':p.amountPesos==null?'No assigned rows in snapshot':p.amountPesos===row.historicalMaximumPesos?`Historical high (${row.historicalPeakYear})`:''}</td></tr>`);
     }
-    districtSelect.addEventListener('change',renderHistory);familySelect.addEventListener('change',()=>{riseFamily.value=familySelect.value;renderHistory()});riseYear.addEventListener('change',renderHistory);riseFamily.addEventListener('change',()=>{familySelect.value=riseFamily.value;renderHistory()});renderHistory();
+    districtSelect.addEventListener('change',renderHistory);familySelect.addEventListener('change',()=>{riseFamily.value=familySelect.value;renderRiseComparison();renderFamilyCharts();renderHistory()});riseYear.addEventListener('change',renderHistory);riseFamily.addEventListener('change',()=>{familySelect.value=riseFamily.value;renderHistory()});renderHistory();
     const currentLeaders=Object.entries(scan.topCurrentAboveHistoricalMaxByFamily).flatMap(([family,rows])=>rows.map(r=>({...r,family}))).sort((a,b)=>b.excessOverMaximumPesos-a.excessOverMaximumPesos);
     putTable('#current-leaders',currentLeaders,r=>`<tr><td data-label="Project family">${escapeHtml(r.family)}</td><td data-label="District">${escapeHtml(r.district)}</td><td class="num" data-label="HGAB 2027">${billion(r.currentAmountPesos)}</td><td class="num" data-label="Prior GAA high">${billion(r.historicalMaximumPesos)} · ${r.historicalPeakYear}</td><td class="num" data-label="Above high">+${billion(r.excessOverMaximumPesos)}</td><td class="num" data-label="Change vs GAA average">${pct(r.changeVsAveragePct)}</td></tr>`);
     const district=d.districtFamilyScan.ilocosNorteFirst;
