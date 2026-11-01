@@ -211,14 +211,14 @@ def main():
     for record in comparison_rows:
         project = record.get("third") or {}
         category = family_for_title(project.get("projectName"))
-        if category not in {"Road", "Multi-purpose building"}:
+        if category not in {"Road", "Bridge", "Flood control", "Multi-purpose building"}:
             continue
         office = str(project.get("office") or "Unassigned office").strip()
         item = office_totals[category][office]
         item["amountPesos"] += int(project.get("amountPesos") or 0)
         item["lineItems"] += 1
     hgab_office_concentration = {}
-    for category in ("Road", "Multi-purpose building"):
+    for category in ("Road", "Bridge", "Flood control", "Multi-purpose building"):
         offices = office_totals[category]
         total = sum(row["amountPesos"] for row in offices.values())
         central = offices.get("Central Office", {"amountPesos": 0, "lineItems": 0})
