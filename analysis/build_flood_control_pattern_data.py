@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Build a compact evidence snapshot for the flood-control pattern report."""
 import json
+import re
 from collections import Counter, defaultdict
 from pathlib import Path
 
@@ -9,6 +10,20 @@ FLOOD = ROOT / "static/data/flood_control_data_with_jv.json"
 MPB = ROOT / "static/nep-preview/mpb-data.json"
 INTEGRATED = ROOT / "static/nep-preview/integrated-district-data.json"
 OUT = ROOT / "static/nep-preview/flood-control-pattern-data.json"
+DPWH_COMPARISON = ROOT / "static/nep-preview/dpwh-hgab-comparison.json"
+
+
+def family_for_title(title):
+    text = str(title or "")
+    if re.search(r"multi[\s-]*purpose.{0,40}building|building.{0,40}multi[\s-]*purpose", text, re.I):
+        return "Multi-purpose building"
+    if re.search(r"flood|drainage|dike|revetment|riverbank protection", text, re.I):
+        return "Flood control"
+    if re.search(r"\bbridge\b", text, re.I):
+        return "Bridge"
+    if re.search(r"\broad\b|\broads\b", text, re.I):
+        return "Road"
+    return None
 
 
 def main():
@@ -177,6 +192,74 @@ def main():
             row for row in current_above_max if row["category"] == category
         ][:5]
 
+    national_family_totals = {}
+    for category in all_categories:
+        totals = {}
+        for row in district_rows:
+            values = row.get("categories", {}).get(category)
+            if not values:
+                continue
+            key = (row.get("year"), row.get("stage"))
+            item = totals.setdefault(key, {"year": row.get("year"), "stage": row.get("stage"), "amountPesos": 0, "lineItems": 0})
+            item["amountPesos"] += int(values.get("totalPesos") or 0)
+            item["lineItems"] += int(values.get("lineItems") or 0)
+        national_family_totals[category] = sorted(
+            totals.values(), key=lambda item: (item["year"], item["stage"])
+        )
+    comparison_rows = json.loads(DPWH_COMPARISON.read_text(encoding="utf-8")).get("rows", [])
+    office_totals = defaultdict(lambda: defaultdict(lambda: {"amountPesos": 0, "lineItems": 0}))
+    for record in comparison_rows:
+        project = record.get("third") or {}
+        category = family_for_title(project.get("projectName"))
+        if category not in {"Road", "Multi-purpose building"}:
+            continue
+        office = str(project.get("office") or "Unassigned office").strip()
+        item = office_totals[category][office]
+        item["amountPesos"] += int(project.get("amountPesos") or 0)
+        item["lineItems"] += 1
+    hgab_office_concentration = {}
+    for category in ("Road", "Multi-purpose building"):
+        offices = office_totals[category]
+        total = sum(row["amountPesos"] for row in offices.values())
+        central = offices.get("Central Office", {"amountPesos": 0, "lineItems": 0})
+        deo_rows = [
+            {"office": office, **values}
+            for office, values in offices.items()
+            if "District Engineering Office" in office
+        ]
+        deo_rows.sort(key=lambda row: row["amountPesos"], reverse=True)
+        deo_total = sum(row["amountPesos"] for row in deo_rows)
+        hgab_office_concentration[category] = {
+            "totalAmountPesos": total,
+            "totalLineItems": sum(row["lineItems"] for row in offices.values()),
+            "centralOfficeAmountPesos": central["amountPesos"],
+            "centralOfficeSharePct": round(100 * central["amountPesos"] / total, 1) if total else None,
+            "deoAmountPesos": deo_total,
+            "deoCount": len(deo_rows),
+            "topThreeDeoSharePct": round(100 * sum(row["amountPesos"] for row in deo_rows[:3]) / deo_total, 1) if deo_total else None,
+            "topDeos": [
+                {**row, "shareOfDeoAmountsPct": round(100 * row["amountPesos"] / deo_total, 2) if deo_total else None}
+                for row in deo_rows[:10]
+            ],
+        }
+    all_other_year_comparisons = {}
+    for category in all_categories:
+        points = national_family_totals.get(category, [])
+        gaa_points = [point for point in points if point["stage"] == "GAA" and point["amountPesos"] > 0]
+        comparisons = []
+        for point in points:
+            baseline = gaa_points if point["stage"] != "GAA" else [other for other in gaa_points if other["year"] != point["year"]]
+            if not baseline:
+                continue
+            average = sum(other["amountPesos"] for other in baseline) / len(baseline)
+            comparisons.append({
+                **point,
+                "otherYearsAveragePesos": round(average, 2),
+                "otherYearsCount": len(baseline),
+                "changeVsOtherYearsPct": round(100 * (point["amountPesos"] / average - 1), 1) if average else None,
+            })
+        all_other_year_comparisons[category] = comparisons
+
     data = {
         "generatedFrom": {
             "floodContracts": "static/data/flood_control_data_with_jv.json",
@@ -225,6 +308,9 @@ def main():
             "currentVsHistory": history_comparisons,
             "currentAboveHistoricalMax": current_above_max[:40],
             "topCurrentAboveHistoricalMaxByFamily": top_current_by_family,
+            "nationalFamilyTotals": national_family_totals,
+            "hgabOfficeConcentration": hgab_office_concentration,
+            "allOtherYearComparisons": all_other_year_comparisons,
             "coverage": integrated.get("coverage", []),
             "method": integrated.get("method", {}),
         },
