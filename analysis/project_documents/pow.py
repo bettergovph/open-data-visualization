@@ -5,13 +5,12 @@ from pathlib import Path
 _PADDLE_OCR=None
 
 def paddle_words(page,dpi=170):
-    """Second-pass OCR for pages where the existing extractors find no rows.
+    """Return PaddleOCR's strongest orientation and its alternate attempts.
 
-    Returns PaddleOCR word boxes in the same (x0,y0,x1,y1,text) shape used by
-    the Apple Vision/Tesseract parsers. Rotation is selected by the amount of
-    recognizable POW structure, then by OCR confidence and useful text count.
-    PaddleOCR remains optional so installations without its large model package
-    retain the existing parser behavior.
+    Uses the same quarter-turn and higher-resolution checks as the existing
+    OCR retry path. Keeping candidates lets the row parser rank recoveries by
+    mapped POW structure, while preserving the first OCR engine's rows.
+    PaddleOCR remains optional.
     """
     global _PADDLE_OCR
     try:
@@ -32,30 +31,37 @@ def paddle_words(page,dpi=170):
             _PADDLE_OCR=False
     if _PADDLE_OCR is False:return None
     try:
-        pix=page.get_pixmap(matrix=fitz.Matrix(dpi/72,dpi/72),alpha=False)
-        image=Image.open(io.BytesIO(pix.tobytes('png'))).convert('RGB')
         attempts=[]
-        for rotation in (0,90,180,270):
-            rotated=image.rotate(rotation,expand=True) if rotation else image
-            result=_PADDLE_OCR.predict(np.asarray(rotated))[0]
-            texts=result.get('rec_texts',[]);scores=result.get('rec_scores',[]);boxes=result.get('rec_boxes',[])
-            words=[]
-            for box,text,confidence in zip(boxes,texts,scores):
-                text=str(text).strip()
-                if not text:continue
-                x0,y0,x1,y1=map(float,box)
-                words.append((x0,y0,x1,y1,text,float(confidence)))
-            joined=' '.join(w[4] for w in words)
-            structure=(4*len(re.findall(r'\b(?:ITEM\s*NO|DESCRIPTION|QUANTITY|AMOUNT|TOTAL\s+COST|AS\s+SUBMITTED)\b',joined,re.I))
-                +3*sum(bool(ITEM.fullmatch(w[4])) for w in words)
-                +sum(bool(amount(w[4])) for w in words))
-            confidence=sum(w[5] for w in words)/len(words) if words else 0
-            attempts.append((structure,confidence,min(len(words),300),words,rotation,rotated.width,joined))
+        for rotation,resolution in [(0,dpi),(90,dpi),(180,dpi),(270,dpi),(90,350),(270,350)]:
+            try:
+                pix=page.get_pixmap(matrix=fitz.Matrix(resolution/72,resolution/72),alpha=False)
+                image=Image.open(io.BytesIO(pix.tobytes('png'))).convert('RGB')
+                rotated=image.rotate(rotation,expand=True) if rotation else image
+                result=_PADDLE_OCR.predict(np.asarray(rotated))[0]
+                texts=result.get('rec_texts',[]);scores=result.get('rec_scores',[]);boxes=result.get('rec_boxes',[])
+                words=[]
+                for box,text,confidence in zip(boxes,texts,scores):
+                    text=str(text).strip()
+                    if not text:continue
+                    x0,y0,x1,y1=map(float,box)
+                    words.append((x0,y0,x1,y1,text,float(confidence)))
+                joined=' '.join(w[4] for w in words)
+                structure=(4*len(re.findall(r'\b(?:ITEM\s*NO|DESCRIPTION|QUANTITY|AMOUNT|TOTAL\s+COST|AS\s+SUBMITTED)\b',joined,re.I))
+                    +3*sum(bool(ITEM.fullmatch(w[4])) for w in words)
+                    +sum(bool(amount(w[4])) for w in words))
+                confidence=sum(w[5] for w in words)/len(words) if words else 0
+                attempts.append((structure,confidence,min(len(words),300),words,rotation,rotated.width,joined,resolution))
+            except Exception:
+                continue
         if not attempts:return None
-        _,_,_,words,rotation,width,text=max(attempts,key=lambda a:(a[0],a[1],a[2]))
-        return {'words':[(*w[:5],0,int(round((w[1]+w[3])/16)),0) for w in words], 'width':width,
-            'text':text,'rotation':rotation,'method':f'OCR · PaddleOCR PP-OCRv6 · rotated scan {rotation}°',
-            'meanConfidence':round(sum(w[5] for w in words)/len(words),4) if words else 0}
+        converted=[]
+        for structure,confidence,count,words,rotation,width,text,resolution in attempts:
+            converted.append({'words':[(*w[:5],0,int(round((w[1]+w[3])/16)),0) for w in words], 'width':width,
+                'text':text,'rotation':rotation,'resolution':resolution,'structureScore':structure,
+                'meanConfidence':round(confidence,4),'wordCount':count,
+                'method':f'OCR · PaddleOCR PP-OCRv6 · rotated scan {rotation}° at {resolution} dpi'})
+        best=max(converted,key=lambda a:(a['structureScore'],a['meanConfidence'],a['wordCount']))
+        return {**best,'attempts':converted}
     except Exception:
         return None
 NUMBER=re.compile(r'^(?:(?:₱|PHP|P)\s*)?-?\d[\d,]*(?:\.\d+)?\s*(?:₱|PHP|P)?$',re.I)
@@ -616,25 +622,50 @@ def parse_pdf(path,output,allocation_pesos=None):
                 page_rows=[r for r in page_rows if (r.get('itemCode'),r.get('amountPesos')) not in compact_keys]
                 page_rows.extend(compact_rows)
                 current_cost_category=compact_category
-        paddle_confidence=None;paddle_category_rows=0;paddle_method=None
-        if not page_rows:
+        paddle_confidence=None;paddle_category_rows=0;paddle_method=None;paddle_rotation=None;paddle_resolution=None
+        # PaddleOCR supplements rows from Vision/Tesseract on scanned pages.
+        # Conflicting rows for an already recovered item are left for review;
+        # only distinct item codes are added, so the engines do not overwrite
+        # one another's amount or description.
+        if not page_rows or method.startswith('OCR'):
             paddle=paddle_words(page)
             if paddle:
-                paddle_words_data=paddle['words'];paddle_method=paddle['method'];paddle_width=paddle['width']
-                paddle_text=paddle['text'];paddle_confidence=paddle['meanConfidence']
-                paddle_summary=bool(re.search(r'PROGRAM\s+OF\s+WORKS\s*/?\s*BUDGET\s+COST|BREAKDOWN\s+OF\s+EXPENDITURES',paddle_text,re.I))
+                paddle_attempts=[]
+                for attempt in paddle.get('attempts',[paddle]):
+                    candidate_words=attempt['words'];candidate_method=attempt['method']
+                    candidate_rows,candidate_category=item_rows_from_words(candidate_words,attempt['width'],number+1,candidate_method,current_cost_category)
+                    candidate_review=False
+                    if not candidate_rows:candidate_rows,candidate_review=word_rows(candidate_words,attempt['width'],number+1,candidate_method)
+                    compact_rows,compact_category=summary_item_rows_from_words(candidate_words,attempt['width'],number+1,candidate_method,page_start_category)
+                    if compact_rows:
+                        compact_keys={(r.get('itemCode'),r.get('amountPesos')) for r in compact_rows}
+                        candidate_rows=[r for r in candidate_rows if (r.get('itemCode'),r.get('amountPesos')) not in compact_keys]
+                        candidate_rows.extend(compact_rows);candidate_category=compact_category
+                    paddle_attempts.append((candidate_rows,candidate_review,candidate_category,attempt))
+                best_rows,best_review,best_category,best_attempt=max(paddle_attempts,key=lambda a:(
+                    len(a[0]),sum(bool(r.get('itemCode')) for r in a[0]),not a[1],
+                    a[3]['structureScore'],a[3]['meanConfidence'],a[3]['wordCount']))
+                paddle_method=best_attempt['method'];paddle_confidence=best_attempt['meanConfidence']
+                paddle_rotation=best_attempt['rotation'];paddle_resolution=best_attempt['resolution']
+                prior_codes={r.get('itemCode') for r in page_rows if r.get('itemCode')}
+                prior_keys={(r.get('itemCode'),r.get('amountPesos'),r.get('quantity')) for r in page_rows}
+                for row in best_rows:
+                    code=row.get('itemCode');key=(code,row.get('amountPesos'),row.get('quantity'))
+                    if (code and code not in prior_codes) or (not code and key not in prior_keys):
+                        page_rows.append(row)
+                        if code:prior_codes.add(code)
+                        prior_keys.add(key)
+                if not page_rows and best_review:review=True
+                if best_category is not None and best_category!=current_cost_category:current_cost_category=best_category
+                best_text=best_attempt['text'];best_words=best_attempt['words'];best_width=best_attempt['width']
+                paddle_summary=bool(re.search(r'PROGRAM\s+OF\s+WORKS\s*/?\s*BUDGET\s+COST|BREAKDOWN\s+OF\s+EXPENDITURES',best_text,re.I))
                 if paddle_summary:
-                    mapped=cost_category_totals_from_words(paddle_words_data,paddle_width,number+1,paddle_method)
+                    mapped=cost_category_totals_from_words(best_words,best_width,number+1,paddle_method)
                     share_total=sum(row['sharePct'] for row in mapped)
                     if mapped and len(mapped)>=3 and 90<=share_total<=110:
                         cost_categories.extend(mapped);paddle_category_rows=len(mapped)
-                page_rows,current_cost_category=item_rows_from_words(paddle_words_data,paddle_width,number+1,paddle_method,current_cost_category)
-                if not page_rows:page_rows,review=word_rows(paddle_words_data,paddle_width,number+1,paddle_method)
-                compact_rows,compact_category=summary_item_rows_from_words(paddle_words_data,paddle_width,number+1,paddle_method,page_start_category)
-                if compact_rows:
-                    page_rows.extend(compact_rows);current_cost_category=compact_category
-                if page_rows:
-                    words=paddle_words_data;ocr_width=paddle_width;method=paddle_method;text=paddle_text
+                if not method.startswith('OCR') or not words:
+                    words=best_words;ocr_width=best_width;text=best_text
         if method.startswith('OCR') and page_rows:
             lines={}
             for w in words:lines.setdefault(round(w[1]/5),[]).append(w)
@@ -644,6 +675,8 @@ def parse_pdf(path,output,allocation_pesos=None):
         page_record={'page':number+1,'status':'candidate_rows' if page_rows else 'needs_manual_review' if review else 'no_bill_rows_recovered','rows':len(page_rows),'method':method,'reviewNote':'Numeric columns could not be mapped safely; inspect the source page.' if review else None}
         if paddle_confidence is not None:page_record['paddleMeanConfidence']=paddle_confidence
         if paddle_method:page_record['paddleMethod']=paddle_method
+        if paddle_rotation is not None:page_record['paddleSelectedRotationDegrees']=paddle_rotation
+        if paddle_resolution is not None:page_record['paddleSelectedDpi']=paddle_resolution
         if paddle_category_rows:page_record['paddleCategorySummaryRows']=paddle_category_rows
         pages.append(page_record)
         rows.extend(page_rows)
