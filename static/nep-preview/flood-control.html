@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Flood-control pattern review · BetterGov</title>
+  <link rel="stylesheet" href="../css/tailwind.css?v=2173d9cc1d14">
+  <link rel="stylesheet" href="research-theme.css?v=a60c21b98857">
+  <link rel="stylesheet" href="report-disclaimer.css?v=20261029-01">
+  <style>
+    *{box-sizing:border-box}body{margin:0;background:#f3f6f5;color:#212121;font:16px/1.5 system-ui,sans-serif}
+    main{width:100%;padding:24px clamp(16px,2vw,32px)}
+    .page-hero{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(280px,.75fr);gap:24px;margin:8px 0 24px;padding:clamp(22px,3vw,36px);border-left:8px solid #FCD116;border-radius:16px;background:linear-gradient(120deg,#00246A,#0038A8);color:#fff;box-shadow:0 14px 34px #00246A22}
+    .page-hero .eyebrow{color:#FCD116;font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}.page-hero h2{margin:8px 0;font-size:clamp(26px,4vw,42px);line-height:1.12}.page-hero p{max-width:920px;margin:10px 0;color:#f1f4fa}.hero-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.hero-metric{padding:15px;border:1px solid #ffffff3d;border-radius:11px;background:#ffffff12}.hero-metric strong{display:block;color:#FCD116;font-size:clamp(21px,2.7vw,31px);line-height:1.1}.hero-metric span{display:block;margin-top:6px;color:#fff;font-size:12px;line-height:1.4}
+    .report-section{margin:22px 0;padding:clamp(18px,2vw,26px);border:1px solid #dce2e5;border-radius:14px;background:#fff;box-shadow:0 3px 14px #00246A0b}.report-section h2{margin:0 0 8px;color:#00246A;font-size:clamp(20px,2.3vw,28px)}.section-intro{max-width:1100px;margin:4px 0 18px;color:#4b5563}.chart-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.chart-panel{min-width:0;padding:15px;border:1px solid #e0e4e8;border-radius:11px;background:#fff}.chart-panel h3{margin:0;color:#00246A;font-size:17px}.chart-panel p{margin:3px 0 12px;color:#5b6570;font-size:13px}.chart-panel svg{display:block;width:100%;height:auto;overflow:visible}.chart-axis{stroke:#aeb8c2;stroke-width:1}.chart-gridline{stroke:#e4e8ec;stroke-width:1}.chart-bar{fill:#0038A8}.chart-bar-accent{fill:#b65b09}.chart-label{fill:#333;font:12px system-ui,sans-serif}.chart-value{fill:#00246A;font:700 12px system-ui,sans-serif}.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:12px;margin:18px 0}.stat-card{padding:16px;border:1px solid #dce2e5;border-top:4px solid #0038A8;border-radius:10px;background:#fff}.stat-card strong{display:block;color:#00246A;font-size:24px;line-height:1.2}.stat-card span{display:block;margin-top:5px;color:#4b5563;font-size:13px}.callout{margin:16px 0;padding:14px 16px;border-left:4px solid #b65b09;border-radius:0 8px 8px 0;background:#fff4e8}.callout strong{color:#713b08}.table-wrap{width:100%;overflow:hidden}table{width:100%;border-collapse:collapse;table-layout:fixed}th,td{padding:10px 12px;border-bottom:1px solid #e0e4e8;text-align:left;vertical-align:top;overflow-wrap:anywhere}th{background:#eaf0ff;color:#00246A;font-size:13px}td{font-size:14px}td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}.table-note{margin:10px 0 0;color:#59636f;font-size:12px}.pattern-status{display:inline-block;padding:3px 8px;border-radius:999px;background:#fff0d9;color:#754500;font-size:12px;font-weight:750}.source-list{padding-left:20px}.source-list li{margin:7px 0}.source-list a{color:#0038A8;font-weight:650}.disclaimer-copy p{margin:8px 0}
+    @media(max-width:760px){.page-hero{grid-template-columns:1fr}.chart-grid{grid-template-columns:1fr}.table-wrap{overflow:visible}table,tbody,tr,td{display:block;width:100%}thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}tbody tr{padding:10px 0;border-bottom:1px solid #dce2e5}tbody td{display:grid;grid-template-columns:minmax(110px,38%) minmax(0,1fr);gap:8px;padding:5px 8px;border:0;text-align:left!important}tbody td::before{content:attr(data-label);font-weight:750;color:#00246A}.hero-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:420px){.hero-metrics{grid-template-columns:1fr}.report-section{padding:15px}tbody td{grid-template-columns:minmax(96px,34%) minmax(0,1fr);font-size:13px}}
+  </style>
+<style id="uniform-report-menu-style">
+header{padding-left:clamp(16px,2vw,32px)!important;padding-right:clamp(16px,2vw,32px)!important}
+header .report-nav{box-sizing:border-box!important;display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;grid-auto-rows:34px!important;align-content:start!important;gap:8px 10px!important;width:100%!important;max-width:none!important;height:118px!important;min-height:118px!important;margin:16px 0 0!important;padding:0!important;font:12px/1.1 system-ui,sans-serif!important}
+header .report-nav a,header .report-nav a:visited{box-sizing:border-box!important;display:flex!important;align-items:center!important;justify-content:center!important;min-width:0!important;height:34px!important;margin:0!important;padding:4px 7px!important;color:#FCD116!important;background:transparent!important;border:1px solid #ffffff55!important;border-radius:8px!important;text-align:center!important;text-decoration:none!important;font:12px/1.1 system-ui,sans-serif!important;overflow-wrap:anywhere!important}
+header .report-nav a:hover{color:#fff!important;background:#ffffff12!important;border-color:#FCD116!important}
+header .report-nav a:focus-visible{outline:2px solid #FCD116!important;outline-offset:2px!important}
+.chart-legend-no-rank{list-style:none!important;padding-left:0!important}.chart-legend-no-rank li{grid-template-columns:minmax(0,1fr) auto!important}.chart-legend-no-rank li>span:first-child{overflow-wrap:anywhere}
+.site-ai-credit{box-sizing:border-box!important;width:100%!important;margin:36px 0 0!important;padding:14px clamp(16px,2vw,32px)!important;border-top:1px solid #BDBDBD!important;color:#5A6670!important;font:12px/1.55 system-ui,sans-serif!important}.site-ai-credit p{max-width:none!important;margin:0!important}
+@media(max-width:900px){header .report-nav{grid-template-columns:repeat(3,minmax(0,1fr))!important;height:202px!important;min-height:202px!important}}
+@media(max-width:560px){header .report-nav{grid-template-columns:repeat(2,minmax(0,1fr))!important;height:328px!important;min-height:328px!important}}
+body.bettergov-research>header.uniform-report-header{box-sizing:border-box!important;display:grid!important;grid-template-rows:176px 118px!important;gap:16px!important;align-content:start!important;height:361px!important;min-height:361px!important;padding-top:24px!important;padding-bottom:24px!important;border-bottom:3px solid #FCD116!important}
+body.bettergov-research>header.uniform-report-header>.report-nav{margin:0!important;align-self:start!important}
+body.bettergov-research>header .report-header-heading{display:grid!important;grid-template-rows:28px 20px 58px 1fr!important;gap:6px!important;min-width:0!important;min-height:0!important}
+body.bettergov-research>header .report-header-brand{display:flex!important;align-items:center!important;justify-self:start!important;width:122px!important;height:28px!important;padding:3px 7px!important;box-sizing:border-box!important;background:#fff!important;border-radius:5px!important}
+body.bettergov-research>header .report-header-brand img{display:block!important;width:108px!important;height:22px!important;max-width:108px!important;object-fit:contain!important}
+body.bettergov-research>header .report-header-heading>.eyebrow{margin:0!important;font:11px/20px system-ui,sans-serif!important;letter-spacing:.08em!important;text-transform:uppercase!important;color:#FCD116!important}
+body.bettergov-research>header .report-header-heading>h1{margin:0!important;padding:0!important;font-size:clamp(25px,2.3vw,36px)!important;line-height:1.2!important;align-self:start!important}
+body.bettergov-research>header .report-header-heading>p{margin:0!important;padding:0!important;font-size:15px!important;line-height:1.55!important;max-width:none!important;align-self:start!important}
+@media(max-width:900px){body.bettergov-research>header.uniform-report-header{height:495px!important;min-height:495px!important;grid-template-rows:226px 202px!important}body.bettergov-research>header .report-header-heading{grid-template-rows:26px 18px 66px 1fr!important;gap:6px!important}body.bettergov-research>header .report-header-brand{width:114px!important;height:26px!important}body.bettergov-research>header .report-header-brand img{width:100px!important;height:20px!important}body.bettergov-research>header .report-header-heading>h1{font-size:26px!important;line-height:1.25!important}body.bettergov-research>header .report-header-heading>p{font-size:14px!important}}
+@media(max-width:560px){body.bettergov-research>header.uniform-report-header{height:647px!important;min-height:647px!important;padding-top:20px!important;padding-bottom:20px!important;grid-template-rows:260px 328px!important}body.bettergov-research>header .report-header-heading{grid-template-rows:26px 18px 68px 1fr!important;gap:6px!important}body.bettergov-research>header .report-header-brand{width:106px!important;height:24px!important;padding:2px 6px!important}body.bettergov-research>header .report-header-brand img{width:92px!important;height:20px!important}body.bettergov-research>header .report-header-heading>h1{font-size:22px!important;line-height:1.2!important}body.bettergov-research>header .report-header-heading>p{font-size:13px!important;line-height:1.5!important}}
+</style></head>
+<body class="bettergov-research">
+<header class="uniform-report-header"><div class="report-header-heading"><a class="report-header-brand" href="https://bettergov.ph/" aria-label="BetterGov home"><img src="https://assets.bettergov.ph/logos/webp/horizontal-black.webp" alt="BetterGov"></a><div class="eyebrow">BetterGov · Budget research</div><h1>Flood-control pattern review</h1><p>Compare the documented Bulacan flood-control expansion with other project groups, starting with multi-purpose buildings.</p></div><nav class="report-nav" aria-label="Budget report pages"><a href="summary.html">Summary · investigative leads</a><a href="flood-control.html">Flood-control pattern review</a><a href="archive/congress-district-allocations.html">District allocations · HGAB 3rd</a><a href="congress.html">Project flags by district</a><a href="cost-per-km.html">Cost per meter</a><a href="repeats.html">Project repeat comparisons</a><a href="dpwh-hgab.html">DPWH · NEP → HGAB (3rd)</a><a href="out-of-place.html">Out of Place</a><a href="rcs.html">RCS · POW scope review</a><a href="mpb.html">MPB · Multi-purpose buildings</a><a href="dpwh.html">DPWH POWs</a><a href="barangay.html">Barangay allocations</a><a href="integrated-district-allocations.html">Integrated · District allocations</a><a href="integrated.html">Integrated · Project records</a><a href="archive.html">Archive</a></nav></header>
+<main>
+  <section class="page-hero" aria-labelledby="hero-title">
+    <div>
+      <span class="eyebrow">Pattern comparison · evidence snapshot</span>
+      <h2 id="hero-title">Does another project group show the Bulacan pattern?</h2>
+      <p>The flood-control record shows a sharp rise in Bulacan project count and contract value, followed by a sustained high level. MPB is a strong next review target because of its volume, repeated historical titles, and concentrated rounded allocations. The available MPB evidence does not yet establish the same geographic and year-over-year pattern.</p>
+    </div>
+    <div class="hero-metrics" id="hero-metrics" aria-live="polite"><div class="hero-metric"><strong>Loading</strong><span>Evidence snapshot</span></div></div>
+  </section>
+
+  <aside class="intro report-disclaimer" id="report-evidence-notice" role="note"><strong>Disclaimer.</strong> This page compares patterns in public project and budget records to identify questions for review. A pattern, repeated title, allocation amount, location or comparison candidate does not establish duplication, improper conduct, responsibility or intent. Flood-control figures describe contract records; MPB figures describe FY2027 HGAB 3rd-reading budget lines and provisional NEP matching. These are different sources and stages, so their amounts are not directly comparable. Data coverage, title matching, location quality and project phases can affect the results. This site is updated as records are added and reviewed; calculations are preliminary and open to correction. More source documents, stakeholder input and independent review may improve accuracy or add context. Please inspect the linked records and share corrections.</aside>
+
+  <section class="report-section" aria-labelledby="flood-baseline-title">
+    <h2 id="flood-baseline-title">1. The Bulacan flood-control pattern</h2>
+    <p class="section-intro">The chart uses DPWH flood-control contract records in the current ODV snapshot. It shows the annual count and contract value in Bulacan alongside the national total. The strongest visible change is from 2022 to 2023; Bulacan remained the largest single-province total in 2024.</p>
+    <div class="chart-grid">
+      <div class="chart-panel"><h3>Bulacan project count</h3><p>Contracts per infrastructure year</p><div id="bulacan-count-chart"></div></div>
+      <div class="chart-panel"><h3>Bulacan contract value</h3><p>₱ billions; compare Bulacan with all other provinces</p><div id="bulacan-cost-chart"></div></div>
+    </div>
+    <div class="table-wrap"><table id="flood-table"><thead><tr><th>Year</th><th class="num">Bulacan projects</th><th class="num">Change</th><th class="num">Bulacan contract value</th><th class="num">National cost share</th></tr></thead><tbody></tbody></table></div>
+    <p class="table-note">The dataset contains 9,855 contract records dated 2018–2025. Coverage is sparse in 2021 (12 Bulacan records) and in 2025; treat 2021 as a weak baseline. The principal rise shown here is 2022–2023. Contract value is not the same as appropriation or disbursement.</p>
+  </section>
+
+  <section class="report-section" aria-labelledby="mpb-review-title">
+    <h2 id="mpb-review-title">2. MPB is the next review target</h2>
+    <p class="section-intro">MPB shows strong repeat and allocation signals, but the available evidence differs from the flood-control contract series. Treat the NEP counterpart results as candidates until each title and source page is checked.</p>
+    <div class="stat-grid" id="mpb-stats"></div>
+    <div class="callout"><strong>Current reading:</strong> MPB is not yet a confirmed second Bulacan-style case. The closest testable lead is a high volume of repeated or similarly titled projects paired with frequent round allocations; broader geographic concentration and year-over-year budget growth still need a like-for-like dataset.</div>
+    <div class="table-wrap"><table id="mpb-signals"><thead><tr><th>Pattern test</th><th>What the current data shows</th><th>Assessment</th></tr></thead><tbody></tbody></table></div>
+  </section>
+
+  <section class="report-section" aria-labelledby="locality-title">
+    <h2 id="locality-title">3. Where the Bulacan totals recur</h2>
+    <p class="section-intro">These localities had the largest combined contract values in the Bulacan 2022–2024 records. This is geographic concentration within the province, not evidence that the projects share a contractor, scope or outcome.</p>
+    <div class="chart-panel"><h3>Top municipalities and cities by contract value</h3><p>Bulacan, 2022–2024 · ₱ billions</p><div id="bulacan-localities-chart"></div></div>
+    <div class="table-wrap"><table id="locality-table"><thead><tr><th>Locality label in source</th><th class="num">Projects</th><th class="num">Contract value</th></tr></thead><tbody></tbody></table></div>
+  </section>
+
+  <section class="report-section" aria-labelledby="amount-title">
+    <h2 id="amount-title">4. MPB allocation amounts to review</h2>
+    <p class="section-intro">Frequent rounded amounts can reflect standard scopes or budgeting practices. They are a way to group records for inspection, not a standalone risk finding.</p>
+    <div class="chart-panel"><h3>Most frequent amounts among MPB insertion candidates</h3><p>Number of provisional candidate lines</p><div id="mpb-amount-chart"></div></div>
+    <div class="table-wrap"><table id="amount-table"><thead><tr><th>HGAB amount</th><th class="num">Candidate lines</th></tr></thead><tbody></tbody></table></div>
+  </section>
+
+  <section class="report-section" aria-labelledby="method-title">
+    <h2 id="method-title">How to read this comparison</h2>
+    <ul>
+      <li><strong>Known Bulacan pattern:</strong> rising project count and contract value from 2022 to 2023, followed by a high 2024 value; Bulacan was the largest single-province flood-control total in each of those years.</li>
+      <li><strong>MPB candidate pattern:</strong> large HGAB line-item volume, frequent comparison candidates, repeated historical title matches and rounded amounts. These signals are not independent and do not prove that records describe the same building or funded scope.</li>
+      <li><strong>Not yet measured comparably:</strong> the available MPB snapshot does not provide a complete annual MPB time series using the same budget stage and classification for every year. Its office/region distribution is not directly comparable to flood contracts’ province distribution.</li>
+      <li><strong>Next validation:</strong> inspect the source pages for the largest MPB candidates, reconcile NEP/HGAB matches manually, verify locations and building types, and build a consistent year-by-year MPB baseline before comparing growth or concentration.</li>
+    </ul>
+    <p class="table-note">Sources: local ODV snapshots <code>flood_control_data_with_jv.json</code> and <code>mpb-data.json</code>. The older NEP 2026 analysis summary is not used for the headline calculation because its generated artifacts are dated October 2025 and its stated Bulacan concentration claims are not reproduced by the current contract snapshot.</p>
+  </section>
+</main>
+<script>
+(()=>{
+  const peso=n=>'₱'+Number(n||0).toLocaleString('en-PH',{maximumFractionDigits:0});
+  const billion=n=>'₱'+(Number(n||0)/1e9).toLocaleString('en-PH',{minimumFractionDigits:2,maximumFractionDigits:2})+'B';
+  const escapeHtml=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const putTable=(selector,rows,render)=>document.querySelector(selector+' tbody').innerHTML=rows.map(render).join('');
+  function barChart(target,items,{valueKey,labelKey,format,categoryFormat=null,secondaryKey=null,secondaryFormat=null}={}){
+    const el=document.getElementById(target), W=760, rowH=36, left=155, right=88, top=12, H=top+items.length*rowH+12;
+    const max=Math.max(1,...items.flatMap(x=>[Number(x[valueKey])||0,secondaryKey?(Number(x[secondaryKey])||0):0]));
+    const scale=(W-left-right)/max; let svg=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${escapeHtml(el.closest('.chart-panel')?.querySelector('h3')?.textContent||'Bar chart')}">`;
+    for(let i=0;i<=4;i++){const x=left+(W-left-right)*i/4;svg+=`<line class="chart-gridline" x1="${x}" x2="${x}" y1="4" y2="${H-8}"/><text class="chart-label" x="${x}" y="${H-1}" text-anchor="middle">${escapeHtml(format(max*i/4))}</text>`}
+    items.forEach((item,i)=>{let y=top+i*rowH;const raw=categoryFormat?categoryFormat(item[labelKey]):String(item[labelKey]??'');const name=raw.replace(/^CITY OF /,'').replace(/ \([^)]*\)$/,'');svg+=`<text class="chart-label" x="${left-8}" y="${y+14}" text-anchor="end">${escapeHtml(name.length>22?name.slice(0,20)+'…':name)}</text>`;let val=Number(item[valueKey])||0,w=val*scale;svg+=`<rect class="chart-bar" x="${left}" y="${y}" width="${Math.max(w,1)}" height="13" rx="3"><title>${escapeHtml(raw)}: ${escapeHtml(format(val))}</title></rect><text class="chart-value" x="${Math.min(left+w+6,W-right+4)}" y="${y+11}">${escapeHtml(format(val))}</text>`;if(secondaryKey){let val2=Number(item[secondaryKey])||0,w2=val2*scale;svg+=`<rect class="chart-bar-accent" x="${left}" y="${y+16}" width="${Math.max(w2,1)}" height="10" rx="3"><title>Other provinces: ${escapeHtml(secondaryFormat(val2))}</title></rect>`}});
+    svg+='</svg>';el.innerHTML=svg;
+  }
+  fetch('flood-control-pattern-data.json?v=20261101').then(r=>{if(!r.ok)throw Error('Data file unavailable');return r.json()}).then(d=>{
+    const annual=d.flood.annual.filter(x=>x.year>=2021&&x.year<=2024);
+    const latest=annual.at(-1),prior=annual.find(x=>x.year===2022),middle=annual.find(x=>x.year===2023);
+    const jump=prior&&middle?100*(middle.bulacanContractCost/prior.bulacanContractCost-1):0;
+    document.getElementById('hero-metrics').innerHTML=`<div class="hero-metric"><strong>${latest.bulacanProjects}</strong><span>Bulacan flood-control contracts in ${latest.year}</span></div><div class="hero-metric"><strong>${billion(latest.bulacanContractCost)}</strong><span>Bulacan contract value in ${latest.year}</span></div><div class="hero-metric"><strong>+${jump.toFixed(1)}%</strong><span>Bulacan contract-value change, 2022 to 2023</span></div><div class="hero-metric"><strong>${d.mpb.repeatPairs.toLocaleString()}</strong><span>MPB historical comparison pairs for follow-up</span></div>`;
+    const costSeries=annual.map(x=>({...x,otherProvinceCost:Math.max(0,x.nationalContractCost-x.bulacanContractCost)}));
+    barChart('bulacan-count-chart',annual,{valueKey:'bulacanProjects',labelKey:'year',format:n=>Number(n).toFixed(0)});
+    barChart('bulacan-cost-chart',costSeries,{valueKey:'bulacanContractCost',labelKey:'year',format:n=>(Number(n)/1e9).toFixed(1)+'B',secondaryKey:'otherProvinceCost',secondaryFormat:n=>(Number(n)/1e9).toFixed(1)+'B'});
+    const changes=annual.map((x,i)=>({...x,changePct:i&&annual[i-1].bulacanContractCost?100*(x.bulacanContractCost/annual[i-1].bulacanContractCost-1):null}));
+    putTable('#flood-table',annual,(x,i)=>{const prev=annual[i-1],change=prev&&prev.bulacanContractCost?100*(x.bulacanContractCost/prev.bulacanContractCost-1):null;return `<tr><td data-label="Year">${x.year}</td><td class="num" data-label="Bulacan projects">${x.bulacanProjects.toLocaleString()}</td><td class="num" data-label="Change">${change===null?'—':(change>=0?'+':'')+change.toFixed(1)+'%'}</td><td class="num" data-label="Bulacan value">${billion(x.bulacanContractCost)}</td><td class="num" data-label="National cost share">${x.bulacanCostSharePct.toFixed(1)}%</td></tr>`});
+    const m=d.mpb;
+    const stats=[['5,765', 'HGAB MPB line items · ₱'+(m.hgabPesos/1e9).toFixed(2)+'B total'],[m.insertionCandidates.toLocaleString(), 'provisional insertion candidates · '+m.candidateLineSharePct+'% of lines'],[m.historicalRepeatProjects.toLocaleString(), 'projects with a historical title recurrence · '+m.repeatPairs.toLocaleString()+' pairs'],[m.distributionGroups.toLocaleString(), 'region/office groups across '+m.regions+' regions']];
+    document.getElementById('mpb-stats').innerHTML=stats.map(x=>`<div class="stat-card"><strong>${x[0]}</strong><span>${x[1]}</span></div>`).join('');
+    const cs=m.coordinateSummary||{};
+    const signalRows=[
+      ['Rapid rise', 'No like-for-like annual MPB totals available in this snapshot.', 'Not tested'],
+      ['Geographic concentration', `${m.distributionGroups} region/office groups across ${m.regions} regions; not a province-level comparison to flood contracts.`, 'Different unit'],
+      ['Repeated project titles', `${m.repeatPairs.toLocaleString()} historical comparison pairs across ${m.historicalRepeatProjects.toLocaleString()} projects. Some may be phases or legitimate continuations.`, 'Review lead'],
+      ['Round allocation amounts', `${m.repeatedCandidateAmounts[0].candidateLines.toLocaleString()} candidate lines at ${peso(m.repeatedCandidateAmounts[0].amountPesos)}; amount repetition alone is not a risk finding.`, 'Review lead'],
+      ['Nearby same-site points', `${cs.currentUnder50mSameSiteCandidates??0} current under-50 m same-site candidates; location and building identity still need source checks.`, 'Limited evidence']
+    ];
+    putTable('#mpb-signals',signalRows,r=>`<tr><td data-label="Pattern test">${escapeHtml(r[0])}</td><td data-label="Current evidence">${escapeHtml(r[1])}</td><td data-label="Assessment"><span class="pattern-status">${escapeHtml(r[2])}</span></td></tr>`);
+    const loc=d.flood.bulacanTopLocalities;
+    barChart('bulacan-localities-chart',loc.slice(0,8),{valueKey:'contractCost',labelKey:'name',format:n=>(Number(n)/1e9).toFixed(2)+'B'});
+    putTable('#locality-table',loc.slice(0,8),r=>`<tr><td data-label="Locality">${escapeHtml(r.name)}</td><td class="num" data-label="Projects">${r.projects.toLocaleString()}</td><td class="num" data-label="Value">${billion(r.contractCost)}</td></tr>`);
+    const amounts=m.repeatedCandidateAmounts.slice(0,10);
+    barChart('mpb-amount-chart',amounts,{valueKey:'candidateLines',labelKey:'amountPesos',categoryFormat:n=>peso(n),format:n=>Number(n).toLocaleString('en-PH',{maximumFractionDigits:0})});
+    putTable('#amount-table',amounts,r=>`<tr><td data-label="HGAB amount">${peso(r.amountPesos)}</td><td class="num" data-label="Candidate lines">${r.candidateLines.toLocaleString()}</td></tr>`);
+  }).catch(err=>{document.getElementById('hero-metrics').innerHTML=`<div class="hero-metric"><strong>Data unavailable</strong><span>${escapeHtml(err.message)}</span></div>`});
+})();
+</script>
+<footer class="site-ai-credit"><p><strong>AI assistance:</strong> OpenAI Codex contributed to software implementation and data-processing workflows for this site. This credit does not represent independent verification of the underlying sources, calculations, or conclusions.</p></footer></body>
+</html>
