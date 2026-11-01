@@ -53,7 +53,7 @@ def paddle_words(page,dpi=170):
             attempts.append((structure,confidence,min(len(words),300),words,rotation,rotated.width,joined))
         if not attempts:return None
         _,_,_,words,rotation,width,text=max(attempts,key=lambda a:(a[0],a[1],a[2]))
-        return {'words':[(*w[:5],0,0,0) for w in words], 'width':width,
+        return {'words':[(*w[:5],0,int(round((w[1]+w[3])/16)),0) for w in words], 'width':width,
             'text':text,'rotation':rotation,'method':f'OCR · PaddleOCR PP-OCRv6 · rotated scan {rotation}°',
             'meanConfidence':round(sum(w[5] for w in words)/len(words),4) if words else 0}
     except Exception:
