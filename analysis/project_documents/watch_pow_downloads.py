@@ -6,6 +6,7 @@ import json
 import os
 import re
 import sys
+import threading
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -21,6 +22,11 @@ def atomic_json(path, value):
     temporary = path.with_suffix(path.suffix + '.tmp')
     temporary.write_text(json.dumps(value, ensure_ascii=False) + '\n')
     temporary.replace(path)
+
+def heartbeat(stop, status_path, state):
+    while not stop.wait(20):
+        state['heartbeatAtUtc'] = utc()
+        atomic_json(status_path, state)
 
 def ledger_rows(ledger):
     found = {}
@@ -43,12 +49,19 @@ def main():
     cli.add_argument('--root', type=Path, default=Path(DEFAULT_ROOT) if DEFAULT_ROOT else None)
     cli.add_argument('--interval', type=int, default=20)
     cli.add_argument('--once', action='store_true')
+    cli.add_argument('--status', action='store_true', help='print the latest internal status and exit')
     args = cli.parse_args()
     if args.root is None:
         raise SystemExit('Set DPWH_STATUS_ROOT or pass --root.')
     root, ledger = args.root, args.root / 'attachments' / 'downloads.jsonl'
     result_root = root / 'parsed_pow'
     status_path = root / 'pow-parser-watcher-status.json'
+    if args.status:
+        try:
+            print(json.dumps(json.loads(status_path.read_text()), ensure_ascii=False, indent=2))
+        except (OSError, ValueError) as exc:
+            raise SystemExit(f'Parser status is unavailable: {exc}')
+        return
     if not ledger.is_file():
         raise SystemExit(f'Download ledger not found: {ledger}')
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
@@ -71,15 +84,23 @@ def main():
         'current': None,
     }
     completed = {}
+    observed = set()
+    retry_after = {}
+    previous_download_checkpoint = str((prior or {}).get('lastDownloaderRecordUtc') or '')
+    first_scan = True
     while True:
         records = ledger_rows(ledger)
-        pending = []
+        fresh, without_result, stale_or_error, waiting_retry = [], [], [], []
+        scan_keys = set()
         for record in records:
             key = (record['projectCode'], str(record['documentId']), record['signature'])
+            scan_keys.add(key)
             output_dir = result_root / key[0] / (key[1] + '-' + key[2][:16])
             marker_path = output_dir / 'status.json'
-            if key in completed:
+            prior_marker = completed.get(key)
+            if prior_marker and prior_marker.get('status') == 'parsed':
                 continue
+            marker = None
             try:
                 marker = json.loads(marker_path.read_text())
                 if marker.get('status') == 'parsed' and marker.get('parseStatus') != 'parser_dependency_missing' and marker.get('parserVersion') == parser_version and marker.get('sourceSha256') == record.get('sha256'):
@@ -87,16 +108,40 @@ def main():
                     continue
             except (OSError, ValueError):
                 pass
-            pending.append(record)
+            if prior_marker and prior_marker.get('status') == 'error' and retry_after.get(key, 0) > time.time():
+                waiting_retry.append(record)
+                continue
+            timestamp = str(record.get('at') or '')
+            is_new = key not in observed and (
+                not first_scan or not previous_download_checkpoint or timestamp > previous_download_checkpoint
+            )
+            if is_new:
+                fresh.append(record)
+            elif marker is None and not marker_path.exists():
+                without_result.append(record)
+            else:
+                stale_or_error.append(record)
+        observed.update(scan_keys)
+        first_scan = False
+        fresh.sort(key=lambda r: (str(r.get('at') or ''), r['projectCode'], str(r['documentId'])), reverse=True)
+        without_result.sort(key=lambda r: (str(r.get('at') or ''), r['projectCode'], str(r['documentId'])))
+        stale_or_error.sort(key=lambda r: (str(r.get('at') or ''), r['projectCode'], str(r['documentId'])))
+        pending = fresh + without_result + stale_or_error
         successful = [value for value in completed.values() if value.get('status') == 'parsed']
         lifetime['skippedCurrent'] = len(successful)
         lifetime['processed'] = len(successful)
         lifetime['rows'] = sum(int(value.get('rows', 0) or 0) for value in successful)
         lifetime['categories'] = sum(int(value.get('categories', 0) or 0) for value in successful)
-        lifetime['pending'] = len(pending)
+        lifetime['pending'] = len(pending) + len(waiting_retry)
+        lifetime['pendingNewDownloads'] = len(fresh)
+        lifetime['pendingWithoutParseResult'] = len(without_result)
+        lifetime['pendingRetry'] = len(stale_or_error) + len(waiting_retry)
+        lifetime['queuePolicy'] = 'New downloads first; then missing parse results; then failed or stale results.'
         lifetime['totalDownloadedPow'] = len(records)
         lifetime['lastDownloaderRecordUtc'] = records[-1].get('at') if records else None
-        lifetime['status'] = 'running' if pending else 'idle'
+        lifetime['lastQueueScanAtUtc'] = utc()
+        lifetime['heartbeatAtUtc'] = lifetime['lastQueueScanAtUtc']
+        lifetime['status'] = 'running' if pending else ('waiting_retry' if waiting_retry else 'idle')
         lifetime['updatedAtUtc'] = utc()
         atomic_json(status_path, lifetime)
         if not pending:
@@ -109,10 +154,14 @@ def main():
         output_dir = result_root / code / (document_id + '-' + record['signature'][:16])
         relative = Path(record.get('path', ''))
         pdf = (root / 'attachments' / relative).resolve()
-        lifetime['current'] = {'projectCode': code, 'documentId': document_id, 'fileName': record.get('fileName')}
+        lifetime['current'] = {'projectCode': code, 'documentId': document_id, 'fileName': record.get('fileName'),
+                               'priority': 'new download' if record in fresh else ('missing parse result' if record in without_result else 'retry/stale result')}
         lifetime['updatedAtUtc'] = utc()
         atomic_json(status_path, lifetime)
         marker = {'parserVersion': parser_version, 'sourceSha256': record.get('sha256')}
+        heartbeat_stop = threading.Event()
+        heartbeat_thread = threading.Thread(target=heartbeat, args=(heartbeat_stop, status_path, lifetime), daemon=True)
+        heartbeat_thread.start()
         try:
             if not pdf.is_file():
                 raise FileNotFoundError(f'Ledger file is missing: {relative}')
@@ -139,6 +188,10 @@ def main():
             marker.update({'status': 'error', 'atUtc': utc(), 'error': f'{type(exc).__name__}: {str(exc)[:240]}'})
             lifetime['errors'] += 1
             lifetime['lastError'] = f'{code} {document_id}: {marker["error"]}'
+            retry_after[(code, document_id, record['signature'])] = time.time() + 300
+        finally:
+            heartbeat_stop.set()
+            heartbeat_thread.join()
         atomic_json(output_dir / 'status.json', marker)
         completed[(code, document_id, record['signature'])] = marker
         lifetime['current'] = None
