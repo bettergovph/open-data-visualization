@@ -1,7 +1,63 @@
 """Conservative POW bill-row candidates with exact page/row evidence."""
-import hashlib,json,os,re,shutil,subprocess,sys
+import hashlib,json,os,re,shutil,subprocess,sys,tempfile
 from decimal import Decimal,InvalidOperation
 from pathlib import Path
+_PADDLE_OCR=None
+
+def paddle_words(page,dpi=170):
+    """Second-pass OCR for pages where the existing extractors find no rows.
+
+    Returns PaddleOCR word boxes in the same (x0,y0,x1,y1,text) shape used by
+    the Apple Vision/Tesseract parsers. Rotation is selected by the amount of
+    recognizable POW structure, then by OCR confidence and useful text count.
+    PaddleOCR remains optional so installations without its large model package
+    retain the existing parser behavior.
+    """
+    global _PADDLE_OCR
+    try:
+        import numpy as np
+        os.environ.setdefault('PADDLE_PDX_CACHE_HOME',str(Path(tempfile.gettempdir())/'paddleocr-cache'))
+        from paddleocr import PaddleOCR
+        from PIL import Image
+        import io
+        import pymupdf as fitz
+    except ImportError:
+        return None
+    if _PADDLE_OCR is None:
+        try:
+            _PADDLE_OCR=PaddleOCR(lang='en',ocr_version='PP-OCRv6',
+                use_doc_orientation_classify=False,use_doc_unwarping=False,
+                use_textline_orientation=False)
+        except Exception:
+            _PADDLE_OCR=False
+    if _PADDLE_OCR is False:return None
+    try:
+        pix=page.get_pixmap(matrix=fitz.Matrix(dpi/72,dpi/72),alpha=False)
+        image=Image.open(io.BytesIO(pix.tobytes('png'))).convert('RGB')
+        attempts=[]
+        for rotation in (0,90,180,270):
+            rotated=image.rotate(rotation,expand=True) if rotation else image
+            result=_PADDLE_OCR.predict(np.asarray(rotated))[0]
+            texts=result.get('rec_texts',[]);scores=result.get('rec_scores',[]);boxes=result.get('rec_boxes',[])
+            words=[]
+            for box,text,confidence in zip(boxes,texts,scores):
+                text=str(text).strip()
+                if not text:continue
+                x0,y0,x1,y1=map(float,box)
+                words.append((x0,y0,x1,y1,text,float(confidence)))
+            joined=' '.join(w[4] for w in words)
+            structure=(4*len(re.findall(r'\b(?:ITEM\s*NO|DESCRIPTION|QUANTITY|AMOUNT|TOTAL\s+COST|AS\s+SUBMITTED)\b',joined,re.I))
+                +3*sum(bool(ITEM.fullmatch(w[4])) for w in words)
+                +sum(bool(amount(w[4])) for w in words))
+            confidence=sum(w[5] for w in words)/len(words) if words else 0
+            attempts.append((structure,confidence,min(len(words),300),words,rotation,rotated.width,joined))
+        if not attempts:return None
+        _,_,_,words,rotation,width,text=max(attempts,key=lambda a:(a[0],a[1],a[2]))
+        return {'words':[(*w[:5],0,0,0) for w in words], 'width':width,
+            'text':text,'rotation':rotation,'method':f'OCR · PaddleOCR PP-OCRv6 · rotated scan {rotation}°',
+            'meanConfidence':round(sum(w[5] for w in words)/len(words),4) if words else 0}
+    except Exception:
+        return None
 NUMBER=re.compile(r'^(?:(?:₱|PHP|P)\s*)?-?\d[\d,]*(?:\.\d+)?\s*(?:₱|PHP|P)?$',re.I)
 ITEM=re.compile(r'^(?:\d{3,4}(?:\([^)]*\))*[a-z0-9]*|[A-Z]\.\d+(?:\([^)]*\))*[a-z0-9]*)$',re.I)
 def normalized_item_code(value):
@@ -560,13 +616,36 @@ def parse_pdf(path,output,allocation_pesos=None):
                 page_rows=[r for r in page_rows if (r.get('itemCode'),r.get('amountPesos')) not in compact_keys]
                 page_rows.extend(compact_rows)
                 current_cost_category=compact_category
+        paddle_confidence=None;paddle_category_rows=0;paddle_method=None
+        if not page_rows:
+            paddle=paddle_words(page)
+            if paddle:
+                paddle_words_data=paddle['words'];paddle_method=paddle['method'];paddle_width=paddle['width']
+                paddle_text=paddle['text'];paddle_confidence=paddle['meanConfidence']
+                paddle_summary=bool(re.search(r'PROGRAM\s+OF\s+WORKS\s*/?\s*BUDGET\s+COST|BREAKDOWN\s+OF\s+EXPENDITURES',paddle_text,re.I))
+                if paddle_summary:
+                    mapped=cost_category_totals_from_words(paddle_words_data,paddle_width,number+1,paddle_method)
+                    share_total=sum(row['sharePct'] for row in mapped)
+                    if mapped and len(mapped)>=3 and 90<=share_total<=110:
+                        cost_categories.extend(mapped);paddle_category_rows=len(mapped)
+                page_rows,current_cost_category=item_rows_from_words(paddle_words_data,paddle_width,number+1,paddle_method,current_cost_category)
+                if not page_rows:page_rows,review=word_rows(paddle_words_data,paddle_width,number+1,paddle_method)
+                compact_rows,compact_category=summary_item_rows_from_words(paddle_words_data,paddle_width,number+1,paddle_method,page_start_category)
+                if compact_rows:
+                    page_rows.extend(compact_rows);current_cost_category=compact_category
+                if page_rows:
+                    words=paddle_words_data;ocr_width=paddle_width;method=paddle_method;text=paddle_text
         if method.startswith('OCR') and page_rows:
             lines={}
             for w in words:lines.setdefault(round(w[1]/5),[]).append(w)
             page_context=component_context('\n'.join(' '.join(w[4] for w in sorted(line,key=lambda x:x[0])) for _,line in sorted(lines.items())))
             if page_context:
                 for row in page_rows:row['componentContext']=page_context
-        pages.append({'page':number+1,'status':'candidate_rows' if page_rows else 'needs_manual_review' if review else 'no_bill_rows_recovered','rows':len(page_rows),'method':method,'reviewNote':'Numeric columns could not be mapped safely; inspect the source page.' if review else None})
+        page_record={'page':number+1,'status':'candidate_rows' if page_rows else 'needs_manual_review' if review else 'no_bill_rows_recovered','rows':len(page_rows),'method':method,'reviewNote':'Numeric columns could not be mapped safely; inspect the source page.' if review else None}
+        if paddle_confidence is not None:page_record['paddleMeanConfidence']=paddle_confidence
+        if paddle_method:page_record['paddleMethod']=paddle_method
+        if paddle_category_rows:page_record['paddleCategorySummaryRows']=paddle_category_rows
+        pages.append(page_record)
         rows.extend(page_rows)
     # Retain repeated observations rather than summing duplicate page/table views.
     grouped={}

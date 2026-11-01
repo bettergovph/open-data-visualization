@@ -26923,11 +26923,60 @@
               "status": "needs_manual_review",
               "rows": 0,
               "method": "OCR · Apple Vision orientation retry (six attempts), selected 0°",
-              "reviewNote": "Numeric columns could not be mapped safely; inspect the source page."
+              "reviewNote": "Numeric columns could not be mapped safely; inspect the source page.",
+              "paddleCategorySummaryRows": 5,
+              "paddleMeanConfidence": 0.9960804975722447,
+              "paddleMethod": "PaddleOCR PP-OCRv6; 150 dpi; rotation 0°"
             }
           ],
           "rows": [],
-          "costCategoryBreakdown": [],
+          "costCategoryBreakdown": [
+            {
+              "label": "Other General Requirements",
+              "sharePct": 6.19,
+              "amountPesos": 78302.07,
+              "sourcePage": 2,
+              "extractionMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 0°",
+              "verificationStatus": "Machine-extracted printed category total; verify cited POW page",
+              "paddleMeanConfidence": 0.9960804975722447
+            },
+            {
+              "label": "EARTHWORKS",
+              "sharePct": 4.58,
+              "amountPesos": 57969.07,
+              "sourcePage": 2,
+              "extractionMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 0°",
+              "verificationStatus": "Machine-extracted printed category total; verify cited POW page",
+              "paddleMeanConfidence": 0.9960804975722447
+            },
+            {
+              "label": "PLAIN AND REINFORCED CONCRETE WORKS",
+              "sharePct": 38.54,
+              "amountPesos": 487317.67,
+              "sourcePage": 2,
+              "extractionMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 0°",
+              "verificationStatus": "Machine-extracted printed category total; verify cited POW page",
+              "paddleMeanConfidence": 0.9960804975722447
+            },
+            {
+              "label": "FINISHING WORKS",
+              "sharePct": 27.3,
+              "amountPesos": 345182.68,
+              "sourcePage": 2,
+              "extractionMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 0°",
+              "verificationStatus": "Machine-extracted printed category total; verify cited POW page",
+              "paddleMeanConfidence": 0.9960804975722447
+            },
+            {
+              "label": "PLUMBING/SANITARY WORKS",
+              "sharePct": 23.38,
+              "amountPesos": 295556.0,
+              "sourcePage": 2,
+              "extractionMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 0°",
+              "verificationStatus": "Machine-extracted printed category total; verify cited POW page",
+              "paddleMeanConfidence": 0.9960804975722447
+            }
+          ],
           "summaryMetadata": {
             "summaryPages": [
               1,
@@ -1042924,5 +1042973,14 @@
     "categoryRowsRecovered": 2399,
     "onlyNativeTextPages": true,
     "imageOnlyPagesReusedFromExistingIndex": true
+  },
+  "paddleOcrRecovery": {
+    "engine": "PaddleOCR PP-OCRv6",
+    "recoveredCategorySummaryRows": 5,
+    "recoveredProjectCodes": [
+      "2027DPWH-Proposal-00135"
+    ],
+    "validation": "Recovered printed category shares total 99.99%; each row remains machine-extracted and requires source-page verification.",
+    "generatedAtUtc": "2026-11-01"
   }
 }

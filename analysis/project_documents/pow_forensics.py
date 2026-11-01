@@ -152,6 +152,8 @@ def parser_signals(pow_document):
         "parserManualReviewPageCount": statuses.get("needs_manual_review", 0),
         "parserNoBillRowsPageCount": statuses.get("no_bill_rows_recovered", 0),
         "parserNeedsOcrPageCount": statuses.get("needs_ocr", 0),
+        "parserPaddlePageCount": sum(1 for p in pages if p.get("paddleMeanConfidence") is not None),
+        "parserPaddleCategorySummaryRowCount": sum(int(p.get("paddleCategorySummaryRows", 0) or 0) for p in pages),
         "parserOcrPageCount": sum(n for method, n in methods.items() if "OCR" in method),
         "parserNativeTextPageCount": sum(n for method, n in methods.items() if "native PDF text" in method),
         "parserSignatoryStatus": pow_document.get("signatoryStatus"),
@@ -212,7 +214,7 @@ def main():
             source_project = source_projects.get(record["code"], {})
             source_pow = next((d for d in source_project.get("documents", []) if str(d.get("kind", "")).casefold() == "pow"), {})
             record["pages"] = [
-                {"page": p.get("page"), "rotation": p.get("nativePageRotation"), "orientation": p.get("pageRectOrientation"), "status": p.get("status"), "method": p.get("method")}
+                {"page": p.get("page"), "rotation": p.get("nativePageRotation"), "orientation": p.get("pageRectOrientation"), "status": p.get("status"), "method": p.get("method"), "paddleMethod": p.get("paddleMethod"), "paddleMeanConfidence": p.get("paddleMeanConfidence"), "paddleCategorySummaryRows": p.get("paddleCategorySummaryRows")}
                 for p in (source_pow.get("pages") or [])
             ]
             record.update(parser_signals(source_pow))
@@ -284,6 +286,9 @@ def main():
                 "orientation": page.get("pageRectOrientation"),
                 "status": page.get("status"),
                 "method": page.get("method"),
+                "paddleMethod": page.get("paddleMethod"),
+                "paddleMeanConfidence": page.get("paddleMeanConfidence"),
+                "paddleCategorySummaryRows": page.get("paddleCategorySummaryRows"),
             }
             pages.append(item)
             if item["orientation"]:
