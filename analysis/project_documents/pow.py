@@ -98,7 +98,16 @@ def cost_category_totals_from_words(words,width,page,method):
         try:x0,y0,x1,y1=map(float,word[:4])
         except (TypeError,ValueError):continue
         tokens.append({'x':x0,'x1':x1,'y':(y0+y1)/2,'text':str(word[4]).strip()})
+    percent_columns=[t['x'] for t in tokens if t['text']=='%' and width*.42<=t['x']<=width*.72]
     shares=[t for t in tokens if re.fullmatch(r'\d{1,4}(?:[.,]\d{1,4})?%',t['text']) and width*.42<=t['x']<=width*.72]
+    # Native-text Excel exports often store the percent sign only in the
+    # column heading ("% Total"), leaving each row value as a bare number.
+    # Anchor those values to that heading so unrelated quantities elsewhere
+    # on the page are not treated as category shares.
+    for token in tokens:
+        if (percent_columns and any(abs(token['x']-x)<=width*.035 for x in percent_columns)
+                and re.fullmatch(r'\d{1,3}(?:[.,]\d{1,4})?',token['text'])):
+            shares.append(token)
     found=[]
     for share_token in shares:
         share_value=re.sub(r'[^\d.]','',share_token['text'].replace(',','.'))
@@ -109,10 +118,16 @@ def cost_category_totals_from_words(words,width,page,method):
         try:share=float(share_value)
         except ValueError:continue
         if not 0<share<=100:continue
-        row_tokens=[t for t in tokens if abs(t['y']-share_token['y'])<=10]
+        row_tolerance=10 if method.startswith('OCR') else 3.5
+        row_tokens=[t for t in tokens if abs(t['y']-share_token['y'])<=row_tolerance]
         monetary=[]
         for token in row_tokens:
-            if token['x']<share_token['x']+width*.13:continue
+            # On selectable-text Excel exports, the direct-cost column sits
+            # closer to the percent column than in the scan layouts. Keep a
+            # small gap to avoid reading the percentage header as an amount,
+            # then use the first monetary column to its right.
+            amount_gap=width*(.13 if method.startswith('OCR') else .06)
+            if token['x']<share_token['x']+amount_gap:continue
             parsed=amount(token['text'])
             if parsed is not None and parsed>0:monetary.append((token,parsed))
         # OCR may split cents into a neighboring token. Join adjacent words
@@ -507,7 +522,12 @@ def parse_pdf(path,output,allocation_pesos=None):
                                         for _,line in sorted(category_lines.items()))
                 cost_categories.extend(cost_category_totals(category_text,number+1,method))
         elif is_category_summary:
-            cost_categories.extend(cost_category_totals(category_text,number+1,method))
+            mapped=cost_category_totals_from_words(words,ocr_width,number+1,method)
+            share_total=sum(row['sharePct'] for row in mapped)
+            if mapped and len(mapped)>=3 and 90<=share_total<=110:
+                cost_categories.extend(mapped)
+            else:
+                cost_categories.extend(cost_category_totals(category_text,number+1,method))
         page_rows=[]
         page_start_category=current_cost_category
         current_context=component_context(text) or current_context
