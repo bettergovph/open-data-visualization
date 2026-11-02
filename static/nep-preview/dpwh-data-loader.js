@@ -18,7 +18,7 @@
       const legacy=Array.isArray(index.projectShards)?{projects:index.projectShards}:null;
       if(!arrays&&!legacy)return index;
       const sources=arrays||legacy;
-      await Promise.all(Object.entries(sources).map(async([key,shards])=>{
+      await Promise.all(Object.entries(sources).filter(([key])=>mode!=='cost-per-unit'||key==='projects'||key==='summaryPeerGroups').map(async([key,shards])=>{
         const parts=await Promise.all(shards.map(async shard=>{
           const file=shard.path+'?v='+encodeURIComponent(shard.sha256||'');
           const result=await fetch(file,{cache:'force-cache'});
