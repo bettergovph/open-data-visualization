@@ -965246,137 +965246,450 @@
         "sha256": "0d97b8803a844b98f78c018960ec9c886d40a0d8d6111786406f816d70ef19de",
         "rowSourceSha256": "0d97b8803a844b98f78c018960ec9c886d40a0d8d6111786406f816d70ef19de",
         "rowSourceStatus": "current_source_version",
-        "currentParseStatus": "no_bill_rows_recovered",
+        "currentParseStatus": "candidate_rows",
         "pageCount": 18,
         "pages": [
           {
             "page": 1,
             "status": "no_bill_rows_recovered",
             "rows": 0,
-            "method": "OCR · Apple Vision · rotated scan 270°; original boxes/confidence retained",
-            "reviewNote": null
+            "method": "OCR · PaddleOCR PP-OCRv6 · rotated scan 180° at 170 dpi",
+            "reviewNote": null,
+            "paddleMeanConfidence": 0.9726,
+            "paddleMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 180° at 170 dpi",
+            "paddleSelectedRotationDegrees": 180,
+            "paddleSelectedDpi": 170
           },
           {
             "page": 2,
-            "status": "no_bill_rows_recovered",
-            "rows": 0,
-            "method": "OCR · Apple Vision · rotated scan 90°; original boxes/confidence retained",
-            "reviewNote": null
+            "status": "candidate_rows",
+            "rows": 10,
+            "method": "OCR · PaddleOCR PP-OCRv6 · rotated scan 270° at 170 dpi",
+            "reviewNote": null,
+            "paddleMeanConfidence": 0.9794,
+            "paddleMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 270° at 170 dpi",
+            "paddleSelectedRotationDegrees": 270,
+            "paddleSelectedDpi": 170
           },
           {
             "page": 3,
             "status": "no_bill_rows_recovered",
             "rows": 0,
-            "method": "OCR · Apple Vision; original boxes/confidence retained",
-            "reviewNote": null
+            "method": "OCR · PaddleOCR PP-OCRv6 · rotated scan 90° at 350 dpi",
+            "reviewNote": null,
+            "paddleMeanConfidence": 0.6193,
+            "paddleMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 90° at 350 dpi",
+            "paddleSelectedRotationDegrees": 90,
+            "paddleSelectedDpi": 350
           },
           {
             "page": 4,
             "status": "no_bill_rows_recovered",
             "rows": 0,
-            "method": "OCR · Apple Vision · rotated scan 270°; original boxes/confidence retained",
-            "reviewNote": null
+            "method": "OCR · PaddleOCR PP-OCRv6 · rotated scan 0° at 170 dpi",
+            "reviewNote": null,
+            "paddleMeanConfidence": 0.9905,
+            "paddleMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 0° at 170 dpi",
+            "paddleSelectedRotationDegrees": 0,
+            "paddleSelectedDpi": 170
           },
           {
             "page": 5,
             "status": "no_bill_rows_recovered",
             "rows": 0,
-            "method": "OCR · Apple Vision · rotated scan 90°; original boxes/confidence retained",
-            "reviewNote": null
+            "method": "OCR · PaddleOCR PP-OCRv6 · rotated scan 0° at 170 dpi",
+            "reviewNote": null,
+            "paddleMeanConfidence": 0.9921,
+            "paddleMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 0° at 170 dpi",
+            "paddleSelectedRotationDegrees": 0,
+            "paddleSelectedDpi": 170
           },
           {
             "page": 6,
             "status": "no_bill_rows_recovered",
             "rows": 0,
-            "method": "OCR · Apple Vision · rotated scan 90°; original boxes/confidence retained",
-            "reviewNote": null
+            "method": "OCR · PaddleOCR PP-OCRv6 · rotated scan 0° at 170 dpi",
+            "reviewNote": null,
+            "paddleMeanConfidence": 0.9908,
+            "paddleMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 0° at 170 dpi",
+            "paddleSelectedRotationDegrees": 0,
+            "paddleSelectedDpi": 170
           },
           {
             "page": 7,
             "status": "no_bill_rows_recovered",
             "rows": 0,
-            "method": "OCR · Apple Vision · rotated scan 270°; original boxes/confidence retained",
-            "reviewNote": null
+            "method": "OCR · PaddleOCR PP-OCRv6 · rotated scan 0° at 170 dpi",
+            "reviewNote": null,
+            "paddleMeanConfidence": 0.9923,
+            "paddleMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 0° at 170 dpi",
+            "paddleSelectedRotationDegrees": 0,
+            "paddleSelectedDpi": 170
           },
           {
             "page": 8,
             "status": "no_bill_rows_recovered",
             "rows": 0,
-            "method": "OCR · Apple Vision; original boxes/confidence retained",
-            "reviewNote": null
+            "method": "OCR · PaddleOCR PP-OCRv6 · rotated scan 0° at 170 dpi",
+            "reviewNote": null,
+            "paddleMeanConfidence": 0.9871,
+            "paddleMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 0° at 170 dpi",
+            "paddleSelectedRotationDegrees": 0,
+            "paddleSelectedDpi": 170
           },
           {
             "page": 9,
             "status": "no_bill_rows_recovered",
             "rows": 0,
-            "method": "OCR · Apple Vision · rotated scan 90°; original boxes/confidence retained",
-            "reviewNote": null
+            "method": "OCR · PaddleOCR PP-OCRv6 · rotated scan 0° at 170 dpi",
+            "reviewNote": null,
+            "paddleMeanConfidence": 0.9922,
+            "paddleMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 0° at 170 dpi",
+            "paddleSelectedRotationDegrees": 0,
+            "paddleSelectedDpi": 170
           },
           {
             "page": 10,
             "status": "no_bill_rows_recovered",
             "rows": 0,
-            "method": "OCR · Apple Vision · rotated scan 270°; original boxes/confidence retained",
-            "reviewNote": null
+            "method": "OCR · PaddleOCR PP-OCRv6 · rotated scan 0° at 170 dpi",
+            "reviewNote": null,
+            "paddleMeanConfidence": 0.992,
+            "paddleMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 0° at 170 dpi",
+            "paddleSelectedRotationDegrees": 0,
+            "paddleSelectedDpi": 170
           },
           {
             "page": 11,
             "status": "no_bill_rows_recovered",
             "rows": 0,
-            "method": "OCR · Apple Vision; original boxes/confidence retained",
-            "reviewNote": null
+            "method": "OCR · PaddleOCR PP-OCRv6 · rotated scan 0° at 170 dpi",
+            "reviewNote": null,
+            "paddleMeanConfidence": 0.9927,
+            "paddleMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 0° at 170 dpi",
+            "paddleSelectedRotationDegrees": 0,
+            "paddleSelectedDpi": 170
           },
           {
             "page": 12,
             "status": "no_bill_rows_recovered",
             "rows": 0,
-            "method": "OCR · Apple Vision; original boxes/confidence retained",
-            "reviewNote": null
+            "method": "OCR · PaddleOCR PP-OCRv6 · rotated scan 0° at 170 dpi",
+            "reviewNote": null,
+            "paddleMeanConfidence": 0.9933,
+            "paddleMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 0° at 170 dpi",
+            "paddleSelectedRotationDegrees": 0,
+            "paddleSelectedDpi": 170
           },
           {
             "page": 13,
             "status": "no_bill_rows_recovered",
             "rows": 0,
-            "method": "OCR · Apple Vision · rotated scan 90°; original boxes/confidence retained",
-            "reviewNote": null
+            "method": "OCR · PaddleOCR PP-OCRv6 · rotated scan 0° at 170 dpi",
+            "reviewNote": null,
+            "paddleMeanConfidence": 0.9929,
+            "paddleMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 0° at 170 dpi",
+            "paddleSelectedRotationDegrees": 0,
+            "paddleSelectedDpi": 170
           },
           {
             "page": 14,
             "status": "no_bill_rows_recovered",
             "rows": 0,
-            "method": "OCR · Apple Vision · rotated scan 180°; original boxes/confidence retained",
-            "reviewNote": null
+            "method": "OCR · PaddleOCR PP-OCRv6 · rotated scan 0° at 170 dpi",
+            "reviewNote": null,
+            "paddleMeanConfidence": 0.9928,
+            "paddleMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 0° at 170 dpi",
+            "paddleSelectedRotationDegrees": 0,
+            "paddleSelectedDpi": 170
           },
           {
             "page": 15,
             "status": "no_bill_rows_recovered",
             "rows": 0,
-            "method": "OCR · Apple Vision · rotated scan 270°; original boxes/confidence retained",
-            "reviewNote": null
+            "method": "OCR · PaddleOCR PP-OCRv6 · rotated scan 0° at 170 dpi",
+            "reviewNote": null,
+            "paddleMeanConfidence": 0.9937,
+            "paddleMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 0° at 170 dpi",
+            "paddleSelectedRotationDegrees": 0,
+            "paddleSelectedDpi": 170
           },
           {
             "page": 16,
             "status": "no_bill_rows_recovered",
             "rows": 0,
-            "method": "OCR · Apple Vision · rotated scan 180°; original boxes/confidence retained",
-            "reviewNote": null
+            "method": "OCR · PaddleOCR PP-OCRv6 · rotated scan 0° at 170 dpi",
+            "reviewNote": null,
+            "paddleMeanConfidence": 0.9889,
+            "paddleMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 0° at 170 dpi",
+            "paddleSelectedRotationDegrees": 0,
+            "paddleSelectedDpi": 170
           },
           {
             "page": 17,
             "status": "no_bill_rows_recovered",
             "rows": 0,
-            "method": "OCR · Apple Vision · rotated scan 90°; original boxes/confidence retained",
-            "reviewNote": null
+            "method": "OCR · PaddleOCR PP-OCRv6 · rotated scan 0° at 170 dpi",
+            "reviewNote": null,
+            "paddleMeanConfidence": 0.9924,
+            "paddleMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 0° at 170 dpi",
+            "paddleSelectedRotationDegrees": 0,
+            "paddleSelectedDpi": 170
           },
           {
             "page": 18,
             "status": "no_bill_rows_recovered",
             "rows": 0,
-            "method": "OCR · Apple Vision · rotated scan 90°; original boxes/confidence retained",
-            "reviewNote": null
+            "method": "OCR · PaddleOCR PP-OCRv6 · rotated scan 0° at 170 dpi",
+            "reviewNote": null,
+            "paddleMeanConfidence": 0.9924,
+            "paddleMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 0° at 170 dpi",
+            "paddleSelectedRotationDegrees": 0,
+            "paddleSelectedDpi": 170
           }
         ],
-        "rows": [],
+        "rows": [
+          {
+            "itemCode": "404(1)a",
+            "description": "PLAIN REINFORCED STRUCTURES Reinfording Sted, Grade 40",
+            "componentContext": null,
+            "componentContexts": null,
+            "costCategory": null,
+            "quantity": 19485.7,
+            "unit": "Kilogram",
+            "printedUnitCostPesos": null,
+            "inclusiveUnitCostPesos": null,
+            "calculatedUnitCostPesos": 50.749305388053806,
+            "amountPesos": 988885.74,
+            "directCostSharePct": null,
+            "manualReview": null,
+            "sourcePage": 2,
+            "observedPages": [
+              2
+            ],
+            "extractionMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 270° at 170 dpi",
+            "arithmeticStatus": "Printed unit cost unavailable; amount/quantity is derived",
+            "verificationStatus": "Machine-extracted candidate; verify source page",
+            "costBasis": null,
+            "amountBasis": null
+          },
+          {
+            "itemCode": "404(1)b",
+            "description": "Reinfording Sted, Grade 40 Reinfording Sted, Grade 60",
+            "componentContext": null,
+            "componentContexts": null,
+            "costCategory": null,
+            "quantity": 19485.7,
+            "unit": "Kilogram Kilogram",
+            "printedUnitCostPesos": null,
+            "inclusiveUnitCostPesos": null,
+            "calculatedUnitCostPesos": 50.749305388053806,
+            "amountPesos": 988885.74,
+            "directCostSharePct": null,
+            "manualReview": null,
+            "sourcePage": 2,
+            "observedPages": [
+              2
+            ],
+            "extractionMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 270° at 170 dpi",
+            "arithmeticStatus": "Printed unit cost unavailable; amount/quantity is derived",
+            "verificationStatus": "Machine-extracted candidate; verify source page",
+            "costBasis": null,
+            "amountBasis": null
+          },
+          {
+            "itemCode": "405(1)a3",
+            "description": "Reinfording Sted, Grade 60 Structural Concrete (20.68MPa) - Class A (28 days)",
+            "componentContext": null,
+            "componentContexts": null,
+            "costCategory": null,
+            "quantity": 11067.41,
+            "unit": "Cubic Meter Kilogram",
+            "printedUnitCostPesos": null,
+            "inclusiveUnitCostPesos": null,
+            "calculatedUnitCostPesos": 51.59980519380777,
+            "amountPesos": 571076.2,
+            "directCostSharePct": null,
+            "manualReview": null,
+            "sourcePage": 2,
+            "observedPages": [
+              2
+            ],
+            "extractionMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 270° at 170 dpi",
+            "arithmeticStatus": "Printed unit cost unavailable; amount/quantity is derived",
+            "verificationStatus": "Machine-extracted candidate; verify source page",
+            "costBasis": null,
+            "amountBasis": null
+          },
+          {
+            "itemCode": "103(1)a",
+            "description": "EARTHWORK Structure Excavation (Common Soil)",
+            "componentContext": null,
+            "componentContexts": null,
+            "costCategory": null,
+            "quantity": 880.34,
+            "unit": "Cubic Meter PhP",
+            "printedUnitCostPesos": null,
+            "inclusiveUnitCostPesos": null,
+            "calculatedUnitCostPesos": 297.23431855873866,
+            "amountPesos": 261667.26,
+            "directCostSharePct": null,
+            "manualReview": null,
+            "sourcePage": 2,
+            "observedPages": [
+              2
+            ],
+            "extractionMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 270° at 170 dpi",
+            "arithmeticStatus": "Printed unit cost unavailable; amount/quantity is derived",
+            "verificationStatus": "Machine-extracted candidate; verify source page",
+            "costBasis": null,
+            "amountBasis": null
+          },
+          {
+            "itemCode": "414(1)",
+            "description": "Lean Concrete, Class B, 16.5 Mpa Forms and Falsework TOTAL OF PART F DRAINAGE AND SLOPE PROTECTION STRUCTURES",
+            "componentContext": null,
+            "componentContexts": null,
+            "costCategory": null,
+            "quantity": 25.1,
+            "unit": "Cubic Meter Lump sum",
+            "printedUnitCostPesos": null,
+            "inclusiveUnitCostPesos": null,
+            "calculatedUnitCostPesos": 4967.489243027889,
+            "amountPesos": 124683.98,
+            "directCostSharePct": null,
+            "manualReview": null,
+            "sourcePage": 2,
+            "observedPages": [
+              2
+            ],
+            "extractionMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 270° at 170 dpi",
+            "arithmeticStatus": "Printed unit cost unavailable; amount/quantity is derived",
+            "verificationStatus": "Machine-extracted candidate; verify source page",
+            "costBasis": null,
+            "amountBasis": null
+          },
+          {
+            "itemCode": "103(3)",
+            "description": "Structure Excavation (Common Soil) Foundation Fill",
+            "componentContext": null,
+            "componentContexts": null,
+            "costCategory": null,
+            "quantity": 25.1,
+            "unit": "Cubic Meter Cubic Meter PhP PhP",
+            "printedUnitCostPesos": null,
+            "inclusiveUnitCostPesos": null,
+            "calculatedUnitCostPesos": 1898.2804780876495,
+            "amountPesos": 47646.84,
+            "directCostSharePct": null,
+            "manualReview": null,
+            "sourcePage": 2,
+            "observedPages": [
+              2
+            ],
+            "extractionMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 270° at 170 dpi",
+            "arithmeticStatus": "Printed unit cost unavailable; amount/quantity is derived",
+            "verificationStatus": "Machine-extracted candidate; verify source page",
+            "costBasis": null,
+            "amountBasis": null
+          },
+          {
+            "itemCode": "104(1)a",
+            "description": "Foundation Fill Embankment from roadway/structure excavation TOTAL OF PART C PLAIN REINFORCED STRUCTURES",
+            "componentContext": null,
+            "componentContexts": null,
+            "costCategory": null,
+            "quantity": 25.1,
+            "unit": "Cubic Meter Cubic Meter PhP PhP PhP",
+            "printedUnitCostPesos": null,
+            "inclusiveUnitCostPesos": null,
+            "calculatedUnitCostPesos": 1898.2804780876495,
+            "amountPesos": 47646.84,
+            "directCostSharePct": null,
+            "manualReview": null,
+            "sourcePage": 2,
+            "observedPages": [
+              2
+            ],
+            "extractionMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 270° at 170 dpi",
+            "arithmeticStatus": "Printed unit cost unavailable; amount/quantity is derived",
+            "verificationStatus": "Machine-extracted candidate; verify source page",
+            "costBasis": null,
+            "amountBasis": null
+          },
+          {
+            "itemCode": "601(1)",
+            "description": "MISCELLANEOUS STRUCTURES Sidewalk (100mm thk) TOTAL OF PART H GRAND TOTAL",
+            "componentContext": null,
+            "componentContexts": null,
+            "costCategory": null,
+            "quantity": 52.5,
+            "unit": "Square Meter PhP PhP",
+            "printedUnitCostPesos": null,
+            "inclusiveUnitCostPesos": null,
+            "calculatedUnitCostPesos": 553.6441904761905,
+            "amountPesos": 29066.32,
+            "directCostSharePct": null,
+            "manualReview": null,
+            "sourcePage": 2,
+            "observedPages": [
+              2
+            ],
+            "extractionMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 270° at 170 dpi",
+            "arithmeticStatus": "Printed unit cost unavailable; amount/quantity is derived",
+            "verificationStatus": "Machine-extracted candidate; verify source page",
+            "costBasis": null,
+            "amountBasis": null
+          },
+          {
+            "itemCode": "405(6)",
+            "description": "Structural Concrete (20.68MPa) - Class A (28 days) Structural Concrete, Painting Works",
+            "componentContext": null,
+            "componentContexts": null,
+            "costCategory": null,
+            "quantity": 47.5,
+            "unit": "Square Meter Cubic Meter",
+            "printedUnitCostPesos": null,
+            "inclusiveUnitCostPesos": null,
+            "calculatedUnitCostPesos": 188.0098947368421,
+            "amountPesos": 8930.47,
+            "directCostSharePct": null,
+            "manualReview": null,
+            "sourcePage": 2,
+            "observedPages": [
+              2
+            ],
+            "extractionMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 270° at 170 dpi",
+            "arithmeticStatus": "Printed unit cost unavailable; amount/quantity is derived",
+            "verificationStatus": "Machine-extracted candidate; verify source page",
+            "costBasis": null,
+            "amountBasis": null
+          },
+          {
+            "itemCode": "407(8)",
+            "description": "Structural Concrete, Painting Works Lean Concrete, Class B, 16.5 Mpa",
+            "componentContext": null,
+            "componentContexts": null,
+            "costCategory": null,
+            "quantity": 47.5,
+            "unit": "Square Meter Cubic Meter",
+            "printedUnitCostPesos": null,
+            "inclusiveUnitCostPesos": null,
+            "calculatedUnitCostPesos": 188.0098947368421,
+            "amountPesos": 8930.47,
+            "directCostSharePct": null,
+            "manualReview": null,
+            "sourcePage": 2,
+            "observedPages": [
+              2
+            ],
+            "extractionMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 270° at 170 dpi",
+            "arithmeticStatus": "Printed unit cost unavailable; amount/quantity is derived",
+            "verificationStatus": "Machine-extracted candidate; verify source page",
+            "costBasis": null,
+            "amountBasis": null
+          }
+        ],
         "costCategoryBreakdown": [],
         "summaryMetadata": {},
         "scopeNote": null,
@@ -1287735,425 +1288048,6 @@
       {
         "type": "POW",
         "url": "https://s3.infrawatch.ph/nep/fy2027/2027DPWH-Proposal-17254/2027DPWH-Proposal-17254_POW.pdf"
-      }
-    ]
-  },
-  {
-    "code": "2027DPWH-Proposal-17259",
-    "name": "Toledo-Tabuelan-Sn Remigio Rd - K0080 + 844 - K0081 + 412, K0090 + 202 - K0090 + 309, K0090 + 373 - K0090 + 777, K0092 + 000 - K0093 + 738",
-    "office": "Cebu 3rd District Engineering Office",
-    "region": "Region VII",
-    "allocationPesos": 60000000,
-    "preparedAt": null,
-    "documents": [
-      {
-        "kind": "pow",
-        "status": "available",
-        "url": "https://s3.infrawatch.ph/nep/fy2027/2027DPWH-Proposal-17259/2027DPWH-Proposal-17259_POW.pdf",
-        "sha256": "fa6989f3d8a55304ff88c88a2cef8a3dc0dcda47ffa651c0b24d51f0d5108a34",
-        "rowSourceSha256": "fa6989f3d8a55304ff88c88a2cef8a3dc0dcda47ffa651c0b24d51f0d5108a34",
-        "rowSourceStatus": "current_source_version",
-        "currentParseStatus": "needs_ocr",
-        "pageCount": 74,
-        "pages": [
-          {
-            "page": 1,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 2,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 3,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 4,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 5,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 6,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 7,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 8,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 9,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 10,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 11,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 12,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 13,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 14,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 15,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 16,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 17,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 18,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 19,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 20,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 21,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 22,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 23,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 24,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 25,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 26,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 27,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 28,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 29,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 30,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 31,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 32,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 33,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 34,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 35,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 36,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 37,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 38,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 39,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 40,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 41,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 42,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 43,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 44,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 45,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 46,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 47,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 48,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 49,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 50,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 51,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 52,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 53,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 54,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 55,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 56,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 57,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 58,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 59,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 60,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 61,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 62,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 63,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 64,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 65,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 66,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 67,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 68,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 69,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 70,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 71,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 72,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 73,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          },
-          {
-            "page": 74,
-            "status": "needs_ocr",
-            "message": "Image-only page; OCR required before ranking bill rows."
-          }
-        ],
-        "rows": [],
-        "costCategoryBreakdown": [],
-        "summaryMetadata": {},
-        "scopeNote": null,
-        "controls": [],
-        "reviewPages": [],
-        "people": [],
-        "signatoryStatus": null,
-        "errorType": null
-      }
-    ],
-    "documentLinks": [
-      {
-        "type": "BP 202",
-        "url": "https://s3.infrawatch.ph/nep/fy2027/2027DPWH-Proposal-17259/2027DPWH-Proposal-17259_BP%20202.pdf"
-      },
-      {
-        "type": "Certificate of Implementability",
-        "url": "https://s3.infrawatch.ph/nep/fy2027/2027DPWH-Proposal-17259/2027DPWH-Proposal-17259_Certificate%20of%20Implementabilty.pdf"
-      },
-      {
-        "type": "Geotagged Photos",
-        "url": "https://s3.infrawatch.ph/nep/fy2027/2027DPWH-Proposal-17259/2027DPWH-Proposal-17259_Geotagged%20Photos.pdf"
-      },
-      {
-        "type": "POW",
-        "url": "https://s3.infrawatch.ph/nep/fy2027/2027DPWH-Proposal-17259/2027DPWH-Proposal-17259_POW.pdf"
       }
     ]
   }
