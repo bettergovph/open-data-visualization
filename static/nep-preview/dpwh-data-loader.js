@@ -1,12 +1,19 @@
 /* Loads the public DPWH index and assembles its JSON shards. */
 (()=>{
-  let pending;
-  window.loadDpwhInDepthData=()=>{
-    if(pending)return pending;
-    pending=(async()=>{
+  const pending=new Map();
+  window.loadDpwhInDepthData=(options={})=>{
+    const mode=options.mode||'full';
+    if(pending.has(mode))return pending.get(mode);
+    const task=(async()=>{
       const response=await fetch('dpwh-in-depth-data.json',{cache:'no-cache'});
       if(!response.ok)throw Error('DPWH data index unavailable ('+response.status+')');
       const index=await response.json();
+      if(mode==='summary'){
+        if(!Array.isArray(index.projectDirectory))throw Error('DPWH project directory unavailable');
+        if(Number.isFinite(index.projectCount)&&index.projectDirectory.length!==index.projectCount)throw Error('DPWH project directory is incomplete');
+        index.projects=index.projectDirectory;
+        return index;
+      }
       const arrays=index.arrayShards||null;
       const legacy=Array.isArray(index.projectShards)?{projects:index.projectShards}:null;
       if(!arrays&&!legacy)return index;
@@ -28,6 +35,7 @@
       }));
       return index;
     })();
-    return pending;
+    pending.set(mode,task);
+    return task;
   };
 })();
