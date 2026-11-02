@@ -51,7 +51,7 @@ def ledger_rows(ledger):
             found[(code, document_id, signature)] = record
     return sorted(found.values(), key=lambda r: (r.get('at', ''), r['projectCode'], str(r['documentId'])))
 
-def parse_one(record, root_value, result_root_value, parser_version):
+def parse_one(record, root_value, result_root_value, parser_version, ocr_engine='apple_tesseract'):
     """Run one isolated PyMuPDF parse and save its result and marker."""
     root, result_root = Path(root_value), Path(result_root_value)
     code, document_id = record['projectCode'], str(record['documentId'])
@@ -64,7 +64,7 @@ def parse_one(record, root_value, result_root_value, parser_version):
         if not pdf.is_file():
             raise FileNotFoundError(f'Ledger file is missing: {relative}')
         from analysis.project_documents.pow import parse_pdf
-        result = parse_pdf(pdf, output_dir / 'parser-work', None)
+        result = parse_pdf(pdf, output_dir / 'parser-work', None, ocr_engine=ocr_engine)
         parsed_at = utc()
         wrapped = {
             'projectCode': code, 'documentId': document_id,
@@ -72,34 +72,85 @@ def parse_one(record, root_value, result_root_value, parser_version):
             'sourceRelativePath': str(relative), 'sourceSha256': record.get('sha256'),
             'sourceUrl': record.get('url'), 'downloadedAtUtc': record.get('at'),
             'parsedAtUtc': parsed_at, 'parserVersion': parser_version,
+            'ocrEngine': ocr_engine,
             'allocationPesos': None,
             'allocationShareNote': 'NEP allocation not attached by this bulk parser; item amounts and printed POW summaries remain available.',
             **result,
         }
         atomic_json(output_dir / 'result.json', wrapped)
+        no_row_scans=[int(page['page']) for page in result.get('pages',[])
+            if not int(page.get('rows') or 0) and (str(page.get('method') or '').startswith('OCR') or page.get('status')=='needs_ocr')]
         marker.update({'status': 'parsed', 'parsedAtUtc': parsed_at,
                        'rows': int(result.get('uniqueCandidateRows', 0) or 0),
                        'categories': len(result.get('costCategoryBreakdown', []) or []),
-                       'parseStatus': result.get('status')})
+                       'parseStatus': result.get('status'),
+                       'paddleFallbackNeeded': ocr_engine == 'apple_tesseract' and bool(no_row_scans) and not result.get('rows'),
+                       'paddleFallbackPages':no_row_scans})
     except Exception as exc:
         marker.update({'status': 'error', 'atUtc': utc(),
                        'error': f'{type(exc).__name__}: {str(exc)[:240]}'})
     atomic_json(output_dir / 'status.json', marker)
     return key, marker
 
+def parse_paddle_fallback(record, root_value, result_root_value, parser_version):
+    """Use one dedicated PaddleOCR process for primary parses with no bill rows."""
+    root, result_root = Path(root_value), Path(result_root_value)
+    code, document_id = record['projectCode'], str(record['documentId'])
+    key = (code, document_id, record['signature'])
+    output_dir = result_root / code / (document_id + '-' + record['signature'][:16])
+    result_path = output_dir / 'result.json'
+    marker = {'parserVersion': parser_version, 'sourceSha256': record.get('sha256')}
+    try:
+        pdf = (root / 'attachments' / Path(record.get('path', ''))).resolve()
+        if not pdf.is_file():raise FileNotFoundError('Ledger file is missing')
+        primary=json.loads(result_path.read_text())
+        from analysis.project_documents.pow import parse_pdf
+        primary_marker=json.loads((output_dir/'status.json').read_text())
+        paddle=parse_pdf(pdf,output_dir/'paddle-fallback',None,ocr_engine='paddle',
+            page_numbers=set(primary_marker.get('paddleFallbackPages') or []))
+        merged=dict(primary)
+        merged['paddleFallback']={'status':paddle.get('status'),'rows':len(paddle.get('rows',[])),
+            'pagesProcessed':paddle.get('pagesProcessed'),'engine':'PaddleOCR PP-OCRv6'}
+        if paddle.get('rows'):
+            fallback_pages={int(page['page']):page for page in paddle.get('pages',[]) if page.get('page') is not None}
+            merged['pages']=[fallback_pages.get(int(page['page']),page) if int(page.get('page') or 0) in fallback_pages else page
+                for page in primary.get('pages',[])]
+            merged.update({k:paddle[k] for k in ('rows','uniqueCandidateRows','rowObservations',
+                'sumOfUniqueCandidateAmountsPesos','status') if k in paddle})
+            merged['pagesProcessed']=primary.get('pagesProcessed',paddle.get('pagesProcessed'))
+            if paddle.get('costCategoryBreakdown'):
+                categories={(int(row.get('sourcePage') or 0),str(row.get('label') or '').casefold()):row
+                    for row in primary.get('costCategoryBreakdown',[])}
+                categories.update({(int(row.get('sourcePage') or 0),str(row.get('label') or '').casefold()):row
+                    for row in paddle.get('costCategoryBreakdown',[])})
+                merged['costCategoryBreakdown']=list(categories.values())
+            merged['ocrEngine']='apple_tesseract + PaddleOCR fallback'
+        atomic_json(result_path,merged)
+        parsed_rows=merged.get('rows') or []
+        marker.update({'status':'parsed','parsedAtUtc':utc(),'rows':len(parsed_rows),
+            'categories':len(merged.get('costCategoryBreakdown',[]) or []),'parseStatus':merged.get('status'),
+            'paddleFallbackNeeded':False,'paddleFallbackStatus':paddle.get('status'),
+            'paddleRowsRecovered':len(paddle.get('rows',[]) or [])})
+    except Exception as exc:
+        marker.update({'status':'parsed','parsedAtUtc':utc(),'rows':0,'categories':0,
+            'parseStatus':'no_bill_rows_recovered','paddleFallbackNeeded':False,
+            'paddleFallbackStatus':'error','error':f'{type(exc).__name__}: {str(exc)[:240]}'})
+    atomic_json(output_dir/'status.json',marker)
+    return key,marker
+
 
 def main():
     cli = argparse.ArgumentParser()
     cli.add_argument('--root', type=Path, default=Path(DEFAULT_ROOT) if DEFAULT_ROOT else None)
     cli.add_argument('--interval', type=int, default=20)
-    cli.add_argument('--workers', type=int, default=4, help='isolated parser processes; PyMuPDF is not shared across threads')
+    cli.add_argument('--workers', type=int, default=7, help='primary Apple/Tesseract parser processes')
     cli.add_argument('--once', action='store_true')
     cli.add_argument('--status', action='store_true', help='print the latest internal status and exit')
     args = cli.parse_args()
     if args.root is None:
         raise SystemExit('Set DPWH_STATUS_ROOT or pass --root.')
-    if not 1 <= args.workers <= 8:
-        cli.error('--workers must be between 1 and 8')
+    if not 1 <= args.workers <= 7:
+        cli.error('--workers must be between 1 and 7')
     root, ledger = args.root, args.root / 'attachments' / 'downloads.jsonl'
     result_root = root / 'parsed_pow'
     status_path = root / 'pow-parser-watcher-status.json'
@@ -127,9 +178,11 @@ def main():
         'workers': args.workers, 'active': [], 'current': None,
     }
     completed, observed, retry_after, active = {}, set(), {}, {}
+    paddle_queue,paddle_active={},{}
     previous_download_checkpoint = str((prior or {}).get('lastDownloaderRecordUtc') or '')
     first_scan = True
     pool = ProcessPoolExecutor(max_workers=args.workers, mp_context=multiprocessing.get_context('spawn'))
+    paddle_pool = ProcessPoolExecutor(max_workers=1, mp_context=multiprocessing.get_context('spawn'))
     try:
         while True:
             # Harvest completed jobs first so newly arrived downloads can take priority immediately.
@@ -148,6 +201,8 @@ def main():
                     output_dir = result_root / key[0] / (key[1] + '-' + key[2][:16])
                     atomic_json(output_dir / 'status.json', marker)
                 completed[key] = marker
+                if marker.get('paddleFallbackNeeded'):
+                    paddle_queue[key]=(record,marker)
                 if marker.get('status') == 'error':
                     lifetime['errors'] += 1
                     lifetime['lastError'] = f'{key[0]} {key[1]}: {marker.get("error")}'
@@ -156,6 +211,19 @@ def main():
                     lifetime['lastParsedAtUtc'] = marker.get('parsedAtUtc')
                     lifetime['lastResultStatus'] = marker.get('parseStatus')
                 del active[future]
+
+            for future,details in list(paddle_active.items()):
+                if not future.done():continue
+                record,key=details
+                try:
+                    returned_key,marker=future.result()
+                    if returned_key!=key:raise RuntimeError('Paddle fallback returned a different document key')
+                except Exception as exc:
+                    marker=completed.get(key,{})
+                    marker.update({'paddleFallbackNeeded':False,'paddleFallbackStatus':'error',
+                        'error':f'{type(exc).__name__}: {str(exc)[:240]}'})
+                    output_dir=result_root/key[0]/(key[1]+'-'+key[2][:16]);atomic_json(output_dir/'status.json',marker)
+                completed[key]=marker;del paddle_active[future]
 
             records = ledger_rows(ledger)
             fresh, without_result, stale_or_error, waiting_retry = [], [], [], []
@@ -176,6 +244,7 @@ def main():
                     marker = json.loads(marker_path.read_text())
                     if marker.get('status') == 'parsed' and marker.get('parseStatus') != 'parser_dependency_missing' and marker.get('parserVersion') == parser_version and marker.get('sourceSha256') == record.get('sha256'):
                         completed[key] = marker
+                        if marker.get('paddleFallbackNeeded'):paddle_queue[key]=(record,marker)
                         continue
                 except (OSError, ValueError):
                     pass
@@ -205,9 +274,14 @@ def main():
                 key = (record['projectCode'], str(record['documentId']), record['signature'])
                 priority = ('new download' if record in fresh else
                             'missing parse result' if record in without_result else 'retry/stale result')
-                future = pool.submit(parse_one, record, str(root), str(result_root), parser_version)
+                future = pool.submit(parse_one, record, str(root), str(result_root), parser_version,'apple_tesseract')
                 active[future] = (record, key, priority)
                 pending.remove(record)
+
+            if paddle_queue and not paddle_active:
+                key,(record,primary_marker)=next(iter(paddle_queue.items()))
+                future=paddle_pool.submit(parse_paddle_fallback,record,str(root),str(result_root),parser_version)
+                paddle_active[future]=(record,key);del paddle_queue[key]
 
             successful = [value for value in completed.values() if value.get('status') == 'parsed']
             lifetime['skippedCurrent'] = len(successful)
@@ -221,32 +295,39 @@ def main():
             lifetime['totalPendingIncludingActive'] = lifetime['pending'] + len(active)
             lifetime['active'] = [
                 {'projectCode': record['projectCode'], 'documentId': key[1],
-                 'fileName': record.get('fileName'), 'priority': priority}
+                 'fileName': record.get('fileName'), 'priority': priority,'stage':'Apple/Tesseract primary'}
                 for record, key, priority in active.values()
             ]
-            lifetime['activeCount'] = len(active)
+            lifetime['active'].extend({'projectCode':record['projectCode'],'documentId':key[1],
+                'fileName':record.get('fileName'),'priority':'no-row OCR fallback','stage':'PaddleOCR'}
+                for record,key in paddle_active.values())
+            lifetime['activeCount'] = len(active)+len(paddle_active)
             lifetime['workers'] = args.workers
+            lifetime['primaryOcrEngine']='Apple Vision/Tesseract'
+            lifetime['paddleFallbackWorkers']=1
+            lifetime['pendingPaddleFallback']=len(paddle_queue)
             lifetime['queuePolicy'] = 'New downloads first; then missing parse results; then failed or stale results.'
             lifetime['totalDownloadedPow'] = len(records)
             lifetime['lastDownloaderRecordUtc'] = records[-1].get('at') if records else None
             lifetime['lastQueueScanAtUtc'] = utc()
             lifetime['heartbeatAtUtc'] = lifetime['lastQueueScanAtUtc']
-            lifetime['status'] = 'running' if pending or active else ('waiting_retry' if waiting_retry else 'idle')
+            lifetime['status'] = 'running' if pending or active or paddle_active or paddle_queue else ('waiting_retry' if waiting_retry else 'idle')
             lifetime['current'] = lifetime['active'][0] if lifetime['active'] else None
             lifetime['updatedAtUtc'] = utc()
             atomic_json(status_path, lifetime)
 
-            if args.once and not pending and not active and not waiting_retry:
+            if args.once and not pending and not active and not paddle_active and not paddle_queue and not waiting_retry:
                 lifetime['status'] = 'complete'
                 lifetime['finishedAtUtc'] = utc()
                 atomic_json(status_path, lifetime)
                 return
-            if not pending and not active and not waiting_retry and not args.once:
+            if not pending and not active and not paddle_active and not paddle_queue and not waiting_retry and not args.once:
                 time.sleep(max(5, args.interval))
             else:
                 time.sleep(1)
     finally:
         pool.shutdown(wait=True, cancel_futures=False)
+        paddle_pool.shutdown(wait=True,cancel_futures=False)
 
 if __name__ == '__main__':
     main()

@@ -512,7 +512,9 @@ def word_rows(words,width,page,method):
         if row:result.append(row)
     return result,False
 
-def parse_pdf(path,output,allocation_pesos=None):
+def parse_pdf(path,output,allocation_pesos=None,ocr_engine='ensemble',page_numbers=None):
+    if ocr_engine not in {'apple_tesseract','paddle','ensemble'}:
+        raise ValueError('ocr_engine must be apple_tesseract, paddle, or ensemble')
     try:import pymupdf as fitz
     except ImportError:return {'status':'parser_dependency_missing','message':'Install project_documents/requirements.txt in the document-service environment.','rows':[]}
     output.mkdir(parents=True,exist_ok=True);document=fitz.open(path);rows=[];pages=[];vision=None;itemized_controls=[];source_tables=[]
@@ -525,7 +527,7 @@ def parse_pdf(path,output,allocation_pesos=None):
             if cached_vision.get('pages'):vision=cached_vision
     except (OSError,ValueError,AttributeError):
         vision=None
-    if vision is None and sys.platform=='darwin' and shutil.which('swift') and any(len(p.get_text().strip())<40 for p in document):
+    if ocr_engine!='paddle' and vision is None and sys.platform=='darwin' and shutil.which('swift') and any(len(p.get_text().strip())<40 for p in document):
         try:
             environment={**os.environ,'CLANG_MODULE_CACHE_PATH':str(output/'swift-module-cache'),'SWIFT_MODULECACHE_PATH':str(output/'swift-module-cache')}
             response=subprocess.run(['swift',str(Path(__file__).with_name('ocr_vision.swift')),str(path),'100'],capture_output=True,text=True,check=True,timeout=240,env=environment)
@@ -538,8 +540,18 @@ def parse_pdf(path,output,allocation_pesos=None):
     current_context=None;current_cost_category=None;cost_categories=[]
     for number,page in enumerate(document):
         if number>=100:break
+        if page_numbers is not None and number+1 not in page_numbers:continue
         text=page.get_text();words=page.get_text('words');method='native PDF text/table';ocr_width=page.rect.width
-        if len(text.strip())<40:
+        paddle_page_attempts=[]
+        if ocr_engine=='paddle' and len(text.strip())<40:
+            paddle=paddle_words(page)
+            if paddle:
+                paddle_page_attempts=paddle.get('attempts',[])
+                best=max(paddle_page_attempts,key=lambda a:(a['structureScore'],a['meanConfidence'],a['wordCount']))
+                words=best['words'];text=best['text'];ocr_width=best['width'];method=best['method']
+            else:
+                pages.append({'page':number+1,'status':'needs_ocr','message':'PaddleOCR returned no text for this scanned page.','ocrEngine':'paddle'});continue
+        elif len(text.strip())<40 and ocr_engine!='paddle':
             if shutil.which('tesseract'):
                 original_rotation=page.rotation;attempts=[]
                 # Some proposal scans are landscape sheets embedded in portrait
@@ -592,6 +604,7 @@ def parse_pdf(path,output,allocation_pesos=None):
                 cost_categories.extend(cost_category_totals(category_text,number+1,method))
         page_rows=[]
         page_start_category=current_cost_category
+        is_component_cost_analysis=bool(re.search(r'DETAILED\s+BREAKDOWN\s+OF\s+COMPONENT\b',text,re.I))
         current_context=component_context(text) or current_context
         if method.startswith('native'):
             try:
@@ -623,11 +636,31 @@ def parse_pdf(path,output,allocation_pesos=None):
                 page_rows.extend(compact_rows)
                 current_cost_category=compact_category
         paddle_confidence=None;paddle_category_rows=0;paddle_method=None;paddle_rotation=None;paddle_resolution=None
+        if ocr_engine=='paddle' and paddle_page_attempts and not is_component_cost_analysis:
+            mapped_attempts=[]
+            for attempt in paddle_page_attempts:
+                candidate_method=attempt['method'];candidate_words=attempt['words']
+                candidate_rows,candidate_category=item_rows_from_words(candidate_words,attempt['width'],number+1,candidate_method,page_start_category)
+                candidate_review=False
+                if not candidate_rows:candidate_rows,candidate_review=word_rows(candidate_words,attempt['width'],number+1,candidate_method)
+                compact_rows,compact_category=summary_item_rows_from_words(candidate_words,attempt['width'],number+1,candidate_method,page_start_category)
+                if compact_rows:
+                    compact_keys={(r.get('itemCode'),r.get('amountPesos')) for r in compact_rows}
+                    candidate_rows=[r for r in candidate_rows if (r.get('itemCode'),r.get('amountPesos')) not in compact_keys]+compact_rows
+                    candidate_category=compact_category
+                mapped_attempts.append((candidate_rows,candidate_review,candidate_category,attempt))
+            if mapped_attempts:
+                page_rows,review,current_cost_category,best=max(mapped_attempts,key=lambda a:(
+                    len(a[0]),sum(bool(row.get('itemCode')) for row in a[0]),not a[1],
+                    a[3]['structureScore'],a[3]['meanConfidence'],a[3]['wordCount']))
+                words=best['words'];ocr_width=best['width'];text=best['text'];method=best['method']
+                paddle_confidence=best['meanConfidence'];paddle_method=best['method']
+                paddle_rotation=best['rotation'];paddle_resolution=best['resolution']
         # PaddleOCR supplements rows from Vision/Tesseract on scanned pages.
         # Conflicting rows for an already recovered item are left for review;
         # only distinct item codes are added, so the engines do not overwrite
         # one another's amount or description.
-        if not page_rows or method.startswith('OCR'):
+        if ocr_engine=='ensemble' and (not page_rows or method.startswith('OCR')):
             paddle=paddle_words(page)
             if paddle:
                 paddle_attempts=[]
