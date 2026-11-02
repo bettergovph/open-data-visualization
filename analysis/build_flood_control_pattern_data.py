@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Build a compact evidence snapshot for the flood-control pattern report."""
+import hashlib
 import json
 import re
 from collections import Counter, defaultdict
@@ -324,6 +325,12 @@ def main():
         },
     }
     OUT.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n")
+    page = OUT.parent / "flood-control.html"
+    if page.exists():
+        version = hashlib.sha256(OUT.read_bytes()).hexdigest()[:12]
+        text = page.read_text()
+        text = re.sub(r"flood-control-pattern-data\.json(?:\?v=[^'\"]*)?", f"flood-control-pattern-data.json?v={version}", text)
+        page.write_text(text)
     print(f"Wrote {OUT}")
 
 

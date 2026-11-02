@@ -1,15 +1,15 @@
 {
-  "generatedAtUtc": "2026-11-02T09:53:36.670762+00:00",
+  "generatedAtUtc": "2026-11-02T10:05:41.720596+00:00",
   "stage": "NEP FY2027 proposal documents",
   "summary": {
-    "projectsWithParsedPow": 6824,
+    "projectsWithParsedPow": 6838,
     "projectsWithRetainedPriorPowRows": 199,
-    "parsedPowRows": 165828,
-    "projectsWithSavedResults": 10696,
+    "parsedPowRows": 166206,
+    "projectsWithSavedResults": 10721,
     "projectsWithoutSelectedAttachments": 280,
-    "availableDocuments": 11788,
+    "availableDocuments": 11813,
     "failedDocuments": 0,
-    "attemptedDocuments": 11788,
+    "attemptedDocuments": 11813,
     "errorTypes": {}
   },
   "source": "https://api.dpwh.bettergov.ph",
@@ -174,10 +174,10 @@
     "listedAnyRows": 751,
     "listedAnyPct": 8.3,
     "listedDocumentRecords": 3517,
-    "inspectedRows": 8432,
-    "inspectedPct": 93.3,
-    "missingAnyTypeRows": 7500,
-    "missingAnyTypePct": 88.9,
+    "inspectedRows": 8466,
+    "inspectedPct": 93.7,
+    "missingAnyTypeRows": 7534,
+    "missingAnyTypePct": 89.0,
     "noSelectedNepRows": 6105,
     "noSelectedNepPct": 38.2,
     "missingListedDocumentsRows": 15228,
@@ -197,11 +197,11 @@
         "pct": 0.5
       },
       "photos": {
-        "count": 1070,
-        "pct": 12.7
+        "count": 1091,
+        "pct": 12.9
       },
       "rdc": {
-        "count": 7361,
+        "count": 7395,
         "pct": 87.3
       }
     },
@@ -215,8 +215,115 @@
     "sourceCommit": "34ef5d8cbbacda92f6503ffd9a428569f157f64d",
     "snapshotRetrievedAtUtc": "2026-10-18T08:46:20Z"
   },
-  "projectCount": 10696,
-  "powPeerCount": 1873,
+  "documentReconciliation": {
+    "transparencyProjects": 11371,
+    "transparencyRecords": 53801,
+    "projectsWithDocumentLinksInLoadedSnapshot": 10721,
+    "loadedProjectRecords": 10721,
+    "nepProjectRecords": 11420,
+    "nepTransparencyRecords": 11372,
+    "selectedPairs": 10166,
+    "selectedPairPortalProjects": 10118,
+    "selectedPairProjectsWithLoadedDocuments": 9537,
+    "selectedPairDocumentRecords": 44233,
+    "directHgabProjectsWithLoadedDocuments": 8470,
+    "directHgabDocumentRecords": 40115,
+    "uniqueMatchedDocumentRecords": 46329,
+    "wastedDocumentRecords": 7472,
+    "rows": [
+      {
+        "type": "BP 202",
+        "transparencyRecords": 11148,
+        "selectedPairRecords": 9633,
+        "directHgabRecords": 8539,
+        "uniqueMatchedRecords": 9657,
+        "wastedRecords": 1491
+      },
+      {
+        "type": "Certificate of Implementability",
+        "transparencyRecords": 10928,
+        "selectedPairRecords": 9441,
+        "directHgabRecords": 8563,
+        "uniqueMatchedRecords": 9465,
+        "wastedRecords": 1463
+      },
+      {
+        "type": "POW",
+        "transparencyRecords": 10772,
+        "selectedPairRecords": 9270,
+        "directHgabRecords": 8441,
+        "uniqueMatchedRecords": 9293,
+        "wastedRecords": 1479
+      },
+      {
+        "type": "Geotagged Photos",
+        "transparencyRecords": 10023,
+        "selectedPairRecords": 8739,
+        "directHgabRecords": 8149,
+        "uniqueMatchedRecords": 8764,
+        "wastedRecords": 1259
+      },
+      {
+        "type": "Location Map",
+        "transparencyRecords": 2276,
+        "selectedPairRecords": 1889,
+        "directHgabRecords": 1603,
+        "uniqueMatchedRecords": 1893,
+        "wastedRecords": 383
+      },
+      {
+        "type": "Certificate",
+        "transparencyRecords": 1696,
+        "selectedPairRecords": 1498,
+        "directHgabRecords": 1308,
+        "uniqueMatchedRecords": 1501,
+        "wastedRecords": 195
+      },
+      {
+        "type": "RDC Endorsement",
+        "transparencyRecords": 1650,
+        "selectedPairRecords": 1267,
+        "directHgabRecords": 1145,
+        "uniqueMatchedRecords": 1271,
+        "wastedRecords": 379
+      },
+      {
+        "type": "PDC Endorsement",
+        "transparencyRecords": 1601,
+        "selectedPairRecords": 1289,
+        "directHgabRecords": 1224,
+        "uniqueMatchedRecords": 1294,
+        "wastedRecords": 307
+      },
+      {
+        "type": "LDC Endorsement",
+        "transparencyRecords": 848,
+        "selectedPairRecords": 643,
+        "directHgabRecords": 613,
+        "uniqueMatchedRecords": 647,
+        "wastedRecords": 201
+      },
+      {
+        "type": "NOL",
+        "transparencyRecords": 587,
+        "selectedPairRecords": 564,
+        "directHgabRecords": 530,
+        "uniqueMatchedRecords": 565,
+        "wastedRecords": 22
+      },
+      {
+        "type": "Other document types",
+        "transparencyRecords": 2272,
+        "selectedPairRecords": 1973,
+        "directHgabRecords": 1779,
+        "uniqueMatchedRecords": 1979,
+        "wastedRecords": 293
+      }
+    ],
+    "note": "Portal counts come from the full DPWH Transparency metadata inventory. Selected-pair and direct-HGAB counts use project-level document links present in the loaded snapshot and deduplicate by source URL. Direct HGAB records can overlap selected-pair records; wasted records are the inventory residual after taking their unique union. This residual is not proof of literal waste."
+  },
+  "projectCount": 10721,
+  "powPeerCount": 1879,
   "summaryPeerGroupCount": 7,
   "arrayShards": {
     "projects": [
@@ -240,25 +347,25 @@
       },
       {
         "path": "dpwh-in-depth-shards/projects-004.json",
-        "itemCount": 2079,
-        "sizeBytes": 36071850,
-        "sha256": "a7024c894da66e3816d2673bbeb37d48001a57c59d67b583fc8a3513ea082d11"
+        "itemCount": 2104,
+        "sizeBytes": 36529876,
+        "sha256": "ab5e8ccbc483676777b8459db8d9562a3f6c97f1e3519b48a8e937f4e91af03f"
       }
     ],
     "powPeers": [
       {
         "path": "dpwh-in-depth-shards/powPeers-001.json",
-        "itemCount": 1873,
-        "sizeBytes": 37047729,
-        "sha256": "ac97f7161589470527ffaa2b8066b0d7f6bf5171cf55abe6adb76cd580658955"
+        "itemCount": 1879,
+        "sizeBytes": 37092002,
+        "sha256": "178a5aab2d835e16f6dcad7bd79c1bb94652ebe26f08d2eb91753b7b9d1678d0"
       }
     ],
     "summaryPeerGroups": [
       {
         "path": "dpwh-in-depth-shards/summaryPeerGroups-001.json",
         "itemCount": 7,
-        "sizeBytes": 12506099,
-        "sha256": "6396bd628017917766c9aa8b717d059c04f9044eb75761d604a2679701bbb923"
+        "sizeBytes": 12534714,
+        "sha256": "1bad4d9e426b334798ed2b5607de7f0a3938abd67019a6623b7d3e843af27cd8"
       }
     ]
   },

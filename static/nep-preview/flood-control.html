@@ -169,7 +169,7 @@ body.bettergov-research>header .report-header-heading>p{margin:0!important;paddi
     items.forEach((item,i)=>{let y=top+i*rowH;const raw=categoryFormat?categoryFormat(item[labelKey]):String(item[labelKey]??'');const name=raw.replace(/^CITY OF /,'').replace(/ \([^)]*\)$/,'');svg+=`<text class="chart-label" x="${left-8}" y="${y+14}" text-anchor="end">${escapeHtml(name.length>22?name.slice(0,20)+'…':name)}</text>`;let val=Number(item[valueKey])||0,w=val*scale;svg+=`<rect class="chart-bar" x="${left}" y="${y}" width="${Math.max(w,1)}" height="13" rx="3"><title>${escapeHtml(raw)}: ${escapeHtml(format(val))}</title></rect><text class="chart-value" x="${Math.min(left+w+6,W-right+4)}" y="${y+11}">${escapeHtml(format(val))}</text>`;if(secondaryKey){let val2=Number(item[secondaryKey])||0,w2=val2*scale;svg+=`<rect class="chart-bar-accent" x="${left}" y="${y+16}" width="${Math.max(w2,1)}" height="10" rx="3"><title>${escapeHtml(secondaryLabel)}: ${escapeHtml(secondaryFormat(val2))}</title></rect><text class="chart-value" x="${Math.min(left+w2+6,W-right+4)}" y="${y+25}">${escapeHtml(secondaryFormat(val2))}</text>`}});
     svg+='</svg>';el.innerHTML=svg;
   }
-  fetch('flood-control-pattern-data.json?v=20261101-rise-clustering').then(r=>{if(!r.ok)throw Error('Data file unavailable');return r.json()}).then(d=>{
+  fetch('flood-control-pattern-data.json?v=b461de9ab675').then(r=>{if(!r.ok)throw Error('Data file unavailable');return r.json()}).then(d=>{
     const annual=d.flood.annual.filter(x=>x.year>=2021&&x.year<=2024);
     const latest=annual.at(-1),prior=annual.find(x=>x.year===2022),middle=annual.find(x=>x.year===2023);
     const jump=prior&&middle?100*(middle.bulacanContractCost/prior.bulacanContractCost-1):0;
@@ -195,9 +195,9 @@ body.bettergov-research>header .report-header-heading>p{margin:0!important;paddi
     barChart('mpb-deo-chart',mpbOffices.topDeos.slice(0,6),{valueKey:'shareOfDeoAmountsPct',labelKey:'office',categoryFormat:x=>x.replace(/District Engineering Office/gi,'DEO'),format:n=>Number(n).toFixed(1)+'%'});
     const riseYear=document.getElementById('rise-reference-year'),riseFamily=document.getElementById('rise-family');
     const comparisonFamilies=['Bridge','Multi-purpose building'];
-    riseYear.innerHTML=Array.from({length:7},(_,i)=>2020+i).map(y=>`<option value="${y}">GAA ${y}</option>`).join('');for(let y=2000;y<2020;y++){const option=document.createElement('option');option.value='unavailable-'+y;option.textContent='FY'+y+' · Data unavailable';option.disabled=true;riseYear.append(option)}[...riseYear.options].sort((a,b)=>Number((a.value.match(/\d{4}/)||[0])[0])-Number((b.value.match(/\d{4}/)||[0])[0])).forEach(o=>riseYear.append(o));
+    const comparisonYears=[...new Set(Object.values(scan.nationalFamilyTotals||{}).flat().filter(point=>point.stage==='GAA').map(point=>point.year))].sort((a,b)=>a-b);riseYear.innerHTML=comparisonYears.map(y=>`<option value="${y}">GAA ${y}</option>`).join('');for(let y=2000;y<2020;y++){const option=document.createElement('option');option.value='unavailable-'+y;option.textContent='FY'+y+' · Data unavailable';option.disabled=true;riseYear.append(option)}[...riseYear.options].sort((a,b)=>Number((a.value.match(/\d{4}/)||[0])[0])-Number((b.value.match(/\d{4}/)||[0])[0])).forEach(o=>riseYear.append(o));
     riseFamily.innerHTML=comparisonFamilies.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
-    riseYear.value='2026';
+    riseYear.value=String(comparisonYears.at(-1)||2026);
     riseFamily.value='Bridge';
     function renderRiseComparison(){
       const category=riseFamily.value,year=Number(riseYear.value),points=(scan.nationalFamilyTotals[category]||[]),base=points.find(r=>r.year===year&&r.stage==='GAA'),current=points.find(r=>r.year===2027&&r.stage==='HGAB 3rd');
