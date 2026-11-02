@@ -960431,119 +960431,376 @@
         "sha256": "4ba7ec8fa0656873cb09c5d72fefeebca86a42f074879339be31756a86279981",
         "rowSourceSha256": "4ba7ec8fa0656873cb09c5d72fefeebca86a42f074879339be31756a86279981",
         "rowSourceStatus": "current_source_version",
-        "currentParseStatus": "needs_manual_review",
+        "currentParseStatus": "candidate_rows",
         "pageCount": 14,
         "pages": [
           {
             "page": 1,
-            "status": "needs_manual_review",
+            "status": "no_bill_rows_recovered",
             "rows": 0,
-            "method": "OCR · Apple Vision · rotated scan 90°; original boxes/confidence retained",
-            "reviewNote": "Numeric columns could not be mapped safely; inspect the source page."
+            "method": "OCR · PaddleOCR PP-OCRv6 · rotated scan 270° at 170 dpi",
+            "reviewNote": null,
+            "paddleMeanConfidence": 0.9881,
+            "paddleMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 270° at 170 dpi",
+            "paddleSelectedRotationDegrees": 270,
+            "paddleSelectedDpi": 170
           },
           {
             "page": 2,
             "status": "no_bill_rows_recovered",
             "rows": 0,
-            "method": "OCR · Apple Vision · rotated scan 90°; original boxes/confidence retained",
+            "method": "OCR · PaddleOCR PP-OCRv6 · rotated scan 270° at 350 dpi",
             "reviewNote": null
           },
           {
             "page": 3,
             "status": "no_bill_rows_recovered",
             "rows": 0,
-            "method": "OCR · Apple Vision; original boxes/confidence retained",
-            "reviewNote": null
+            "method": "OCR · PaddleOCR PP-OCRv6 · rotated scan 270° at 350 dpi",
+            "reviewNote": null,
+            "paddleMeanConfidence": 0.9952,
+            "paddleMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 270° at 350 dpi",
+            "paddleSelectedRotationDegrees": 270,
+            "paddleSelectedDpi": 350
           },
           {
             "page": 4,
-            "status": "no_bill_rows_recovered",
-            "rows": 0,
-            "method": "OCR · Apple Vision · rotated scan 90°; original boxes/confidence retained",
-            "reviewNote": null
+            "status": "candidate_rows",
+            "rows": 7,
+            "method": "OCR · PaddleOCR PP-OCRv6 · rotated scan 270° at 170 dpi",
+            "reviewNote": "Numeric columns could not be mapped safely; inspect the source page.",
+            "paddleMeanConfidence": 0.9783,
+            "paddleMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 270° at 170 dpi",
+            "paddleSelectedRotationDegrees": 270,
+            "paddleSelectedDpi": 170
           },
           {
             "page": 5,
             "status": "no_bill_rows_recovered",
             "rows": 0,
-            "method": "OCR · Apple Vision · rotated scan 90°; original boxes/confidence retained",
-            "reviewNote": null
+            "method": "OCR · PaddleOCR PP-OCRv6 · rotated scan 0° at 170 dpi",
+            "reviewNote": null,
+            "paddleMeanConfidence": 0.9903,
+            "paddleMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 0° at 170 dpi",
+            "paddleSelectedRotationDegrees": 0,
+            "paddleSelectedDpi": 170
           },
           {
             "page": 6,
             "status": "no_bill_rows_recovered",
             "rows": 0,
-            "method": "OCR · Apple Vision · rotated scan 90°; original boxes/confidence retained",
-            "reviewNote": null
+            "method": "OCR · PaddleOCR PP-OCRv6 · rotated scan 0° at 170 dpi",
+            "reviewNote": null,
+            "paddleMeanConfidence": 0.9897,
+            "paddleMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 0° at 170 dpi",
+            "paddleSelectedRotationDegrees": 0,
+            "paddleSelectedDpi": 170
           },
           {
             "page": 7,
             "status": "no_bill_rows_recovered",
             "rows": 0,
-            "method": "OCR · Apple Vision · rotated scan 90°; original boxes/confidence retained",
-            "reviewNote": null
+            "method": "OCR · PaddleOCR PP-OCRv6 · rotated scan 0° at 170 dpi",
+            "reviewNote": null,
+            "paddleMeanConfidence": 0.9857,
+            "paddleMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 0° at 170 dpi",
+            "paddleSelectedRotationDegrees": 0,
+            "paddleSelectedDpi": 170
           },
           {
             "page": 8,
             "status": "no_bill_rows_recovered",
             "rows": 0,
-            "method": "OCR · Apple Vision · rotated scan 90°; original boxes/confidence retained",
-            "reviewNote": null
+            "method": "OCR · PaddleOCR PP-OCRv6 · rotated scan 0° at 170 dpi",
+            "reviewNote": null,
+            "paddleMeanConfidence": 0.9922,
+            "paddleMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 0° at 170 dpi",
+            "paddleSelectedRotationDegrees": 0,
+            "paddleSelectedDpi": 170
           },
           {
             "page": 9,
             "status": "no_bill_rows_recovered",
             "rows": 0,
-            "method": "OCR · Apple Vision · rotated scan 90°; original boxes/confidence retained",
-            "reviewNote": null
+            "method": "OCR · PaddleOCR PP-OCRv6 · rotated scan 0° at 170 dpi",
+            "reviewNote": null,
+            "paddleMeanConfidence": 0.9882,
+            "paddleMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 0° at 170 dpi",
+            "paddleSelectedRotationDegrees": 0,
+            "paddleSelectedDpi": 170
           },
           {
             "page": 10,
             "status": "no_bill_rows_recovered",
             "rows": 0,
-            "method": "OCR · Apple Vision · rotated scan 90°; original boxes/confidence retained",
-            "reviewNote": null
+            "method": "OCR · PaddleOCR PP-OCRv6 · rotated scan 0° at 170 dpi",
+            "reviewNote": null,
+            "paddleMeanConfidence": 0.9922,
+            "paddleMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 0° at 170 dpi",
+            "paddleSelectedRotationDegrees": 0,
+            "paddleSelectedDpi": 170
           },
           {
             "page": 11,
             "status": "no_bill_rows_recovered",
             "rows": 0,
-            "method": "OCR · Apple Vision · rotated scan 90°; original boxes/confidence retained",
-            "reviewNote": null
+            "method": "OCR · PaddleOCR PP-OCRv6 · rotated scan 0° at 170 dpi",
+            "reviewNote": null,
+            "paddleMeanConfidence": 0.9918,
+            "paddleMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 0° at 170 dpi",
+            "paddleSelectedRotationDegrees": 0,
+            "paddleSelectedDpi": 170
           },
           {
             "page": 12,
             "status": "no_bill_rows_recovered",
             "rows": 0,
-            "method": "OCR · Apple Vision · rotated scan 180°; original boxes/confidence retained",
-            "reviewNote": null
+            "method": "OCR · PaddleOCR PP-OCRv6 · rotated scan 0° at 170 dpi",
+            "reviewNote": null,
+            "paddleMeanConfidence": 0.9932,
+            "paddleMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 0° at 170 dpi",
+            "paddleSelectedRotationDegrees": 0,
+            "paddleSelectedDpi": 170
           },
           {
             "page": 13,
             "status": "no_bill_rows_recovered",
             "rows": 0,
-            "method": "OCR · Apple Vision · rotated scan 90°; original boxes/confidence retained",
-            "reviewNote": null
+            "method": "OCR · PaddleOCR PP-OCRv6 · rotated scan 0° at 170 dpi",
+            "reviewNote": null,
+            "paddleMeanConfidence": 0.9895,
+            "paddleMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 0° at 170 dpi",
+            "paddleSelectedRotationDegrees": 0,
+            "paddleSelectedDpi": 170
           },
           {
             "page": 14,
             "status": "no_bill_rows_recovered",
             "rows": 0,
-            "method": "OCR · Apple Vision · rotated scan 90°; original boxes/confidence retained",
-            "reviewNote": null
+            "method": "OCR · PaddleOCR PP-OCRv6 · rotated scan 0° at 170 dpi",
+            "reviewNote": null,
+            "paddleMeanConfidence": 0.9898,
+            "paddleMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 0° at 170 dpi",
+            "paddleSelectedRotationDegrees": 0,
+            "paddleSelectedDpi": 170
           }
         ],
-        "rows": [],
-        "costCategoryBreakdown": [],
+        "rows": [
+          {
+            "itemCode": "311(1)f2",
+            "description": "Porlland Cemenl Concrele Pavemenl (Unreinforced), 0.30 m thick, 7",
+            "componentContext": null,
+            "componentContexts": null,
+            "costCategory": "Finishing and other civil works",
+            "quantity": 12081.34,
+            "unit": "sq.m",
+            "printedUnitCostPesos": null,
+            "inclusiveUnitCostPesos": null,
+            "calculatedUnitCostPesos": 225346.96258858702,
+            "amountPesos": 2722493273.0,
+            "directCostSharePct": null,
+            "manualReview": null,
+            "sourcePage": 4,
+            "observedPages": [
+              4
+            ],
+            "extractionMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 270° at 170 dpi · compact submitted row mapped by OCR word positions",
+            "arithmeticStatus": "Direct cost amount/quantity is derived; printed inclusive unit cost is separate",
+            "verificationStatus": "Machine-extracted submitted item row; verify source page",
+            "costBasis": "as_submitted",
+            "amountBasis": "Submitted direct-cost item amount"
+          },
+          {
+            "itemCode": "102(1)",
+            "description": "Unsuitable Excavalion",
+            "componentContext": null,
+            "componentContexts": null,
+            "costCategory": "Earthwork",
+            "quantity": 4832.54,
+            "unit": "cu.m.",
+            "printedUnitCostPesos": null,
+            "inclusiveUnitCostPesos": null,
+            "calculatedUnitCostPesos": 308.6239989736246,
+            "amountPesos": 1491437.82,
+            "directCostSharePct": null,
+            "manualReview": null,
+            "sourcePage": 4,
+            "observedPages": [
+              4
+            ],
+            "extractionMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 270° at 170 dpi · compact submitted row mapped by OCR word positions",
+            "arithmeticStatus": "Direct cost amount/quantity is derived; printed inclusive unit cost is separate",
+            "verificationStatus": "Machine-extracted submitted item row; verify source page",
+            "costBasis": "as_submitted",
+            "amountBasis": "Submitted direct-cost item amount"
+          },
+          {
+            "itemCode": "200(1)",
+            "description": "Aggregale Subbase Course",
+            "componentContext": null,
+            "componentContexts": null,
+            "costCategory": "Reinforced concrete",
+            "quantity": 1208.13,
+            "unit": "cu.m.",
+            "printedUnitCostPesos": null,
+            "inclusiveUnitCostPesos": null,
+            "calculatedUnitCostPesos": 704.5515962686135,
+            "amountPesos": 851189.92,
+            "directCostSharePct": null,
+            "manualReview": null,
+            "sourcePage": 4,
+            "observedPages": [
+              4
+            ],
+            "extractionMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 270° at 170 dpi · compact submitted row mapped by OCR word positions",
+            "arithmeticStatus": "Direct cost amount/quantity is derived; printed inclusive unit cost is separate",
+            "verificationStatus": "Machine-extracted submitted item row; verify source page",
+            "costBasis": "as_submitted",
+            "amountBasis": "Submitted direct-cost item amount"
+          },
+          {
+            "itemCode": "105(1)a",
+            "description": "Subgrade Preparation, Common Material",
+            "componentContext": null,
+            "componentContexts": null,
+            "costCategory": "Earthwork",
+            "quantity": 12081.34,
+            "unit": "sq.m.",
+            "printedUnitCostPesos": null,
+            "inclusiveUnitCostPesos": null,
+            "calculatedUnitCostPesos": 20.736933154765946,
+            "amountPesos": 250529.94,
+            "directCostSharePct": null,
+            "manualReview": null,
+            "sourcePage": 4,
+            "observedPages": [
+              4
+            ],
+            "extractionMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 270° at 170 dpi · compact submitted row mapped by OCR word positions",
+            "arithmeticStatus": "Direct cost amount/quantity is derived; printed inclusive unit cost is separate",
+            "verificationStatus": "Machine-extracted submitted item row; verify source page",
+            "costBasis": "as_submitted",
+            "amountBasis": "Submitted direct-cost item amount"
+          },
+          {
+            "itemCode": "B.8(1)",
+            "description": "Traffic Management",
+            "componentContext": null,
+            "componentContexts": null,
+            "costCategory": "Other General Requirements",
+            "quantity": 5.2,
+            "unit": "mos",
+            "printedUnitCostPesos": null,
+            "inclusiveUnitCostPesos": null,
+            "calculatedUnitCostPesos": 46249.209615384614,
+            "amountPesos": 240495.89,
+            "directCostSharePct": null,
+            "manualReview": null,
+            "sourcePage": 4,
+            "observedPages": [
+              4
+            ],
+            "extractionMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 270° at 170 dpi · compact submitted row mapped by OCR word positions",
+            "arithmeticStatus": "Direct cost amount/quantity is derived; printed inclusive unit cost is separate",
+            "verificationStatus": "Machine-extracted submitted item row; verify source page",
+            "costBasis": "as_submitted",
+            "amountBasis": "Submitted direct-cost item amount"
+          },
+          {
+            "itemCode": "B.9",
+            "description": "Mobilization / Demobilization",
+            "componentContext": null,
+            "componentContexts": null,
+            "costCategory": "Other General Requirements",
+            "quantity": 1.0,
+            "unit": "1.s.",
+            "printedUnitCostPesos": null,
+            "inclusiveUnitCostPesos": null,
+            "calculatedUnitCostPesos": 171823.44,
+            "amountPesos": 171823.44,
+            "directCostSharePct": null,
+            "manualReview": null,
+            "sourcePage": 4,
+            "observedPages": [
+              4
+            ],
+            "extractionMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 270° at 170 dpi · compact submitted row mapped by OCR word positions",
+            "arithmeticStatus": "Direct cost amount/quantity is derived; printed inclusive unit cost is separate",
+            "verificationStatus": "Machine-extracted submitted item row; verify source page",
+            "costBasis": "as_submitted",
+            "amountBasis": "Submitted direct-cost item amount"
+          },
+          {
+            "itemCode": "B.7(2)",
+            "description": "Occupational Safely and Health Program",
+            "componentContext": null,
+            "componentContexts": null,
+            "costCategory": "Other General Requirements",
+            "quantity": 1.0,
+            "unit": "1,s.",
+            "printedUnitCostPesos": null,
+            "inclusiveUnitCostPesos": null,
+            "calculatedUnitCostPesos": 154894.53,
+            "amountPesos": 154894.53,
+            "directCostSharePct": null,
+            "manualReview": null,
+            "sourcePage": 4,
+            "observedPages": [
+              4
+            ],
+            "extractionMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 270° at 170 dpi · compact submitted row mapped by OCR word positions",
+            "arithmeticStatus": "Direct cost amount/quantity is derived; printed inclusive unit cost is separate",
+            "verificationStatus": "Machine-extracted submitted item row; verify source page",
+            "costBasis": "as_submitted",
+            "amountBasis": "Submitted direct-cost item amount"
+          }
+        ],
+        "costCategoryBreakdown": [
+          {
+            "label": "Surface Courses",
+            "sharePct": 89.38,
+            "amountPesos": 27224932.73,
+            "sourcePage": 1,
+            "extractionMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 270° at 170 dpi",
+            "verificationStatus": "Machine-extracted printed category total; verify cited POW page"
+          },
+          {
+            "label": "Earthwork",
+            "sharePct": 5.72,
+            "amountPesos": 1741967.77,
+            "sourcePage": 1,
+            "extractionMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 270° at 170 dpi",
+            "verificationStatus": "Machine-extracted printed category total; verify cited POW page"
+          },
+          {
+            "label": "Subbase And Base Course",
+            "sharePct": 2.79,
+            "amountPesos": 851189.92,
+            "sourcePage": 1,
+            "extractionMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 270° at 170 dpi",
+            "verificationStatus": "Machine-extracted printed category total; verify cited POW page"
+          },
+          {
+            "label": "Other General Requirements",
+            "sharePct": 1.89,
+            "amountPesos": 574496.72,
+            "sourcePage": 1,
+            "extractionMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 270° at 170 dpi",
+            "verificationStatus": "Machine-extracted printed category total; verify cited POW page"
+          },
+          {
+            "label": "Facilities For The Engineer",
+            "sharePct": 0.22,
+            "amountPesos": 67168.25,
+            "sourcePage": 1,
+            "extractionMethod": "OCR · PaddleOCR PP-OCRv6 · rotated scan 270° at 170 dpi",
+            "verificationStatus": "Machine-extracted printed category total; verify cited POW page"
+          }
+        ],
         "summaryMetadata": {},
         "scopeNote": null,
         "controls": [],
-        "reviewPages": [
-          {
-            "page": 1,
-            "note": "Numeric columns could not be mapped safely; inspect the source page."
-          }
-        ],
+        "reviewPages": [],
         "people": [],
         "signatoryStatus": null,
         "errorType": null
