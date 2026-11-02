@@ -69,6 +69,7 @@ def main():
     top_amounts = [{"amountPesos": amount, "candidateLines": count} for amount, count in amount_frequency.most_common(12)]
 
     district_rows = integrated.get("annual", [])
+    gaa_years = sorted({int(row["year"]) for row in district_rows if row.get("stage") == "GAA"})
     ilocos_id = "leg:ilocos-norte:1st"
     ilocos_series = []
     by_district_period = {}
@@ -150,7 +151,7 @@ def main():
         for category, current_values in row.get("categories", {}).items():
             current_amount = int(current_values.get("totalPesos") or 0)
             history_points = []
-            for year in range(2020, 2027):
+            for year in gaa_years:
                 historical_row = by_district_period.get((row.get("districtId"), year, "GAA"))
                 historical_values = (historical_row or {}).get("categories", {}).get(category)
                 history_points.append({
