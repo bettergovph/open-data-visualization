@@ -698,6 +698,14 @@ async fn budget_trivia_entry(req: HttpRequest) -> Result<HttpResponse, ActixErro
     Ok(file.into_response(&req))
 }
 
+// Keep the retired district-flags URL redirect in the application router,
+// rather than shipping a standalone HTML redirect stub in the static tree.
+async fn ignorant_entry() -> HttpResponse {
+    HttpResponse::MovedPermanently()
+        .append_header(("Location", "/static/nep-preview/congress.html"))
+        .finish()
+}
+
 async fn budget_trivia_mobile(req: HttpRequest) -> Result<HttpResponse, ActixError> {
     if !is_mobile(&req) {
         return Ok(HttpResponse::Found()
@@ -759,6 +767,7 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .configure(project_documents::configure)
             .wrap(cors)
+            .service(web::resource("/static/nep-preview/ignorant.html").to(ignorant_entry))
             .service(web::resource("/static/nep-preview/budget-trivia.html").to(budget_trivia_entry))
             .service(web::resource("/budget-trivia-mobile").to(budget_trivia_mobile))
             .service(
