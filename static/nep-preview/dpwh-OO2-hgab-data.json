@@ -1,0 +1,1332 @@
+{
+  "summary": {
+    "created": "2026-11-02",
+    "baselineDomesticHgabOnlyCandidates": 5549,
+    "amendmentRows": 70,
+    "highConfidenceRows": 58,
+    "highConfidenceUniqueHgabCandidates": 58,
+    "reviewRows": 9,
+    "reviewUniqueHgabCandidatesNotAlreadyHighConfidence": 9,
+    "unresolvedRows": 3,
+    "conservativeAdjustedBaseline": 5491,
+    "reviewInclusiveLowerBound": 5482,
+    "sourceWorkbookReportedTotalPesos": 8276558559.9,
+    "parsedAmendmentRowsToAmountTotalPesos": 10283758559.9,
+    "workbookRowSumMismatch": true,
+    "method": "One amendment row is considered a high-confidence candidate only when normalized title token Jaccard similarity is at least 0.75 and the HGAB-only candidate amount exactly equals the amendment amount, or (for a title change) the amount equals the amendment increase over the named prior line within ₱1,000. Review candidates do not reduce the conservative count. Candidate links are investigative correspondences, not official NEP determinations."
+  },
+  "records": [
+    {
+      "sourceRow": 4,
+      "section": "Changes In Project Title",
+      "projectTitle": "Rehabilitation of Road and Drainage System along Sto. Domingo Avenue (Chainage 0+000 - Chainage 1+115.50), District I, Quezon City",
+      "fromExistingLine": "Construction of Matalahib Creek Pumping Station, Quezon City - Php 410,000,000.00",
+      "toAmountPesos": 333000000,
+      "changeAmountPesos": -77000000.0,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 1.0,
+      "titleExactAfterNormalization": true,
+      "hgabCandidate": {
+        "id": "HB10858-3-0298-003490",
+        "projectName": "Rehabilitation of Road and Drainage System along Sto. Domingo Avenue (Chainage 0+000 - Chainage 1+115.50), District I, Quezon City",
+        "amountPesos": 333000000,
+        "sourcePage": "298",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 5,
+      "section": "Changes In Project Title",
+      "projectTitle": "Rehabilitation of Road and Drainage System along Del Monte Avenue (Chainage 0+000 - Chainage 0+236), District I, Quezon City",
+      "fromExistingLine": null,
+      "toAmountPesos": 55000000,
+      "changeAmountPesos": null,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 1.0,
+      "titleExactAfterNormalization": true,
+      "hgabCandidate": {
+        "id": "HB10858-3-0298-003491",
+        "projectName": "Rehabilitation of Road and Drainage System along Del Monte Avenue (Chainage 0+000 - Chainage 0+236), District I, Quezon City",
+        "amountPesos": 55000000,
+        "sourcePage": "298",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 6,
+      "section": "Changes In Project Title",
+      "projectTitle": "Rehabilitation of Road and Drainage System (Talayan Flood Interceptor) Chainage 0+000 to Chainage 0+070, District I, Quezon City",
+      "fromExistingLine": null,
+      "toAmountPesos": 22000000,
+      "changeAmountPesos": null,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 1.0,
+      "titleExactAfterNormalization": true,
+      "hgabCandidate": {
+        "id": "HB10858-3-0327-004017",
+        "projectName": "Rehabilitation of Road and Drainage System (Talayan Flood Interceptor) Chainage 0+000 to Chainage 0+070, District I, Quezon City",
+        "amountPesos": 22000000,
+        "sourcePage": "327",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 7,
+      "section": "Changes In Project Title",
+      "projectTitle": "Improvement of Balanti Creek, Second District, Barangay Concepcion Dos, Marikina City (Sta 0+000 - Sta.126.80, Sta. 280 - Sta. 837.60)",
+      "fromExistingLine": "Improvement of Balanti Creek, Second District, Barangay Concepcion Dos, Marikina City - Php 98,000,000.00",
+      "toAmountPesos": 142826155.18,
+      "changeAmountPesos": 44826155.18000001,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap; HGAB amount is within ₱1,000 of the amendment increase over the named prior line",
+      "titleTokenJaccard": 1.0,
+      "titleExactAfterNormalization": true,
+      "hgabCandidate": {
+        "id": "HB10858-3-0365-004753",
+        "projectName": "Improvement of Balanti Creek, Second District, Barangay Concepcion Dos, Marikina City (Sta 0+000 - Sta.126.80, Sta. 280 - Sta. 837.60)",
+        "amountPesos": 44826000,
+        "sourcePage": "365",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 8,
+      "section": "Changes In Project Title",
+      "projectTitle": "Construction of Retarding Basin, Barangay Cararayan, Naga City, Camarines Sur",
+      "fromExistingLine": "Construction of Retarding Basin in Barangay Balatas",
+      "toAmountPesos": 300000000,
+      "changeAmountPesos": null,
+      "status": "Unresolved",
+      "rationale": "No candidate clears the title and amount checks; not counted as an HGAB-only reduction",
+      "titleTokenJaccard": 0.4667,
+      "titleExactAfterNormalization": false,
+      "hgabCandidate": null
+    },
+    {
+      "sourceRow": 9,
+      "section": "Changes In Project Title",
+      "projectTitle": "Construction of Pumping Station with Detention Pond and Flood Gate, Brgy. Looc, Mandaue City, Cebu (10.3217024,123.9549925)",
+      "fromExistingLine": "Construction of Detention Pond, Barangay Looc, Mandaue City, Cebu",
+      "toAmountPesos": 60000000,
+      "changeAmountPesos": null,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 1.0,
+      "titleExactAfterNormalization": true,
+      "hgabCandidate": {
+        "id": "HB10858-3-0312-003757",
+        "projectName": "Construction of Pumping Station with Detention Pond and Flood Gate, Barangay Looc, Mandaue City, Cebu (10.3217024,123.9549925)",
+        "amountPesos": 60000000,
+        "sourcePage": "312",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 10,
+      "section": "Changes In Project Title",
+      "projectTitle": "Construction of Low Height Dam in Panay River Watershed, Capiz",
+      "fromExistingLine": "Consultancy Services for the conduct of Feasibility Study of Low Height Dam along Panay River Watershed, Capiz",
+      "toAmountPesos": 10800000,
+      "changeAmountPesos": null,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 1.0,
+      "titleExactAfterNormalization": true,
+      "hgabCandidate": {
+        "id": "HB10858-3-0310-003715",
+        "projectName": "Construction of Low Height Dam in Panay River Watershed, Capiz",
+        "amountPesos": 10800000,
+        "sourcePage": "310",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 11,
+      "section": "Changes In Project Title",
+      "projectTitle": "Construction of Low Height Dam in Jalaur River Watershed, Iloilo",
+      "fromExistingLine": "Consultancy Services for the conduct of Feasibility Study of Low Height Dam along Jalaur River Watershed, Iloilo",
+      "toAmountPesos": 8400000,
+      "changeAmountPesos": null,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 1.0,
+      "titleExactAfterNormalization": true,
+      "hgabCandidate": {
+        "id": "HB10858-3-0310-003716",
+        "projectName": "Construction of Low Height Dam in Jalaur River Watershed, Iloilo",
+        "amountPesos": 8400000,
+        "sourcePage": "310",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 12,
+      "section": "Changes In Project Title",
+      "projectTitle": "Construction of Water Impounding Structure along Mananga River, Cebu",
+      "fromExistingLine": "Construction of Mananga River System, Cebu",
+      "toAmountPesos": 300000000,
+      "changeAmountPesos": null,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 1.0,
+      "titleExactAfterNormalization": true,
+      "hgabCandidate": {
+        "id": "HB10858-3-0368-004822",
+        "projectName": "Construction of Water Impounding Structure along Mananga River, Cebu",
+        "amountPesos": 300000000,
+        "sourcePage": "368",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 13,
+      "section": "Changes In Project Title",
+      "projectTitle": "Construction of Water Impounding Structure along Cotcot River, Liloan, Cebu",
+      "fromExistingLine": "Construction of Flood Control Structure along Cotcot River (Upstream), Liloan, Cebu",
+      "toAmountPesos": 300000000,
+      "changeAmountPesos": null,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 1.0,
+      "titleExactAfterNormalization": true,
+      "hgabCandidate": {
+        "id": "HB10858-3-0368-004818",
+        "projectName": "Construction of Water Impounding Structure along Cotcot River, Liloan, Cebu",
+        "amountPesos": 300000000,
+        "sourcePage": "368",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 14,
+      "section": "Changes In Project Title",
+      "projectTitle": "Construction of Water Impounding Structure along Cotcot River, Compostela, Cebu",
+      "fromExistingLine": "Construction of Flood Control Structure along Cotcot River (Upstream), Compostela, Cebu",
+      "toAmountPesos": 300000000,
+      "changeAmountPesos": null,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 1.0,
+      "titleExactAfterNormalization": true,
+      "hgabCandidate": {
+        "id": "HB10858-3-0368-004817",
+        "projectName": "Construction of Water Impounding Structure along Cotcot River, Compostela, Cebu",
+        "amountPesos": 300000000,
+        "sourcePage": "368",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 15,
+      "section": "Changes In Project Title",
+      "projectTitle": "Construction of Water Impounding Structure along Bulacao River, Cebu City",
+      "fromExistingLine": "Construction of Flood Mitigation Structure and Drainage System, Barangay Bulacao, Talisay City, Cebu",
+      "toAmountPesos": 150000000,
+      "changeAmountPesos": null,
+      "status": "Review candidate",
+      "rationale": "Strong title overlap, but the HGAB amount differs from the amendment amount",
+      "titleTokenJaccard": 1.0,
+      "titleExactAfterNormalization": true,
+      "hgabCandidate": {
+        "id": "HB10858-3-0313-003769",
+        "projectName": "Construction of Water Impounding Structure along Bulacao River, Cebu City",
+        "amountPesos": 120000000,
+        "sourcePage": "313",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 16,
+      "section": "Changes In Project Title",
+      "projectTitle": "Construction of Low Height Dam in Pagsangahan River Watershed, Ormoc City, Leyte",
+      "fromExistingLine": "Consultancy Services for the conduct of Feasibility Study of low height dams along Pagsangahan River Watershed",
+      "toAmountPesos": 20000000,
+      "changeAmountPesos": null,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 1.0,
+      "titleExactAfterNormalization": true,
+      "hgabCandidate": {
+        "id": "HB10858-3-0314-003781",
+        "projectName": "Construction of Low Height Dam in Pagsangahan River Watershed, Ormoc City, Leyte",
+        "amountPesos": 20000000,
+        "sourcePage": "314",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 18,
+      "section": "New Projects",
+      "projectTitle": "Construction of Flood Control and Land Development of City Camp Lagoon, 16.410157N, 120.586109E, Baguio City",
+      "fromExistingLine": null,
+      "toAmountPesos": 180000000,
+      "changeAmountPesos": null,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 0.8,
+      "titleExactAfterNormalization": false,
+      "hgabCandidate": {
+        "id": "HB10858-3-0302-003559",
+        "projectName": "Construction of Flood Control, City Camp Lagoon, 16.410157N, 120.586109E, Baguio City",
+        "amountPesos": 180000000,
+        "sourcePage": "302",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 19,
+      "section": "New Projects",
+      "projectTitle": "Construction of Drainage Structure along Pico-Lamtang Road K0255 + (-168) to Balili River, La Trinidad, Benguet",
+      "fromExistingLine": null,
+      "toAmountPesos": 170000000,
+      "changeAmountPesos": null,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 1.0,
+      "titleExactAfterNormalization": true,
+      "hgabCandidate": {
+        "id": "HB10858-3-0302-003558",
+        "projectName": "Construction of Drainage Structure along Pico-Lamtang Road K0255 + (-168) to Balili River, La Trinidad, Benguet",
+        "amountPesos": 170000000,
+        "sourcePage": "302",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 20,
+      "section": "New Projects",
+      "projectTitle": "Construction of Drainage Structure - Strawberry Fields (Sta. 1+115) to Balili River, La Trinidad, Benguet",
+      "fromExistingLine": null,
+      "toAmountPesos": 252000000,
+      "changeAmountPesos": null,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 1.0,
+      "titleExactAfterNormalization": true,
+      "hgabCandidate": {
+        "id": "HB10858-3-0302-003557",
+        "projectName": "Construction of Drainage Structure - Strawberry Fields (Sta. 1+115) to Balili River, La Trinidad, Benguet",
+        "amountPesos": 252000000,
+        "sourcePage": "302",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 21,
+      "section": "New Projects",
+      "projectTitle": "Construction/Improvement of Drainage Structure along Puguis Road (Sta. 0+140) to Wangal-Motorpool Road (Sta. 0+712), La Trinidad, Benguet",
+      "fromExistingLine": null,
+      "toAmountPesos": 50000000,
+      "changeAmountPesos": null,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 1.0,
+      "titleExactAfterNormalization": true,
+      "hgabCandidate": {
+        "id": "HB10858-3-0336-004197",
+        "projectName": "Construction/Improvement of Drainage Structure along Puguis Road (Sta. 0+140) to Wangal-Motorpool Road (Sta. 0+712), La Trinidad, Benguet",
+        "amountPesos": 50000000,
+        "sourcePage": "336",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 22,
+      "section": "New Projects",
+      "projectTitle": "Construction/Rehabilitation of Drainage along National Roads - Secondary Roads - Baguio-Bontoc Road – K0253+229 - K0253+449, La Trinidad, Benguet",
+      "fromExistingLine": null,
+      "toAmountPesos": 25000000,
+      "changeAmountPesos": null,
+      "status": "Review candidate",
+      "rationale": "Amount or location aligns, but title overlap is not distinctive enough to count automatically",
+      "titleTokenJaccard": 0.4444,
+      "titleExactAfterNormalization": false,
+      "hgabCandidate": {
+        "id": "HB10858-3-0191-001465",
+        "projectName": "Baguio-Bontoc Rd - K0253+229 - K0253+449, La Trinidad, Benguet",
+        "amountPesos": 25000000,
+        "sourcePage": "191",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 23,
+      "section": "New Projects",
+      "projectTitle": "Construction/ Upgrading/ Rehabilitation of Drainage along National Roads - Secondary Roads - G. Araneta Avenue (S05617LZ) - K0009 + 346 - K0009 + 684, Quezon City",
+      "fromExistingLine": null,
+      "toAmountPesos": 107000000,
+      "changeAmountPesos": null,
+      "status": "Review candidate",
+      "rationale": "Amount or location aligns, but title overlap is not distinctive enough to count automatically",
+      "titleTokenJaccard": 0.5,
+      "titleExactAfterNormalization": false,
+      "hgabCandidate": {
+        "id": "HB10858-3-0191-001451",
+        "projectName": "G. Araneta Avenue (S05617LZ) - K0009 + 346 - K0009 + 684, Quezon City",
+        "amountPesos": 107000000,
+        "sourcePage": "191",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 24,
+      "section": "New Projects",
+      "projectTitle": "Construction/ Upgrading/ Rehabilitation of Drainage along National Roads - Secondary Roads - South Ave. (Timog Ave.) - (S05269LZ) - K0010 +957 - K0009 + 073, Quezon City",
+      "fromExistingLine": null,
+      "toAmountPesos": 100000000,
+      "changeAmountPesos": null,
+      "status": "Review candidate",
+      "rationale": "Amount or location aligns, but title overlap is not distinctive enough to count automatically",
+      "titleTokenJaccard": 0.5263,
+      "titleExactAfterNormalization": false,
+      "hgabCandidate": {
+        "id": "HB10858-3-0191-001452",
+        "projectName": "South Ave. (Timog Ave.) - (S05269LZ) - K0010 +957 - K0009 + 073, Quezon City",
+        "amountPesos": 100000000,
+        "sourcePage": "191",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 25,
+      "section": "New Projects",
+      "projectTitle": "Construction/ Upgrading/ Rehabilitation of Drainage along National Roads - Tertiary Roads - Mother Ignacia Ave. (S05365LZ) - K0010 +203 - K0010 + 436, Quezon City",
+      "fromExistingLine": null,
+      "toAmountPesos": 110000000,
+      "changeAmountPesos": null,
+      "status": "Review candidate",
+      "rationale": "Amount or location aligns, but title overlap is not distinctive enough to count automatically",
+      "titleTokenJaccard": 0.5,
+      "titleExactAfterNormalization": false,
+      "hgabCandidate": {
+        "id": "HB10858-3-0195-001531",
+        "projectName": "Mother Ignacia Ave. (S05365LZ) - K0010 +203 - K0010 + 436, Quezon City",
+        "amountPesos": 110000000,
+        "sourcePage": "195",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 26,
+      "section": "New Projects",
+      "projectTitle": "Construction / Upgrading / Rehabilitation of Drainage along National Roads - Tertiary Roads - Sgt. Esguerra Ave. (S05376LZ) - K0010 + (-070) - K0010 + 060, Quezon City",
+      "fromExistingLine": null,
+      "toAmountPesos": 85000000,
+      "changeAmountPesos": null,
+      "status": "Review candidate",
+      "rationale": "Amount or location aligns, but title overlap is not distinctive enough to count automatically",
+      "titleTokenJaccard": 0.5,
+      "titleExactAfterNormalization": false,
+      "hgabCandidate": {
+        "id": "HB10858-3-0195-001532",
+        "projectName": "Sgt. Esguerra Ave. (S05376LZ) - K0010 + (-070) - K0010 + 060, Quezon City",
+        "amountPesos": 85000000,
+        "sourcePage": "195",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 27,
+      "section": "New Projects",
+      "projectTitle": "Construction/ Upgrading/ Rehabilitation of Drainage along National Roads - Tertiary Roads, Mother Ignacia Ave. (S05365LZ) - K0009 + 223 - K0009 +523, Quezon City",
+      "fromExistingLine": null,
+      "toAmountPesos": 130000000,
+      "changeAmountPesos": null,
+      "status": "Review candidate",
+      "rationale": "Amount or location aligns, but title overlap is not distinctive enough to count automatically",
+      "titleTokenJaccard": 0.5,
+      "titleExactAfterNormalization": false,
+      "hgabCandidate": {
+        "id": "HB10858-3-0195-001530",
+        "projectName": "Mother Ignacia Ave. (S05365LZ) - K0009 + 223 - K0009 +523, Quezon City",
+        "amountPesos": 130000000,
+        "sourcePage": "195",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 28,
+      "section": "New Projects",
+      "projectTitle": "Construction of Interceptor along Toctocan Road, Brgys. Manresa (Sta. 0+004.00P - Sta. 0+130.00P), Masambong (Sta. 0+005.30 - Sta. 0+016.00, Sta. 0+210.00 - Sta. 261.60, Sta. 0+410.00 - Sta. 0+484.10A, Sta. 0+450.00 - Sta. 0+460.00B), and Apolonio Samson (Sta. 0+460.00B-Sta.0+484.10B), Quezon City",
+      "fromExistingLine": null,
+      "toAmountPesos": 166328404.72,
+      "changeAmountPesos": null,
+      "status": "Review candidate",
+      "rationale": "Strong title overlap, but the HGAB amount differs from the amendment amount",
+      "titleTokenJaccard": 0.9412,
+      "titleExactAfterNormalization": false,
+      "hgabCandidate": {
+        "id": "HB10858-3-0296-003452",
+        "projectName": "Construction of Interceptor along Toctocan Road, s. Manresa (Sta. 0+004.00P - Sta. 0+130.00P), Masambong (Sta. 0+005.30 - Sta. 0+016.00, Sta. 0+210.00 - Sta. 261.60, Sta. 0+410.00 - Sta. 0+484.10A, Sta. 0+450.00 - Sta. 0+460.00B), and Apolonio Samson (Sta. 0+460.00B-Sta.0+484.10B), Quezon City",
+        "amountPesos": 166328000,
+        "sourcePage": "296",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 29,
+      "section": "New Projects",
+      "projectTitle": "Rehabilitation of Drainage System, Lirio St. (Sta. 0+000.00 - Sta. 0+156.70), Lirio Ext. (Sta. 0+000.00 - Sta. 0+039.80), Camia Ext. I (Sta. 0+000.00 - Sta. 0+121.10), Camia Ext. II (Sta. 0+000.00 - Sta. 0+052.30), Camia Ext. III (Sta. 0+000.00 - Sta. 0+028.00) and Alley 4 (Sta. 0+000.00 - Sta. 0+069.00), Barangay Old Capitol Site, Quezon City",
+      "fromExistingLine": null,
+      "toAmountPesos": 25000000,
+      "changeAmountPesos": null,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 1.0,
+      "titleExactAfterNormalization": true,
+      "hgabCandidate": {
+        "id": "HB10858-3-0328-004037",
+        "projectName": "Rehabilitation of Drainage System, Lirio St. (Sta. 0+000.00 - Sta. 0+156.70), Lirio Ext. (Sta. 0+000.00 - Sta. 0+039.80), Camia Ext. I (Sta. 0+000.00 - Sta. 0+121.10), Camia Ext. II (Sta. 0+000.00 - Sta. 0+052.30), Camia Ext. III (Sta. 0+000.00 - Sta. 0+028.00) and Alley 4 (Sta. 0+000.00 - Sta. 0+069.00), Barangay Old Capitol Site, Quezon City",
+        "amountPesos": 25000000,
+        "sourcePage": "328",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 30,
+      "section": "New Projects",
+      "projectTitle": "Rehabilitation of Drainage System, Matimyas St. (Sta. 0+000.00 - Sta. 0+305.60), Lourdes Castillo St. (Sta. 0+000.00 - Sta. 0+467.40), Data St. (Sta. 0+000.00 - Sta. 0+552.00), Barangay Don Manuel, Quezon City",
+      "fromExistingLine": null,
+      "toAmountPesos": 80000000,
+      "changeAmountPesos": null,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 1.0,
+      "titleExactAfterNormalization": true,
+      "hgabCandidate": {
+        "id": "HB10858-3-0296-003454",
+        "projectName": "Rehabilitation of Drainage System, Matimyas St. (Sta. 0+000.00 - Sta. 0+305.60), Lourdes Castillo St. (Sta. 0+000.00 - Sta. 0+467.40), Data St. (Sta. 0+000.00 - Sta. 0+552.00), Barangay Don Manuel, Quezon City",
+        "amountPesos": 80000000,
+        "sourcePage": "296",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 31,
+      "section": "New Projects",
+      "projectTitle": "Rehabilitation of Drainage System, Bayani St. (Sta. 0+000.00 - Sta. 0+353.60), Barangay Doña Imelda, Quezon City",
+      "fromExistingLine": null,
+      "toAmountPesos": 50000000,
+      "changeAmountPesos": null,
+      "status": "Unresolved",
+      "rationale": "No candidate clears the title and amount checks; not counted as an HGAB-only reduction",
+      "titleTokenJaccard": 0.4815,
+      "titleExactAfterNormalization": false,
+      "hgabCandidate": null
+    },
+    {
+      "sourceRow": 32,
+      "section": "New Projects",
+      "projectTitle": "Rehabilitation of Drainage System, 11th St. (Sta. 0+000.00 - Sta. 0+605.80), Barangay Damayang Lagi, Quezon City",
+      "fromExistingLine": null,
+      "toAmountPesos": 38000000,
+      "changeAmountPesos": null,
+      "status": "Unresolved",
+      "rationale": "No candidate clears the title and amount checks; not counted as an HGAB-only reduction",
+      "titleTokenJaccard": 0.4286,
+      "titleExactAfterNormalization": false,
+      "hgabCandidate": null
+    },
+    {
+      "sourceRow": 33,
+      "section": "New Projects",
+      "projectTitle": "Rehabilitation of Drainage System, Sct. Fernandez St. (Sta. 1+168.60 - Sta. 1+389.90), Barangay Laging Handa, Quezon City",
+      "fromExistingLine": null,
+      "toAmountPesos": 60000000,
+      "changeAmountPesos": null,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 1.0,
+      "titleExactAfterNormalization": true,
+      "hgabCandidate": {
+        "id": "HB10858-3-0296-003455",
+        "projectName": "Rehabilitation of Drainage System, Sct. Fernandez St. (Sta. 1+168.60 - Sta. 1+389.90), Barangay Laging Handa, Quezon City",
+        "amountPesos": 60000000,
+        "sourcePage": "296",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 34,
+      "section": "New Projects",
+      "projectTitle": "Rehabilitation of Drainage System, Forestry Area (Sta. 0+000.00 - Sta. 0+112.50), Lagoon Area (Sta. 0+000.00 - Sta. 0+279.30), Everlasting (Sta 0+000.00 - Sta. 0+310.00) and Orchid St. (Sta. 0+000.00 - Sta. 0+154.70), Barangay Central, Quezon City",
+      "fromExistingLine": null,
+      "toAmountPesos": 15000000,
+      "changeAmountPesos": null,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 1.0,
+      "titleExactAfterNormalization": true,
+      "hgabCandidate": {
+        "id": "HB10858-3-0328-004035",
+        "projectName": "Rehabilitation of Drainage System, Forestry Area (Sta. 0+000.00 - Sta. 0+112.50), Lagoon Area (Sta. 0+000.00 - Sta. 0+279.30), Everlasting (Sta 0+000.00 - Sta. 0+310.00) and Orchid St. (Sta. 0+000.00 - Sta. 0+154.70), Barangay Central, Quezon City",
+        "amountPesos": 15000000,
+        "sourcePage": "328",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 35,
+      "section": "New Projects",
+      "projectTitle": "Rehabilitation of Drainage System, Justice Lourdes Paredes San Diego Ave. (Sta. 0+035.00 - Sta. 0+199.80), Barangay Bagong Lipunan ng Crame, Quezon City",
+      "fromExistingLine": null,
+      "toAmountPesos": 13000000,
+      "changeAmountPesos": null,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 1.0,
+      "titleExactAfterNormalization": true,
+      "hgabCandidate": {
+        "id": "HB10858-3-0328-004036",
+        "projectName": "Rehabilitation of Drainage System, Justice Lourdes Paredes San Diego Ave. (Sta. 0+035.00 - Sta. 0+199.80), Barangay Bagong Lipunan ng Crame, Quezon City",
+        "amountPesos": 13000000,
+        "sourcePage": "328",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 36,
+      "section": "New Projects",
+      "projectTitle": "Rehabilitation of Drainage System, Bagong Buhay St. (Sta. 0+000.00 - Sta. 0+116.50 and Tomas Pin Pin St. (Sta. 0+000.00 - Sta. 0+155.30), Barangay Sto. Niño, Quezon City",
+      "fromExistingLine": null,
+      "toAmountPesos": 27000000,
+      "changeAmountPesos": null,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 1.0,
+      "titleExactAfterNormalization": true,
+      "hgabCandidate": {
+        "id": "HB10858-3-0327-004033",
+        "projectName": "Rehabilitation of Drainage System, Bagong Buhay St. (Sta. 0+000.00 - Sta. 0+116.50 and Tomas Pin Pin St. (Sta. 0+000.00 - Sta. 0+155.30), Barangay Sto. Niño, Quezon City",
+        "amountPesos": 27000000,
+        "sourcePage": "327",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 37,
+      "section": "New Projects",
+      "projectTitle": "Construction of Drainage along Tayuman St. (going to Tayuman Pumping Station), Manila City, K0007+(-594.60) to K0007+(-389.20) & K0007+(-091.20) to K0007+124.50, Manila City",
+      "fromExistingLine": null,
+      "toAmountPesos": 110000000,
+      "changeAmountPesos": null,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 1.0,
+      "titleExactAfterNormalization": true,
+      "hgabCandidate": {
+        "id": "HB10858-3-0296-003451",
+        "projectName": "Construction of Drainage along Tayuman St. (going to Tayuman Pumping Station), Manila City, K0007+(-594.60) to K0007+(-389.20) & K0007+(-091.20) to K0007+124.50, Manila City",
+        "amountPesos": 110000000,
+        "sourcePage": "296",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 38,
+      "section": "New Projects",
+      "projectTitle": "Construction of Detention Basin at NPDC Compound, M. Orosa St. Cor T.M Kalaw St. Ermita, Manila, 14.582155, 120.980347",
+      "fromExistingLine": null,
+      "toAmountPesos": 360000000,
+      "changeAmountPesos": null,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 1.0,
+      "titleExactAfterNormalization": true,
+      "hgabCandidate": {
+        "id": "HB10858-3-0296-003450",
+        "projectName": "Construction of Detention Basin at NPDC Compound, M. Orosa St. Cor T.M Kalaw St. Ermita, Manila, 14.582155, 120.980347",
+        "amountPesos": 360000000,
+        "sourcePage": "296",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 39,
+      "section": "New Projects",
+      "projectTitle": "Construction of Detention Basin at Harbor View, South Drive Ermita, Manila, 14.578644, 120.974859",
+      "fromExistingLine": null,
+      "toAmountPesos": 380000000,
+      "changeAmountPesos": null,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 1.0,
+      "titleExactAfterNormalization": true,
+      "hgabCandidate": {
+        "id": "HB10858-3-0296-003449",
+        "projectName": "Construction of Detention Basin at Harbor View, South Drive Ermita, Manila, 14.578644, 120.974859",
+        "amountPesos": 380000000,
+        "sourcePage": "296",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 40,
+      "section": "New Projects",
+      "projectTitle": "Construction (Completion) of Catch Basin at Rajah Sulayman Plaza, Brgy. 700, Zone 77, Malate, Manila, 14.569025, 120.984068",
+      "fromExistingLine": null,
+      "toAmountPesos": 50000000,
+      "changeAmountPesos": null,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 1.0,
+      "titleExactAfterNormalization": true,
+      "hgabCandidate": {
+        "id": "HB10858-3-0328-004039",
+        "projectName": "Construction (Completion) of Catch Basin at Rajah Sulayman Plaza, Barangay 700, Zone 77, Malate, Manila, 14.569025, 120.984068",
+        "amountPesos": 50000000,
+        "sourcePage": "328",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 41,
+      "section": "New Projects",
+      "projectTitle": "Completion of Pumping Station (Pumphouse No. 2) along Navotas Coastal Dike, Brgy. Daanghari, Navotas City (14.664966, 120.938371)",
+      "fromExistingLine": null,
+      "toAmountPesos": 194000000,
+      "changeAmountPesos": null,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 1.0,
+      "titleExactAfterNormalization": true,
+      "hgabCandidate": {
+        "id": "HB10858-3-0296-003446",
+        "projectName": "Completion of Pumping Station (Pumphouse No. 2) along Navotas Coastal Dike, Barangay Daanghari, Navotas City (14.664966, 120.938371)",
+        "amountPesos": 194000000,
+        "sourcePage": "296",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 42,
+      "section": "New Projects",
+      "projectTitle": "Construction of Retarding Basin at Pumphouse No. 2, Brgy. Daanghari including drainage laterals, Navotas City (14.664966, 120.938371)",
+      "fromExistingLine": null,
+      "toAmountPesos": 75000000,
+      "changeAmountPesos": null,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 1.0,
+      "titleExactAfterNormalization": true,
+      "hgabCandidate": {
+        "id": "HB10858-3-0296-003453",
+        "projectName": "Construction of Retarding Basin at Pumphouse No. 2, Barangay Daanghari including drainage laterals, Navotas City (14.664966, 120.938371)",
+        "amountPesos": 75000000,
+        "sourcePage": "296",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 43,
+      "section": "New Projects",
+      "projectTitle": "Construction of Pumping Stations with Retarding Basin along Navotas Coastal Dike (Completion), Navotas City",
+      "fromExistingLine": null,
+      "toAmountPesos": 200000000,
+      "changeAmountPesos": null,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 1.0,
+      "titleExactAfterNormalization": true,
+      "hgabCandidate": {
+        "id": "HB10858-3-0296-003448",
+        "projectName": "Construction (Completion) of Pumping Stations with Retarding Basin along Navotas Coastal Dike, Navotas City",
+        "amountPesos": 200000000,
+        "sourcePage": "296",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 44,
+      "section": "New Projects",
+      "projectTitle": "Improvement of Road Dike leading to Navotas Pumping Station No. 1 (C0+000 - C0+385) along Navotas Coastal Dike, Navotas City",
+      "fromExistingLine": null,
+      "toAmountPesos": 204000000,
+      "changeAmountPesos": null,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 1.0,
+      "titleExactAfterNormalization": true,
+      "hgabCandidate": {
+        "id": "HB10858-3-0412-005701",
+        "projectName": "Improvement of Road Dike leading to Navotas Pumping Station No. 1 (C0+000 - C0+385) along Navotas Coastal Dike, Navotas City",
+        "amountPesos": 204000000,
+        "sourcePage": "412",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 45,
+      "section": "New Projects",
+      "projectTitle": "Construction of Dupinga Sabo Dam, Gabaldon, Nueva Ecija",
+      "fromExistingLine": null,
+      "toAmountPesos": 400000000,
+      "changeAmountPesos": null,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 0.7778,
+      "titleExactAfterNormalization": false,
+      "hgabCandidate": {
+        "id": "HB10858-3-0304-003595",
+        "projectName": "Construction of Dupinga Sabo Dam, Gabadlon, Nueva Ecija",
+        "amountPesos": 400000000,
+        "sourcePage": "304",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 46,
+      "section": "New Projects",
+      "projectTitle": "Construction of Inasan Sabo Dam, Gabaldon, Nueva Ecija",
+      "fromExistingLine": null,
+      "toAmountPesos": 250000000,
+      "changeAmountPesos": null,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 0.7778,
+      "titleExactAfterNormalization": false,
+      "hgabCandidate": {
+        "id": "HB10858-3-0304-003596",
+        "projectName": "Construction of Inasan Sabo Dam, Gabadlon, Nueva Ecija",
+        "amountPesos": 250000000,
+        "sourcePage": "304",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 47,
+      "section": "New Projects",
+      "projectTitle": "Construction of Digmala Sabo Dam, Bongabon, Nueva Ecija",
+      "fromExistingLine": null,
+      "toAmountPesos": 150000000,
+      "changeAmountPesos": null,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 1.0,
+      "titleExactAfterNormalization": true,
+      "hgabCandidate": {
+        "id": "HB10858-3-0304-003598",
+        "projectName": "Construction of Digmala Sabo Dam, Bongabon, Nueva Ecija",
+        "amountPesos": 150000000,
+        "sourcePage": "304",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 48,
+      "section": "New Projects",
+      "projectTitle": "Construction of Bugnan Sabo Dam, Gabaldon, Nueva Ecija",
+      "fromExistingLine": null,
+      "toAmountPesos": 300000000,
+      "changeAmountPesos": null,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 0.7778,
+      "titleExactAfterNormalization": false,
+      "hgabCandidate": {
+        "id": "HB10858-3-0304-003597",
+        "projectName": "Construction of Bugnan Sabo Dam, Gabadlon, Nueva Ecija",
+        "amountPesos": 300000000,
+        "sourcePage": "304",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 49,
+      "section": "New Projects",
+      "projectTitle": "Construction of Anipa Sabo Dam, Gabaldon, Nueva Ecija",
+      "fromExistingLine": null,
+      "toAmountPesos": 200000000,
+      "changeAmountPesos": null,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 0.7778,
+      "titleExactAfterNormalization": false,
+      "hgabCandidate": {
+        "id": "HB10858-3-0304-003594",
+        "projectName": "Construction of Anipa Sabo Dam, Gabadlon, Nueva Ecija",
+        "amountPesos": 200000000,
+        "sourcePage": "304",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 50,
+      "section": "New Projects",
+      "projectTitle": "Construction of Flood Mitigation Structure along Pampanga River and Bagbag River, Brgy. Frances - Gatbuca - Bulusan - Sta.Lucia, Calumpit Bulacan (Sta. 0+000 - Sta. 1+900, Sta. 0+000 - Sta. 1+738)",
+      "fromExistingLine": null,
+      "toAmountPesos": 160090000,
+      "changeAmountPesos": null,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 1.0,
+      "titleExactAfterNormalization": true,
+      "hgabCandidate": {
+        "id": "HB10858-3-0303-003583",
+        "projectName": "Construction of Flood Mitigation Structure along Pampanga River and Bagbag River, Barangay Frances - Gatbuca - Bulusan - Sta.Lucia, Calumpit, Bulacan (Sta. 0+000 - Sta. 1+900, Sta. 0+000 - Sta. 1+738)",
+        "amountPesos": 160090000,
+        "sourcePage": "303",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 51,
+      "section": "New Projects",
+      "projectTitle": "Construction of Flood Mitigation Structure along Halang River, Hagonoy, Bulacan (Sta. 0+000 - Sta. 2+708, Sta. 0+000 - Sta. 2+418)",
+      "fromExistingLine": null,
+      "toAmountPesos": 480000000,
+      "changeAmountPesos": null,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 1.0,
+      "titleExactAfterNormalization": true,
+      "hgabCandidate": {
+        "id": "HB10858-3-0303-003582",
+        "projectName": "Construction of Flood Mitigation Structure along Halang River, Hagonoy, Bulacan (Sta. 0+000 - Sta. 2+708, Sta. 0+000 - Sta. 2+418)",
+        "amountPesos": 480000000,
+        "sourcePage": "303",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 52,
+      "section": "New Projects",
+      "projectTitle": "Construction of Retarding Basin at South Central School Open Grounds, Brgy. Santo Cristo, Baliwag, Bulacan (14.95626, 120.8967)",
+      "fromExistingLine": null,
+      "toAmountPesos": 205000000,
+      "changeAmountPesos": null,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 1.0,
+      "titleExactAfterNormalization": true,
+      "hgabCandidate": {
+        "id": "HB10858-3-0304-003591",
+        "projectName": "Construction of Retarding Basin at South Central School Open Grounds, Barangay Santo Cristo, Baliwag, Bulacan (14.95626, 120.8967)",
+        "amountPesos": 205000000,
+        "sourcePage": "304",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 53,
+      "section": "New Projects",
+      "projectTitle": "Construction of Retarding Basin at Brgy. Bulihan, Malolos City, Bulacan (14.859608, 120.810933)",
+      "fromExistingLine": null,
+      "toAmountPesos": 66600000,
+      "changeAmountPesos": null,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 1.0,
+      "titleExactAfterNormalization": true,
+      "hgabCandidate": {
+        "id": "HB10858-3-0303-003588",
+        "projectName": "Construction of Retarding Basin at Barangay Bulihan, Malolos City, Bulacan (14.859608, 120.810933)",
+        "amountPesos": 66600000,
+        "sourcePage": "303",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 54,
+      "section": "New Projects",
+      "projectTitle": "Construction of Retarding Basin along Sampaguita Road, Brgy. Santo Rosario, City of Malolos, Bulacan (14.839380, 120.814731)",
+      "fromExistingLine": null,
+      "toAmountPesos": 132000000,
+      "changeAmountPesos": null,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 1.0,
+      "titleExactAfterNormalization": true,
+      "hgabCandidate": {
+        "id": "HB10858-3-0303-003587",
+        "projectName": "Construction of Retarding Basin along Sampaguita Road, Barangay Santo Rosario, City of Malolos, Bulacan (14.839380, 120.814731)",
+        "amountPesos": 132000000,
+        "sourcePage": "303",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 55,
+      "section": "New Projects",
+      "projectTitle": "Rehabilitation of Road with Slope Protection along Sto. Tomas - Minalin Tail Dike (Minalin Section), including Revetment Works, Sta. 9+860 - Sta. 10+340, Brgy. Sta. Catalina, Minalin, Pampanga",
+      "fromExistingLine": null,
+      "toAmountPesos": 120000000,
+      "changeAmountPesos": null,
+      "status": "Review candidate",
+      "rationale": "Amount or location aligns, but title overlap is not distinctive enough to count automatically",
+      "titleTokenJaccard": 0.7308,
+      "titleExactAfterNormalization": false,
+      "hgabCandidate": {
+        "id": "HB10858-3-0304-003592",
+        "projectName": "Rehabilitation of San Fernando-Sto. Tomas-Minalin Tail Dike (Minalin Section), including Revetment Works, Sta. 9+860 – Sta. 10+340, Barangay Sta. Catalina, Minalin, Pampanga",
+        "amountPesos": 120000000,
+        "sourcePage": "304",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 56,
+      "section": "New Projects",
+      "projectTitle": "Construction of Detention Basin at Brgy. Sapa, Sto. Tomas, Pampanga\n(15.001468,120.708807)",
+      "fromExistingLine": null,
+      "toAmountPesos": 300000000,
+      "changeAmountPesos": null,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 1.0,
+      "titleExactAfterNormalization": true,
+      "hgabCandidate": {
+        "id": "HB10858-3-0303-003581",
+        "projectName": "Construction of Detention Basin at Barangay Sapa, Sto. Tomas, Pampanga (15.001468,120.708807)",
+        "amountPesos": 300000000,
+        "sourcePage": "303",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 57,
+      "section": "New Projects",
+      "projectTitle": "Construction of Detention Basin (15.030810, 120.732303), Mexico and San Simon, Pampanga",
+      "fromExistingLine": null,
+      "toAmountPesos": 350000000,
+      "changeAmountPesos": null,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 1.0,
+      "titleExactAfterNormalization": true,
+      "hgabCandidate": {
+        "id": "HB10858-3-0303-003580",
+        "projectName": "Construction of Detention Basin (15.030810, 120.732303), Mexico and San Simon, Pampanga",
+        "amountPesos": 350000000,
+        "sourcePage": "303",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 58,
+      "section": "New Projects",
+      "projectTitle": "Construction of Detention Basins, Beside Sagop Creek, Brgy, Triangulo (Magtoto), Naga City, Camarines Sur",
+      "fromExistingLine": null,
+      "toAmountPesos": 126200000,
+      "changeAmountPesos": null,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 0.9286,
+      "titleExactAfterNormalization": false,
+      "hgabCandidate": {
+        "id": "HB10858-3-0309-003683",
+        "projectName": "Construction of Detention Basins, Beside Sagop Creek, , Triangulo (Magtoto), Naga City, Camarines Sur",
+        "amountPesos": 126200000,
+        "sourcePage": "309",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 59,
+      "section": "New Projects",
+      "projectTitle": "Construction of Detention Basins, Almeda Avenue at the back of Villa Concepcion, Naga City, Camarines Sur",
+      "fromExistingLine": null,
+      "toAmountPesos": 76200000,
+      "changeAmountPesos": null,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 1.0,
+      "titleExactAfterNormalization": true,
+      "hgabCandidate": {
+        "id": "HB10858-3-0309-003682",
+        "projectName": "Construction of Detention Basins, Almeda Avenue at the back of Villa Concepcion, Naga City, Camarines Sur",
+        "amountPesos": 76200000,
+        "sourcePage": "309",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 60,
+      "section": "New Projects",
+      "projectTitle": "Construction of Water Impounding Structure along Butuanon River, Cebu",
+      "fromExistingLine": null,
+      "toAmountPesos": 100000000,
+      "changeAmountPesos": null,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 1.0,
+      "titleExactAfterNormalization": true,
+      "hgabCandidate": {
+        "id": "HB10858-3-0313-003760",
+        "projectName": "Construction of Water Impounding Structure along Butuanon River, Cebu",
+        "amountPesos": 100000000,
+        "sourcePage": "313",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 61,
+      "section": "New Projects",
+      "projectTitle": "Construction of Drainage Structure and Drainage Facilities along A.S. Fortuna St. and Tipolo Creek, Mandaue City, Cebu",
+      "fromExistingLine": null,
+      "toAmountPesos": 150000000,
+      "changeAmountPesos": null,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 1.0,
+      "titleExactAfterNormalization": true,
+      "hgabCandidate": {
+        "id": "HB10858-3-0313-003758",
+        "projectName": "Construction of Drainage Structure and Drainage Facilities along A.S. Fortuna St. and Tipolo Creek, Mandaue City, Cebu",
+        "amountPesos": 150000000,
+        "sourcePage": "313",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 62,
+      "section": "New Projects",
+      "projectTitle": "Construction/Maintenance of Flood Mitigation Structures and Drainage Systems, Construction of Parian Urban Drainage System, Cebu City (Section 1: Sta. 0+000.00 - Sta. 0+205.00, Section 2: Sta. 0+000.00 - Sta. 0+220.00, Section 3: Sta. 0+000.00 - Sta. 0+273.00, Section 4: Sta. 0+000.00 - Sta. 0+932.00, Section 5: Sta. 0+000.00 - Sta. 1+110.00)",
+      "fromExistingLine": null,
+      "toAmountPesos": 300000000,
+      "changeAmountPesos": null,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 0.7931,
+      "titleExactAfterNormalization": false,
+      "hgabCandidate": {
+        "id": "HB10858-3-0313-003759",
+        "projectName": "Construction of Parian Urban Drainage System, Cebu City (Section 1: Sta. 0+000.00 - Sta. 0+205.00, Section 2: Sta. 0+000.00 - Sta. 0+220.00, Section 3: Sta. 0+000.00 - Sta. 0+273.00, Section 4: Sta. 0+000.00 - Sta. 0+932.00, Section 5: Sta. 0+000.00 - Sta. 1+110.00)",
+        "amountPesos": 300000000,
+        "sourcePage": "313",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 63,
+      "section": "New Projects",
+      "projectTitle": "Construction of Cabayongan River Multi-Purpose Project Small River Impounding System, Cabayongan River, Jaro, Leyte (RS: 11.1599635,124.7438226, LS: 11.1590763,124.7442043)",
+      "fromExistingLine": null,
+      "toAmountPesos": 170000000,
+      "changeAmountPesos": null,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 1.0,
+      "titleExactAfterNormalization": true,
+      "hgabCandidate": {
+        "id": "HB10858-3-0314-003780",
+        "projectName": "Construction of Cabayongan River Multi-Purpose Project Small River Impounding System, Cabayongan River, Jaro, Leyte (RS: 11.1599635,124.7438226, LS: 11.1590763,124.7442043)",
+        "amountPesos": 170000000,
+        "sourcePage": "314",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 64,
+      "section": "New Projects",
+      "projectTitle": "Construction/Rehabilitation of Talomo Flood Mitigation Structure along Talomo River Sta. 1519+000.00 to Sta. 1519+200.00 (Right Bank) and Sta. 1519+780.00 to Sta. 1519+846.60 (Left Bank), Talomo, Davao City",
+      "fromExistingLine": null,
+      "toAmountPesos": 41400000,
+      "changeAmountPesos": null,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 0.9583,
+      "titleExactAfterNormalization": false,
+      "hgabCandidate": {
+        "id": "HB10858-3-0370-004846",
+        "projectName": "Construction of Talomo Flood Mitigation Structure along Talomo River Sta. 1519+000.00 to Sta. 1519+200.00 (Right Bank) and Sta. 1519+780.00 to Sta. 1519+846.60 (Left Bank), Talomo, Davao City",
+        "amountPesos": 41400000,
+        "sourcePage": "370",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 65,
+      "section": "New Projects",
+      "projectTitle": "Construction/Rehabilitation of Talomo Flood Mitigation Structure along Talomo River Sta. 1519+320.00 to Sta. 1519+580.00, Talomo, Davao City",
+      "fromExistingLine": null,
+      "toAmountPesos": 63000000,
+      "changeAmountPesos": null,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 0.9412,
+      "titleExactAfterNormalization": false,
+      "hgabCandidate": {
+        "id": "HB10858-3-0370-004847",
+        "projectName": "Construction of Talomo Flood Mitigation Structure along Talomo River Sta. 1519+320.00 to Sta. 1519+580.00, Talomo, Davao City",
+        "amountPesos": 63000000,
+        "sourcePage": "370",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 66,
+      "section": "New Projects",
+      "projectTitle": "Construction/Rehabilitation of Talomo Flood Mitigation Structure along Talomo River Sta. 1519+000.00 to 1519+320.00, Talomo, Davao City",
+      "fromExistingLine": null,
+      "toAmountPesos": 108000000,
+      "changeAmountPesos": null,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 0.9412,
+      "titleExactAfterNormalization": false,
+      "hgabCandidate": {
+        "id": "HB10858-3-0370-004845",
+        "projectName": "Construction of Talomo Flood Mitigation Structure along Talomo River Sta. 1519+000.00 to 1519+320.00, Talomo, Davao City",
+        "amountPesos": 108000000,
+        "sourcePage": "370",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 68,
+      "section": "New Projects",
+      "projectTitle": "Construction of Nature Based Solution Coastal Defense in Barangay Masukol, Paombong, Bulacan (14.762244, 120.770711)",
+      "fromExistingLine": null,
+      "toAmountPesos": 96494000,
+      "changeAmountPesos": null,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 1.0,
+      "titleExactAfterNormalization": true,
+      "hgabCandidate": {
+        "id": "HB10858-3-0303-003584",
+        "projectName": "Construction of Nature Based Solution Coastal Defense in Barangay Masukol, Paombong, Bulacan (14.762244, 120.770711)",
+        "amountPesos": 96494000,
+        "sourcePage": "303",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 69,
+      "section": "New Projects",
+      "projectTitle": "Construction of Nature Based Solution Coastal Defense in Barangay Sta. Cruz, Paombong, Bulacan (14.758897, 120.792747)",
+      "fromExistingLine": null,
+      "toAmountPesos": 80411000,
+      "changeAmountPesos": null,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 1.0,
+      "titleExactAfterNormalization": true,
+      "hgabCandidate": {
+        "id": "HB10858-3-0303-003585",
+        "projectName": "Construction of Nature Based Solution Coastal Defense in Barangay Sta. Cruz, Paombong, Bulacan (14.758897, 120.792747)",
+        "amountPesos": 80411000,
+        "sourcePage": "303",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 70,
+      "section": "New Projects",
+      "projectTitle": "Construction of Nature Based Solution Coastal Defense in Barangay Tibaguin, Hagonoy, Bulacan (14.772167, 120.752300)",
+      "fromExistingLine": null,
+      "toAmountPesos": 80409000,
+      "changeAmountPesos": null,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 1.0,
+      "titleExactAfterNormalization": true,
+      "hgabCandidate": {
+        "id": "HB10858-3-0303-003586",
+        "projectName": "Construction of Nature Based Solution Coastal Defense in Barangay Tibaguin, Hagonoy, Bulacan (14.772167, 120.752300)",
+        "amountPesos": 80409000,
+        "sourcePage": "303",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 71,
+      "section": "New Projects",
+      "projectTitle": "Construction of Retarding Basin at Engr. Virgilio V. Dionisio Memorial Highschool, Brgy. Poblacion, Pulilan, Bulacan \n(14.8999, 120.8472)",
+      "fromExistingLine": null,
+      "toAmountPesos": 105600000,
+      "changeAmountPesos": null,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 1.0,
+      "titleExactAfterNormalization": true,
+      "hgabCandidate": {
+        "id": "HB10858-3-0303-003589",
+        "projectName": "Construction of Retarding Basin at Engr. Virgilio V. Dionisio Memorial Highschool, Barangay Poblacion, Pulilan, Bulacan (14.8999, 120.8472)",
+        "amountPesos": 105600000,
+        "sourcePage": "303",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 72,
+      "section": "New Projects",
+      "projectTitle": "Construction of Retarding Basin at Government Center, Barangay Peñabatan, Pulilan, Bulacan (14.9274, 120.8415)",
+      "fromExistingLine": null,
+      "toAmountPesos": 264000000,
+      "changeAmountPesos": null,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 1.0,
+      "titleExactAfterNormalization": true,
+      "hgabCandidate": {
+        "id": "HB10858-3-0304-003590",
+        "projectName": "Construction of Retarding Basin at Government Center, Barangay Peñabatan, Pulilan, Bulacan (14.9274, 120.8415)",
+        "amountPesos": 264000000,
+        "sourcePage": "304",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 73,
+      "section": "New Projects",
+      "projectTitle": "Construction of Flood Control Structure along Sibuguey River, Siay, Zamboanga Sibugay 0 + 000 to 0 + 245",
+      "fromExistingLine": null,
+      "toAmountPesos": 50000000,
+      "changeAmountPesos": null,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 1.0,
+      "titleExactAfterNormalization": true,
+      "hgabCandidate": {
+        "id": "HB10858-3-0373-004896",
+        "projectName": "Construction of Flood Control Structure along Sibuguey River, Siay, Zamboanga Sibugay 0 + 000 to 0 + 245",
+        "amountPesos": 50000000,
+        "sourcePage": "373",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 74,
+      "section": "New Projects",
+      "projectTitle": "Construction of River Wall along the Sibuguey River, Barangay Minsulao to Barangay Paruk, Siay, Zamboanga Sibugay\n0 + 000 to 0 + 228",
+      "fromExistingLine": null,
+      "toAmountPesos": 50000000,
+      "changeAmountPesos": null,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 1.0,
+      "titleExactAfterNormalization": true,
+      "hgabCandidate": {
+        "id": "HB10858-3-0373-004897",
+        "projectName": "Construction of River Wall along the Sibuguey River, Barangay Minsulao to Barangay Paruk, Siay, Zamboanga Sibugay 0 + 000 to 0 + 228",
+        "amountPesos": 50000000,
+        "sourcePage": "373",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    },
+    {
+      "sourceRow": 75,
+      "section": "New Projects",
+      "projectTitle": "Repair/Maintenance of Porac River Revetment 5, Sta. 0+000 - Sta. 0+240, Sto. Cristo, Lubao, Pampanga",
+      "fromExistingLine": null,
+      "toAmountPesos": 50000000,
+      "changeAmountPesos": null,
+      "status": "High-confidence candidate",
+      "rationale": "Distinctive title overlap and exact amount",
+      "titleTokenJaccard": 0.8125,
+      "titleExactAfterNormalization": false,
+      "hgabCandidate": {
+        "id": "HB10858-3-0342-004312",
+        "projectName": "Rehabilitation of Porac River Revetment 5, Sta. 0+000 - Sta. 0+240, Sto. Cristo, Lubao, Pampanga",
+        "amountPesos": 50000000,
+        "sourcePage": "342",
+        "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf"
+      }
+    }
+  ]
+}
