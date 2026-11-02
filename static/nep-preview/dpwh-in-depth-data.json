@@ -1,19 +1,13 @@
 {
-  "generatedAtUtc": "2026-11-02T10:30:09.803360+00:00",
+  "generatedAtUtc": "2026-11-02T11:25:29.371610+00:00",
   "stage": "NEP FY2027 proposal documents",
   "summary": {
-    "projectsWithParsedPow": 7069,
-    "projectsWithRetainedPriorPowRows": 199,
-    "parsedPowRows": 173100,
-    "projectsWithSavedResults": 11015,
-    "projectsWithoutSelectedAttachments": 280,
-    "availableDocuments": 12107,
-    "failedDocuments": 0,
-    "attemptedDocuments": 12107,
-    "errorTypes": {}
+    "projectsWithBillRows": 7153,
+    "billRowCount": 174173,
+    "projectsInReviewSet": 11034
   },
   "source": "https://api.dpwh.bettergov.ph",
-  "scope": "Static snapshot of locally cached documents. Not whole-program coverage. Raw PDFs and photos are excluded from this publication.",
+  "scope": "This snapshot covers linked DPWH project-document records available for review; it is not a whole-program inventory. Original files remain available through cited sources.",
   "powCategoryMerges": {
     "drainage and slope protection structures": "drainage and slope protection structures",
     "drainage and slope protection": "drainage and slope protection structures",
@@ -171,18 +165,20 @@
     "projectRows": 15979,
     "linkedRows": 9035,
     "linkedPct": 56.5,
-    "listedAnyRows": 751,
-    "listedAnyPct": 8.3,
-    "listedDocumentRecords": 3517,
-    "inspectedRows": 8685,
-    "inspectedPct": 96.1,
-    "missingAnyTypeRows": 7753,
-    "missingAnyTypePct": 89.3,
+    "directListedRows": 8763,
+    "pairedNepRowsWithListedDocuments": 9577,
+    "listedAnyRows": 9601,
+    "listedAnyPct": 60.1,
+    "listedDocumentRecords": 47374,
+    "inspectedRows": 8763,
+    "inspectedPct": 97.0,
+    "missingAnyTypeRows": 7831,
+    "missingAnyTypePct": 89.4,
     "noSelectedNepRows": 6105,
     "noSelectedNepPct": 38.2,
-    "missingListedDocumentsRows": 15228,
-    "doubleRedFlagRows": 6105,
-    "doubleRedFlagPct": 38.2,
+    "missingListedDocumentsRows": 6378,
+    "doubleRedFlagRows": 6081,
+    "doubleRedFlagPct": 38.1,
     "missingTypes": {
       "bp202": {
         "count": 0,
@@ -197,12 +193,12 @@
         "pct": 0.5
       },
       "photos": {
-        "count": 1186,
-        "pct": 13.7
+        "count": 1235,
+        "pct": 14.1
       },
       "rdc": {
-        "count": 7614,
-        "pct": 87.7
+        "count": 7692,
+        "pct": 87.8
       }
     },
     "statusCounts": {
@@ -213,63 +209,64 @@
       "unmapped": 7
     },
     "sourceCommit": "34ef5d8cbbacda92f6503ffd9a428569f157f64d",
-    "snapshotRetrievedAtUtc": "2026-10-18T08:46:20Z"
+    "snapshotRetrievedAtUtc": "2026-10-18T08:46:20Z",
+    "documentCoverageMethod": "A document link is counted when listed directly on the HGAB title match or on that row’s selected NEP counterpart. Paired NEP links indicate available project documents, not proof that identical files are attached to or scoped to the HGAB row."
   },
   "documentReconciliation": {
     "transparencyProjects": 11371,
     "transparencyRecords": 53801,
-    "projectsWithDocumentLinksInLoadedSnapshot": 11015,
-    "loadedProjectRecords": 11015,
+    "projectsWithDocumentLinksInLoadedSnapshot": 11034,
+    "loadedProjectRecords": 11034,
     "nepProjectRecords": 11420,
     "nepTransparencyRecords": 11372,
     "selectedPairs": 10166,
     "selectedPairPortalProjects": 10118,
-    "selectedPairProjectsWithLoadedDocuments": 9826,
-    "selectedPairDocumentRecords": 45542,
-    "directHgabProjectsWithLoadedDocuments": 8750,
-    "directHgabDocumentRecords": 41385,
-    "uniqueMatchedDocumentRecords": 47692,
-    "wastedDocumentRecords": 6109,
+    "selectedPairProjectsWithLoadedDocuments": 9844,
+    "selectedPairDocumentRecords": 45619,
+    "directHgabProjectsWithLoadedDocuments": 8763,
+    "directHgabDocumentRecords": 41441,
+    "uniqueMatchedDocumentRecords": 47775,
+    "wastedDocumentRecords": 6026,
     "rows": [
       {
         "type": "BP 202",
         "transparencyRecords": 11148,
-        "selectedPairRecords": 9922,
-        "directHgabRecords": 8819,
-        "uniqueMatchedRecords": 9946,
-        "wastedRecords": 1202
+        "selectedPairRecords": 9942,
+        "directHgabRecords": 8834,
+        "uniqueMatchedRecords": 9966,
+        "wastedRecords": 1182
       },
       {
         "type": "Certificate of Implementability",
         "transparencyRecords": 10928,
-        "selectedPairRecords": 9729,
-        "directHgabRecords": 8843,
-        "uniqueMatchedRecords": 9753,
-        "wastedRecords": 1175
+        "selectedPairRecords": 9747,
+        "directHgabRecords": 8856,
+        "uniqueMatchedRecords": 9771,
+        "wastedRecords": 1157
       },
       {
         "type": "POW",
         "transparencyRecords": 10772,
-        "selectedPairRecords": 9559,
-        "directHgabRecords": 8721,
-        "uniqueMatchedRecords": 9582,
-        "wastedRecords": 1190
+        "selectedPairRecords": 9579,
+        "directHgabRecords": 8736,
+        "uniqueMatchedRecords": 9602,
+        "wastedRecords": 1170
       },
       {
         "type": "Geotagged Photos",
         "transparencyRecords": 10023,
-        "selectedPairRecords": 8935,
-        "directHgabRecords": 8343,
-        "uniqueMatchedRecords": 8960,
-        "wastedRecords": 1063
+        "selectedPairRecords": 8942,
+        "directHgabRecords": 8345,
+        "uniqueMatchedRecords": 8967,
+        "wastedRecords": 1056
       },
       {
         "type": "Location Map",
         "transparencyRecords": 2276,
-        "selectedPairRecords": 2035,
-        "directHgabRecords": 1742,
-        "uniqueMatchedRecords": 2039,
-        "wastedRecords": 237
+        "selectedPairRecords": 2046,
+        "directHgabRecords": 1753,
+        "uniqueMatchedRecords": 2050,
+        "wastedRecords": 226
       },
       {
         "type": "Certificate",
@@ -298,10 +295,10 @@
       {
         "type": "LDC Endorsement",
         "transparencyRecords": 848,
-        "selectedPairRecords": 653,
+        "selectedPairRecords": 654,
         "directHgabRecords": 623,
-        "uniqueMatchedRecords": 657,
-        "wastedRecords": 191
+        "uniqueMatchedRecords": 658,
+        "wastedRecords": 190
       },
       {
         "type": "NOL",
@@ -314,64 +311,52 @@
       {
         "type": "Other document types",
         "transparencyRecords": 2272,
-        "selectedPairRecords": 2027,
-        "directHgabRecords": 1832,
-        "uniqueMatchedRecords": 2033,
-        "wastedRecords": 239
+        "selectedPairRecords": 2033,
+        "directHgabRecords": 1838,
+        "uniqueMatchedRecords": 2039,
+        "wastedRecords": 233
       }
     ],
     "note": "Portal counts come from the full DPWH Transparency metadata inventory. Selected-pair and direct-HGAB counts use project-level document links present in the loaded snapshot and deduplicate by source URL. Direct HGAB records can overlap selected-pair records; wasted records are the inventory residual after taking their unique union. This residual is not proof of literal waste."
   },
-  "projectCount": 11015,
-  "powPeerCount": 1910,
+  "projectCount": 11034,
+  "powPeerCount": 1936,
   "summaryPeerGroupCount": 7,
   "arrayShards": {
     "projects": [
       {
         "path": "dpwh-in-depth-shards/projects-001.json",
-        "itemCount": 2934,
-        "sizeBytes": 41994539,
-        "sha256": "de3a67199659be7d56ef8e218fb24bffcce0605b358cf0347fd2f869e376e731"
+        "itemCount": 4277,
+        "sizeBytes": 41989237,
+        "sha256": "5aa8883744b153e6bdd0ad22b8c4bbd1cefa9ceb0e5850a66286078130d96281"
       },
       {
         "path": "dpwh-in-depth-shards/projects-002.json",
-        "itemCount": 2857,
-        "sizeBytes": 41995813,
-        "sha256": "df9e55c65a465209d7b87e01e20345c9df0c57964193cb5f5590f2a68ad69f9f"
+        "itemCount": 4348,
+        "sizeBytes": 41996101,
+        "sha256": "893b23baaa012850fbd5dd2654e8a682b62e99035f9e4a8cd579d08d6edee8bf"
       },
       {
         "path": "dpwh-in-depth-shards/projects-003.json",
-        "itemCount": 2826,
-        "sizeBytes": 41981182,
-        "sha256": "32207845219b3ca01dd7c21832238f96c203e621945209a8039cca40feecb4da"
-      },
-      {
-        "path": "dpwh-in-depth-shards/projects-004.json",
-        "itemCount": 2351,
-        "sizeBytes": 41918599,
-        "sha256": "c4e30047d4b0c8a131ca8c046a44f7eb77cf552b94225e0d4d5818dd57e4e819"
-      },
-      {
-        "path": "dpwh-in-depth-shards/projects-005.json",
-        "itemCount": 47,
-        "sizeBytes": 734979,
-        "sha256": "ade88487abd50a9fdf14126d9480930b7df9581cf5ce41123caa1239d570d7c4"
+        "itemCount": 2409,
+        "sizeBytes": 28715638,
+        "sha256": "b7f1f7ae31251c7eb77635bd7a2999aeb2f1ef17ba083031f712a71a35617ecf"
       }
     ],
     "powPeers": [
       {
         "path": "dpwh-in-depth-shards/powPeers-001.json",
-        "itemCount": 1910,
-        "sizeBytes": 38599430,
-        "sha256": "4335699375e08ed8ea2cd42c47804bbb81538d21ed76397675a93f9f5acf30b3"
+        "itemCount": 1936,
+        "sizeBytes": 39288015,
+        "sha256": "27ec59af02bd1a778cc5efa0e54dbd1bf514a92e431bea26a8407823e4be6e90"
       }
     ],
     "summaryPeerGroups": [
       {
         "path": "dpwh-in-depth-shards/summaryPeerGroups-001.json",
         "itemCount": 7,
-        "sizeBytes": 13132818,
-        "sha256": "f6d4ebf00e7321ecbfdf74a7b41f42f7c0345da32195ba89ea425941a2f0901f"
+        "sizeBytes": 13126547,
+        "sha256": "4d93b2ae392815505f6ae7da20b1420e35941700f84f7b9df3bba04b41185419"
       }
     ]
   },
