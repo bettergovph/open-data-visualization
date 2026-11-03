@@ -143,7 +143,8 @@ def main():
     cli = argparse.ArgumentParser()
     cli.add_argument('--root', type=Path, default=Path(DEFAULT_ROOT) if DEFAULT_ROOT else None)
     cli.add_argument('--interval', type=int, default=20)
-    cli.add_argument('--workers', type=int, default=7, help='primary Apple/Tesseract parser processes')
+    cli.add_argument('--workers', type=int, default=1, help='primary Apple/Tesseract parser processes for new or unparsed PDFs')
+    cli.add_argument('--paddle-workers', type=int, default=7, help='PaddleOCR processes for primary parses that recovered no bill rows')
     cli.add_argument('--once', action='store_true')
     cli.add_argument('--status', action='store_true', help='print the latest internal status and exit')
     args = cli.parse_args()
@@ -151,6 +152,8 @@ def main():
         raise SystemExit('Set DPWH_STATUS_ROOT or pass --root.')
     if not 1 <= args.workers <= 7:
         cli.error('--workers must be between 1 and 7')
+    if not 1 <= args.paddle_workers <= 7:
+        cli.error('--paddle-workers must be between 1 and 7')
     root, ledger = args.root, args.root / 'attachments' / 'downloads.jsonl'
     result_root = root / 'parsed_pow'
     status_path = root / 'pow-parser-watcher-status.json'
@@ -182,7 +185,7 @@ def main():
     previous_download_checkpoint = str((prior or {}).get('lastDownloaderRecordUtc') or '')
     first_scan = True
     pool = ProcessPoolExecutor(max_workers=args.workers, mp_context=multiprocessing.get_context('spawn'))
-    paddle_pool = ProcessPoolExecutor(max_workers=1, mp_context=multiprocessing.get_context('spawn'))
+    paddle_pool = ProcessPoolExecutor(max_workers=args.paddle_workers, mp_context=multiprocessing.get_context('spawn'))
     try:
         while True:
             # Harvest completed jobs first so newly arrived downloads can take priority immediately.
@@ -229,10 +232,11 @@ def main():
             fresh, without_result, stale_or_error, waiting_retry = [], [], [], []
             scan_keys = set()
             active_keys = {details[1] for details in active.values()}
+            paddle_active_keys = {details[1] for details in paddle_active.values()}
             for record in records:
                 key = (record['projectCode'], str(record['documentId']), record['signature'])
                 scan_keys.add(key)
-                if key in active_keys:
+                if key in active_keys or key in paddle_active_keys:
                     continue
                 output_dir = result_root / key[0] / (key[1] + '-' + key[2][:16])
                 marker_path = output_dir / 'status.json'
@@ -278,8 +282,8 @@ def main():
                 active[future] = (record, key, priority)
                 pending.remove(record)
 
-            if paddle_queue and not paddle_active:
-                key,(record,primary_marker)=next(iter(paddle_queue.items()))
+            paddle_slots=max(0,args.paddle_workers-len(paddle_active))
+            for key,(record,primary_marker) in list(paddle_queue.items())[:paddle_slots]:
                 future=paddle_pool.submit(parse_paddle_fallback,record,str(root),str(result_root),parser_version)
                 paddle_active[future]=(record,key);del paddle_queue[key]
 
@@ -304,7 +308,7 @@ def main():
             lifetime['activeCount'] = len(active)+len(paddle_active)
             lifetime['workers'] = args.workers
             lifetime['primaryOcrEngine']='Apple Vision/Tesseract'
-            lifetime['paddleFallbackWorkers']=1
+            lifetime['paddleFallbackWorkers']=args.paddle_workers
             lifetime['pendingPaddleFallback']=len(paddle_queue)
             lifetime['queuePolicy'] = 'New downloads first; then missing parse results; then failed or stale results.'
             lifetime['totalDownloadedPow'] = len(records)

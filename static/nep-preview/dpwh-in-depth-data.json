@@ -1,11 +1,11 @@
 {
-  "generatedAtUtc": "2026-11-02T16:34:54.037595+00:00",
+  "generatedAtUtc": "2026-11-03T07:31:04.234020+00:00",
   "stage": "NEP FY2027 proposal documents",
   "summary": {
-    "projectsWithBillRows": 7154,
-    "billRowCount": 174187,
+    "projectsWithBillRows": 7161,
+    "billRowCount": 174313,
     "projectsInReviewSet": 11034,
-    "powCategoryCount": 41118
+    "powCategoryCount": 41126
   },
   "source": "https://api.dpwh.bettergov.ph",
   "scope": "This snapshot covers linked DPWH project-document records available for review; it is not a whole-program inventory. Original files remain available through cited sources.",
@@ -276,6 +276,39 @@
     "directHgabDocumentRecords": 41441,
     "uniqueMatchedDocumentRecords": 47775,
     "wastedDocumentRecords": 6026,
+    "developmentCouncil": {
+      "portalRecords": 4099,
+      "selectedPairRecords": 3300,
+      "directHgabRecords": 3079,
+      "uniqueMatchedRecords": 3313,
+      "wastedRecords": 786,
+      "byType": {
+        "RDC": {
+          "type": "RDC Endorsement",
+          "transparencyRecords": 1650,
+          "selectedPairRecords": 1267,
+          "directHgabRecords": 1145,
+          "uniqueMatchedRecords": 1271,
+          "wastedRecords": 379
+        },
+        "PDC": {
+          "type": "PDC Endorsement",
+          "transparencyRecords": 1601,
+          "selectedPairRecords": 1379,
+          "directHgabRecords": 1311,
+          "uniqueMatchedRecords": 1384,
+          "wastedRecords": 217
+        },
+        "LDC": {
+          "type": "LDC Endorsement",
+          "transparencyRecords": 848,
+          "selectedPairRecords": 654,
+          "directHgabRecords": 623,
+          "uniqueMatchedRecords": 658,
+          "wastedRecords": 190
+        }
+      }
+    },
     "rows": [
       {
         "type": "BP 202",
@@ -66575,35 +66608,35 @@
     }
   ],
   "projectCount": 11034,
-  "powPeerCount": 1937,
+  "powPeerCount": 1938,
   "summaryPeerGroupCount": 7,
   "arrayShards": {
     "projects": [
       {
         "path": "dpwh-in-depth-shards/projects-001.json",
-        "itemCount": 4277,
-        "sizeBytes": 41997008,
-        "sha256": "30ca962c8685c9c6cc004d95b2152d5e498c2620bf60417ef1d0f045c1374a74"
+        "itemCount": 4266,
+        "sizeBytes": 41983752,
+        "sha256": "bbcec1d1cc31ff0853de2a99c3329061c765f94a7364415c75216e924aa6dbb8"
       },
       {
         "path": "dpwh-in-depth-shards/projects-002.json",
-        "itemCount": 4348,
-        "sizeBytes": 41996101,
-        "sha256": "893b23baaa012850fbd5dd2654e8a682b62e99035f9e4a8cd579d08d6edee8bf"
+        "itemCount": 4355,
+        "sizeBytes": 41985942,
+        "sha256": "fdb02a5d3c2241caa907c22042609e1270a9d0720e0ccc399c06e15d84c98f7f"
       },
       {
         "path": "dpwh-in-depth-shards/projects-003.json",
-        "itemCount": 2409,
-        "sizeBytes": 28715638,
-        "sha256": "b7f1f7ae31251c7eb77635bd7a2999aeb2f1ef17ba083031f712a71a35617ecf"
+        "itemCount": 2413,
+        "sizeBytes": 28813771,
+        "sha256": "75f8bfbd33c4fc5ff9369ae86036f350096973abd22ee0707c78ee35bb26cb35"
       }
     ],
     "powPeers": [
       {
         "path": "dpwh-in-depth-shards/powPeers-001.json",
-        "itemCount": 1937,
-        "sizeBytes": 39296934,
-        "sha256": "b998ada844aa971cdf0ac466828e5321dbbf318c7d8185ea331943bce95e9ff6"
+        "itemCount": 1938,
+        "sizeBytes": 39315426,
+        "sha256": "f0ae96728204fad47aff13311531585d2f418eda5256a0063a2fccaef2630272"
       }
     ],
     "summaryPeerGroups": [

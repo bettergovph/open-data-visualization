@@ -742,7 +742,11 @@
                                 <h2 style="color: #0038A8; margin: 0 0 20px 0;">🏛️ PCAB AMO Analysis</h2>
                                 <p style="color: #666; margin: 0 0 30px 0;">
                                     Analysis of PCAB Authorized Managing Officers (AMOs) who are elected politicians,
-                                    revealing potential conflicts of interest.
+                                    revealing potential conflicts of interest. Person names are shown only for AMOs
+                                    matched to politicians in the linked political records. SEC officer and
+                                    incorporator names are shown in full only for exact political-record matches or
+                                    when the same person and SEC company are named on the legacy /zarah contractor
+                                    page. Other names are masked. A name match alone does not establish identity.
                                 </p>
 
                                 <!-- Dashboard Statistics -->
@@ -3022,6 +3026,7 @@
                                         `Year: ${item.year || 'N/A'}`,
                                         `Contracts: ${item.contract_count}`,
                                         `Contractors: ${(item.contractors || []).join(', ') || 'N/A'}`,
+                                        ...formatAmoSecCompanies(item.sec_companies),
                                         `Total: ${formatCurrency(item.total_amount)}`
                                     ];
                                 }
@@ -3117,6 +3122,7 @@
                                         `Related Person Location: ${[item.related_person_province, item.related_person_municipality_city].filter(Boolean).join(', ') || 'N/A'}`,
                                         `Contracts: ${item.contract_count}`,
                                         `Contractors: ${(item.contractors || []).join(', ') || 'N/A'}`,
+                                        ...formatAmoSecCompanies(item.sec_companies),
                                         `Total: ${formatCurrency(item.total_amount)}`
                                     ];
                                 }
@@ -3193,6 +3199,26 @@
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2
             }).format(amount);
+        }
+
+        function formatAmoSecCompanies(companies) {
+            if (!Array.isArray(companies) || !companies.length) return ['SEC registration: no match'];
+            const lines = companies.slice(0, 5).map(company => {
+                const label = company.company_name || company.contractor_name || 'Company';
+                const parts = [company.sec_number, company.status, company.date_registered].filter(Boolean);
+                return `SEC: ${label}${parts.length ? ` (${parts.join(' · ')})` : ''}`;
+            });
+            const officerRows = companies.flatMap(company => company.officers || []);
+            officerRows.slice(0, 8).forEach(person => {
+                const matchLabel = person.politician_linked
+                    ? 'political-record name match'
+                    : person.public_route_disclosed
+                        ? 'name and SEC company listed on /zarah'
+                        : 'masked; link uncertain';
+                lines.push(`SEC ${person.role || 'officer/incorporator'}: ${person.name_display} (${matchLabel})`);
+            });
+            if (officerRows.length > 8) lines.push(`${officerRows.length - 8} more officer/incorporator records`);
+            return lines;
         }
     </script>
 

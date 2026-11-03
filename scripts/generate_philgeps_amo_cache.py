@@ -6,8 +6,11 @@ who are elected politicians. This cache powers the AMO tab in the PhilGEPS page.
 
 import asyncio
 import asyncpg
+import csv
 import json
 import os
+import re
+from urllib.parse import urlparse
 import pandas as pd
 from collections import Counter
 from pathlib import Path
@@ -20,6 +23,166 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 STATIC_DATA_DIR = ROOT_DIR / "static" / "data"
 PARQUET_DIR = ROOT_DIR / "data" / "parquet"
 OUTPUT_FILE = STATIC_DATA_DIR / "philgeps_amo_cache.json"
+SEC_FILE = STATIC_DATA_DIR / "sec_contractors_database.json"
+PUBLIC_ROUTE_NAME_FILE = STATIC_DATA_DIR / "public_contractor_route_people.json"
+SEC_OFFICER_FILES = [
+    *sorted((ROOT_DIR / "database").glob("llm_sec_officers_*.csv")),
+    *sorted((ROOT_DIR / "family_analysis/family_parser/contractor_officers_csvs").glob("*.csv")),
+]
+
+
+def normalized_company_key(value: str) -> str:
+    """Normalize business names for conservative SEC company record joins."""
+    if not isinstance(value, str):
+        return ""
+    return re.sub(r"[^A-Z0-9]", "", value.upper())
+
+
+def normalized_person_key(value: str) -> str:
+    """Normalize a full person name for strict equality matching only."""
+    if not isinstance(value, str):
+        return ""
+    return re.sub(r"[^A-Z0-9]", "", value.upper())
+
+
+def mask_person_name(value: str) -> str:
+    """Keep each token's first character and mask the remaining letters."""
+    if not isinstance(value, str):
+        return "*"
+    def mask_token(match):
+        token = match.group(0)
+        return token[:1] + "*" * (len(token) - 1) if len(token) > 1 else "*"
+    return re.sub(r"[^\W\d_]+", mask_token, value, flags=re.UNICODE) or "*"
+
+
+def load_public_route_names() -> Dict[str, set[str]]:
+    """Exact name allowlist from the unlisted legacy contractor route."""
+    if not PUBLIC_ROUTE_NAME_FILE.exists():
+        return {}
+    try:
+        payload = json.loads(PUBLIC_ROUTE_NAME_FILE.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    allowed: Dict[str, set[str]] = {}
+    for company in payload.get("companies", []):
+        sec_number = str(company.get("sec_number") or "").strip()
+        if not sec_number:
+            continue
+        allowed.setdefault(sec_number, set()).update(
+            normalized_person_key(name) for name in company.get("names_as_published", [])
+            if normalized_person_key(name)
+        )
+    return allowed
+
+
+def load_sec_officer_records(politician_names: set[str]) -> Tuple[Dict[str, List[Dict[str, Any]]], Dict[str, List[Dict[str, Any]]]]:
+    """Load officer extracts and publish readable names only on exact matches."""
+    by_company: Dict[str, List[Dict[str, Any]]] = {}
+    by_sec_number: Dict[str, List[Dict[str, Any]]] = {}
+    company_sec_numbers: Dict[str, set[str]] = {}
+    public_names_by_sec = load_public_route_names()
+    if SEC_FILE.exists():
+        try:
+            sec_payload = json.loads(SEC_FILE.read_text(encoding="utf-8"))
+            for company in sec_payload.get("contractors", []):
+                sec_number = str(company.get("sec_number") or "").strip()
+                if not sec_number:
+                    continue
+                for field in ("original_contractor_name", "company_name"):
+                    company_key = normalized_company_key(company.get(field))
+                    if company_key:
+                        company_sec_numbers.setdefault(company_key, set()).add(sec_number)
+        except (OSError, json.JSONDecodeError, TypeError):
+            company_sec_numbers = {}
+    seen = set()
+    for csv_path in SEC_OFFICER_FILES:
+        try:
+            with csv_path.open(encoding="utf-8-sig", newline="") as f:
+                for row in csv.DictReader(f):
+                    company_key = normalized_company_key(row.get("company_name", ""))
+                    raw_name = (row.get("person_name") or "").strip()
+                    if not company_key or not raw_name:
+                        continue
+                    person_key = normalized_person_key(raw_name)
+                    role = (row.get("role") or "Officer / incorporator").strip()
+                    source_url = (row.get("source_url") or "").strip()
+                    source_domain = urlparse(source_url).netloc.lower() if source_url else None
+                    dedupe = (company_key, person_key, role.upper(), source_url)
+                    if dedupe in seen:
+                        continue
+                    seen.add(dedupe)
+                    politician_linked = bool(person_key and person_key in politician_names)
+                    sec_numbers = company_sec_numbers.get(company_key, set())
+                    public_route_disclosed = bool(
+                        person_key and len(sec_numbers) == 1
+                        and person_key in public_names_by_sec.get(next(iter(sec_numbers)), set())
+                    )
+                    linked = politician_linked or public_route_disclosed
+                    match_basis = (
+                        "exact full-name match to political records" if politician_linked
+                        else "exact name listed for this SEC company on /zarah" if public_route_disclosed
+                        else "uncertain; name masked"
+                    )
+                    public_record = {
+                        "name_display": raw_name if linked else mask_person_name(raw_name),
+                        "role": role,
+                        "politician_linked": politician_linked,
+                        "public_route_disclosed": public_route_disclosed,
+                        "match_basis": match_basis,
+                        "source_domain": source_domain or None,
+                        "source_file": csv_path.name,
+                        "confidence_level": row.get("confidence_level") or None,
+                    }
+                    by_company.setdefault(company_key, []).append(public_record)
+                    # Only use the SEC identifier bridge when the source company
+                    # name resolves to exactly one registered company.
+                    if len(sec_numbers) == 1:
+                        by_sec_number.setdefault(next(iter(sec_numbers)), []).append(public_record)
+        except (OSError, csv.Error, UnicodeError):
+            continue
+    return by_company, by_sec_number
+
+
+def enrich_with_sec_company_data(amo_rows: List[Dict[str, Any]], politician_names: set[str]) -> None:
+    """Attach business fields and privacy-filtered officer/incorporator records."""
+    if not SEC_FILE.exists():
+        return
+    with SEC_FILE.open(encoding="utf-8") as f:
+        payload = json.load(f)
+    records = payload.get("contractors", []) if isinstance(payload, dict) else []
+    by_name = {}
+    for record in records:
+        for candidate in (record.get("original_contractor_name"), record.get("company_name")):
+            key = normalized_company_key(candidate)
+            if key:
+                by_name.setdefault(key, record)
+    officers_by_company, officers_by_sec_number = load_sec_officer_records(politician_names)
+    for amo in amo_rows:
+        sec_companies = []
+        for contractor in amo.get("contractors", []):
+            record = by_name.get(normalized_company_key(contractor))
+            if not record:
+                continue
+            # Business registration details only. Addresses and all person fields
+            # are deliberately excluded from this public cache.
+            company_key = normalized_company_key(record.get("company_name"))
+            sec_number = str(record.get("sec_number") or "").strip()
+            officers = officers_by_company.get(company_key, []) + officers_by_sec_number.get(sec_number, [])
+            # Keep a deterministic unique list when both joins identify a row.
+            officers = list({
+                (person.get("name_display"), person.get("role"), person.get("source_file"), person.get("source_domain")): person
+                for person in officers
+            }.values())
+            sec_companies.append({
+                "contractor_name": contractor,
+                "company_name": record.get("company_name"),
+                "sec_number": record.get("sec_number"),
+                "status": record.get("status"),
+                "date_registered": record.get("date_registered"),
+                "source": record.get("source"),
+                "officers": officers,
+            })
+        amo["sec_companies"] = sec_companies
 
 
 async def match_amos_to_politicians(pcab_amos: List[str], dynasty_conn) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
@@ -334,6 +497,18 @@ async def generate_amo_cache():
                     'total_amount': float(row['total_amount']),
                     'contractors': indirect_contractors.get(amo_name, [])
                 })
+
+        # SEC cache has business registration fields, but not verified officer
+        # records. Keep this enrichment to business identifiers only.
+        politician_names = {
+            normalized_person_key(m.get("full_name", "")) for m in direct_matches
+        }
+        politician_names.update(
+            normalized_person_key(m.get("related_person_name", "")) for m in indirect_matches
+        )
+        politician_names.discard("")
+        enrich_with_sec_company_data(top_direct, politician_names)
+        enrich_with_sec_company_data(top_indirect, politician_names)
         
         # Prepare output
         total_direct_contracts = int(df['is_direct_elected_amo'].sum())
