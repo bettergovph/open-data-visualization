@@ -14,6 +14,32 @@
     "removalPesos": 2560500000,
     "adjustedLines": 127
   },
+  "historicalGaaBaseline": [
+    {
+      "year": 2016,
+      "stage": "GAA",
+      "classifiedRows": 836,
+      "linkedRows": 490,
+      "unlinkedRows": 346,
+      "allocationPesos": 1600595000
+    },
+    {
+      "year": 2017,
+      "stage": "GAA",
+      "classifiedRows": 5885,
+      "linkedRows": 3407,
+      "unlinkedRows": 2478,
+      "allocationPesos": 4362042000
+    },
+    {
+      "year": 2018,
+      "stage": "GAA",
+      "classifiedRows": 4504,
+      "linkedRows": 2599,
+      "unlinkedRows": 1905,
+      "allocationPesos": 8589521000
+    }
+  ],
   "insertions": [
     {
       "comparison": "No plausible NEP title counterpart; review candidate",
@@ -415084,7 +415110,11 @@
     },
     {
       "file": "dpwh-in-depth-data.json",
-      "sha256": "4e0cc8f61d9645b4e067659d32d4f18efbe7d786cc8fdbd4645436128d540b28"
+      "sha256": "efbc7aa73b94bae56017d9b6c7f869a495f50672a6efc7de3c7cf725f904dbb6"
+    },
+    {
+      "file": "mpb-barangay-data.json",
+      "sha256": "bee912ec1bc79cb8fbbc2d72a45f59836a90f3f4bad3f6d687fca4f62d8ad909"
     },
     {
       "file": "data_sources/csiiiv/legislative_profiles_ff0f748.json",
