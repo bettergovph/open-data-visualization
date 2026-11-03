@@ -210,7 +210,7 @@ body.bettergov-research>header .report-header-heading>p{margin:0!important;paddi
     barChart('bridge-deo-chart',bridgeOffices.topDeos.slice(0,6),{valueKey:'shareOfDeoAmountsPct',labelKey:'office',categoryFormat:x=>x.replace(/District Engineering Office/gi,'DEO'),format:n=>Number(n).toFixed(1)+'%'});
     barChart('mpb-deo-chart',mpbOffices.topDeos.slice(0,6),{valueKey:'shareOfDeoAmountsPct',labelKey:'office',categoryFormat:x=>x.replace(/District Engineering Office/gi,'DEO'),format:n=>Number(n).toFixed(1)+'%'});
     const riseYear=document.getElementById('rise-reference-year'),riseFamily=document.getElementById('rise-family');
-    const comparisonFamilies=['Bridge','Multi-purpose building'];
+    const comparisonFamilies=['Flood control','Multi-purpose building','Road','Bridge'];
     const comparisonYears=[...new Set(Object.values(scan.nationalFamilyTotals||{}).flat().filter(point=>point.stage==='GAA').map(point=>point.year))].sort((a,b)=>a-b);riseYear.innerHTML=comparisonYears.map(y=>`<option value="${y}">GAA ${y}</option>`).join('');for(let y=2000;y<2020;y++){if(comparisonYears.includes(y))continue;const option=document.createElement('option');option.value='unavailable-'+y;option.textContent='FY'+y+' · Data unavailable';option.disabled=true;riseYear.append(option)}[...riseYear.options].sort((a,b)=>Number((a.value.match(/\d{4}/)||[0])[0])-Number((b.value.match(/\d{4}/)||[0])[0])).forEach(o=>riseYear.append(o));
     riseFamily.innerHTML=comparisonFamilies.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
     riseYear.value=String(comparisonYears.at(-1)||2026);
@@ -268,9 +268,9 @@ body.bettergov-research>header .report-header-heading>p{margin:0!important;paddi
     const familySelect=document.getElementById('history-family');
     const districtOptions=[...new Map(historyRows.map(r=>[r.districtId,r.district])).entries()].sort((a,b)=>a[1].localeCompare(b[1]));
     districtSelect.innerHTML=districtOptions.map(([id,name])=>`<option value="${escapeHtml(id)}">${escapeHtml(name)}</option>`).join('');
-    familySelect.innerHTML=scan.categories.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+    familySelect.innerHTML=comparisonFamilies.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
     districtSelect.value=districtOptions.some(x=>x[0]==='leg:ilocos-norte:1st')?'leg:ilocos-norte:1st':districtOptions[0]?.[0];
-    familySelect.value=scan.categories.includes('Bridge')?'Bridge':scan.categories[0];
+    familySelect.value=comparisonFamilies.includes('Bridge')?'Bridge':comparisonFamilies[0];
     riseFamily.value=familySelect.value;
     const pct=x=>x==null?'—':`${x>=0?'+':''}${Number(x).toLocaleString('en-PH',{maximumFractionDigits:1})}%`;
     function renderHistory(){
