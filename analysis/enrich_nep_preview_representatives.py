@@ -14,6 +14,7 @@ import json
 import re
 import unicodedata
 from collections import defaultdict
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -40,7 +41,7 @@ def district_key(value: Any) -> str:
 
 
 def load_roster() -> tuple[dict[str, dict[str, str]], dict[str, list[str]]]:
-    records = json.loads(ROSTER_PATH.read_text())
+    records = roster_rows()
     known_provinces = {norm(name) for name in json.loads(DISTRICTS_PATH.read_text()).get("districts", {})}
     by_province: dict[str, dict[str, str]] = defaultdict(dict)
     for row in records:
@@ -53,6 +54,42 @@ def load_roster() -> tuple[dict[str, dict[str, str]], dict[str, list[str]]]:
         by_province[province][district_key(row["district"])] = representative
     aliases = {province: reps for province, reps in by_province.items()}
     return by_province, aliases
+
+
+def roster_rows():
+    """One sourced current roster shared by report builders and enrichers.
+
+    Keep the seed file intact: inventory evidence hashes refer to its geographic
+    source snapshot. Identity corrections and explicit seat aliases live in the
+    separately dated correction file.
+    """
+    records = json.loads(ROSTER_PATH.read_text())
+    path = ROSTER_PATH.with_name('20th_congress_roster_corrections.json')
+    correction_data = json.loads(path.read_text()) if path.exists() else {}
+    corrections = {(norm(x['province']), district_key(x['district'])): x
+                   for x in correction_data.get('corrections', [])}
+    for row in records:
+        fix = corrections.get((norm(row.get('province')), district_key(row.get('district'))))
+        if fix:
+            row['representative'] = fix['representative']
+            row['province'] = fix.get('geographyProvince', row['province'])
+            row['district'] = fix.get('geographyDistrict', row['district'])
+            row['displayDistrict'] = fix.get('displayDistrict')
+            row['profileUrl'] = fix.get('profileUrl', correction_data.get('source'))
+            row['memberStatus'] = fix.get('memberStatus', 'active')
+            row['lastRepresentative'] = fix.get('lastRepresentative')
+    return records
+
+
+@lru_cache(maxsize=1024)
+def correct_representative_name(value):
+    """Update an existing current-roster label using explicit seed-seat identity."""
+    old = json.loads(ROSTER_PATH.read_text())
+    current = roster_rows()
+    aliases = {norm(a.get('representative')): b['representative']
+               for a, b in zip(old, current)
+               if a.get('representative') and a.get('representative') != b.get('representative')}
+    return aliases.get(norm(value), value)
 
 
 def make_locality_index(roster: dict[str, dict[str, str]]) -> tuple[dict[str, list[tuple[str, list[str]]]], list[str]]:
@@ -218,6 +255,10 @@ def main() -> None:
             current = row.get("congressional_representatives") or []
             totals[key][0] += 1
             if current:
+                corrected = [correct_representative_name(name) for name in current]
+                if corrected != current and args.write:
+                    row['congressional_representatives'] = corrected
+                    changed = True
                 continue
             names = infer_representatives(title_for(row_path, row), roster, locality_index,
                                           province_names, places_by_first_word)

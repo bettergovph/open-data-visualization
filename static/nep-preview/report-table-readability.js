@@ -1,18 +1,30 @@
 (()=>{
 'use strict';
+if(window.ReportTableReadabilityLoaded)return;
+window.ReportTableReadabilityLoaded=true;
 const normalize=value=>String(value||'').replace(/\s+/g,' ').trim();
 const empty=value=>/^(?:[—–\-\s]*|n\/?a|none|unknown|unresolved|not (?:available|resolved|identified|established))$/i.test(normalize(value));
 function label(table){const section=table.closest('section,article');return normalize(section?.querySelector('h2,h3')?.textContent)||'Report table'}
 const pagination=new WeakMap();
+const sharedScript=document.currentScript?.src||new URL('report-table-readability.js',location.href).href;
+let evidenceLoader;
+function linkedEvidence(){
+ if(window.ReportProjectEvidence)return Promise.resolve(window.ReportProjectEvidence);
+ if(!evidenceLoader)evidenceLoader=new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=new URL('project-evidence-details.js?v=709294ae5b8c',sharedScript).href;script.onload=()=>window.ReportProjectEvidence?resolve(window.ReportProjectEvidence):reject(Error('Evidence reader did not initialize'));script.onerror=()=>reject(Error('Evidence reader could not be loaded'));document.head.append(script)}).catch(e=>{evidenceLoader=null;throw e});
+ return evidenceLoader;
+}
 const titleHeader=text=>{
  const value=normalize(text).toLowerCase();
  if(value==='enacted gaa line item')return false;
- if(/\b(?:amount|allocation|cost|rate|price|count|entries|project id)\b/.test(value))return false;
+ if(/\b(?:amount|allocation|cost|rate|price|count|entries|project id|project rows|project lines)\b/.test(value))return false;
  return /\bproject\b/.test(value)||(/\b(?:closest|prior|current|nep|hgab|gaa)\b.*\btitle\b/.test(value)&&!/\bsimilarity\b/.test(value))||/\b(?:nep|hgab|gaa)\b.*\bline(?: item)?\b/.test(value)||/^extracted hgab record$/.test(value)||/^(?:(?:2nd|3rd|first|second|third) reading line|title)$/.test(value)||/^(?:facility|school\s*\/\s*building|named project)$/.test(value);
 };
+window.ReportProjectDetails={enrichLinked:request=>linkedEvidence().then(reader=>reader.enrich(request))};
+document.dispatchEvent(new Event('report-project-details-ready'));
 const detailDialog=(()=>{
  const dialog=document.createElement('dialog');dialog.className='report-project-dialog';dialog.setAttribute('aria-labelledby','report-project-dialog-title');
- dialog.innerHTML='<div class="report-project-card"><header><div><span class="report-project-kicker">Project row · source-table details</span><h2 id="report-project-dialog-title"></h2></div><button type="button" class="report-project-close" aria-label="Close project details">×</button></header><div class="report-project-fields"></div><nav class="report-project-links" aria-label="Project evidence links"></nav></div>';
+ dialog.setAttribute('data-report-table-exempt','true');
+ dialog.innerHTML='<div class="report-project-card"><header><div><span class="report-project-kicker">Project record · linked source evidence</span><h2 id="report-project-dialog-title"></h2></div><button type="button" class="report-project-close" aria-label="Close project details">×</button></header><h3 class="report-source-table-heading"></h3><dl class="report-project-fields"></dl><nav class="report-project-links" aria-label="Project evidence links"></nav><section class="report-linked-project-evidence" aria-live="polite"></section></div>';
  document.body.append(dialog);
  dialog.querySelector('.report-project-close').addEventListener('click',()=>dialog.close());
  dialog.addEventListener('click',event=>{if(event.target===dialog)dialog.close()});
@@ -37,15 +49,22 @@ function openProjectDetails(table,row,titleIndexes){
  });
  const links=safeLinks(row);
  detailDialog.querySelector('#report-project-dialog-title').textContent=title||'Project details';
+ detailDialog.querySelector('.report-source-table-heading').textContent='Complete source-table row · '+label(table);
  detailDialog.querySelector('.report-project-fields').innerHTML=fields.length?fields.join(''):'<p>No additional row details are available.</p>';
  detailDialog.querySelector('.report-project-links').innerHTML=links.length?`<strong>Source links</strong>${links.map(link=>`<a href="${escapeHTML(link.url)}" target="_blank" rel="noopener">${escapeHTML(link.label)} ↗</a>`).join('')}`:'';
  if(!detailDialog.open)detailDialog.showModal();
+ const host=detailDialog.querySelector('.report-linked-project-evidence'),request={};host._loadingRequest=request;
+ const titles=titleIndexes.flatMap(index=>{const cell=row.cells[index],copy=cell.cloneNode(true);copy.querySelectorAll('button,small,.report-project-details-trigger').forEach(n=>n.remove());const text=normalize(copy.textContent);return [cell.dataset.projectTitle,text,text.split(' · ')[0],cellText(cell)].filter(Boolean)});
+ host.innerHTML='<h3>Linked project evidence</h3><p role="status">Loading linked source records…</p>';
+ linkedEvidence().then(reader=>{if(host._loadingRequest===request)reader.enrich({host,table,row,titles})}).catch(e=>{if(host._loadingRequest===request)host.textContent='Linked source records could not be loaded: '+e.message});
 }
 function escapeHTML(value){return String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]))}
 document.addEventListener('click',event=>{
  const trigger=event.target.closest('.report-project-details-trigger');
- const cell=trigger?.closest('td');
- if(!cell||event.target.closest('[data-mpb-project-id]'))return;
+ const cell=trigger?.closest('td,th');
+ if(!cell)return;
+ const mapped=event.target.closest('[data-mpb-project-id]');
+ if(mapped&&window.ReportMpbDetails?.hasRecord(mapped.dataset.mpbProjectId))return;
  const table=cell.closest('table'),head=table?.tHead?.rows[table.tHead.rows.length-1];
  if(!head)return;
  const indexes=[...head.cells].map((th,index)=>titleHeader(th.textContent)?index:-1).filter(index=>index>=0).slice(0,1);

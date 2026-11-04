@@ -20,8 +20,7 @@
   });
   if (!dataNode || !select || !plot || !summary) return;
 
-  const init = boundaryData => {
-  const reportData = JSON.parse(dataNode.textContent);
+  const init = (boundaryData, reportData) => {
   const source = reportData.coordinateProximity || {};
   const pairs = source.current || [];
   const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({
@@ -211,6 +210,14 @@
     }
     projectCard.classList.toggle('mpb-map-project-card--viewport', viewportPopup);
     projectCard.hidden = false;
+    const linkedHost=document.createElement('section');linkedHost.className='report-linked-project-evidence';
+    projectCard.append(linkedHost);
+    const sourceTable=document.createElement('table'),sourceRow=document.createElement('tr');
+    sourceRow.dataset.projectId=projectId;sourceTable.append(sourceRow);
+    const enrich=()=>window.ReportProjectDetails.enrichLinked({host:linkedHost,table:sourceTable,row:sourceRow,titles:[detail.projectName]})
+      .catch(error=>{linkedHost.textContent='Linked project evidence could not be loaded: '+error.message});
+    if(window.ReportProjectDetails)enrich();
+    else document.addEventListener('report-project-details-ready',enrich,{once:true});
     projectCard.querySelector('.mpb-map-project-close').addEventListener('click', () => {
       projectCard.hidden = true;
       projectCard.classList.remove('mpb-map-project-card--viewport');
@@ -218,6 +225,7 @@
   }
 
   openProjectCard = showProject;
+  window.ReportMpbDetails={hasRecord:id=>Boolean(projectDetails[id])};
   if (pendingProject) {
     const selected = pendingProject; pendingProject = null;
     showProject(selected.id, selected.viewportPopup);
@@ -333,8 +341,8 @@
   select.addEventListener('change', () => { updateShareLinks(); render(); });
   render();
   };
-  fetch('mpb-municipality-boundaries.json?v=20261025-boundary-view-4')
-    .then(response => { if (!response.ok) throw new Error('Boundary data unavailable'); return response.json(); })
-    .then(init)
-    .catch(() => init(null));
+  Promise.all([
+    fetch('mpb-municipality-boundaries.json?v=20261025-boundary-view-4').then(response=>{if(!response.ok)throw Error('Boundary data unavailable');return response.json()}).catch(()=>null),
+    fetch('mpb-data.json',{cache:'no-cache'}).then(response=>{if(!response.ok)throw Error('MPB project source unavailable');return response.json()})
+  ]).then(([boundary,data])=>init(boundary,data)).catch(error=>{summary.textContent='Could not load MPB map project records: '+error.message});
 })();

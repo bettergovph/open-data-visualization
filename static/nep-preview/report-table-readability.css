@@ -38,6 +38,29 @@
 .report-project-card h2{margin:0;color:#00246A;font-size:clamp(20px,2.5vw,29px);line-height:1.25;overflow-wrap:anywhere}
 .report-project-close{flex:0 0 auto;width:40px;height:40px;padding:0!important;border:1px solid #BDBDBD!important;border-radius:50%!important;background:#fff!important;color:#212121!important;font-size:26px!important;line-height:1!important}
 .report-project-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 18px}
+.report-project-fields{margin:0}
+.report-project-card h3{color:#00246A;font-size:20px;margin:24px 0 12px}
+.report-project-card h4{color:#00246A;font-size:17px;margin:12px 0}
+.report-project-card h5{font-size:15px;margin:14px 0 8px}
+.report-linked-project-evidence{border-top:2px solid #0038A8;margin-top:24px;padding-top:4px}
+.linked-source-record{border:1px solid #d8dfea;border-radius:10px;background:white;padding:16px;margin:14px 0}
+.evidence-facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 16px;margin:10px 0}
+.evidence-facts>div{min-width:0;border-bottom:1px solid #e5e9ef;padding:7px 0}
+.evidence-facts dt{font-size:12px;font-weight:700;color:#526173}
+.evidence-facts dd{margin:4px 0 0;overflow-wrap:anywhere;white-space:pre-wrap}
+.evidence-facts .evidence-facts{display:block}
+.linked-evidence-section,.linked-evidence-document{margin:12px 0;padding:12px;border:1px solid #e0e5ec;border-radius:8px}
+.linked-evidence-section summary,.linked-evidence-document summary{cursor:pointer;font-weight:700;color:#0038A8}
+.evidence-items{padding-left:22px;margin:12px 0}
+.evidence-items>li{margin:10px 0;padding-bottom:8px;border-bottom:1px solid #e4e9ef}
+.evidence-pagination{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:14px}
+.evidence-pagination[hidden]{display:none}
+.evidence-pagination button,.evidence-record-picker select{font:inherit;padding:7px 10px;border:1px solid #b9c3d0;border-radius:6px;background:white}
+.evidence-pagination button:disabled{opacity:.4}
+.evidence-record-picker{display:flex;flex-direction:column;gap:6px;margin:14px 0;font-weight:700}
+.evidence-record-picker select{max-width:100%}
+.evidence-match-status{padding:10px 12px;background:#eaf0ff;border-left:4px solid #0038A8}
+@media(max-width:650px){.evidence-facts{grid-template-columns:minmax(0,1fr)}.linked-source-record{padding:10px}.evidence-pagination{font-size:12px}}
 .report-project-field{min-width:0;padding:12px 14px;border:1px solid #E0E0E0;border-radius:10px;background:#fff}
 .report-project-field dt{margin-bottom:4px;color:#616161;font-size:12px;font-weight:750;letter-spacing:.03em;text-transform:uppercase}
 .report-project-field dd{margin:0;overflow-wrap:anywhere;white-space:pre-wrap}

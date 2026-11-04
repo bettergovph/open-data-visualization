@@ -309,7 +309,7 @@ def main() -> None:
     parser.add_argument("--geographic-decisions", type=Path, default=ROOT / "static/data/congress_location_scope_reviews.json", help="reviewed location evidence supplement; IDs, titles and amounts must match")
     args = parser.parse_args()
 
-    roster_raw = json.loads(reps.ROSTER_PATH.read_text())
+    roster_raw = reps.roster_rows()
     seat_rows = []
     for row in roster_raw:
         province, district = str(row.get("province", "")).strip(), reps.district_key(row.get("district"))
@@ -317,7 +317,8 @@ def main() -> None:
         if district not in DISTRICT_LABELS or not province or not name or reps.norm(name) == "special election":
             continue
         seat_rows.append({"province": province, "districtLabel": DISTRICT_LABELS[district],
-                          "representative": name, "key": reps.norm(name)})
+                          "representative": name, "key": reps.norm(name),
+                          "displayDistrict": row.get('displayDistrict')})
 
     # Keep only one row per named seat and build a name-to-seat lookup.
     seats = {}
@@ -331,7 +332,7 @@ def main() -> None:
     scenario_rows = {}
     for scenario in ("strict",):
         scenario_rows[scenario] = [
-            {"district": f'{row["province"]} · {row["districtLabel"]}',
+            {"district": row.get('displayDistrict') or f'{row["province"]} · {row["districtLabel"]}',
              "representative": row["representative"], "lineItems": 0, "totalPesos": 0}
             for row in seats
         ]
@@ -550,7 +551,9 @@ def main() -> None:
 
     output = {
         "source": "FY2027 DPWH HGAB 3rd Reading local extraction",
-        "roster": "20th Congress roster in ODV static/data/20th_congress_representatives.json",
+        "roster": "20th Congress seed roster with sourced current corrections from static/data/20th_congress_roster_corrections.json; current geographic context only",
+        "rosterCorrectionsSource": "https://www.congress.gov.ph/house-members",
+        "rosterCheckedDate": "2026-11-04",
         "extractionMethod": source.get("metadata", {}).get("extractionMethod", "local schedule extraction"),
         "sourceWarning": source.get("metadata", {}).get("warning", "Candidate extraction; check cited bill pages."),
         "unit": "pesos",
