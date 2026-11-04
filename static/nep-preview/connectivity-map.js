@@ -1,6 +1,12 @@
 (()=>{
   const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const number=x=>Number(x||0).toLocaleString('en-PH');
+  const venueHash=async value=>{
+    const normalized=String(value??'').normalize('NFKC').trim().replace(/\s+/g,' ').toLocaleLowerCase('en-PH');
+    if(!globalThis.crypto?.subtle)throw Error('SHA-256 requires a secure browser context (HTTPS or localhost).');
+    const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(normalized));
+    return [...new Uint8Array(digest)].map(x=>x.toString(16).padStart(2,'0')).join('');
+  };
   let payloadPromise,boundaryPromise,dialog;
   const fetchJson=async name=>{const r=await fetch(name);if(!r.ok)throw Error(`${name}: HTTP ${r.status}`);return r.json()};
   const payload=()=>payloadPromise||(payloadPromise=fetchJson('connectivity-map-data.json'));
@@ -71,9 +77,10 @@
       const [data,bounds]=await Promise.all([payload(),boundaries()]),project=data.projects?.find?.(row=>String(row.id)===String(id))||data.projects?.[id];
       if(!project)throw Error('Map geometry is not available for this project record.');
       const road=project.roadSection?data.roads?.[project.roadSection]:null;
+      const displayProject={...project,venues:await Promise.all((project.venues||[]).map(async v=>({...v,name:`SHA-256 ${await venueHash(v.name)}`})))};
       dlg.querySelector('#connectivity-map-title').textContent=project.title||'Connectivity map';
       dlg.querySelector('#connectivity-map-subtitle').textContent=[project.region,project.roadName,project.roadClass,project.nearestDistanceMeters==null?'':`${number(project.nearestDistanceMeters)} m to nearest road`].filter(Boolean).join(' · ');
-      content.innerHTML=`<p class="connectivity-map-source-status" role="status">DA crop overlays are temporarily unavailable: the map service returned HTTP 404 for its WMS/WFS endpoint. Municipality outlines, FMR points, road sections and venue points remain visible.</p><p class="connectivity-map-source">The DA catalog identifies rainfed rice/corn, irrigated rice and coconut land-use layers. <a href="https://geomapping.da.gov.ph/prdp/map_generator" target="_blank" rel="noopener noreferrer">Open the DA PRDP Enhanced Geomapping System ↗</a>. These crop-area layers are proxies, not individual farm parcels.</p><div id="connectivity-map-drawing">${svgMap(project,bounds,road)}</div>`;
+      content.innerHTML=`<p class="connectivity-map-source-status" role="status">DA crop overlays are temporarily unavailable: the map service returned HTTP 404 for its WMS/WFS endpoint. Municipality outlines, FMR points, road sections and venue points remain visible.</p><p class="connectivity-map-source">The DA catalog identifies rainfed rice/corn, irrigated rice and coconut land-use layers. <a href="https://geomapping.da.gov.ph/prdp/map_generator" target="_blank" rel="noopener noreferrer">Open the DA PRDP Enhanced Geomapping System ↗</a>. These crop-area layers are proxies, not individual farm parcels.</p><div id="connectivity-map-drawing">${svgMap(displayProject,bounds,road)}</div>`;
     }catch(error){content.innerHTML=`<p class="connectivity-map-error">Map layers could not be loaded: ${esc(error.message||error)}</p>`;}
   }
   document.addEventListener('click',event=>{const button=event.target.closest('[data-connectivity-map]');if(!button)return;event.preventDefault();open(button.dataset.connectivityMap);});
