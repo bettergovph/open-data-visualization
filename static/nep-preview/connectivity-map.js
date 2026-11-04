@@ -60,7 +60,7 @@
   async function open(id){
     const dlg=ensureDialog(),content=dlg.querySelector('#connectivity-map-content');dlg.querySelector('#connectivity-map-title').textContent='FMR and road connection details';content.textContent='Loading route, road and municipality geometry…';dlg.showModal();
     try{
-      const [data,bounds]=await Promise.all([payload(),boundaries()]),project=data.projects?.[id];
+      const [data,bounds]=await Promise.all([payload(),boundaries()]),project=data.projects?.find?.(row=>String(row.id)===String(id))||data.projects?.[id];
       if(!project)throw Error('Map geometry is not available for this project record.');
       const road=project.roadSection?data.roads?.[project.roadSection]:null;
       dlg.querySelector('#connectivity-map-title').textContent=project.title||'Connectivity map';
