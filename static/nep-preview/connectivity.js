@@ -1,0 +1,26 @@
+(()=>{
+  const n=x=>Number(x||0).toLocaleString('en-PH'),peso=x=>'₱'+n(x),
+    esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  if(location.protocol==='file:'){
+    const message='Connectivity data is stored in separate JSON files. Open this page through the local web server (HTTP), not directly as a file.';
+    document.getElementById('rows').innerHTML='<tr><td colspan="7">'+message+'</td></tr>';
+    document.getElementById('road-project-count').textContent=message;
+    return;
+  }
+  fetch('connectivity-data.json').then(r=>{if(!r.ok)throw Error('connectivity-data.json returned HTTP '+r.status);return r.json()}).then(d=>{
+    const rows=d.projects||[],q=document.getElementById('q'),sel=document.getElementById('result'),size=document.getElementById('size'),body=document.getElementById('rows'),pageLabel=document.getElementById('page');
+    Object.keys(d.summary||{}).forEach(x=>sel.add(new Option(`${x} (${d.summary[x]})`,x)));
+    document.getElementById('road-stats').innerHTML=Object.entries(d.summary||{}).map(([k,v])=>`<div class="stat"><strong>${n(v)}</strong>${esc(k)}</div>`).join('')+`<div class="stat"><strong>${n(rows.length)}</strong>FMR projects · ${n(d.roadFeatures)} ArcGIS road features</div>`;
+    let page=0;function draw(){const term=q.value.trim().toLowerCase(),items=rows.filter(x=>(!sel.value||x.result===sel.value)&&(!term||`${x.title} ${x.region} ${x.roadName}`.toLowerCase().includes(term))),per=Number(size.value),pages=Math.max(1,Math.ceil(items.length/per));page=Math.min(page,pages-1);body.innerHTML=items.slice(page*per,(page+1)*per).map(x=>`<tr><td>${esc(x.title)}<small>Printed source p. ${esc(x.sourcePage)}</small></td><td>${esc(x.region)}</td><td>${esc(x.roadName)}<small>${esc(x.roadClass)} · ${esc(x.roadSection)}</small></td><td class="num">${n(x.startDistanceMeters)}</td><td class="num">${x.endDistanceMeters==null?'—':n(x.endDistanceMeters)}</td><td class="${x.flagTags?.length?'red-flag':''}">${esc(x.result)}${x.flagTags?.length?'<small>Flag tag: DPWH-backed road-network comparison</small>':''}</td><td class="num">${peso(x.amountPesos)}</td></tr>`).join('')||'<tr><td colspan="7">No matching records.</td></tr>';pageLabel.textContent=`${items.length?page*per+1:0}–${Math.min((page+1)*per,items.length)} of ${items.length} · Page ${page+1} of ${pages}`;document.getElementById('prev').disabled=page===0;document.getElementById('next').disabled=page>=pages-1}
+    q.addEventListener('input',()=>{page=0;draw()});sel.addEventListener('change',()=>{page=0;draw()});size.addEventListener('change',()=>{page=0;draw()});document.getElementById('prev').onclick=()=>{page--;draw()};document.getElementById('next').onclick=()=>{page++;draw()};draw();
+  }).catch(e=>{document.getElementById('rows').innerHTML='<tr><td colspan="7">Connectivity data unavailable: '+esc(e.message||e)+'</td></tr>';});
+
+  // This larger title-screen asset loads independently; it cannot delay the
+  // endpoint-distance table above.
+  fetch('connectivity-road-projects.json').then(r=>{if(!r.ok)throw Error('connectivity-road-projects.json returned HTTP '+r.status);return r.json()}).then(roadData=>{
+    const roadRows=roadData.rows||[],rq=document.getElementById('roadq'),rb=document.getElementById('road-project-rows'),rp=document.getElementById('road-page'),rs=document.getElementById('road-size');
+    document.getElementById('road-project-count').textContent=`${n(roadRows.length)} GAA/HGAB road titles pass the rural/remote or national-road title screen. Place status uses DPWH City-Municipal Boundaries; municipality is a provisional remote-area proxy. ${Object.entries(roadData.placeStatusCounts||{}).map(([k,v])=>`${n(v)} ${k}`).join(' · ')}`;
+    let roadPage=0;function drawRoad(){const term=rq.value.trim().toLowerCase(),items=roadRows.filter(x=>!term||`${x.title} ${x.source}`.toLowerCase().includes(term)),per=Number(rs.value),pages=Math.max(1,Math.ceil(items.length/per));roadPage=Math.min(roadPage,pages-1);rb.innerHTML=items.slice(roadPage*per,(roadPage+1)*per).map(x=>`<tr><td>FY${x.year}<br>${esc(x.stage)}</td><td>${esc(x.title)}</td><td class="num">${peso(x.amountPesos)}</td><td>${esc(x.source)}</td><td>${esc(x.placeStatus)}${x.matchedPlaces?.length?`<small>${esc(x.matchedPlaces.join(', '))}</small>`:''}</td></tr>`).join('')||'<tr><td colspan="5">No matching projects.</td></tr>';rp.textContent=`${items.length?roadPage*per+1:0}–${Math.min((roadPage+1)*per,items.length)} of ${items.length} · Page ${roadPage+1} of ${pages}`;document.getElementById('road-prev').disabled=roadPage===0;document.getElementById('road-next').disabled=roadPage>=pages-1}
+    rq.addEventListener('input',()=>{roadPage=0;drawRoad()});rs.addEventListener('change',()=>{roadPage=0;drawRoad()});document.getElementById('road-prev').onclick=()=>{roadPage--;drawRoad()};document.getElementById('road-next').onclick=()=>{roadPage++;drawRoad()};drawRoad();
+  }).catch(e=>{document.getElementById('road-project-count').textContent='Road-place candidate data unavailable: '+String(e.message||e);});
+})();
