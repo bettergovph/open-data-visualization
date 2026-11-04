@@ -1,6 +1,12 @@
 (() => {
   const dataNode = document.getElementById('mpb-data');
   const select = document.getElementById('mpbMunicipalitySelect');
+  const search = document.getElementById('mpbMunicipalitySearch');
+  const placeOptions = document.getElementById('mpbMunicipalityOptions');
+  let activePlace = '';
+  const selectedPlace = () => activePlace || select.value;
+  const setSelectedPlace = name => { activePlace = name; select.value = name; if (search) search.value = placeLabels.get(name) || name; };
+  const placeLabels = new Map();
   const plot = document.getElementById('mpbMunicipalityPlot');
   const summary = document.getElementById('mpbMapSummary');
   const story = document.getElementById('mpbMapStory');
@@ -85,13 +91,19 @@
     option.value = name;
     option.textContent = `${prettyPlace(name)} · ${rows.length} pair${rows.length === 1 ? '' : 's'} · max ${formatDistance(spread(rows))}`;
     select.append(option);
+    placeLabels.set(name, option.textContent);
   }
   const requestedPlace = new URLSearchParams(location.search).get('place');
-  select.value = groups.has(requestedPlace) ? requestedPlace : sortedGroups[0][0];
+  setSelectedPlace(groups.has(requestedPlace) ? requestedPlace : sortedGroups[0][0]);
+  if (sortedGroups.length > 50 && search && placeOptions) {
+    placeOptions.replaceChildren(...sortedGroups.map(([name]) => { const option = document.createElement('option'); option.value = placeLabels.get(name); return option; }));
+    select.hidden = true; search.hidden = false;
+    search.addEventListener('input', () => { const match = [...placeLabels].find(([, label]) => label.toLocaleLowerCase() === search.value.trim().toLocaleLowerCase()); activePlace = match?.[0] || ''; if (activePlace) { select.value = activePlace; updateShareLinks(); } render(); });
+  }
 
   function shareUrl() {
     const url = new URL('mpb.html', 'https://research.bettergov.ph/static/nep-preview/');
-    url.searchParams.set('place', select.value);
+    url.searchParams.set('place', selectedPlace());
     url.hash = 'mpb-coordinate-proximity';
     return url.href;
   }
@@ -101,13 +113,13 @@
   const shareStatus = document.getElementById('mpbMapShareStatus');
   let preparedShareFile = null;
   function cachedShareTarget() {
-    const cachedPage = source.sharePages?.[select.value];
+    const cachedPage = source.sharePages?.[selectedPlace()];
     // Facebook must receive a publicly reachable URL even when this report is
     // being previewed from localhost or a file-based workspace.
     return cachedPage ? new URL(cachedPage, 'https://research.bettergov.ph/static/nep-preview/').href : shareUrl();
   }
   function cachedShareImage() {
-    const cachedPage = source.sharePages?.[select.value];
+    const cachedPage = source.sharePages?.[selectedPlace()];
     if (!cachedPage) return null;
     return new URL(cachedPage.replace(/\.html(?=\?|$)/, '.png'), document.baseURI).href;
   }
@@ -127,7 +139,7 @@
     if (nativeShareButton) nativeShareButton.disabled = canShareFiles;
     if (downloadLink && imageUrl) {
       downloadLink.href = imageUrl;
-      downloadLink.download = `mpb-locations-${select.value.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.png`;
+      downloadLink.download = `mpb-locations-${selectedPlace().toLowerCase().replace(/[^a-z0-9]+/g, '-')}.png`;
     }
     if (canShareFiles && imageUrl) {
       fetch(imageUrl, { cache: 'force-cache' }).then(response => {
@@ -144,7 +156,7 @@
     const file = preparedShareFile;
     if (!file) { if (shareStatus) shareStatus.textContent = 'Preparing the map image. Try again in a moment.'; return; }
     const pageUrl = cachedShareTarget();
-    const payload = { files: [file], title: `MPB project locations · ${prettyPlace(select.value)}`, text: `MPB project locations and same-site funding comparisons for ${prettyPlace(select.value)}. Location checks are review leads, not findings.\n${pageUrl}` };
+    const payload = { files: [file], title: `MPB project locations · ${prettyPlace(selectedPlace())}`, text: `MPB project locations and same-site funding comparisons for ${prettyPlace(selectedPlace())}. Location checks are review leads, not findings.\n${pageUrl}` };
     try {
       if (!navigator.canShare(payload)) throw new Error('Image sharing unsupported');
       await navigator.share(payload);
@@ -174,8 +186,8 @@
         row.sourceLabel?.startsWith(projectId + ' · ') || row.otherSource?.startsWith(projectId + ' · ')));
       if (matchingGroup) {
         hasMatchingMap = true;
-        if (select.value !== matchingGroup[0]) {
-          select.value = matchingGroup[0]; updateShareLinks(); render();
+        if (selectedPlace() !== matchingGroup[0]) {
+          setSelectedPlace(matchingGroup[0]); updateShareLinks(); render();
         }
       }
     }
@@ -241,16 +253,16 @@
     return '#168277';
   }
   function render() {
-    const group = groups.get(select.value) || [];
+    const group = groups.get(selectedPlace()) || [];
     if (story && group.length) {
       const farthest = group.reduce((best, row) => Number(row.distanceMeters) > Number(best.distanceMeters) ? row : best, group[0]);
       const closePairs = group.filter(row => Number(row.distanceMeters) < 50).length;
-      const place = String(farthest.barangay || select.value).split(' · ').map(prettyPlace).join(', ');
+      const place = String(farthest.barangay || selectedPlace()).split(' · ').map(prettyPlace).join(', ');
       const distanceKm = (Number(farthest.distanceMeters) / 1000).toFixed(1);
       const feature = boundaries.get(farthest.municipalityGroup);
       const outside = feature && (insideBoundary({lat:farthest.leftCoordinates.latitude,lon:farthest.leftCoordinates.longitude},feature) === false || insideBoundary({lat:farthest.rightCoordinates.latitude,lon:farthest.rightCoordinates.longitude},feature) === false);
       const boundaryNote = outside ? ' At least one printed point also plots outside the named municipality outline.' : '';
-      story.innerHTML = `<article class="mpb-story-lead"><div><span class="mpb-story-kicker">A location mismatch to check · HGAB 3rd · ${esc(prettyPlace(select.value))}</span><h4>Both entries name ${esc(place)}. Their listed points are ${distanceKm} km apart.</h4><p>The coordinates printed in these two project titles are ${esc(formatDistance(farthest.distanceMeters))} apart in a straight line.${boundaryNote} Check their source schedule before deciding whether either location is wrong.</p><ol><li>${esc(farthest.projectName)} <small>${esc(farthest.sourceLabel)}</small></li><li>${esc(farthest.otherProject)} <small>${esc(farthest.otherSource)}</small></li></ol></div><strong class="mpb-story-distance">${distanceKm}<span>km apart</span></strong></article><aside class="mpb-nearby-lead"><strong>${closePairs}</strong><span>pairs in ${esc(prettyPlace(select.value))} have printed locations less than 50 m apart. They may refer to one site, separate nearby buildings, or copied coordinates; the project scope needs review.</span></aside>`;
+      story.innerHTML = `<article class="mpb-story-lead"><div><span class="mpb-story-kicker">A location mismatch to check · HGAB 3rd · ${esc(prettyPlace(selectedPlace()))}</span><h4>Both entries name ${esc(place)}. Their listed points are ${distanceKm} km apart.</h4><p>The coordinates printed in these two project titles are ${esc(formatDistance(farthest.distanceMeters))} apart in a straight line.${boundaryNote} Check their source schedule before deciding whether either location is wrong.</p><ol><li>${esc(farthest.projectName)} <small>${esc(farthest.sourceLabel)}</small></li><li>${esc(farthest.otherProject)} <small>${esc(farthest.otherSource)}</small></li></ol></div><strong class="mpb-story-distance">${distanceKm}<span>km apart</span></strong></article><aside class="mpb-nearby-lead"><strong>${closePairs}</strong><span>pairs in ${esc(prettyPlace(selectedPlace()))} have printed locations less than 50 m apart. They may refer to one site, separate nearby buildings, or copied coordinates; the project scope needs review.</span></aside>`;
     }
     const pointsBySource = new Map();
     const addPoint = (row, side) => {
@@ -271,7 +283,7 @@
       row, leftKey: addPoint(row, 'left'), rightKey: addPoint(row, 'right')
     }));
     const points = [...pointsBySource.values()].filter(p => Number.isFinite(p.lat) && Number.isFinite(p.lon));
-    const boundary = boundaries.get(select.value);
+    const boundary = boundaries.get(selectedPlace());
     points.forEach((point, i) => { point.number = i + 1; });
     points.forEach(point => { point.insideBoundary = insideBoundary(point, boundary); });
     const pointByKey = new Map(points.map(point => [point.key, point]));
@@ -312,7 +324,7 @@
     const maxPair = [...group].sort((a, b) => Number(b.distanceMeters) - Number(a.distanceMeters))[0];
     const minPair = [...group].sort((a, b) => Number(a.distanceMeters) - Number(b.distanceMeters))[0];
     const distinctBarangs = [...new Set(group.map(row => row.barangay).filter(Boolean))];
-    const visibleLabel = prettyPlace(select.value);
+    const visibleLabel = prettyPlace(selectedPlace());
     const outsideCount = points.filter(point => point.insideBoundary === false).length;
     summary.textContent = `${visibleLabel}: ${points.length} points, ${group.length} pair${group.length === 1 ? '' : 's'}; farthest ${formatDistance(maxPair.distanceMeters)}, closest ${formatDistance(minPair.distanceMeters)}.${outsideCount ? ` ${outsideCount} point${outsideCount===1?'':'s'} plot outside the municipal outline and need checking.` : ''}`;
     const major = Math.max(rangeX, rangeY);
@@ -338,7 +350,7 @@
     // or project title replaces this selection.
     if (points.length) showProject(points[0].hgabId, false);
   }
-  select.addEventListener('change', () => { updateShareLinks(); render(); });
+  select.addEventListener('change', () => { activePlace = select.value; updateShareLinks(); render(); });
   render();
   };
   Promise.all([
