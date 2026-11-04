@@ -2,16 +2,6 @@
   const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const number=x=>Number(x||0).toLocaleString('en-PH');
   let payloadPromise,boundaryPromise,dialog;
-  const agriLayers={
-    'rainfed':'DA land use · rainfed rice and corn',
-    'irrigated':'DA land use · irrigated rice',
-    'coconut':'DA land use · coconut',
-  };
-  const agriNames={
-    'rainfed':'ggu:RP_LUS_Rainfed Rice_and_Corn',
-    'irrigated':'ggu:LUS_Irrigated Rice',
-    'coconut':'ggu:RP_LUS_Coconut',
-  };
   const fetchJson=async name=>{const r=await fetch(name);if(!r.ok)throw Error(`${name}: HTTP ${r.status}`);return r.json()};
   const payload=()=>payloadPromise||(payloadPromise=fetchJson('connectivity-map-data.json'));
   const boundaries=()=>boundaryPromise||(boundaryPromise=fetchJson('out-of-place-boundaries.json'));
@@ -42,7 +32,7 @@
     dialog.querySelector('.connectivity-map-close').addEventListener('click',()=>dialog.close());dialog.addEventListener('click',e=>{if(e.target===dialog)dialog.close();});document.body.append(dialog);return dialog;
   }
   const escAttr=s=>esc(s).replace(/`/g,'&#96;');
-  function svgMap(project,allBoundaries,road,agriLayer){
+  function svgMap(project,allBoundaries,road){
     const width=1100,height=620,local={x:12,y:12,w:730,h:596},inset={x:754,y:12,w:334,h:596};
     const start=utm51(project.start[0],project.start[1]),end=utm51(project.end[0],project.end[1]),venues=(project.venues||[]).map(v=>({...v,xy:utm51(Number(v.longitude),Number(v.latitude))}));
     const locals=nearMunicipalities(allBoundaries.provinceFeatures||[],[project.start,project.end,...venues.map(v=>[v.longitude,v.latitude])]);
@@ -65,9 +55,7 @@
     }else roadSvg+=`<text x="${inset.x+18}" y="${inset.y+100}" class="map-subtitle">No matched road geometry for this source row.</text>`;
     const localTitle=locals.length?`${locals[0].city||locals[0].municipality||'Mapped locality'}, ${locals[0].province||''}`:'Municipality not resolved from boundaries';
     const noVenueLabel=project.venueMatchCount?'A venue match is listed, but its coordinates are unavailable for plotting.':'No matched visitor venue within 100 m in the current inventory.';
-    const wms=new URL('https://geomapping.da.gov.ph/geoserver/wms/');
-    for(const [key,value] of Object.entries({service:'WMS',version:'1.1.1',request:'GetMap',layers:agriNames[agriLayer]||agriNames.rainfed,styles:'',srs:'EPSG:32651',bbox:[localBounds.minX,localBounds.minY,localBounds.maxX,localBounds.maxY].map(x=>x.toFixed(1)).join(','),width:String(local.w),height:String(local.h),format:'image/png',transparent:'true'}))wms.searchParams.set(key,value);
-    return `<svg class="connectivity-map-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="Map of DA agricultural land-use polygons, FMR endpoints, municipality boundary, visitor venues and nearest DPWH road"><style>.map-title{font:700 16px system-ui;fill:#173746}.map-subtitle{font:12px system-ui;fill:#536976}.map-label{font:700 13px system-ui;fill:#523100;paint-order:stroke;stroke:#fff;stroke-width:3px;stroke-linejoin:round}</style><defs><clipPath id="local-clip"><rect x="${local.x+1}" y="${local.y+38}" width="${local.w-2}" height="${local.h-39}"/></clipPath><clipPath id="road-clip"><rect x="${inset.x+12}" y="${inset.y+64}" width="${inset.w-24}" height="${inset.h-92}"/></clipPath></defs><rect width="${width}" height="${height}" fill="#f4f8f9"/><rect x="${local.x}" y="${local.y}" width="${local.w}" height="${local.h}" rx="10" fill="#fff" stroke="#cad6dc"/><text x="${local.x+14}" y="${local.y+26}" class="map-title">FMR route · ${esc(localTitle)}</text><g clip-path="url(#local-clip)"><image id="da-agri-wms" href="${esc(wms.href)}" x="${local.x}" y="${local.y+38}" width="${local.w}" height="${local.h-39}" preserveAspectRatio="none"/><rect x="${local.x}" y="${local.y+38}" width="${local.w}" height="${local.h-39}" fill="#fff" fill-opacity=".08"/><g>${polygons}</g>${route}${venueSvg}${venues.length?venues.map((v,i)=>{const q=projectPoint(v.xy,localBounds,local);return `<text x="${q.x+9}" y="${q.y+4+i%2*14}" class="map-label">${esc(v.name)}</text>`;}).join(''):`<text x="24" y="72" class="map-subtitle">${esc(noVenueLabel)}</text>`}</g>${roadSvg}</svg>`;
+    return `<svg class="connectivity-map-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="Map of FMR endpoints, municipality boundary, visitor venues and nearest DPWH road"><style>.map-title{font:700 16px system-ui;fill:#173746}.map-subtitle{font:12px system-ui;fill:#536976}.map-label{font:700 13px system-ui;fill:#523100;paint-order:stroke;stroke:#fff;stroke-width:3px;stroke-linejoin:round}</style><defs><clipPath id="local-clip"><rect x="${local.x+1}" y="${local.y+38}" width="${local.w-2}" height="${local.h-39}"/></clipPath><clipPath id="road-clip"><rect x="${inset.x+12}" y="${inset.y+64}" width="${inset.w-24}" height="${inset.h-92}"/></clipPath></defs><rect width="${width}" height="${height}" fill="#f4f8f9"/><rect x="${local.x}" y="${local.y}" width="${local.w}" height="${local.h}" rx="10" fill="#fff" stroke="#cad6dc"/><text x="${local.x+14}" y="${local.y+26}" class="map-title">FMR route · ${esc(localTitle)}</text><g clip-path="url(#local-clip)">${polygons}${route}${venueSvg}${venues.length?venues.map((v,i)=>{const q=projectPoint(v.xy,localBounds,local);return `<text x="${q.x+9}" y="${q.y+4+i%2*14}" class="map-label">${esc(v.name)}</text>`;}).join(''):`<text x="24" y="72" class="map-subtitle">${esc(noVenueLabel)}</text>`}</g>${roadSvg}</svg>`;
   }
   async function open(id){
     const dlg=ensureDialog(),content=dlg.querySelector('#connectivity-map-content');dlg.querySelector('#connectivity-map-title').textContent='FMR and road connection details';content.textContent='Loading route, road and municipality geometry…';dlg.showModal();
@@ -77,11 +65,7 @@
       const road=project.roadSection?data.roads?.[project.roadSection]:null;
       dlg.querySelector('#connectivity-map-title').textContent=project.title||'Connectivity map';
       dlg.querySelector('#connectivity-map-subtitle').textContent=[project.region,project.roadName,project.roadClass,project.nearestDistanceMeters==null?'':`${number(project.nearestDistanceMeters)} m to nearest road`].filter(Boolean).join(' · ');
-      content.innerHTML=`<label class="connectivity-map-layer-label">Agricultural area layer <select id="connectivity-map-agri-layer">${Object.entries(agriLayers).map(([key,label])=>`<option value="${key}">${esc(label)}</option>`).join('')}</select></label><span id="connectivity-map-wms-status" class="connectivity-map-source-status" role="status">Loading the DA map layer…</span><p class="connectivity-map-source">Layer source: <a href="https://geomapping.da.gov.ph/prdp/map_generator" target="_blank" rel="noopener noreferrer">DA PRDP Enhanced Geomapping System ↗</a>. Crop land-use polygons are an agricultural-area proxy, not individual farm parcels or proof that a specific farm uses this road.</p><div id="connectivity-map-drawing">${svgMap(project,bounds,road,'rainfed')}</div>`;
-      const layerSelect=content.querySelector('#connectivity-map-agri-layer'),wmsImage=content.querySelector('#da-agri-wms'),wmsStatus=content.querySelector('#connectivity-map-wms-status');
-      wmsImage.addEventListener('load',()=>{wmsStatus.textContent='DA crop land-use overlay loaded.';});
-      wmsImage.addEventListener('error',()=>{wmsStatus.textContent='DA crop land-use overlay did not load; municipality and project layers are still shown.';});
-      layerSelect.addEventListener('change',()=>{const drawing=content.querySelector('#connectivity-map-drawing');drawing.innerHTML=svgMap(project,bounds,road,layerSelect.value);const image=drawing.querySelector('#da-agri-wms');image.addEventListener('load',()=>{wmsStatus.textContent='DA crop land-use overlay loaded.';});image.addEventListener('error',()=>{wmsStatus.textContent='DA crop land-use overlay did not load; municipality and project layers are still shown.';});wmsStatus.textContent='Loading the DA map layer…';});
+      content.innerHTML=`<p class="connectivity-map-source-status" role="status">DA crop overlays are temporarily unavailable: the map service returned HTTP 404 for its WMS/WFS endpoint. Municipality outlines, FMR points, road sections and venue points remain visible.</p><p class="connectivity-map-source">The DA catalog identifies rainfed rice/corn, irrigated rice and coconut land-use layers. <a href="https://geomapping.da.gov.ph/prdp/map_generator" target="_blank" rel="noopener noreferrer">Open the DA PRDP Enhanced Geomapping System ↗</a>. These crop-area layers are proxies, not individual farm parcels.</p><div id="connectivity-map-drawing">${svgMap(project,bounds,road)}</div>`;
     }catch(error){content.innerHTML=`<p class="connectivity-map-error">Map layers could not be loaded: ${esc(error.message||error)}</p>`;}
   }
   document.addEventListener('click',event=>{const button=event.target.closest('[data-connectivity-map]');if(!button)return;event.preventDefault();open(button.dataset.connectivityMap);});
