@@ -10,9 +10,9 @@ header{padding-left:clamp(16px,2vw,32px)!important;padding-right:clamp(16px,2vw,
 header .report-nav{box-sizing:border-box!important;display:flex!important;align-items:center!important;flex-wrap:wrap!important;gap:8px!important;width:100%!important;max-width:none!important;height:auto!important;min-height:0!important;margin:12px 0 0!important;padding:0!important;font:13px/1.3 system-ui,sans-serif!important;position:relative!important;z-index:20!important}
 header .report-nav-group{position:relative!important;min-width:130px!important;height:42px!important;margin:0!important;padding:0!important;border:1px solid #ffffff66!important;border-radius:9px!important;background:#0038A8!important}
 header .report-nav-group:first-of-type{min-width:150px!important}
-header .report-nav-group>summary{list-style:none!important;display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px!important;height:40px!important;min-height:40px!important;padding:8px 13px!important;color:#FCD116!important;font:700 14px/1.2 system-ui,sans-serif!important;cursor:pointer!important}
+header .report-nav-group>summary{list-style:none!important;display:flex!important;position:relative!important;align-items:center!important;justify-content:center!important;gap:12px!important;height:40px!important;min-height:40px!important;padding:8px 30px!important;color:#FCD116!important;font:700 14px/1.2 system-ui,sans-serif!important;cursor:pointer!important}
 header .report-nav-group>summary::-webkit-details-marker{display:none!important}
-header .report-nav-group>summary::after{content:'+'!important;color:#fff!important;font-size:17px!important;line-height:1!important}
+header .report-nav-group>summary::after{position:absolute!important;right:12px!important;content:'+'!important;color:#fff!important;font-size:17px!important;line-height:1!important}
 header .report-nav-group[open]>summary::after{content:'−'!important}
 header .report-nav-group>summary:hover{color:#fff!important}
 header .report-nav-group>summary:focus-visible{outline:2px solid #FCD116!important;outline-offset:2px!important;border-radius:8px!important}
