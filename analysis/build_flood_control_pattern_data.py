@@ -267,7 +267,7 @@ def main():
             "floodContracts": "static/data/flood_control_data_with_jv.json",
             "mpbAnalysis": "static/nep-preview/mpb-data.json",
             "districtAnnualAnalysis": "static/nep-preview/integrated-district-data.json",
-            "floodScope": "DPWH flood-control contract records in the local ODV snapshot",
+            "floodScope": "DPWH flood-control contract records in the archived project dataset",
             "mpbScope": "FY2027 HGAB 3rd-reading MPB budget lines and comparison candidates",
         },
         "flood": {

@@ -122,7 +122,7 @@ body.bettergov-research main :is(.repeat-hero-breakdown>div,.unit-hero-stats>div
 
   <section class="report-section" aria-labelledby="flood-baseline-title">
     <h2 id="flood-baseline-title">2. Historical context: the Bulacan flood-control pattern</h2>
-    <p class="section-intro">The chart uses DPWH flood-control contract records in the current ODV snapshot. It shows the annual count and contract value in Bulacan alongside the national total. The strongest visible change is from 2022 to 2023; Bulacan remained the largest single-province total in 2024.</p>
+    <p class="section-intro">The chart uses DPWH flood-control contract records in the current archived contract records. It shows the annual count and contract value in Bulacan alongside the national total. The strongest visible change is from 2022 to 2023; Bulacan remained the largest single-province total in 2024.</p>
     <div class="chart-grid">
       <div class="chart-panel"><h3>Bulacan project count</h3><p>Contracts per infrastructure year</p><div id="bulacan-count-chart"></div></div>
       <div class="chart-panel"><h3>Bulacan contract value</h3><p>₱ billions; compare Bulacan with all other provinces</p><div id="bulacan-cost-chart"></div></div>
@@ -178,7 +178,7 @@ body.bettergov-research main :is(.repeat-hero-breakdown>div,.unit-hero-stats>div
       <li><strong>Not yet matched:</strong> local-project clustering inside Ilocos Norte 1st and contractor concentration are not measured in the district budget table. GAA allocations do not identify awarded contractors; contract-level joins and title/location checks are needed.</li>
       <li><strong>Next validation:</strong> inspect source pages for the largest district increases, check locality concentration within each district, reconcile assigned and unresolved rows, and compare project scope and year before describing a recurring pattern.</li>
     </ul>
-    <p class="table-note">Sources: local ODV snapshots <code>flood_control_data_with_jv.json</code>, <code>integrated-district-data.json</code>, and <code>mpb-data.json</code>. The older NEP 2026 summary is not used for these headline comparisons because its generated artifacts are dated October 2025.</p>
+    <p class="table-note">Sources: archived flood-control, district, and building project records. The older NEP 2026 summary is not used for these headline comparisons because its generated artifacts are dated October 2025.</p>
   </section>
 </main>
 <script>
@@ -195,7 +195,7 @@ body.bettergov-research main :is(.repeat-hero-breakdown>div,.unit-hero-stats>div
     items.forEach((item,i)=>{let y=top+i*rowH;const raw=categoryFormat?categoryFormat(item[labelKey]):String(item[labelKey]??'');const name=raw.replace(/^CITY OF /,'').replace(/ \([^)]*\)$/,'');svg+=`<text class="chart-label" x="${left-8}" y="${y+14}" text-anchor="end">${escapeHtml(name.length>22?name.slice(0,20)+'…':name)}</text>`;let val=Number(item[valueKey])||0,w=val*scale;svg+=`<rect class="chart-bar" x="${left}" y="${y}" width="${Math.max(w,1)}" height="13" rx="3"><title>${escapeHtml(raw)}: ${escapeHtml(format(val))}</title></rect><text class="chart-value" x="${Math.min(left+w+6,W-right+4)}" y="${y+11}">${escapeHtml(format(val))}</text>`;if(secondaryKey){let val2=Number(item[secondaryKey])||0,w2=val2*scale;svg+=`<rect class="chart-bar-accent" x="${left}" y="${y+16}" width="${Math.max(w2,1)}" height="10" rx="3"><title>${escapeHtml(secondaryLabel)}: ${escapeHtml(secondaryFormat(val2))}</title></rect><text class="chart-value" x="${Math.min(left+w2+6,W-right+4)}" y="${y+25}">${escapeHtml(secondaryFormat(val2))}</text>`}});
     svg+='</svg>';el.innerHTML=svg;
   }
-  fetch('flood-control-pattern-data.json?v=29b6bbf96b7b').then(r=>{if(!r.ok)throw Error('Data file unavailable');return r.json()}).then(d=>{
+  fetch('flood-control-pattern-data.json?v=15295217fe81').then(r=>{if(!r.ok)throw Error('Data file unavailable');return r.json()}).then(d=>{
     const annual=d.flood.annual.filter(x=>x.year>=2021&&x.year<=2024);
     const latest=annual.at(-1),prior=annual.find(x=>x.year===2022),middle=annual.find(x=>x.year===2023);
     const jump=prior&&middle?100*(middle.bulacanContractCost/prior.bulacanContractCost-1):0;

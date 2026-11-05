@@ -1,9 +1,9 @@
 {
   "generatedFrom": {
-    "floodContracts": "static/data/flood_control_data_with_jv.json",
-    "mpbAnalysis": "static/nep-preview/mpb-data.json",
-    "districtAnnualAnalysis": "static/nep-preview/integrated-district-data.json",
-    "floodScope": "DPWH flood-control contract records in the local ODV snapshot",
+    "floodContracts": "DPWH flood-control contract data",
+    "mpbAnalysis": "DPWH MPB project data",
+    "districtAnnualAnalysis": "annual district allocation data",
+    "floodScope": "archived DPWH flood-control contract records",
     "mpbScope": "FY2027 HGAB 3rd-reading MPB budget lines and comparison candidates"
   },
   "flood": {
@@ -67774,9 +67774,9 @@
       }
     ],
     "method": {
-      "classifier": "Shared title classifier from analyze_priority_repeats.py: Multi-purpose building, flood control, bridge and road.",
+      "classifier": "Shared title classifier for multi-purpose buildings, flood control, bridges, and roads.",
       "attribution": "Current legislative-district roster and strict qualified-location rules. Unique assignments only; shared and unresolved titles remain excluded from district totals.",
-      "timeLimit": "Project locations are assigned to current legislative district boundaries. Representative labels are year-specific: explicit ODV term intervals for FY2020–FY2025 and the current 20th Congress roster for FY2026–FY2027. Ambiguous, missing, and default-only term records are left unresolved.",
+      "timeLimit": "Project locations are assigned to current legislative district boundaries. Representative labels are year-specific: sourced historical term intervals for FY2020–FY2025 and the current 20th Congress roster for FY2026–FY2027. Ambiguous, missing, and default-only term records are left unresolved.",
       "representativeCoverage": {
         "2020|GAA": {
           "resolvedDistricts": 199,
@@ -67827,8 +67827,8 @@
           "missingTermDistricts": 0
         }
       },
-      "representativeSource": "ODV static/data/congressmen_consolidated.json explicit term intervals; ODV static/data/20th_congress_representatives.json for FY2026–FY2027; source-linked, named exceptions are recorded in integrated-representative-photo-overrides.json. Broad default 2016–2025 terms are excluded.",
-      "sources": "FY2015 DBM DPWH account-level GAA CSV with capital-outlay PAP candidates; FY2016–FY2018 title-classified DPWH current-new-appropriation rows from the BetterGov GAA Explorer baseline; FY2019 UACS-coded named project rows from the DBM Technical GAA DPWH schedule; FY2020–FY2025 ODV annual GAA data; FY2026 DPWH Details Enrolled Copy; FY2027 House GAB 3rd-reading DPWH schedule. FY2015–FY2019 use separate historical source layers; FY2027 is a proposal, not enacted GAA."
+      "representativeSource": "Sourced historical representative term intervals and the current 20th Congress roster for FY2026–FY2027. Broad default 2016–2025 terms are excluded.",
+      "sources": "FY2015 DBM DPWH account-level GAA CSV with capital-outlay PAP candidates; FY2016–FY2018 title-classified DPWH current-new-appropriation rows from the BetterGov GAA Explorer baseline; FY2019 UACS-coded named project rows from the DBM Technical GAA DPWH schedule; FY2020–FY2025 integrated annual GAA data; FY2026 DPWH Details Enrolled Copy; FY2027 House GAB 3rd-reading DPWH schedule. FY2015–FY2019 use separate historical source layers; FY2027 is a proposal, not enacted GAA."
     }
   },
   "reading": {
