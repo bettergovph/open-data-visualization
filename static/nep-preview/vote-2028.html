@@ -7,12 +7,13 @@
   <meta name="description" content="Search archived Philippine elected-office records and recorded family links used for the Vote 2028 concurrent-office screen.">
   <link id="research-theme-style" rel="stylesheet" href="research-theme.css?v=a60c21b98857">
   <style>
-    .vote-main{width:100%;max-width:none;margin:0 auto;padding:24px clamp(16px,2vw,32px) 40px;color:#18303b;font:15px/1.5 system-ui,sans-serif}
+    html,body{width:100%;max-width:100%;overflow-x:hidden}
+    .vote-main{box-sizing:border-box;width:100%;max-width:100%;margin:0 auto;padding:24px clamp(16px,2vw,32px) 40px;overflow-x:clip;color:#18303b;font:15px/1.5 system-ui,sans-serif}
     .vote-main *{box-sizing:border-box}
     .vote-disclaimer{margin:0 0 18px;padding:14px 16px;border:1px solid #e2d6ae;border-left:4px solid #f4c542;border-radius:10px;background:#fff9e7;color:#38434b}
     .vote-hero{padding:clamp(20px,3vw,34px);border-radius:18px;background:linear-gradient(130deg,#00246a,#0038a8);color:#fff;box-shadow:0 12px 32px #00246a20}
     .vote-hero .eyebrow{color:#fcd116;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
-    .vote-hero h2{max-width:960px;margin:5px 0 8px;font-size:clamp(25px,3vw,38px);line-height:1.14}
+    .vote-hero h2{max-width:960px;margin:5px 0 8px;color:#fff!important;font-size:clamp(25px,3vw,38px);line-height:1.14}
     .vote-hero p{max-width:1050px;margin:0;color:#f4f7ff}
     .vote-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:24px}
     .vote-stat{min-width:0;padding:14px 16px;border:1px solid #ffffff40;border-radius:12px;background:#ffffff12}
@@ -25,8 +26,12 @@
     .vote-actions{display:flex;flex-wrap:wrap;gap:8px}
     .vote-actions button,.vote-actions a{display:inline-flex;min-height:42px;align-items:center;justify-content:center;padding:8px 12px;border:1px solid #0038a8;border-radius:8px;background:#0038a8;color:#fff;font:700 13px system-ui,sans-serif;text-decoration:none;cursor:pointer}
     .vote-actions button:disabled{opacity:.6;cursor:wait}
-    .vote-no-only{display:flex;align-items:center;gap:8px;min-height:42px;padding:0 2px;color:#344956;font-size:13px;font-weight:700;white-space:nowrap}
-    .vote-no-only input{width:18px;height:18px}
+    .vote-chart-card{width:100%;max-width:100%;margin:16px 0 22px;padding:16px;border:1px solid #dce4eb;border-radius:14px;background:#fff}
+    .vote-chart-card h2{margin:0 0 4px;color:#173948;font-size:18px}
+    .vote-chart-card p{margin:0 0 8px;color:#62737d;font-size:12px}
+    #vote-year-chart{display:block;width:100%;max-width:100%;height:auto;overflow:visible}
+    #vote-year-chart text{font:12px system-ui,sans-serif;fill:#52636e}
+    #vote-year-chart .chart-value{font-weight:750;fill:#18303b}
     .vote-table-wrap{margin-top:14px;overflow-x:auto;border:1px solid #dce4eb;border-radius:14px;background:#fff}
     .vote-table{width:100%;border-collapse:collapse;min-width:940px}
     .vote-table th,.vote-table td{padding:11px 12px;border-bottom:1px solid #e8edf1;text-align:left;vertical-align:top}
@@ -54,7 +59,7 @@
     .vote-source-footer{margin-top:18px;padding:14px 0;border-top:1px solid #dce4eb;color:#5e6e78;font-size:12px}
     .vote-source-footer a{color:#0038a8}
     @media(max-width:850px){.vote-controls{grid-template-columns:repeat(2,minmax(0,1fr))}.vote-actions{grid-column:1/-1}}
-    @media(max-width:560px){.vote-stats{grid-template-columns:1fr}.vote-controls{grid-template-columns:1fr}.vote-actions{grid-column:auto}.vote-no-only{white-space:normal}}
+    @media(max-width:560px){.vote-stats{grid-template-columns:1fr}.vote-controls{grid-template-columns:1fr}.vote-actions{grid-column:auto}}
   </style>
 <style id="uniform-report-menu-style">
 header{padding-left:clamp(16px,2vw,32px)!important;padding-right:clamp(16px,2vw,32px)!important}
@@ -111,21 +116,21 @@ body.bettergov-research main :is(.repeat-hero-breakdown>div,.unit-hero-stats>div
     <section class="vote-hero" aria-labelledby="vote-hero-title">
       <div class="eyebrow">Concurrent family office screen · source elections 2004–2025</div>
       <h2 id="vote-hero-title">NO marks linked family members holding office in the same year.</h2>
-      <p>Browse the officials recorded in the old ODV dynasty database, from national offices to local councilors and barangay captains. Search by name, office, party, district or locality.</p>
+      <p>This table shows only officials marked NO under the stated family-office rule. Search the archived ODV records by name, office, party, district or locality.</p>
       <div class="vote-stats" aria-live="polite">
-        <div class="vote-stat"><strong id="vote-total">—</strong><span>officeholder records</span></div>
+        <div class="vote-stat"><strong id="vote-total">—</strong><span>source records checked</span></div>
         <div class="vote-stat"><strong id="vote-no-total">—</strong><span>records marked NO by this rule</span></div>
         <div class="vote-stat"><strong id="vote-year-range">—</strong><span>election years represented</span></div>
       </div>
     </section>
     <p class="vote-note">The latest election snapshot in this archived dataset is 2025. This is not a list of declared 2028 candidates; we will update the page when COMELEC releases official candidate data for the 2028 elections.</p>
+    <section class="vote-chart-card" aria-labelledby="vote-chart-title"><h2 id="vote-chart-title">NO records by election year</h2><p>Count of source officeholder records meeting the same-year family rule. The lone local–national pair is excluded.</p><svg id="vote-year-chart" viewBox="0 0 800 280" role="img" aria-label="Bar chart showing NO records by election year"><text x="24" y="40">Loading chart…</text></svg></section>
     <section aria-label="Filter officeholder records">
       <div class="vote-controls">
         <label for="vote-year">Election year<select id="vote-year"><option value="">All years</option></select></label>
         <label for="vote-office">Office group<select id="vote-office"><option value="">All offices</option></select></label>
         <label for="vote-search">Search names and places<input id="vote-search" type="search" autocomplete="off" placeholder="Name, province, municipality, party…"></label>
-        <label class="vote-no-only"><input id="vote-no-only" type="checkbox"> Show NO rows only</label>
-        <div class="vote-actions"><button type="button" id="vote-export">Export filtered CSV</button><a href="vote-2028-data.json" download>Download JSON</a></div>
+        <div class="vote-actions"><button type="button" id="vote-export">Export filtered CSV</button><a href="vote-2028-data.json" download>Download NO-only JSON</a></div>
       </div>
       <p id="vote-status" role="status" aria-live="polite">Loading ODV election and family-link records…</p>
       <div class="vote-table-wrap">

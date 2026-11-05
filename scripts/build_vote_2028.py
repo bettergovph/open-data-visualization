@@ -246,6 +246,7 @@ def build():
         'sourceSha256': source_hash,
         'years': sorted({r['electionYear'] for r in records}),
         'scope': 'Winner-marked elected office records present in the archived ODV source for president, vice president, senators, House and party-list representatives, governors, vice governors, mayors, vice mayors, provincial board members and councilors. The archived source has no identifiable barangay captain office rows, and its 2019 winner-marked office coverage is incomplete. Latest source election snapshot is 2025; this is not a 2028 candidate list.',
+        'recordsScope': 'The records array contains NO-marked officeholders only. The families object retains linked historical family-member office records for context.',
         'method': {
             'noVoteRule': 'NO means at least two distinct ODV-linked family members held office in the same modeled calendar year. A family with exactly one local and one national officeholder in that year is excluded. This Dapat Isa Lang–inspired screen is applied only to verified ODV relationships or shared ODV dynasty_family_id; shared surnames alone do not count.',
             'officeLevels': 'President/vice president, senators, and House/party-list representatives are classified as national. Governors, vice governors, mayors, vice mayors, provincial board members, and councilors are classified as local.',
@@ -261,7 +262,7 @@ def build():
             'byOffice': {g: {'rows': sum(r['officeGroup'] == g for r in records), 'noVoteRows': sum(r['officeGroup'] == g and r['doNotVote'] for r in records)} for g in sorted({r['officeGroup'] for r in records})},
         },
         'families': family_history,
-        'records': records,
+        'records': [record for record in records if record['doNotVote']],
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(result, ensure_ascii=False, separators=(',', ':')) + '\n')
