@@ -41,6 +41,14 @@ def first_last_key(value):
     return compact_norm(parts[0] + ' ' + parts[-1])
 
 
+def surname_key(value):
+    """Return the final name token, excluding common generational suffixes."""
+    parts = norm(value).split()
+    while parts and parts[-1] in {'JR', 'SR', 'II', 'III', 'IV', 'V'}:
+        parts.pop()
+    return compact_norm(parts[-1]) if parts else ''
+
+
 def clean_nickname(value):
     """Reject ODV nickname-field values that are actually dates or agencies."""
     value = re.sub(r'\s+', ' ', str(value or '').strip().strip('"'))
@@ -296,9 +304,19 @@ def build():
     records = []
     house_name_keys = {compact_norm(item['name']) for item in house_roster}
     odv_house_identity_rows = defaultdict(list)
+    odv_dynasty_family_surnames = defaultdict(set)
     for row in parse_copy(SOURCE, 'political_dynasties'):
         if len(row) < 30:
             continue
+        # The old ODV family page groups dynasty-screened officials by
+        # surname and province. Keep this broader screen separate from
+        # person-to-person kinship evidence and never use it for the NO rule.
+        if row[9] == '1' and row[2] != r'\N' and row[5] != r'\N':
+            family_surname = compact_norm(row[2])
+            family_province = compact_norm(row[5])
+            family_name = compact_norm(row[22] if row[22] != r'\N' else ' '.join(x for x in (row[1], row[2]) if x and x != r'\N'))
+            if family_surname and family_province and family_name:
+                odv_dynasty_family_surnames[(family_province, family_surname)].add(family_name)
         # Capture all historical office rows for exact House-roster names, not
         # only their congressional rows: ODV may store the member's explicit
         # family ID or relationship anchor on an earlier local office record.
@@ -369,6 +387,12 @@ def build():
             'termThroughYear': election_year + role_years,
             'sourceId': row[0], 'familyBasis': 'ODV verified relationship' if any(e['a'] == node or e['b'] == node for e in edges) else ('ODV dynasty family ID' if family_id else ''),
         })
+
+    current_house_odv_family_page_group_matches = sum(
+        seat['seatType'] == 'district' and
+        len(odv_dynasty_family_surnames.get((compact_norm(seat['province']), surname_key(seat['name'])), set())) >= 2
+        for seat in house_roster
+    )
 
     # Use only the congressman profile's uniquely paired display/full-name
     # variants as aliases. Its contractor fields are not family evidence.
@@ -1267,6 +1291,7 @@ def build():
             'officeLevels': 'President/vice president, senators, and House/party-list representatives are classified as national. Governors, vice governors, mayors, vice mayors, provincial board members, and councilors are classified as local.',
             'terms': 'President/vice president and senators are modeled as six-year terms; other included elected positions as three-year terms, based on the election year in ODV. Partial final calendar years are included in overlap checks.',
             'familyLinks': 'Uses ODV relationship records marked verified=true (family relationship types 1–20), source dynasty_family_id values, cited public family links, and source-linked family-parser edges with explicit kinship types and confidence >= 8/10. Family-parser edges connect to the 20th House roster only on exact full-name matches or unique first+last aliases, and connect to another elected officeholder only when that name resolves uniquely. Political allies, succession claims, same-person labels, vague dynasty labels, and surname-only matching are excluded. Duplicate person IDs are consolidated only with an exact full name inside a linked family group or on the same fully identified local seat. Repeated copies of one national office or House seat in the same election year are collapsed; distinct House districts remain separate.',
+            'odvFamilyPageScreen': 'A separate broad coverage count matches current district representatives to the archived ODV family-page grouping by exact province and surname where at least two distinct officials in that group carry the ODV dynasty-screen flag. This is a surname/province screening signal, not proof of kinship, and it never creates a family edge or NO mark.',
             'localNameDeduplication': 'The documented Ginatilan entries Karyn Duterte and Karyn James Duterte are consolidated as one person using public reporting. This is a specific source-backed alias reconciliation, not a general first+last or shared-surname merge.',
             'historicalElectionData': 'The Ateneo Policy Center historical election dataset adds 2004–2016 elected-office records and a separate dynasty-screen flag. Its flag is not a person-to-person relationship and never creates a family group or NO vote. ODV congressman display/full-name variants are used only as unique name aliases; congressman family_connections fields list contractor entities, so they are excluded from family-link evidence. Party-list membership rows are an identity/seat source, not kinship evidence.',
             'limitations': 'The archived ODV records remain incomplete and vary by election year and office. All 311 current district and party-list House seats are represented from the locally captured 20th Congress roster; exact ODV and cited-kinship match counts are reported in the summary. The historical election dataset adds records where ODV rows were absent, but historical 2019 coverage and 2022/2025 local-office coverage remain sparse. ODV fat=1 and the Ateneo dynasty flag are screening markers only; neither is proof of a specific kinship link and neither independently creates a family group or NO vote. Some source rows or relationships may still be omitted or misclassified. NO years use inclusive modeled calendar-year windows; check linked evidence and official records before relying on a marker. No NO means this incomplete screen found no qualifying overlap, not that an official has no family ties.',
@@ -1295,6 +1320,7 @@ def build():
             'currentHouseODVIdentityLinkedRows': current_house_verified_link_count,
             'currentHouseCitedKinshipLinkMatches': cited_house_link_count,
             'currentHouseFamilyLinkedRows': current_house_family_linked_rows,
+            'currentHouseODVFamilyPageGroupMatches': current_house_odv_family_page_group_matches,
             'currentHouseNoVoteRows': current_house_no_vote_rows,
             'citedKinshipEdgesUsed': len(cited_family_edges),
             'currentHouseRosterSource': HOUSE_ROSTER_URL,

@@ -30,6 +30,7 @@
     $('vote-no-total').textContent=fmt(data.summary?.noVoteRows||0);
     $('vote-house-total').textContent=fmt(data.summary?.currentHouseRosterRows||0);
     $('vote-house-linked').textContent=fmt(data.summary?.currentHouseFamilyLinkedRows||0);
+    $('vote-house-family-groups').textContent=fmt(data.summary?.currentHouseODVFamilyPageGroupMatches||0);
     $('vote-house-dynasty').textContent=fmt(data.summary?.currentHouseODVDynastyFlagMatches||0);
     $('vote-year-range').textContent=(data.years||[]).length?`${data.years[0]}–${data.years[data.years.length-1]}`:'—';
     const noByYear=data.summary?.byYear||{};drawYearChart(noByYear);
@@ -61,5 +62,5 @@
     years.forEach((year,i)=>{const x=left+i*step+(step-bw)/2,bh=(values[i]/max)*ph,y=top+ph-bh;parts.push(`<rect x="${x}" y="${y}" width="${bw}" height="${bh}" rx="5" fill="#b42318"><title>${year}: ${fmt(values[i])} NO records</title></rect><text class="chart-value" x="${x+bw/2}" y="${Math.max(top-4,y-7)}" text-anchor="middle">${fmt(values[i])}</text><text x="${x+bw/2}" y="${h-17}" text-anchor="middle">${year}</text>`)});
     parts.push(`<line x1="${left}" y1="${top+ph}" x2="${w-right}" y2="${top+ph}" stroke="#8d9ba5"/>`);svg.innerHTML=parts.join('');
   }
-  fetch('vote-2028-data.json').then(r=>{if(!r.ok)throw Error('Vote 2028 source JSON is unavailable');return r.json()}).then(setup).catch(e=>{status.textContent=`Could not load the ODV records: ${e.message}`;body.innerHTML='<tr><td colspan="8">The dataset could not be loaded.</td></tr>'});
+  fetch('vote-2028-data.json?v=1feb2116a5b5').then(r=>{if(!r.ok)throw Error('Vote 2028 source JSON is unavailable');return r.json()}).then(setup).catch(e=>{status.textContent=`Could not load the ODV records: ${e.message}`;body.innerHTML='<tr><td colspan="8">The dataset could not be loaded.</td></tr>'});
 })();
