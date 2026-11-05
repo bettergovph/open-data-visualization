@@ -5,12 +5,21 @@ import hashlib
 import json
 import re
 import unicodedata
+import csv
+import zipfile
+import xml.etree.ElementTree as ET
 from collections import defaultdict
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / 'database/dynasty_dump.sql.gz'
 OUT = ROOT / 'static/nep-preview/vote-2028-data.json'
+HOUSE_ROSTER = ROOT / 'static/data/20th_congress_representatives.json'
+HOUSE_ROSTER_URL = 'https://www.congress.gov.ph/house-members'
+FAMILY_LINK_DIR = ROOT / 'family_analysis/family_parser'
+ODV_OFFICIALS = ROOT.parent / 'nep/data_sources/odv_dynasty/source_officials.csv.gz'
+ASOG_DATASET = ROOT / 'database/ASoG-POLITICAL-DYNASTIES-DATASET-V2016.xlsx'
+ODV_CONGRESSMEN = ROOT / 'static/data/congressmen_consolidated.json'
 
 
 def norm(value):
@@ -22,6 +31,55 @@ def norm(value):
 def compact_norm(value):
     """Normalize punctuation and spacing for within-family duplicate identities."""
     return norm(value).replace(' ', '')
+
+
+def first_last_key(value):
+    """A conservative alias key; callers must verify it is unique."""
+    parts = norm(value).split()
+    if len(parts) < 2:
+        return ''
+    return compact_norm(parts[0] + ' ' + parts[-1])
+
+
+def clean_nickname(value):
+    """Reject ODV nickname-field values that are actually dates or agencies."""
+    value = re.sub(r'\s+', ' ', str(value or '').strip().strip('"'))
+    if not value or value == r'\N' or len(value) > 48:
+        return ''
+    if re.search(r'\b(born|died|aged|age|circa)\b|\bc\.?\s*\d{3,4}\b', value, re.I):
+        return ''
+    if re.search(r'\b\d{3,4}\b', value):
+        return ''
+    if compact_norm(value) in {'PCSO', 'DILG', 'COMELEC'}:
+        return ''
+    if not re.search(r'[A-Za-z]', value):
+        return ''
+    return value
+
+
+CURATED_PUBLIC_ALIASES = {
+    compact_norm('RODRIGO ROA DUTERTE'): [{
+        'name': 'Digong', 'sourceUrl': 'https://web.nlp.gov.ph/wp-content/uploads/2023/12/NLP-Special-Bibliography-on-PRRD-Part-II-compressed.pdf'}],
+    compact_norm('SARA Z. DUTERTE-CARPIO'): [{
+        'name': 'Inday Sara', 'sourceUrl': 'https://nnc.gov.ph/mindanao-region/women-of-davao-for-nutrition-mayor-inday-sara-duterte/'}],
+    compact_norm('PAOLO Z. DUTERTE'): [{
+        'name': 'Pulong', 'sourceUrl': 'https://www.gmanetwork.com/news/showbiz/chikaminute/598530/duterte-says-he-s-using-media-coverage-to-send-message-to-lover-boy-baste/story/'}],
+    compact_norm('SEBASTIAN Z. DUTERTE'): [{
+        'name': 'Baste', 'sourceUrl': 'https://www.gmanetwork.com/news/showbiz/chikaminute/598530/duterte-says-he-s-using-media-coverage-to-send-message-to-lover-boy-baste/story/'}],
+    compact_norm('RODRIGO RIGO S DUTERTE II'): [{
+        'name': 'Rigo', 'sourceUrl': 'https://mindanews.com/comelec-proclaims-5-dutertes-as-election-winners/'}],
+}
+
+
+def collect_alias_evidence(name, source_aliases=()):
+    out, seen = [], set()
+    for item in list(source_aliases) + CURATED_PUBLIC_ALIASES.get(compact_norm(name), []):
+        alias = clean_nickname(item.get('name'))
+        key = compact_norm(alias)
+        if alias and key and key != compact_norm(name) and key not in seen:
+            out.append({**item, 'name': alias})
+            seen.add(key)
+    return out
 
 
 def office_group(position):
@@ -87,6 +145,69 @@ def parse_copy(source, target):
                 yield line.rstrip('\n').split('\t')
 
 
+def read_asog_election_rows(path):
+    """Read the inventoried Ateneo/ODV historical election sheet (2004–2016)."""
+    if not path.exists():
+        return
+    ns = {'m': 'http://schemas.openxmlformats.org/spreadsheetml/2006/main',
+          'r': 'http://schemas.openxmlformats.org/officeDocument/2006/relationships',
+          'p': 'http://schemas.openxmlformats.org/package/2006/relationships'}
+    with zipfile.ZipFile(path) as archive:
+        shared = ET.fromstring(archive.read('xl/sharedStrings.xml'))
+        strings = [''.join(node.text or '' for node in item.findall('.//m:t', ns))
+                   for item in shared.findall('m:si', ns)]
+        workbook = ET.fromstring(archive.read('xl/workbook.xml'))
+        rels = ET.fromstring(archive.read('xl/_rels/workbook.xml.rels'))
+        targets = {item.attrib['Id']: item.attrib['Target'] for item in rels.findall('p:Relationship', ns)}
+        data_sheet = next((sheet for sheet in workbook.findall('.//m:sheets/m:sheet', ns)
+                           if sheet.attrib.get('name') == 'Data'), None)
+        if data_sheet is None:
+            return
+        target = targets.get(data_sheet.attrib.get('{' + ns['r'] + '}id'), '')
+        sheet_path = target if target.startswith('xl/') else 'xl/' + target
+        sheet = ET.fromstring(archive.read(sheet_path))
+        for row in sheet.findall('.//m:sheetData/m:row', ns):
+            cells = {}
+            for cell in row.findall('m:c', ns):
+                ref = re.match(r'([A-Z]+)', cell.attrib.get('r', ''))
+                value = cell.find('m:v', ns)
+                if not ref or value is None:
+                    continue
+                raw = value.text or ''
+                if cell.attrib.get('t') == 's' and raw:
+                    raw = strings[int(raw)]
+                cells[ref.group(1)] = raw
+            if cells.get('A') == 'First Name':
+                continue
+            first = re.sub(r'\s+', ' ', cells.get('A', '')).strip()
+            last = re.sub(r'\s+', ' ', cells.get('B', '')).strip()
+            if not first or not last:
+                continue
+            # Quoted strings in the first-name field are nickname annotations,
+            # not part of the official name used for identity matching.
+            nickname_values = re.findall(r'["“]([^"”]+)["”]', first)
+            name = re.sub(r'["“][^"”]*["”]', ' ', first)
+            name = re.sub(r'\s+', ' ', f'{name} {last}').strip()
+            try:
+                year = int(cells.get('H', ''))
+            except ValueError:
+                continue
+            group = office_group(cells.get('G', ''))
+            if not group or year < 2004:
+                continue
+            yield {
+                'name': name, 'officeGroup': group, 'position': cells.get('G', '').strip(),
+                'province': cells.get('E', '').strip(), 'municipality': cells.get('F', '').strip(),
+                'region': cells.get('D', '').strip(), 'party': cells.get('C', '').strip(),
+                'electionYear': year, 'termYears': 6 if group in {'President / Vice President', 'Senator'} else 3,
+                'termThroughYear': year + (6 if group in {'President / Vice President', 'Senator'} else 3),
+                'dynastyScreen': cells.get('I', '').strip() == '1',
+                'aliasEvidence': [{'name': alias.strip(),
+                                   'source': 'Ateneo Policy Center historical election dataset nickname field'}
+                                  for alias in nickname_values if alias.strip()],
+            }
+
+
 class UnionFind:
     def __init__(self):
         self.parent = {}
@@ -106,6 +227,56 @@ class UnionFind:
 
 def build():
     source_hash = hashlib.sha256(SOURCE.read_bytes()).hexdigest()
+    odv_aliases_by_id = defaultdict(list)
+    if ODV_OFFICIALS.exists():
+        try:
+            with gzip.open(ODV_OFFICIALS, 'rt', encoding='utf-8', errors='replace', newline='') as stream:
+                for row in csv.DictReader(stream):
+                    alias = clean_nickname(row.get('nickname'))
+                    if alias:
+                        item = {'name': alias, 'source': 'ODV source_officials nickname field'}
+                        if item not in odv_aliases_by_id[row.get('id', '')]:
+                            odv_aliases_by_id[row.get('id', '')].append(item)
+        except (OSError, UnicodeError, csv.Error):
+            pass
+    raw_house_roster = json.loads(HOUSE_ROSTER.read_text(encoding='utf-8'))
+    congressman_profiles = json.loads(ODV_CONGRESSMEN.read_text(encoding='utf-8')) if ODV_CONGRESSMEN.exists() else []
+    profile_display_to_full = defaultdict(set)
+    profile_full_to_display = defaultdict(set)
+    for profile in congressman_profiles:
+        display_name = str(profile.get('display_name') or '').strip()
+        full_name = str(profile.get('full_name') or '').strip()
+        if display_name and full_name and compact_norm(display_name) != compact_norm(full_name):
+            profile_display_to_full[compact_norm(display_name)].add(full_name)
+            profile_full_to_display[compact_norm(full_name)].add(display_name)
+    congressman_name_aliases = {}
+    for display_key, full_names in profile_display_to_full.items():
+        if len(full_names) == 1:
+            full_name = next(iter(full_names))
+            if len(profile_full_to_display[compact_norm(full_name)]) == 1:
+                congressman_name_aliases[display_key] = full_name
+                congressman_name_aliases[compact_norm(full_name)] = next(iter(profile_full_to_display[compact_norm(full_name)]))
+    congressman_unique_name_variant_pairs = len({tuple(sorted((display_key, compact_norm(next(iter(full_names))))))
+                                                  for display_key, full_names in profile_display_to_full.items()
+                                                  if len(full_names) == 1 and
+                                                  len(profile_full_to_display[compact_norm(next(iter(full_names)))]) == 1})
+    house_roster = []
+    for item in raw_house_roster:
+        constituency = re.sub(r'\[[^\]]+\]', '', str(item.get('district') or '')).strip()
+        province = re.sub(r'\[[^\]]+\]', '', str(item.get('province') or '')).strip()
+        member = re.sub(r'\[[^\]]+\]', '', str(item.get('representative') or '')).strip()
+        party = re.sub(r'\[[^\]]+\]', '', str(item.get('party') or '')).strip()
+        if not member:
+            continue
+        if re.fullmatch(r'(?:Lone|\d+(?:st|nd|rd|th))', constituency, re.I) and province:
+            house_roster.append({'name': member, 'province': province, 'district': constituency,
+                                 'party': party, 'seatType': 'district'})
+        elif not constituency and party.isdigit() and province and member:
+            # The local 20th-Congress roster stores party-list rows as
+            # province=member name, representative=party-list organization,
+            # party=seat number.
+            house_roster.append({'name': province, 'province': '', 'district': member,
+                                 'party': member, 'seatType': 'party-list'})
     family = UnionFind()
     edges = []
     # Verified relationship records are explicit family links; the source dump
@@ -123,8 +294,29 @@ def build():
                               'detail': row[4] if row[4] != r'\N' else '', 'basis': 'verified ODV relationship'})
 
     records = []
+    house_name_keys = {compact_norm(item['name']) for item in house_roster}
+    odv_house_identity_rows = defaultdict(list)
     for row in parse_copy(SOURCE, 'political_dynasties'):
-        if len(row) < 30 or row[11] != 't' or row[15].lower() != 'elected' or row[8] == r'\N':
+        if len(row) < 30:
+            continue
+        # Capture all historical office rows for exact House-roster names, not
+        # only their congressional rows: ODV may store the member's explicit
+        # family ID or relationship anchor on an earlier local office record.
+        raw_name = row[22] if row[22] != r'\N' else ' '.join(x for x in (row[1], row[19], row[2], row[20]) if x and x != r'\N')
+        candidate_names = {raw_name, ' '.join(x for x in (row[1], row[19], row[2], row[20]) if x and x != r'\N'),
+                           ' '.join(x for x in (row[21], row[2], row[20]) if x and x != r'\N')}
+        alias_field = '' if row[24] == r'\N' else row[24]
+        candidate_names.update(re.split(r'[,;|]', alias_field))
+        for candidate_name in candidate_names:
+            candidate_key = compact_norm(candidate_name)
+            if candidate_key in house_name_keys:
+                odv_house_identity_rows[candidate_key].append({
+                    'id': row[0], 'unifiedId': '' if row[23] == r'\N' else row[23],
+                    'familyId': '' if row[25] == r'\N' else row[25],
+                    'fat': row[9] == '1', 'position': row[7], 'district': '' if row[29] == r'\N' else row[29],
+                    'province': '' if row[5] == r'\N' else row[5], 'municipality': '' if row[6] == r'\N' else row[6],
+                    'year': '' if row[8] == r'\N' else row[8]})
+        if row[11] != 't' or row[15].lower() != 'elected' or row[8] == r'\N':
             continue
         group = office_group(row[7])
         if not group:
@@ -170,12 +362,95 @@ def build():
         records.append({
             'personKey': person_key, 'familyKey': None,
             'name': name, 'position': display_position, 'odvPosition': row[7], 'officeGroup': group,
+            'aliasEvidence': collect_alias_evidence(name, odv_aliases_by_id.get(row[0], [])),
             'province': province, 'municipality': municipality, 'district': district,
             'region': '' if row[4] == r'\N' else row[4], 'party': party,
             'electionYear': election_year, 'termYears': role_years,
             'termThroughYear': election_year + role_years,
             'sourceId': row[0], 'familyBasis': 'ODV verified relationship' if any(e['a'] == node or e['b'] == node for e in edges) else ('ODV dynasty family ID' if family_id else ''),
         })
+
+    # Use only the congressman profile's uniquely paired display/full-name
+    # variants as aliases. Its contractor fields are not family evidence.
+    for record in records:
+        alternate = congressman_name_aliases.get(compact_norm(record['name']))
+        if alternate:
+            record['aliasEvidence'] = collect_alias_evidence(record['name'], record.get('aliasEvidence', []) + [{
+                'name': alternate, 'source': 'ODV congressman profile · unique display/full-name pair'}])
+
+    # Add the separate Ateneo/ODV historical election dataset. It identifies
+    # elected names, offices, places, years, and a dynasty-screen flag, but it
+    # has no person-to-person kinship edges. An ASOG flag is never treated as
+    # proof of a family link or as sufficient for a NO marker.
+    asog_rows_loaded = 0
+    asog_dynasty_flag_rows = 0
+    asog_exact_identity_matches_to_odv = 0
+    asog_election_rows_added = 0
+    asog_unmatched_or_ambiguous_identity_rows = 0
+    exact_odv_rows = defaultdict(set)
+    exact_odv_records = defaultdict(list)
+    exact_odv_people = defaultdict(set)
+    for record in records:
+        key = (compact_norm(record['name']), record['officeGroup'], record['electionYear'],
+               compact_norm(record.get('province')), compact_norm(record.get('municipality')))
+        exact_odv_rows[key].add(record['personKey'])
+        exact_odv_records[key].append(record)
+        exact_odv_people[(key[0], key[1], key[3], key[4])].add(record['personKey'])
+    for row_number, item in enumerate(read_asog_election_rows(ASOG_DATASET), start=2):
+        asog_rows_loaded += 1
+        asog_dynasty_flag_rows += bool(item['dynastyScreen'])
+        exact_key = (compact_norm(item['name']), item['officeGroup'], item['electionYear'],
+                     compact_norm(item['province']), compact_norm(item['municipality']))
+        matches = exact_odv_rows.get(exact_key, set())
+        identity_matches = exact_odv_people.get((exact_key[0], exact_key[1], exact_key[3], exact_key[4]), set())
+        if len(matches) == 1:
+            person_key = next(iter(matches))
+            asog_exact_identity_matches_to_odv += 1
+        elif len(identity_matches) == 1:
+            person_key = next(iter(identity_matches))
+            asog_exact_identity_matches_to_odv += 1
+        else:
+            # Keep an ambiguous or unmatched election row source-local instead
+            # of guessing that equal/similar names identify one person.
+            digest = hashlib.sha1((compact_norm(item['name']) + '|' + item['officeGroup'] + '|' +
+                                   str(item['electionYear']) + '|' + compact_norm(item['province']) + '|' +
+                                   compact_norm(item['municipality'])).encode()).hexdigest()[:16]
+            person_key = 'asog-election:' + digest
+        if len(matches) != 1:
+            records.append({
+                'personKey': person_key, 'familyKey': None, 'name': item['name'],
+                'position': item['position'], 'odvPosition': item['position'],
+                'officeGroup': item['officeGroup'], 'province': item['province'],
+                'municipality': item['municipality'], 'district': '', 'region': item['region'],
+                'party': item['party'], 'electionYear': item['electionYear'],
+                'termYears': item['termYears'], 'termThroughYear': item['termThroughYear'],
+                'sourceId': f'asog-{item["electionYear"]}-{row_number}',
+                'familyBasis': '', 'aliasEvidence': collect_alias_evidence(item['name'], item['aliasEvidence']), 'odvDynastyFlag': False,
+                'asogDynastyFlag': bool(item['dynastyScreen']),
+                'roleNote': 'Ateneo Policy Center / ODV historical election record; its dynasty flag is a screening marker, not a verified family link.',
+                'sourceDataset': 'Ateneo Policy Center Political Dynasties Dataset · historical election row',
+                'asogOnly': len(identity_matches) != 1,
+            })
+            exact_odv_records[exact_key].append(records[-1])
+            asog_election_rows_added += 1
+            if len(identity_matches) != 1:
+                asog_unmatched_or_ambiguous_identity_rows += 1
+            exact_odv_rows[exact_key].add(person_key)
+            exact_odv_people[(exact_key[0], exact_key[1], exact_key[3], exact_key[4])].add(person_key)
+        # Preserve ASOG's screening result and provenance on an exact matched
+        # ODV role as well as on ASOG-only roles.
+        if len(matches) == 1:
+            for record in exact_odv_records.get(exact_key, []):
+                if record['personKey'] != person_key:
+                    continue
+                record['asogDynastyFlag'] = bool(record.get('asogDynastyFlag') or item['dynastyScreen'])
+                record['aliasEvidence'] = collect_alias_evidence(
+                    record['name'], record.get('aliasEvidence', []) + item['aliasEvidence'])
+                record.setdefault('sourceDataset', 'ODV political_dynasties + Ateneo Policy Center historical election dataset')
+                if item['dynastyScreen']:
+                    note = 'Ateneo/ODV historical dataset marks this election row dynasty-flagged; this screening marker does not establish a specific family link.'
+                    if note not in record.get('roleNote', ''):
+                        record['roleNote'] = (record.get('roleNote', '') + ' ' + note).strip()
 
     # The archived ODV dump has elected Duterte office records but no verified
     # family edge or dynasty_family_id for Rodrigo Duterte, Sara Duterte, and
@@ -341,6 +616,7 @@ def build():
                    family_key='source-family:duterte', family_basis='Publicly documented Duterte family link'):
         name, province, municipality = online_people[slug]
         person_key = 'online-person:' + slug
+        alias_evidence = collect_alias_evidence(name)
         online_records.append({
             'personKey': person_key, 'familyKey': family_key,
             'name': name, 'position': position, 'odvPosition': position.upper(),
@@ -352,6 +628,7 @@ def build():
             'termThroughYear': through,
             'sourceId': 'online-duterte-' + slug + '-' + str(election_year) + '-' + re.sub(r'\W+', '-', position.lower()).strip('-'),
             'familyBasis': family_basis,
+            'aliasEvidence': alias_evidence,
             'roleSourceUrl': role_sources[source_key], 'roleNote': note,
         })
 
@@ -428,6 +705,264 @@ def build():
                family_key='source-family:tulfo', family_basis='Publicly documented Tulfo family link')
     records.extend(online_records)
 
+    # Use the locally captured 20th Congress roster as the current House
+    # officeholder source. The ODV 2025 election snapshot has incomplete and
+    # duplicated winner rows, so replace its 2025 House rows with this roster.
+    records = [r for r in records if not (r['electionYear'] == 2025 and
+                                          r['officeGroup'] == 'Congress / party-list representative')]
+    records = [r for r in records if not (r.get('sourceId', '').startswith('online-duterte-') and
+                                          r['electionYear'] == 2025 and
+                                          r['officeGroup'] == 'Congress / party-list representative')]
+    house_family_people = {
+        compact_norm('PAOLO DUTERTE'): ('PAOLO Z. DUTERTE', 'online-person:paolo', 'source-family:duterte', '2025_winners'),
+        compact_norm('OMAR DUTERTE'): ('OMAR VINCENT S. DUTERTE', 'online-person:omar', 'source-family:duterte', '2025_winners'),
+        compact_norm('HAROLD DUTERTE'): ('HAROLD JAMES TAPANGAN DUTERTE', 'online-person:harold', 'source-family:duterte', 'harold_house'),
+        compact_norm('RALPH TULFO'): ('RALPH WENDEL TULFO', 'online-person:ralph_tulfo', 'source-family:tulfo', 'ralph_house_2025'),
+        compact_norm('JOCELYN TULFO'): ('JOCELYN P TULFO', 'online-person:jocelyn_tulfo', 'source-family:tulfo', 'jocelyn_house_2025'),
+    }
+    family_source_by_key = {x['key']: x for x in documented_families}
+    resignation_events = {}
+    for item in raw_house_roster:
+        if 'resigned' not in str(item.get('party') or '').casefold():
+            continue
+        name = compact_norm(re.sub(r'\[[^\]]+\]', '', str(item.get('province') or '')))
+        date = re.sub(r'\[[^\]]+\]', '', str(item.get('representative') or '')).strip()
+        if name:
+            resignation_events[name] = date
+    current_house_odv_match_count = 0
+    current_house_fat_flag_count = 0
+    current_house_verified_link_count = 0
+    odv_flagged_full_names = set()
+    if ODV_OFFICIALS.exists():
+        try:
+            with gzip.open(ODV_OFFICIALS, 'rt', encoding='utf-8', errors='replace', newline='') as stream:
+                for row in csv.DictReader(stream):
+                    if row.get('fat') != '1':
+                        continue
+                    name = ' '.join(row.get(field, '') for field in
+                                    ('first_name', 'middle_name', 'last_name', 'suffix')).strip()
+                    if compact_norm(name):
+                        odv_flagged_full_names.add(compact_norm(name))
+        except (OSError, UnicodeError, csv.Error):
+            pass
+    house_roster_records = []
+    for seat in house_roster:
+        roster_name = seat['name']
+        family_person = house_family_people.get(compact_norm(roster_name))
+        display_name = family_person[0] if family_person else roster_name.upper()
+        if family_person:
+            person_key = family_person[1]
+            family_key = family_person[2]
+            family_basis = 'Publicly documented family link'
+            role_source = role_sources[family_person[3]]
+        else:
+            seat_identity = '|'.join((compact_norm(display_name), compact_norm(seat['province']),
+                                      compact_norm(seat['district']), compact_norm(seat['party'])))
+            person_key = 'current-house:' + hashlib.sha1(seat_identity.encode()).hexdigest()[:16]
+            family_key = None
+            family_basis = ''
+            role_source = HOUSE_ROSTER_URL
+        profile_alias = congressman_name_aliases.get(compact_norm(roster_name), '')
+        odv_hits = list({hit['id']: hit for name in (roster_name, profile_alias)
+                         for hit in odv_house_identity_rows.get(compact_norm(name), [])}.values())
+        if odv_hits:
+            current_house_odv_match_count += 1
+            district_number = re.search(r'\d+', seat['district'])
+            matching_house_hits = [hit for hit in odv_hits
+                                   if office_group(hit['position']) == 'Congress / party-list representative'
+                                   and (not district_number or not re.search(r'\d+', hit['district']) or
+                                        district_number.group(0) == re.search(r'\d+', hit['district']).group(0))]
+            identity_ids = {hit['unifiedId'] for hit in matching_house_hits if hit['unifiedId']}
+            if len(identity_ids) == 1:
+                unified_id = next(iter(identity_ids))
+                family.union(person_key, 'person:' + unified_id)
+                for hit in matching_house_hits:
+                    if hit['unifiedId'] == unified_id:
+                        family.union('id:' + hit['id'], 'person:' + unified_id)
+            elif matching_house_hits:
+                # Without a unified ODV ID, only attach source rows whose
+                # normalized district matches this House seat. Exact name plus
+                # seat identity is required; a surname match is never used.
+                seat_number = district_number.group(0) if district_number else None
+                selected = [hit for hit in matching_house_hits
+                            if seat_number and re.search(r'\d+', hit['district']) and
+                            re.search(r'\d+', hit['district']).group(0) == seat_number]
+                for hit in selected:
+                    family.union(person_key, 'id:' + hit['id'])
+                    if hit['unifiedId']:
+                        family.union('id:' + hit['id'], 'person:' + hit['unifiedId'])
+            family_ids = {hit['familyId'] for hit in odv_hits if hit['familyId']}
+            if len(family_ids) == 1:
+                family.union(person_key, 'family:' + next(iter(family_ids)))
+            if any(family.find(person_key) == family.find('id:' + hit['id']) for hit in odv_hits if hit['id']):
+                current_house_verified_link_count += 1
+        position = ('Party-list Representative · ' + seat['district'] if seat['seatType'] == 'party-list'
+                    else 'House Representative · ' + seat['district'])
+        source_id = '20th-house-' + hashlib.sha1((compact_norm(roster_name) + '|' + compact_norm(seat['district'])).encode()).hexdigest()[:16]
+        resignation_date = resignation_events.get(compact_norm(roster_name))
+        name_key = compact_norm(roster_name)
+        # The ODV flag comes from any source row for that exact full name.
+        # Do not carry it across first+last aliases because namesakes can be
+        # different officials and the flag is only a screening indicator.
+        dynasty_flag = any(compact_norm(name) in odv_flagged_full_names
+                           for name in (roster_name, profile_alias) if name)
+        current_house_fat_flag_count += bool(dynasty_flag)
+        house_alias_evidence = collect_alias_evidence(
+            display_name,
+            ([{'name': profile_alias, 'source': 'ODV congressman profile · unique display/full-name pair'}]
+             if profile_alias else []) +
+            [item for hit in odv_hits for item in odv_aliases_by_id.get(hit['id'], [])])
+        house_roster_records.append({
+            'personKey': person_key, 'familyKey': family_key, 'name': display_name,
+            'aliasEvidence': house_alias_evidence,
+            'position': position, 'odvPosition': 'PARTY-LIST REPRESENTATIVE' if seat['seatType'] == 'party-list' else 'MEMBER, HOUSE OF REPRESENTATIVES',
+            'officeGroup': 'Congress / party-list representative',
+            'province': seat['province'], 'municipality': '', 'district': seat['district'],
+            'region': 'National' if seat['seatType'] == 'party-list' else '',
+            'party': seat['district'] if seat['seatType'] == 'party-list' else seat['party'],
+            'electionYear': 2025, 'officeStartYear': 2025, 'termYears': 3,
+            'termThroughYear': 2025 if resignation_date else 2028,
+            'sourceId': source_id, 'familyBasis': family_basis, 'roleSourceUrl': role_source,
+            'roleNote': ('20th Congress House roster; ' + ('party-list seat.' if seat['seatType'] == 'party-list' else 'district seat.') +
+                         (f' Roster records resignation on {resignation_date}; term is not extended beyond 2025.' if resignation_date else '')),
+            'odvDynastyFlag': bool(dynasty_flag),
+        })
+    records.extend(house_roster_records)
+
+    # Add source-linked family-parser relationships to ODV officeholder
+    # identities. This repository contains reviewed research extracts from
+    # Wikipedia, Rappler, and other public reporting. Require an explicit
+    # kinship type, confidence >= 8/10, and a source URL. Political allies,
+    # succession, same-person, and vague dynasty labels are not kinship edges.
+    kinship_terms = {
+        'father/son', 'father/daughter', 'son/father', 'daughter/father',
+        'mother/son', 'mother/daughter', 'son/mother', 'daughter/mother',
+        'husband/wife', 'wife/husband', 'brother/brother', 'brother/sister',
+        'sister/brother', 'sister/sister', 'brother', 'sister', 'cousin',
+        'father-in-law/son-in-law', 'father-in-law/daughter-in-law',
+        'sister/brother-in-law', 'brother-in-law/sister-in-law',
+        'sister-in-law', 'brother-in-law', 'grandfather/grandson',
+        'grandson/grandfather', 'grandson/grandmother', 'nephew/aunt',
+        'niece/uncle', 'nephew/uncle', 'uncle/nephew', 'son', 'sisters',
+        'father', 'mother', 'daughter', 'husband', 'wife', 'spouse', 'parent', 'child',
+        'uncle', 'aunt', 'nephew', 'niece', 'grandfather', 'grandmother',
+        'grandson', 'granddaughter', 'granduncle', 'grandaunt', 'father-in-law',
+        'mother-in-law', 'son-in-law', 'daughter-in-law', 'grandchild',
+    }
+    house_person_keys = {r['personKey'] for r in house_roster_records}
+    # Full names are primary. A first+last alias is admitted only where it
+    # identifies exactly one person in the relevant roster or office records.
+    house_aliases = defaultdict(set)
+    office_aliases = defaultdict(set)
+    for record in house_roster_records:
+        house_aliases[compact_norm(record['name'])].add(record['personKey'])
+        for alias in record.get('aliasEvidence', []):
+            house_aliases[compact_norm(alias.get('name'))].add(record['personKey'])
+        alias = first_last_key(record['name'])
+        if alias:
+            house_aliases[alias].add(record['personKey'])
+    for record in records:
+        if record.get('asogOnly'):
+            continue
+        office_aliases[compact_norm(record['name'])].add(record['personKey'])
+        for alias in record.get('aliasEvidence', []):
+            office_aliases[compact_norm(alias.get('name'))].add(record['personKey'])
+        alias = first_last_key(record['name'])
+        if alias:
+            office_aliases[alias].add(record['personKey'])
+    cited_family_edges = []
+    seen_cited_edges = set()
+    relationship_paths = sorted(FAMILY_LINK_DIR.glob('llm_relationships_*.csv'))
+    relationship_paths.extend(sorted((ROOT / 'database').rglob('*.csv')))
+    specific_relationship_file = FAMILY_LINK_DIR / 'all_names_relationships_csvs/llm_specific_names_relationships.csv'
+    if specific_relationship_file.exists():
+        relationship_paths.append(specific_relationship_file)
+    for path in relationship_paths:
+        try:
+            with path.open(encoding='utf-8-sig', newline='') as stream:
+                for relation in csv.DictReader(stream):
+                    relation_type = (relation.get('relationship_type') or '').strip().casefold()
+                    source_url = (relation.get('source_url') or '').strip()
+                    if not re.match(r'^https?://', source_url, re.I):
+                        continue
+                    try:
+                        confidence = int(relation.get('confidence_level') or 0)
+                    except ValueError:
+                        continue
+                    left_name = (relation.get('person1_name') or '').strip()
+                    right_name = (relation.get('person2_name') or '').strip()
+                    if (relation_type not in kinship_terms or confidence < 8 or not source_url
+                            or not left_name or not right_name):
+                        continue
+
+                    def resolve_person(name, aliases, exact_only=False):
+                        candidates = aliases.get(compact_norm(name), set())
+                        if not candidates and not exact_only:
+                            alias = first_last_key(name)
+                            candidates = aliases.get(alias, set()) if alias else set()
+                        return next(iter(candidates)) if len(candidates) == 1 else None
+
+                    left_house = resolve_person(left_name, house_aliases)
+                    right_house = resolve_person(right_name, house_aliases)
+                    # At least one side must be a current House member. Resolve
+                    # the other side against the complete elected-office set.
+                    if left_house:
+                        left_key = left_house
+                        right_key = resolve_person(right_name, office_aliases)
+                    elif right_house:
+                        left_key = resolve_person(left_name, office_aliases)
+                        right_key = right_house
+                    else:
+                        continue
+                    if not left_key or not right_key or left_key == right_key:
+                        continue
+                    identity = tuple(sorted((left_key, right_key))) + (relation_type, source_url)
+                    if identity in seen_cited_edges:
+                        continue
+                    seen_cited_edges.add(identity)
+                    family.union(left_key, right_key)
+                    edge = {'a': left_key, 'b': right_key, 'type': relation_type,
+                            'detail': (relation.get('relationship_description') or '').strip(),
+                            'basis': 'cited family-parser relationship', 'sourceUrl': source_url,
+                            'confidence': confidence}
+                    edges.append(edge)
+                    cited_family_edges.append(edge)
+        except (OSError, UnicodeError, csv.Error):
+            continue
+    cited_house_link_count = len({key for edge in cited_family_edges
+                                  for key in (edge['a'], edge['b']) if key in house_person_keys})
+
+    # Succession changes are one continuous office tenure for the same
+    # Duterte official; do not count the acting title and the sworn-in title
+    # as duplicate officeholders during their transition year.
+    for source_id, person_key, combined_position, note in (
+        ('online-duterte-sebastian-2025-acting-mayor', 'online-person:sebastian',
+         'Mayor · acting then by succession',
+         'Began acting as Mayor in June 2025 and was sworn in after succession on 23 January 2026; modeled once as one continuous mayoral tenure.'),
+        ('online-duterte-rigo-2025-acting-vice-mayor', 'online-person:rigo',
+         'Vice Mayor · acting then by succession',
+         'Became Acting Vice Mayor in July 2025 and was sworn in after succession on 23 January 2026; modeled once as one continuous vice-mayoral tenure.'),
+    ):
+        transition = next((r for r in records if r.get('sourceId') == source_id), None)
+        if not transition:
+            continue
+        person = dict(transition)
+        person.update({'position': combined_position, 'odvPosition': combined_position.upper(),
+                       'officeStartYear': 2025, 'termYears': 3, 'termThroughYear': 2028,
+                       'roleNote': note})
+        records = [r for r in records if r.get('personKey') != person_key or
+                   not (r['electionYear'] == 2025 and r['officeGroup'] in {'Mayor','Vice Mayor'} and
+                        ('acting' in r['position'].casefold() or 'by succession' in r['position'].casefold()))]
+        records.append(person)
+    # Rigo left his elected councilor seat when he became vice mayor. Retain
+    # the councilor year as a completed, separate office and avoid carrying
+    # that seat forward alongside the succession tenure.
+    for record in records:
+        if record.get('personKey') == 'online-person:rigo' and record['position'] == 'Councilor · 1st District':
+            record['termThroughYear'] = 2025
+            record['termYears'] = 0
+            record['roleNote'] = 'Held the elected councilor seat before becoming Acting Vice Mayor in July 2025.'
+
     documented_member_keys = set()
     documented_family_basis = {}
     for documented in documented_families:
@@ -490,6 +1025,25 @@ def build():
     # exact seat collision; same-name officials in different places stay
     # separate. Barangay captain rows lack a barangay identifier and are not
     # inferred to be duplicates from municipality alone.
+    # Explicitly reconcile the ODV Ginatilan entries "Karyn Duterte" and
+    # "Karyn James Duterte" using public reports identifying Karyn James
+    # Duterte as the Ginatilan councilor. Do not generalize this to other
+    # same-surname officials or to other first/last-name variants.
+    karyn_aliases = {compact_norm('Karyn Duterte'), compact_norm('Karyn James Duterte'),
+                     compact_norm('Karyn James Berongan Duterte')}
+    karyn_records = [r for r in records if compact_norm(r['name']) in karyn_aliases
+                     and compact_norm(r.get('province')) == compact_norm('Cebu')
+                     and compact_norm(r.get('municipality')) == compact_norm('Ginatilan')
+                     and r['officeGroup'] == 'Councilor']
+    karyn_person_keys = {r['personKey'] for r in karyn_records}
+    karyn_duterte_name_variants_deduplicated = int(len(karyn_person_keys) > 1)
+    if karyn_duterte_name_variants_deduplicated:
+        canonical = 'documented-person:karyn-james-berongan-duterte'
+        for person_key in karyn_person_keys:
+            family.union(canonical, person_key)
+        for record in records:
+            if record['personKey'] in karyn_person_keys:
+                record['personKey'] = canonical
     local_seat_groups = defaultdict(list)
     for record in records:
         province = compact_norm(record.get('province'))
@@ -542,6 +1096,8 @@ def build():
                 record[field] = ''
         if office_level(record['officeGroup']) == 'national':
             record['region'] = 'National'
+        record['aliasEvidence'] = collect_alias_evidence(
+            record['name'], [item for match in matches for item in match.get('aliasEvidence', [])])
         if len(matches) > 1:
             record['sourceRowIds'] = sorted({r['sourceId'] for r in matches if r.get('sourceId')})
             record['duplicateRowsCollapsed'] = len(matches) - 1
@@ -552,6 +1108,13 @@ def build():
                 record['roleNote'] = (record.get('roleNote', '') + ' ' + note).strip()
         deduped_records.append(record)
     records = deduped_records
+
+    aliases_by_person = defaultdict(list)
+    for record in records:
+        aliases_by_person[record['personKey']].extend(record.get('aliasEvidence', []))
+    for record in records:
+        record['aliasEvidence'] = collect_alias_evidence(record['name'], aliases_by_person[record['personKey']])
+        record['aliases'] = [item['name'] for item in record['aliasEvidence']]
 
     # Build overlapping family officeholder windows. NO applies when two or
     # more distinct family members hold office in the same calendar year,
@@ -567,8 +1130,11 @@ def build():
         if record['familyKey']:
             if not record['familyBasis']:
                 record['familyBasis'] = (record.get('documentedFamilyBasis') or
-                                         ('Publicly documented family link' if record['personKey'] in documented_member_keys
-                                          else 'ODV linked family group'))
+                                         ('Cited family relationship' if any(
+                                             family.find(edge['a']) == root or family.find(edge['b']) == root
+                                             for edge in cited_family_edges) else
+                                          ('Publicly documented family link' if record['personKey'] in documented_member_keys
+                                           else 'ODV linked family group')))
             offices_by_family[record['familyKey']].append(record)
     no_vote_decisions = {}
     for family_key, members in offices_by_family.items():
@@ -604,6 +1170,7 @@ def build():
                 representative = min(office_records, key=lambda office: (office['electionYear'], office['position']))
                 concurrent.append({
                     'name': representative['name'], 'position': '; '.join(positions),
+                    'aliases': representative.get('aliases', []),
                     'officeGroup': representative['officeGroup'], 'province': representative['province'],
                     'municipality': representative['municipality'], 'electionYear': representative['electionYear'],
                     'overlapYears': years,
@@ -644,7 +1211,8 @@ def build():
         if not record['familyKey']:
             continue
         person = family_history[record['familyKey']].setdefault(record['personKey'], {
-            'personKey': record['personKey'], 'name': record['name'], 'offices': []
+            'personKey': record['personKey'], 'name': record['name'], 'offices': [],
+            'aliases': record.get('aliases', []), 'aliasEvidence': record.get('aliasEvidence', [])
         })
         office = {
             'position': record['position'], 'officeGroup': record['officeGroup'],
@@ -662,40 +1230,91 @@ def build():
         for key, members in family_history.items()
     }
 
+    cited_evidence_by_root = defaultdict(list)
+    for edge in cited_family_edges:
+        root = family.find(edge['a'])
+        item = {'relationship': edge['detail'] or edge['type'], 'sourceUrl': edge['sourceUrl'],
+                'confidence': edge['confidence']}
+        if item not in cited_evidence_by_root[root]:
+            cited_evidence_by_root[root].append(item)
+    family_link_evidence = {}
+    for record in records:
+        if not record.get('familyKey'):
+            continue
+        items = cited_evidence_by_root.get(family.find(record['personKey']), [])
+        documented = next((item for item in documented_families
+                           if item['key'] == record['familyKey']), None)
+        if documented:
+            items = items + [{'relationship': documented['basis'], 'sourceUrl': url,
+                              'confidence': None} for url in documented['sources']]
+        if items:
+            target = family_link_evidence.setdefault(record['familyKey'], [])
+            target.extend(item for item in items if item not in target)
+    current_house_family_linked_rows = sum(bool(r.get('familyKey')) for r in house_roster_records)
+    current_house_no_vote_rows = sum(bool(r.get('doNotVote')) for r in house_roster_records)
+
     records.sort(key=lambda r: (r['electionYear'], r['officeGroup'], norm(r['province']), norm(r['municipality']), norm(r['name'])))
     result = {
         'generatedAt': __import__('datetime').datetime.now(__import__('datetime').timezone.utc).isoformat(),
-        'source': 'ODV database/dynasty_dump.sql.gz · political_dynasties and verified relationships tables, supplemented with cited current role records and family links for Duterte, Cayetano, Tulfo, and Villar officials',
+        'source': 'ODV database/dynasty_dump.sql.gz · political_dynasties and verified relationships tables; Ateneo Policy Center historical election dataset (2004–2016); ODV congressman name profiles; locally captured 20th Congress roster; and source-linked family relationship extracts',
         'sourceSha256': source_hash,
         'years': sorted({r['electionYear'] for r in records}),
-        'scope': 'Deduplicated elected office records in archived ODV data for national and local offices from 2004–2025, supplemented with published current roles and documented family links for Duterte, Cayetano, Tulfo, and Villar officials where ODV is missing or mislabels records. This does not make the national ODV roster complete and is not a 2028 candidate list.',
+        'scope': 'Deduplicated elected office records in archived ODV data for national and local offices from 2004–2025, supplemented with the local 20th Congress district and party-list roster and cited current roles/family links. This is not a complete national/local officeholder roster and is not a 2028 candidate list.',
         'recordsScope': 'The records array contains NO-marked officeholders only. The families object retains linked historical family-member office records for context.',
         'method': {
             'noVoteRule': 'NO means at least two distinct linked family members held office in the same modeled calendar year. A family with exactly one local and one national officeholder in that year is excluded. Links come from ODV-verified relationships, shared ODV dynasty_family_id, or specifically cited public family sources; shared surnames alone do not count.',
+            'aliases': 'Official names remain the primary display and identity fields. Usable ODV nickname-field values and separately cited public aliases are preserved as aliases for search, display, details, and export. Date-like values and a short list of known agency abbreviations are excluded. Nicknames never determine family links or identity merges.',
             'officeLevels': 'President/vice president, senators, and House/party-list representatives are classified as national. Governors, vice governors, mayors, vice mayors, provincial board members, and councilors are classified as local.',
             'terms': 'President/vice president and senators are modeled as six-year terms; other included elected positions as three-year terms, based on the election year in ODV. Partial final calendar years are included in overlap checks.',
-            'familyLinks': 'Uses ODV relationship records marked verified=true (family relationship types 1–20), source dynasty_family_id values, and separately cited public family links for Duterte, Cayetano, Tulfo, and Villar officials. Duplicate person IDs are consolidated only with an exact full name inside a linked family group or on the same fully identified local seat. Repeated copies of one national office or House seat in the same election year are collapsed; distinct House districts remain separate. Conflicting copied location labels are omitted. Surname-only matching is not used.',
-            'limitations': 'The archived ODV records are incomplete and vary by election year and office. Online additions repair selected current roles and documented family links, not the full national or local roster; the wider 2019 winner-marked roster remains incomplete, and 2022/2025 local-office coverage is sparse. Some source rows or relationships may still be omitted or misclassified. NO years use inclusive modeled calendar-year windows; check the linked evidence and official records before relying on a marker. No NO means this incomplete screen found no qualifying overlap, not that no political family link exists.',
+            'familyLinks': 'Uses ODV relationship records marked verified=true (family relationship types 1–20), source dynasty_family_id values, cited public family links, and source-linked family-parser edges with explicit kinship types and confidence >= 8/10. Family-parser edges connect to the 20th House roster only on exact full-name matches or unique first+last aliases, and connect to another elected officeholder only when that name resolves uniquely. Political allies, succession claims, same-person labels, vague dynasty labels, and surname-only matching are excluded. Duplicate person IDs are consolidated only with an exact full name inside a linked family group or on the same fully identified local seat. Repeated copies of one national office or House seat in the same election year are collapsed; distinct House districts remain separate.',
+            'localNameDeduplication': 'The documented Ginatilan entries Karyn Duterte and Karyn James Duterte are consolidated as one person using public reporting. This is a specific source-backed alias reconciliation, not a general first+last or shared-surname merge.',
+            'historicalElectionData': 'The Ateneo Policy Center historical election dataset adds 2004–2016 elected-office records and a separate dynasty-screen flag. Its flag is not a person-to-person relationship and never creates a family group or NO vote. ODV congressman display/full-name variants are used only as unique name aliases; congressman family_connections fields list contractor entities, so they are excluded from family-link evidence. Party-list membership rows are an identity/seat source, not kinship evidence.',
+            'limitations': 'The archived ODV records remain incomplete and vary by election year and office. All 311 current district and party-list House seats are represented from the locally captured 20th Congress roster; exact ODV and cited-kinship match counts are reported in the summary. The historical election dataset adds records where ODV rows were absent, but historical 2019 coverage and 2022/2025 local-office coverage remain sparse. ODV fat=1 and the Ateneo dynasty flag are screening markers only; neither is proof of a specific kinship link and neither independently creates a family group or NO vote. Some source rows or relationships may still be omitted or misclassified. NO years use inclusive modeled calendar-year windows; check linked evidence and official records before relying on a marker. No NO means this incomplete screen found no qualifying overlap, not that an official has no family ties.',
         },
         'summary': {
             'officialRows': len(records),
             'noVoteRows': sum(r['doNotVote'] for r in records),
+            'noVoteRowsWithKnownAliases': sum(bool(r.get('aliases')) for r in records if r['doNotVote']),
             'familyGroupsWithQualifyingTerms': len({r['familyKey'] for r in records if r['doNotVote']}),
             'duplicatePersonIdsConsolidatedWithinFamilies': identity_dedup_count,
             'duplicateOfficeRowsRemoved': duplicate_office_rows_removed,
+            'asogHistoricalElectionRowsRead': asog_rows_loaded,
+            'asogDynastyScreenFlaggedElectionRows': asog_dynasty_flag_rows,
+            'asogRowsMatchedToODVPersonIdentity': asog_exact_identity_matches_to_odv,
+            'asogAdditionalHistoricalOfficeRows': asog_election_rows_added,
+            'asogUnmatchedOrAmbiguousIdentityRows': asog_unmatched_or_ambiguous_identity_rows,
+            'odvCongressmanProfilesRead': len(congressman_profiles),
+            'odvCongressmanUniqueNameVariantPairs': congressman_unique_name_variant_pairs,
+            'DuterteNameVariantsDeduplicated': karyn_duterte_name_variants_deduplicated,
             'senateSnapshotRowsCorrectedTo2022Term': senate_snapshot_rows_corrected,
             'senateNameVariantsNormalized': senate_name_variants_normalized,
             'misclassifiedSenateRowsRemoved': misclassified_senate_rows_removed,
+            'currentHouseRosterRows': len(house_roster),
+            'currentHouseODVExactNameMatches': current_house_odv_match_count,
+            'currentHouseODVDynastyFlagMatches': current_house_fat_flag_count,
+            'currentHouseODVIdentityLinkedRows': current_house_verified_link_count,
+            'currentHouseCitedKinshipLinkMatches': cited_house_link_count,
+            'currentHouseFamilyLinkedRows': current_house_family_linked_rows,
+            'currentHouseNoVoteRows': current_house_no_vote_rows,
+            'citedKinshipEdgesUsed': len(cited_family_edges),
+            'currentHouseRosterSource': HOUSE_ROSTER_URL,
             'byYear': {str(y): {'rows': sum(r['electionYear'] == y for r in records), 'noVoteRows': sum(r['electionYear'] == y and r['doNotVote'] for r in records)} for y in sorted({r['electionYear'] for r in records})},
             'byOffice': {g: {'rows': sum(r['officeGroup'] == g for r in records), 'noVoteRows': sum(r['officeGroup'] == g and r['doNotVote'] for r in records)} for g in sorted({r['officeGroup'] for r in records})},
         },
         'documentedFamilyLinks': documented_families,
+        'documentedNameVariantLinks': [{
+            'names': ['Karyn Duterte', 'Karyn James Duterte'],
+            'scope': 'Ginatilan, Cebu councilor records',
+            'sources': ['https://www.philstar.com/cebu-news/2005/06/25/283619/town-mayor-defends-speedy-budget-okay',
+                        'https://www.comelec.gov.ph/php-tpls-attachments/2019NLE/ElectionResults/2019NLE_LIst_of_Elected_CityMun_Candidates.pdf']
+        }],
         'documentedRoleOutcomes': [{
             'name': online_people['rodrigo'][0], 'electionYear': 2025,
             'outcome': 'Elected mayor but did not take the oath and did not assume office; not counted as an officeholder for the NO rule.',
             'sourceUrl': 'https://www.gmanetwork.com/news/topstories/regions/973931/baste-duterte-takes-oath-as-davao-city-mayor/story/'
         }],
         'families': family_history,
+        'familyLinkEvidence': family_link_evidence,
         'records': [record for record in records if record['doNotVote']],
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)

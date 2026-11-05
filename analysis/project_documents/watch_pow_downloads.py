@@ -12,7 +12,7 @@ from concurrent.futures import ProcessPoolExecutor
 from datetime import datetime, timezone
 from pathlib import Path
 
-CODE = re.compile(r'^2027DPWH-Proposal-\d{5}$')
+CODE = re.compile(r'^2027DPWH-(?:Proposal|HGAB)-\d{5}$')
 DEFAULT_ROOT = os.environ.get('DPWH_STATUS_ROOT')
 
 def utc():
@@ -37,18 +37,22 @@ def atomic_json(path, value):
 
 def ledger_rows(ledger):
     found = {}
-    with ledger.open(encoding='utf-8') as stream:
-        for line in stream:
-            try:
-                record = json.loads(line)
-            except ValueError:
-                continue
-            if record.get('status') != 'downloaded' or str(record.get('documentType', '')).strip().casefold() != 'pow':
-                continue
-            code, document_id, signature = record.get('projectCode', ''), str(record.get('documentId', '')), str(record.get('signature', ''))
-            if not CODE.fullmatch(code) or not document_id.isdigit() or not re.fullmatch(r'[a-f0-9]{64}', signature):
-                continue
-            found[(code, document_id, signature)] = record
+    ledgers = (ledger, ledger.with_name('downloads-hgab.jsonl'))
+    for source in ledgers:
+        if not source.is_file():
+            continue
+        with source.open(encoding='utf-8') as stream:
+            for line in stream:
+                try:
+                    record = json.loads(line)
+                except ValueError:
+                    continue
+                if record.get('status') != 'downloaded' or str(record.get('documentType', '')).strip().casefold() != 'pow':
+                    continue
+                code, document_id, signature = record.get('projectCode', ''), str(record.get('documentId', '')), str(record.get('signature', ''))
+                if not CODE.fullmatch(code) or not document_id.isdigit() or not re.fullmatch(r'[a-f0-9]{64}', signature):
+                    continue
+                found[(code, document_id, signature)] = record
     return sorted(found.values(), key=lambda r: (r.get('at', ''), r['projectCode'], str(r['documentId'])))
 
 def parse_one(record, root_value, result_root_value, parser_version, ocr_engine='apple_tesseract'):
@@ -144,7 +148,7 @@ def main():
     cli.add_argument('--root', type=Path, default=Path(DEFAULT_ROOT) if DEFAULT_ROOT else None)
     cli.add_argument('--interval', type=int, default=20)
     cli.add_argument('--workers', type=int, default=1, help='primary Apple/Tesseract parser processes for new or unparsed PDFs')
-    cli.add_argument('--paddle-workers', type=int, default=7, help='PaddleOCR processes for primary parses that recovered no bill rows')
+    cli.add_argument('--paddle-workers', type=int, default=1, help='PaddleOCR processes for primary parses that recovered no bill rows')
     cli.add_argument('--once', action='store_true')
     cli.add_argument('--status', action='store_true', help='print the latest internal status and exit')
     args = cli.parse_args()
