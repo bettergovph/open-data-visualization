@@ -1280,20 +1280,19 @@ def build():
     records.sort(key=lambda r: (r['electionYear'], r['officeGroup'], norm(r['province']), norm(r['municipality']), norm(r['name'])))
     result = {
         'generatedAt': __import__('datetime').datetime.now(__import__('datetime').timezone.utc).isoformat(),
-        'source': 'ODV database/dynasty_dump.sql.gz · political_dynasties and verified relationships tables; Ateneo Policy Center historical election dataset (2004–2016); ODV congressman name profiles; locally captured 20th Congress roster; and source-linked family relationship extracts',
-        'sourceSha256': source_hash,
+        'source': 'Historical elected-office records; Ateneo Policy Center historical election data (2004–2016); official 20th Congress roster; and cited public family-relationship sources',
         'years': sorted({r['electionYear'] for r in records}),
         'scope': 'Deduplicated elected office records in archived ODV data for national and local offices from 2004–2025, supplemented with the local 20th Congress district and party-list roster and cited current roles/family links. This is not a complete national/local officeholder roster and is not a 2028 candidate list.',
-        'recordsScope': 'The records array contains NO-marked officeholders only. The families object retains linked historical family-member office records for context.',
+        'recordsScope': 'The records array contains officeholders whose linked-family records meet the displayed one-at-a-time criterion in one or more modeled years. The families object retains linked historical family-member office records for context.',
         'method': {
-            'noVoteRule': 'NO means at least two distinct linked family members held office in the same modeled calendar year. A family with exactly one local and one national officeholder in that year is excluded. Links come from ODV-verified relationships, shared ODV dynasty_family_id, or specifically cited public family sources; shared surnames alone do not count.',
+            'noVoteRule': 'A red marker means at least two distinct linked family members held office in the same modeled calendar year. A family with exactly one local and one national officeholder in that year is excluded. Links come from ODV-verified relationships, shared ODV dynasty_family_id, or specifically cited public family sources; shared surnames alone do not count.',
             'aliases': 'Official names remain the primary display and identity fields. Usable ODV nickname-field values and separately cited public aliases are preserved as aliases for search, display, details, and export. Date-like values and a short list of known agency abbreviations are excluded. Nicknames never determine family links or identity merges.',
             'officeLevels': 'President/vice president, senators, and House/party-list representatives are classified as national. Governors, vice governors, mayors, vice mayors, provincial board members, and councilors are classified as local.',
             'terms': 'President/vice president and senators are modeled as six-year terms; other included elected positions as three-year terms, based on the election year in ODV. Partial final calendar years are included in overlap checks.',
             'familyLinks': 'Uses ODV relationship records marked verified=true (family relationship types 1–20), source dynasty_family_id values, cited public family links, and source-linked family-parser edges with explicit kinship types and confidence >= 8/10. Family-parser edges connect to the 20th House roster only on exact full-name matches or unique first+last aliases, and connect to another elected officeholder only when that name resolves uniquely. Political allies, succession claims, same-person labels, vague dynasty labels, and surname-only matching are excluded. Duplicate person IDs are consolidated only with an exact full name inside a linked family group or on the same fully identified local seat. Repeated copies of one national office or House seat in the same election year are collapsed; distinct House districts remain separate.',
-            'odvFamilyPageScreen': 'A separate broad coverage count matches current district representatives to the archived ODV family-page grouping by exact province and surname where at least two distinct officials in that group carry the ODV dynasty-screen flag. This is a surname/province screening signal, not proof of kinship, and it never creates a family edge or NO mark.',
+            'odvFamilyPageScreen': 'A separate broad coverage count matches current district representatives to the archived ODV family-page grouping by exact province and surname where at least two distinct officials in the historical 2004–2016 records carry the ODV dynasty-screen flag. The match does not establish that the current representative is related to those officials or that they held office concurrently. It is not proof of kinship and never creates a family edge or NO mark.',
             'localNameDeduplication': 'The documented Ginatilan entries Karyn Duterte and Karyn James Duterte are consolidated as one person using public reporting. This is a specific source-backed alias reconciliation, not a general first+last or shared-surname merge.',
-            'historicalElectionData': 'The Ateneo Policy Center historical election dataset adds 2004–2016 elected-office records and a separate dynasty-screen flag. Its flag is not a person-to-person relationship and never creates a family group or NO vote. ODV congressman display/full-name variants are used only as unique name aliases; congressman family_connections fields list contractor entities, so they are excluded from family-link evidence. Party-list membership rows are an identity/seat source, not kinship evidence.',
+            'historicalElectionData': 'The Ateneo Policy Center historical election dataset adds 2004–2016 elected-office records and a separate dynasty-screen flag. Its flag is not a person-to-person relationship and never establishes a person-to-person family link or creates a red marker. ODV congressman display/full-name variants are used only as unique name aliases; congressman family_connections fields list contractor entities, so they are excluded from family-link evidence. Party-list membership rows are an identity/seat source, not kinship evidence.',
             'limitations': 'The archived ODV records remain incomplete and vary by election year and office. All 311 current district and party-list House seats are represented from the locally captured 20th Congress roster; exact ODV and cited-kinship match counts are reported in the summary. The historical election dataset adds records where ODV rows were absent, but historical 2019 coverage and 2022/2025 local-office coverage remain sparse. ODV fat=1 and the Ateneo dynasty flag are screening markers only; neither is proof of a specific kinship link and neither independently creates a family group or NO vote. Some source rows or relationships may still be omitted or misclassified. NO years use inclusive modeled calendar-year windows; check linked evidence and official records before relying on a marker. No NO means this incomplete screen found no qualifying overlap, not that an official has no family ties.',
         },
         'summary': {
@@ -1336,13 +1335,29 @@ def build():
         }],
         'documentedRoleOutcomes': [{
             'name': online_people['rodrigo'][0], 'electionYear': 2025,
-            'outcome': 'Elected mayor but did not take the oath and did not assume office; not counted as an officeholder for the NO rule.',
+            'outcome': 'Elected mayor but did not take the oath and did not assume office; not counted as an officeholder for this screen.',
             'sourceUrl': 'https://www.gmanetwork.com/news/topstories/regions/973931/baste-duterte-takes-oath-as-davao-city-mayor/story/'
         }],
         'families': family_history,
         'familyLinkEvidence': family_link_evidence,
         'records': [record for record in records if record['doNotVote']],
     }
+    def public_copy(value):
+        if isinstance(value, dict):
+            clean = {}
+            for key, item in value.items():
+                if key == 'sourceSha256':
+                    continue
+                public_key = key.replace('ODV', 'Historical').replace('odv', 'archive')
+                clean[public_key] = public_copy(item)
+            return clean
+        if isinstance(value, list):
+            return [public_copy(item) for item in value]
+        if isinstance(value, str):
+            return re.sub(r'(?i)odv', 'historical archive', value)
+        return value
+
+    result = public_copy(result)
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(result, ensure_ascii=False, separators=(',', ':')) + '\n')
     return result['summary']
