@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Vote 2028 · BetterGov Budget Research</title>
+  <meta name="description" content="Search archived Philippine elected-office records and recorded family links used for the Vote 2028 concurrent-office screen.">
+  <link id="research-theme-style" rel="stylesheet" href="research-theme.css?v=a60c21b98857">
+  <style>
+    .vote-main{width:100%;max-width:none;margin:0 auto;padding:24px clamp(16px,2vw,32px) 40px;color:#18303b;font:15px/1.5 system-ui,sans-serif}
+    .vote-main *{box-sizing:border-box}
+    .vote-disclaimer{margin:0 0 18px;padding:14px 16px;border:1px solid #e2d6ae;border-left:4px solid #f4c542;border-radius:10px;background:#fff9e7;color:#38434b}
+    .vote-hero{padding:clamp(20px,3vw,34px);border-radius:18px;background:linear-gradient(130deg,#00246a,#0038a8);color:#fff;box-shadow:0 12px 32px #00246a20}
+    .vote-hero .eyebrow{color:#fcd116;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+    .vote-hero h2{max-width:960px;margin:5px 0 8px;font-size:clamp(25px,3vw,38px);line-height:1.14}
+    .vote-hero p{max-width:1050px;margin:0;color:#f4f7ff}
+    .vote-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:24px}
+    .vote-stat{min-width:0;padding:14px 16px;border:1px solid #ffffff40;border-radius:12px;background:#ffffff12}
+    .vote-stat strong{display:block;color:#fff;font-size:clamp(22px,2vw,32px);font-variant-numeric:tabular-nums}
+    .vote-stat span{display:block;color:#fcd116;font-size:12px;font-weight:700}
+    .vote-note{margin:14px 0 24px;color:#52636e;font-size:13px}
+    .vote-controls{display:grid;grid-template-columns:minmax(190px,1fr) minmax(190px,1fr) minmax(220px,1.4fr) auto;gap:10px;align-items:end;padding:16px;border:1px solid #dce4eb;border-radius:14px;background:#fff}
+    .vote-controls label{display:grid;gap:5px;color:#52636e;font-size:12px;font-weight:700}
+    .vote-controls input,.vote-controls select{width:100%;height:42px;padding:8px 10px;border:1px solid #b8c5d0;border-radius:8px;background:white;color:#203744;font:14px system-ui,sans-serif}
+    .vote-actions{display:flex;flex-wrap:wrap;gap:8px}
+    .vote-actions button,.vote-actions a{display:inline-flex;min-height:42px;align-items:center;justify-content:center;padding:8px 12px;border:1px solid #0038a8;border-radius:8px;background:#0038a8;color:#fff;font:700 13px system-ui,sans-serif;text-decoration:none;cursor:pointer}
+    .vote-actions button:disabled{opacity:.6;cursor:wait}
+    .vote-no-only{display:flex;align-items:center;gap:8px;min-height:42px;padding:0 2px;color:#344956;font-size:13px;font-weight:700;white-space:nowrap}
+    .vote-no-only input{width:18px;height:18px}
+    .vote-table-wrap{margin-top:14px;overflow-x:auto;border:1px solid #dce4eb;border-radius:14px;background:#fff}
+    .vote-table{width:100%;border-collapse:collapse;min-width:940px}
+    .vote-table th,.vote-table td{padding:11px 12px;border-bottom:1px solid #e8edf1;text-align:left;vertical-align:top}
+    .vote-table th{position:sticky;top:0;background:#eef3fa;color:#344956;font-size:12px;letter-spacing:.03em;text-transform:uppercase}
+    .vote-table td{color:#243b48;font-size:13px}
+    .vote-table td small{display:block;margin-top:3px;color:#647681;font-size:11px}
+    .vote-person{font-weight:750;color:#102e40}
+    .vote-no{display:inline-flex;align-items:center;justify-content:center;min-width:40px;height:30px;padding:0 7px;border-radius:7px;background:#b42318;color:#fff;font-weight:900;letter-spacing:.02em}
+    .vote-clear{color:#7a8790}
+    .vote-detail-btn{padding:5px 8px;border:1px solid #9aabb8;border-radius:7px;background:#fff;color:#0038a8;font-size:12px;font-weight:700;cursor:pointer}
+    .vote-pagination{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px;margin-top:10px;padding:10px 12px;border:1px solid #dce4eb;border-radius:12px;background:#fff}
+    .vote-pagination button{min-height:36px;padding:6px 12px;border:1px solid #0038a8;border-radius:7px;background:white;color:#0038a8;font-weight:700;cursor:pointer}
+    .vote-pagination button:disabled{opacity:.45;cursor:not-allowed}
+    #vote-status{min-height:24px;margin:10px 2px;color:#566a76;font-size:13px}
+    #vote-dialog{width:min(760px,calc(100vw - 28px));max-height:85vh;padding:20px;border:0;border-radius:16px;box-shadow:0 20px 60px #061e3980}
+    #vote-dialog::backdrop{background:#08223d99}
+    #vote-dialog h2{margin:0 0 4px;color:#123846}
+    #vote-dialog p{margin:4px 0 14px;color:#5e6e78;font-size:13px}
+    #vote-dialog ul{display:grid;gap:8px;padding-left:22px}
+    #vote-dialog li{padding:9px 10px;border-radius:8px;background:#f3f6f8}
+    #vote-dialog .dialog-close{float:right;padding:7px 12px;border:1px solid #0038a8;border-radius:7px;background:#0038a8;color:#fff;font-weight:700;cursor:pointer}
+    .vote-method{margin-top:20px;padding:18px;border:1px solid #dce4eb;border-radius:14px;background:#fff}
+    .vote-method h2{margin:0 0 8px;color:#173948;font-size:20px}
+    .vote-method p{margin:7px 0;color:#536771;font-size:13px}
+    .vote-source-footer{margin-top:18px;padding:14px 0;border-top:1px solid #dce4eb;color:#5e6e78;font-size:12px}
+    .vote-source-footer a{color:#0038a8}
+    @media(max-width:850px){.vote-controls{grid-template-columns:repeat(2,minmax(0,1fr))}.vote-actions{grid-column:1/-1}}
+    @media(max-width:560px){.vote-stats{grid-template-columns:1fr}.vote-controls{grid-template-columns:1fr}.vote-actions{grid-column:auto}.vote-no-only{white-space:normal}}
+  </style>
+<style id="uniform-report-menu-style">
+header{padding-left:clamp(16px,2vw,32px)!important;padding-right:clamp(16px,2vw,32px)!important}
+header .report-nav{box-sizing:border-box!important;display:flex!important;align-items:center!important;flex-wrap:wrap!important;gap:8px!important;width:100%!important;max-width:none!important;height:auto!important;min-height:0!important;margin:12px 0 0!important;padding:0!important;font:13px/1.3 system-ui,sans-serif!important;position:relative!important;z-index:20!important}
+header .report-nav-group{position:relative!important;min-width:130px!important;height:42px!important;margin:0!important;padding:0!important;border:1px solid #ffffff66!important;border-radius:9px!important;background:#0038A8!important}
+header .report-nav-group:first-of-type{min-width:150px!important}
+header .report-nav-group>summary{list-style:none!important;display:flex!important;position:relative!important;align-items:center!important;justify-content:center!important;gap:12px!important;height:40px!important;min-height:40px!important;padding:8px 30px!important;color:#FCD116!important;font:700 14px/1.2 system-ui,sans-serif!important;cursor:pointer!important}
+header .report-nav-group>summary::-webkit-details-marker{display:none!important}
+header .report-nav-group>summary::after{position:absolute!important;right:12px!important;content:'+'!important;color:#fff!important;font-size:17px!important;line-height:1!important}
+header .report-nav-group[open]>summary::after{content:'−'!important}
+header .report-nav-group>summary:hover{color:#fff!important}
+header .report-nav-group>summary:focus-visible{outline:2px solid #FCD116!important;outline-offset:2px!important;border-radius:8px!important}
+header .report-nav-links{position:absolute!important;top:calc(100% + 8px)!important;left:0!important;z-index:1000!important;display:grid!important;grid-template-columns:repeat(2,minmax(180px,1fr))!important;gap:5px!important;width:min(600px,calc(100vw - 32px))!important;max-height:min(70vh,560px)!important;overflow:auto!important;padding:10px!important;border:1px solid #ccd7e5!important;border-radius:12px!important;background:#fff!important;box-shadow:0 14px 36px #001b4d38!important}
+header .report-nav-group:last-child .report-nav-links{left:0!important;right:auto!important;width:min(420px,calc(100vw - 32px))!important}
+header .report-nav a,header .report-nav a:visited{box-sizing:border-box!important;display:flex!important;align-items:center!important;min-width:0!important;min-height:38px!important;margin:0!important;padding:8px 10px!important;color:#0038A8!important;background:#f6f8fb!important;border:1px solid #e0e6ef!important;border-radius:8px!important;text-align:left!important;text-decoration:none!important;font:13px/1.25 system-ui,sans-serif!important;overflow-wrap:anywhere!important}
+header .report-nav>a.report-nav-single,header .report-nav>a.report-nav-single:visited{box-sizing:border-box!important;display:flex!important;align-items:center!important;justify-content:center!important;height:42px!important;min-height:42px!important;padding:8px 15px!important;border:1px solid #ffffff66!important;border-radius:9px!important;background:#0038A8!important;color:#FCD116!important;text-decoration:none!important;font:700 14px/1.2 system-ui,sans-serif!important}
+header .report-nav>a.report-nav-single:hover{color:#fff!important}
+header .report-nav>a.report-nav-single:focus-visible{outline:2px solid #FCD116!important;outline-offset:2px!important}
+header .report-nav a:hover{color:#00246A!important;background:#eef3fb!important;border-color:#0038A8!important}
+header .report-nav a:focus-visible{outline:2px solid #0038A8!important;outline-offset:2px!important}
+.chart-legend-no-rank{list-style:none!important;padding-left:0!important}.chart-legend-no-rank li{grid-template-columns:minmax(0,1fr) auto!important}.chart-legend-no-rank li>span:first-child{overflow-wrap:anywhere}
+.site-ai-credit{box-sizing:border-box!important;width:100%!important;margin:36px 0 0!important;padding:14px clamp(16px,2vw,32px)!important;border-top:1px solid #BDBDBD!important;color:#5A6670!important;font:12px/1.55 system-ui,sans-serif!important}.site-ai-credit p{max-width:none!important;margin:0!important}.site-ai-credit p+p{margin-top:6px!important}.site-ai-credit a{color:#0038A8!important;text-underline-offset:2px!important}
+.mpb-source-footer{box-sizing:border-box!important;width:100%!important;margin:36px 0 0!important;padding:16px clamp(16px,2vw,32px)!important;border-top:1px solid #BDBDBD!important;color:#5A6670!important;font:12px/1.55 system-ui,sans-serif!important}.mpb-source-footer p{max-width:none!important;margin:0 0 6px!important}.mpb-source-footer p:last-child{margin-bottom:0!important}.mpb-source-footer a{color:#0038A8!important;text-underline-offset:2px!important}
+@media(max-width:680px){header .report-nav-group{flex:1 1 calc(33.333% - 8px)!important;min-width:100px!important}header .report-nav-single{flex:1 1 calc(33.333% - 8px)!important;min-width:100px!important}header .report-nav-group>summary{justify-content:center!important;min-height:40px!important}header .report-nav-group>summary::after{position:absolute!important;right:14px!important}header .report-nav-links{grid-template-columns:1fr!important;width:min(480px,calc(100vw - 32px))!important}header .report-nav-group:last-child .report-nav-links{right:0!important;left:auto!important}}
+body.bettergov-research>header.uniform-report-header{box-sizing:border-box!important;display:grid!important;grid-template-rows:auto auto!important;gap:14px!important;align-content:start!important;height:auto!important;min-height:0!important;padding-top:22px!important;padding-bottom:18px!important;border-bottom:3px solid #FCD116!important;overflow:visible!important}
+body.bettergov-research>header.uniform-report-header{background:#00246A!important;color:#fff!important}
+body.bettergov-research>header.uniform-report-header>.report-nav{margin:0!important;align-self:start!important}
+body.bettergov-research>header .report-header-heading{display:flex!important;flex-direction:column!important;gap:6px!important;min-width:0!important;min-height:0!important}
+body.bettergov-research>header .report-header-brand{display:flex!important;align-items:center!important;justify-self:start!important;width:122px!important;height:28px!important;padding:3px 7px!important;box-sizing:border-box!important;background:#fff!important;border-radius:5px!important}
+body.bettergov-research>header .report-header-brand img{display:block!important;width:108px!important;height:22px!important;max-width:108px!important;object-fit:contain!important}
+body.bettergov-research>header .report-header-heading>.eyebrow{margin:0!important;font:11px/20px system-ui,sans-serif!important;letter-spacing:.08em!important;text-transform:uppercase!important;color:#FCD116!important}
+body.bettergov-research>header .report-header-heading>h1{margin:0!important;padding:0!important;color:#fff!important;font-size:clamp(25px,2.3vw,36px)!important;line-height:1.2!important;align-self:start!important}
+body.bettergov-research>header .report-header-heading>p{margin:0!important;padding:0!important;color:#F5F5F5!important;font-size:15px!important;line-height:1.55!important;max-width:none!important;align-self:start!important}
+body.bettergov-research main :is(.repeat-hero,.unit-hero,.page-hero,.history-hero,.mpb-hero,.driver-hero){box-sizing:border-box!important;min-height:300px!important;margin:20px 0 24px!important;padding:clamp(22px,3vw,32px)!important;border:0!important;border-left:8px solid #FCD116!important;border-radius:18px!important;background:linear-gradient(120deg,#00246A 0%,#0038A8 100%)!important;color:#fff!important;box-shadow:0 14px 34px #00246A22!important;align-content:center!important}
+body.bettergov-research main :is(.repeat-hero,.unit-hero,.page-hero,.history-hero,.mpb-hero,.driver-hero) :is(h2,h3){color:#fff!important}
+body.bettergov-research main :is(.repeat-hero,.unit-hero,.page-hero,.history-hero,.mpb-hero,.driver-hero) :is(p,span){color:#F5F5F5!important}
+body.bettergov-research main :is(.repeat-hero,.unit-hero,.page-hero,.history-hero,.mpb-hero,.driver-hero) :is(.repeat-hero-kicker,.unit-hero-kicker,.history-hero-kicker,.mpb-hero-kicker,.eyebrow){color:#FCD116!important}
+body.bettergov-research main :is(.repeat-hero,.unit-hero,.page-hero,.history-hero,.mpb-hero,.driver-hero) a{color:#FCD116!important;text-underline-offset:2px!important}
+body.bettergov-research main :is(.repeat-hero-breakdown>div,.unit-hero-stats>div,.hero-metric,.history-hero-stats>div,.mpb-hero-stat,.historical-hero-metrics>div){box-sizing:border-box!important;min-height:106px!important;border:1px solid #ffffff55!important;border-radius:11px!important;background:#ffffff12!important;color:#F5F5F5!important}
+body.bettergov-research main :is(.repeat-hero-breakdown,.unit-hero-stats,.hero-metrics,.history-hero-stats,.mpb-hero-stats,.historical-hero-metrics){align-items:stretch!important}
+body.bettergov-research main :is(.repeat-hero-breakdown>div,.unit-hero-stats>div,.hero-metric,.history-hero-stats>div,.mpb-hero-stat,.historical-hero-metrics>div) strong{color:#FCD116!important}
+@media(max-width:720px){body.bettergov-research main :is(.repeat-hero,.unit-hero,.page-hero,.history-hero,.mpb-hero,.driver-hero){min-height:260px!important}}
+@media(max-width:900px){body.bettergov-research>header .report-header-brand{width:114px!important;height:26px!important}body.bettergov-research>header .report-header-brand img{width:100px!important;height:20px!important}body.bettergov-research>header .report-header-heading>h1{font-size:26px!important;line-height:1.25!important}body.bettergov-research>header .report-header-heading>p{font-size:14px!important}}
+@media(max-width:560px){body.bettergov-research>header.uniform-report-header{padding-top:18px!important;padding-bottom:16px!important}body.bettergov-research>header .report-header-brand{width:106px!important;height:24px!important;padding:2px 6px!important}body.bettergov-research>header .report-header-brand img{width:92px!important;height:20px!important}body.bettergov-research>header .report-header-heading>h1{font-size:22px!important;line-height:1.2!important}body.bettergov-research>header .report-header-heading>p{font-size:13px!important;line-height:1.5!important}}
+</style><style id="research-status-style">
+.research-status{box-sizing:border-box;display:flex;justify-content:space-between;align-items:center;gap:6px 24px;width:100%;margin:0;padding:10px clamp(16px,2vw,32px);border-bottom:1px solid #E6D7A8;border-left:4px solid #FCD116;background:#FFF8E1;color:#212121;font:13px/1.5 system-ui,sans-serif}
+.research-status p{margin:0!important}.research-status-copy{flex:1 1 640px}.research-status-meta{flex:0 1 auto;color:#616161;font-size:12px;white-space:nowrap;font-variant-numeric:tabular-nums}
+@media(max-width:720px){.research-status{display:block}.research-status-meta{display:block;margin-top:4px!important;white-space:normal}}
+</style><script id="research-status-script" defer src="/static/nep-preview/research-status.js?v=8b37c6b4984f"></script></head>
+<body class="bettergov-research">
+  <header class="uniform-report-header"><div class="report-header-heading"><a class="report-header-brand" href="https://bettergov.ph/" aria-label="BetterGov home"><img src="https://assets.bettergov.ph/logos/webp/horizontal-black.webp" alt="BetterGov"></a><div class="eyebrow">BetterGov · Budget research</div><h1>Vote 2028 · Family officeholder records</h1><p class="report-header-teaser">Which linked families held office in the same year?</p></div><nav class="report-nav" aria-label="Budget report sections"><a class="report-nav-single" href="/static/nep-preview/summary.html">Summary</a><details class="report-nav-group"><summary>Budget 2027</summary><div class="report-nav-links"><a href="/static/nep-preview/dpwh.html">DPWH Transparency</a><a href="/static/nep-preview/congress.html">Project flags + district allocations</a><a href="/static/nep-preview/flags.html">Flags</a><a href="/static/nep-preview/undocumented-hgab.html">Undocumented HGAB</a><a href="/static/nep-preview/repeats.html">Project repeats</a><a href="/static/nep-preview/out-of-place.html">Out of Place</a><a href="/static/nep-preview/cost-per-km.html">Cost per meter</a><a href="/static/nep-preview/pccp-cost-per-unit.html">Cost Per Unit · DPWH Atlas</a><a href="/static/nep-preview/cost-per-unit.html">Cost per Unit · peer comparison</a><a href="/static/nep-preview/rcs.html">RCS · POW scope</a><a href="/static/nep-preview/mpb.html">MPB Flags</a><a href="/static/nep-preview/barangay.html">Barangay allocations</a></div></details><details class="report-nav-group"><summary>Historical</summary><div class="report-nav-links"><a href="/static/nep-preview/flood-control.html">Flood-control pattern</a><a href="/static/nep-preview/repeats-historical.html">Project repeats</a><a href="/static/nep-preview/integrated-district-allocations.html">District allocations</a><a href="/static/nep-preview/mpb-barangay.html">MPB</a><a href="/static/nep-preview/mpb-historical.html">DPWH</a><a href="/static/nep-preview/barangay-historical.html">Barangay</a><a href="/static/nep-preview/contractors.html">Contractors</a><a href="/static/nep-preview/connectivity.html">Road connectivity</a></div></details><a class="report-nav-single" href="/static/nep-preview/vote-2028.html">Vote 2028</a></nav></header><aside class="research-status" role="note" aria-label="Research status"><p class="research-status-copy"><strong>Ongoing research.</strong> Figures are provisional and may change as documents are recovered, extracted data is corrected, records are reconciled, and calculations are checked against source documents. Use the deployment timestamp and commit shown here to identify this version; newer build details supersede older copies.</p><p class="research-status-meta" data-site-build-meta>Deployment build information unavailable</p></aside>
+  <main class="vote-main">
+    <aside class="vote-disclaimer"><strong>Research note.</strong> <strong>NO</strong> means at least two ODV-linked family members held office in the same modeled calendar year. A family with exactly one local and one national officeholder in that year is excluded; a second local or national family officeholder makes the family meet the rule. This Dapat Isa Lang–inspired screen is a user-selected voting criterion, not an independent finding about a person. ODV relationships, winners and term windows may be incomplete or misclassified; verify the linked records. No NO means this source did not show a qualifying combination, not that an official has no family ties.</aside>
+    <section class="vote-hero" aria-labelledby="vote-hero-title">
+      <div class="eyebrow">Concurrent family office screen · source elections 2004–2025</div>
+      <h2 id="vote-hero-title">NO marks linked family members holding office in the same year.</h2>
+      <p>Browse the officials recorded in the old ODV dynasty database, from national offices to local councilors and barangay captains. Search by name, office, party, district or locality.</p>
+      <div class="vote-stats" aria-live="polite">
+        <div class="vote-stat"><strong id="vote-total">—</strong><span>officeholder records</span></div>
+        <div class="vote-stat"><strong id="vote-no-total">—</strong><span>records marked NO by this rule</span></div>
+        <div class="vote-stat"><strong id="vote-year-range">—</strong><span>election years represented</span></div>
+      </div>
+    </section>
+    <p class="vote-note">The latest election snapshot in this archived dataset is 2025. This is not a list of declared 2028 candidates; we will update the page when COMELEC releases official candidate data for the 2028 elections.</p>
+    <section aria-label="Filter officeholder records">
+      <div class="vote-controls">
+        <label for="vote-year">Election year<select id="vote-year"><option value="">All years</option></select></label>
+        <label for="vote-office">Office group<select id="vote-office"><option value="">All offices</option></select></label>
+        <label for="vote-search">Search names and places<input id="vote-search" type="search" autocomplete="off" placeholder="Name, province, municipality, party…"></label>
+        <label class="vote-no-only"><input id="vote-no-only" type="checkbox"> Show NO rows only</label>
+        <div class="vote-actions"><button type="button" id="vote-export">Export filtered CSV</button><a href="vote-2028-data.json" download>Download JSON</a></div>
+      </div>
+      <p id="vote-status" role="status" aria-live="polite">Loading ODV election and family-link records…</p>
+      <div class="vote-table-wrap">
+        <table class="vote-table"><thead><tr><th>Rule</th><th>Name</th><th>Office</th><th>Place</th><th>Party</th><th>Election year</th><th>Concurrent family officeholders</th><th>Historical family members</th></tr></thead><tbody id="vote-body"><tr><td colspan="8">Loading records…</td></tr></tbody></table>
+      </div>
+      <div class="vote-pagination"><button type="button" id="vote-prev" disabled>Previous</button><span id="vote-page">Page 1</span><button type="button" id="vote-next" disabled>Next</button></div>
+    </section>
+    <section class="vote-method">
+      <h2>How NO is assigned</h2>
+      <p><strong>NO · Do not vote:</strong> two or more distinct elected officials in an ODV-verified family link or shared dynasty-family ID held office during at least one same modeled calendar year. A family consisting of exactly one local and one national officeholder in that year is excluded. Two local officials, two national officials, or three or more officials across levels qualify. A shared surname alone never triggers NO.</p>
+      <p>This is a Dapat Isa Lang–inspired application of the user’s stated rule; it is not a claim that the movement has adopted this exact data method. The <strong>Historical family members</strong> column lists linked officials even when their terms did not overlap. That history can inform your decision; it does not automatically mark a row NO.</p>
+      <p>Term windows use six years for the President, Vice President and Senators, and three years for other included elected offices. The election year in ODV anchors each term. The archived source has winner-marked records for President, Vice President, Senate, House and party-list representatives, governors, vice governors, mayors, vice mayors, provincial board members and councilors. It contains no identifiable barangay captain office rows.</p>
+      <p>Coverage varies sharply by year and office. The archived 2019 winner-marked office data is incomplete and does not provide a usable local roster, so 2019 is absent from the year filter; 2022 and 2025 local-office coverage is also much smaller than earlier snapshots. A “winner” marker or family link can be incomplete or misclassified. No NO is not a clean bill of health; it means this screen did not find a qualifying combination in the archived records. This is a historical screening aid, not a 2028 candidate list.</p>
+    </section>
+    <footer class="vote-source-footer"><strong>Source:</strong> old ODV <code>database/dynasty_dump.sql.gz</code>, political_dynasties and verified relationships tables. <a href="https://visualizations.bettergov.ph/dynasty" target="_blank" rel="noreferrer">Open the ODV dynasty page</a>. <a href="vote-2028-data.json" download>Download source-derived rows</a>. Source hash and row-level relationship evidence are in the JSON.</footer>
+  </main>
+  <dialog id="vote-dialog"><button type="button" class="dialog-close" id="vote-dialog-close">Close</button><h2 id="vote-dialog-title"></h2><p id="vote-dialog-note"></p><ul id="vote-dialog-list"></ul></dialog>
+  <script src="vote-2028.js" defer></script>
+<footer class="site-ai-credit"><p><strong>Sources:</strong> <a href="https://visualizations.bettergov.ph/sources" target="_blank" rel="noreferrer">Common source catalog</a>. Each page identifies the years and records used in that analysis.</p><p><a href="budget-trivia.html">Budget Trivia · play the game</a></p><p><strong>AI assistance:</strong> OpenAI Codex contributed to software implementation and data-processing workflows for this site. This credit does not represent independent verification of the underlying sources, calculations, or conclusions.</p></footer><script id="report-menu-exclusive-groups">(()=>{const groups=[...document.querySelectorAll('header .report-nav-group')];groups.forEach(group=>group.addEventListener('toggle',()=>{if(group.open)groups.forEach(other=>{if(other!==group)other.open=false})}))})();</script></body>
+</html>
