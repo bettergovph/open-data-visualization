@@ -10,6 +10,7 @@ import zipfile
 import xml.etree.ElementTree as ET
 from collections import defaultdict
 from pathlib import Path
+from vote_people import apply_reviewed_sources, unique_people
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / 'database/dynasty_dump.sql.gz'
@@ -20,6 +21,7 @@ FAMILY_LINK_DIR = ROOT / 'family_analysis/family_parser'
 ODV_OFFICIALS = ROOT.parent / 'nep/data_sources/odv_dynasty/source_officials.csv.gz'
 ASOG_DATASET = ROOT / 'database/ASoG-POLITICAL-DYNASTIES-DATASET-V2016.xlsx'
 ODV_CONGRESSMEN = ROOT / 'static/data/congressmen_consolidated.json'
+REVIEWED_SOURCES = ROOT / 'database/vote_2028_reviewed_sources.json'
 
 
 def norm(value):
@@ -853,6 +855,9 @@ def build():
         })
     records.extend(house_roster_records)
 
+    records, reviewed_summary, reviewed_sources = apply_reviewed_sources(
+        records, house_roster_records, family, documented_families, REVIEWED_SOURCES)
+
     # Add source-linked family-parser relationships to ODV officeholder
     # identities. This repository contains reviewed research extracts from
     # Wikipedia, Rappler, and other public reporting. Require an explicit
@@ -1244,6 +1249,7 @@ def build():
             'district': record['district'], 'party': record['party'],
             'electionYear': record['electionYear'], 'officeStartYear': record.get('officeStartYear', record['electionYear']),
             'termThroughYear': record['termThroughYear'], 'roleNote': record.get('roleNote', ''),
+            'roleSourceUrls': record.get('roleSourceUrls', []),
             'roleSourceUrl': record.get('roleSourceUrl', '')
         }
         if office not in person['offices']:
@@ -1278,12 +1284,16 @@ def build():
     current_house_no_vote_rows = sum(bool(r.get('doNotVote')) for r in house_roster_records)
 
     records.sort(key=lambda r: (r['electionYear'], r['officeGroup'], norm(r['province']), norm(r['municipality']), norm(r['name'])))
+    people = unique_people(records)
     result = {
         'generatedAt': __import__('datetime').datetime.now(__import__('datetime').timezone.utc).isoformat(),
         'source': 'Historical elected-office records; Ateneo Policy Center historical election data (2004–2016); official 20th Congress roster; and cited public family-relationship sources',
         'years': sorted({r['electionYear'] for r in records}),
         'scope': 'Deduplicated elected office records in archived ODV data for national and local offices from 2004–2025, supplemented with the local 20th Congress district and party-list roster and cited current roles/family links. This is not a complete national/local officeholder roster and is not a 2028 candidate list.',
         'recordsScope': 'The records array contains officeholders whose linked-family records meet the displayed one-at-a-time criterion in one or more modeled years. The families object retains linked historical family-member office records for context.',
+        'peopleScope': 'One row per normalized full name. Each row retains all recorded office terms, source person identities and family groups; a display grouping does not infer a family relationship between namesakes. Power order uses the highest recorded office: President, Vice President, Senator, Representative, Governor, Vice Governor, Mayor, Vice Mayor, Provincial Board Member, Councilor, Barangay Captain.',
+        'reviewedOnlineSources': reviewed_sources,
+        'onlineEnrichment': reviewed_summary,
         'method': {
             'noVoteRule': 'A red marker means at least two distinct linked family members held office in the same modeled calendar year. A family with exactly one local and one national officeholder in that year is excluded. Links come from ODV-verified relationships, shared ODV dynasty_family_id, or specifically cited public family sources; shared surnames alone do not count.',
             'aliases': 'Official names remain the primary display and identity fields. Usable ODV nickname-field values and separately cited public aliases are preserved as aliases for search, display, details, and export. Date-like values and a short list of known agency abbreviations are excluded. Nicknames never determine family links or identity merges.',
@@ -1297,6 +1307,9 @@ def build():
         },
         'summary': {
             'officialRows': len(records),
+            'uniqueScreenedNames': len(people),
+            'screenedSourcePersonIdentities': len({key for person in people for key in person['personKeys']}),
+            'uniqueNamesByYear': {str(year): sum(any(o['electionYear'] == year and o.get('doNotVote') for o in p['offices']) for p in people) for year in sorted({r['electionYear'] for r in records})},
             'noVoteRows': sum(r['doNotVote'] for r in records),
             'noVoteRowsWithKnownAliases': sum(bool(r.get('aliases')) for r in records if r['doNotVote']),
             'familyGroupsWithQualifyingTerms': len({r['familyKey'] for r in records if r['doNotVote']}),
@@ -1341,6 +1354,7 @@ def build():
         'families': family_history,
         'familyLinkEvidence': family_link_evidence,
         'records': [record for record in records if record['doNotVote']],
+        'people': people,
     }
     def public_copy(value):
         if isinstance(value, dict):
@@ -1360,6 +1374,16 @@ def build():
     result = public_copy(result)
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(result, ensure_ascii=False, separators=(',', ':')) + '\n')
+    # Keep the page, script and data cache keys in sync on every rebuild.
+    version = hashlib.sha256(OUT.read_bytes()).hexdigest()[:12]
+    script_path = OUT.with_name('vote-2028.js')
+    script = re.sub(r"vote-2028-data\.json\?v=[A-Za-z0-9_-]+", 'vote-2028-data.json?v=' + version, script_path.read_text())
+    script_path.write_text(script)
+    page_path = OUT.with_name('vote-2028.html')
+    page = re.sub(r'vote-2028-data\.json(?:\?v=[A-Za-z0-9_-]+)?', 'vote-2028-data.json?v=' + version, page_path.read_text())
+    script_version = hashlib.sha256(script.encode()).hexdigest()[:12]
+    page = re.sub(r'vote-2028\.js\?v=[A-Za-z0-9_-]+', 'vote-2028.js?v=' + script_version, page)
+    page_path.write_text(page)
     return result['summary']
 
 
