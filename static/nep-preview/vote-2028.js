@@ -3,9 +3,10 @@
   const $=id=>document.getElementById(id),yearFilter=$('vote-year'),officeFilter=$('vote-office'),search=$('vote-search'),body=$('vote-body'),status=$('vote-status'),prev=$('vote-prev'),next=$('vote-next'),pageLabel=$('vote-page'),dialog=$('vote-dialog');
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const fmt=n=>Number(n||0).toLocaleString('en-PH');
+  const fmtYear=y=>y==null||y===''?'—':String(Number.isFinite(Number(y))?Number(y):y);
   const key=v=>String(v||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/[^A-Z0-9]/g,'');
   const place=r=>[r.municipality,r.province].filter(Boolean).join(', ')||r.district||r.region||'Place not recorded';
-  const term=o=>`${fmt(o.officeStartYear??o.electionYear)}–${fmt(o.termThroughYear)}`;
+  const term=o=>`${fmtYear(o.officeStartYear??o.electionYear)}–${fmtYear(o.termThroughYear)}`;
   let people=[],families={},familyEvidence={},page=0,pageSize=50,view=[],sourceNames=new Map();
   function sourceLink(url,label){return /^https?:\/\//i.test(url||'')?`<a href="${esc(url)}" target="_blank" rel="noreferrer">${esc(label||sourceNames.get(url)||'Source')}</a>`:''}
   const urls=o=>[...new Set([o.roleSourceUrl,...(o.roleSourceUrls||[]),...(o.sourceUrls||[])].filter(Boolean))];
