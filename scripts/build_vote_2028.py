@@ -612,6 +612,33 @@ def build():
             'https://quezoncity.gov.ph/proclamation-of-quezon-city-local-candidates/',
             'https://mb.com.ph/2025/05/13/domagoso-reelected-in-manila-10-incumbent-mayors-win-fresh-mandates',
         ],
+    }, {
+        'key': 'source-family:dy-reviewed',
+        'members': ['FAUSTINO G. DY III', 'IAN PAUL L. DY', 'FAUSTINO MICHAEL CARLOS DY III'],
+        'basis': 'Current Isabela House members are linked using the family relationships disclosed in Faustino Dy III’s 2025 SALN and corroborating election reporting; no surname-only matching.',
+        'sources': [
+            'https://qa.philstar.com/headlines/2025/10/22/2481770/house-speaker-bojie-dy-declares-p74-m-net-worth-16-relatives-govt',
+            'https://www.pna.gov.ph/articles/1156187',
+            'https://www.congress.gov.ph/house-members',
+        ],
+    }, {
+        'key': 'source-family:garcia-bataan-reviewed',
+        'members': ['ALBERT S. GARCIA', 'MARIA ANGELA S. GARCIA'],
+        'basis': 'Bataan reporting identifies Albert and Maria Angela Garcia as siblings; local-government and House records identify their current seats.',
+        'sources': [
+            'https://punto.com.ph/2-house-bets-in-bataan-running-unopposed/',
+            'https://bataan.gov.ph/government-officials/bataan-representatives/2nd-district/albert-s-garcia/',
+            'https://bataan.gov.ph/government-officials/representatives/3rd-district/maria-angela-s-garcia/',
+        ],
+    }, {
+        'key': 'source-family:kho-masbate-reviewed',
+        'members': ['ANTONIO T. KHO', 'WILTON TAN KHO'],
+        'basis': 'Inquirer reporting identifies Wilton Kho as Antonio Kho’s son; House records identify their current district seats.',
+        'sources': [
+            'https://newsinfo.inquirer.net/1597072/no-stopping-dynasts-in-w-visayas-masbate',
+            'https://www.congress.gov.ph/house-members/view/A044',
+            'https://www.congress.gov.ph/house-members/view/J046',
+        ],
     }]
     duterte_aliases = {
         'RODRIGO DUTERTE', 'RODRIGO ROA DUTERTE',
@@ -690,6 +717,9 @@ def build():
         'vico_mayor_2025': 'https://mb.com.ph/2025/05/13/domagoso-reelected-in-manila-10-incumbent-mayors-win-fresh-mandates',
         'ralph_house_2025': 'https://congress.gov.ph/house-members/view/K089',
         'jocelyn_house_2025': 'https://www.congress.gov.ph/house-members/view/K102',
+        'dy_house_2025': 'https://www.congress.gov.ph/house-members',
+        'garcia_house_2025': 'https://www.congress.gov.ph/house-members',
+        'kho_house_2025': 'https://www.congress.gov.ph/house-members',
     }
     online_people = {
         'rodrigo': ('RODRIGO ROA DUTERTE', 'Davao del Sur', 'Davao City'),
@@ -820,6 +850,13 @@ def build():
         compact_norm('HAROLD DUTERTE'): ('HAROLD JAMES TAPANGAN DUTERTE', 'online-person:harold', 'source-family:duterte', 'harold_house'),
         compact_norm('RALPH TULFO'): ('RALPH WENDEL TULFO', 'online-person:ralph_tulfo', 'source-family:tulfo', 'ralph_house_2025'),
         compact_norm('JOCELYN TULFO'): ('JOCELYN P TULFO', 'online-person:jocelyn_tulfo', 'source-family:tulfo', 'jocelyn_house_2025'),
+        compact_norm('BOJIE DY'): ('FAUSTINO G. DY III', 'online-person:bojie_dy', 'source-family:dy-reviewed', 'dy_house_2025'),
+        compact_norm('IAN PAUL DY'): ('IAN PAUL L. DY', 'online-person:ian_paul_dy', 'source-family:dy-reviewed', 'dy_house_2025'),
+        compact_norm('MIKE DY III'): ('FAUSTINO MICHAEL CARLOS DY III', 'online-person:mike_dy', 'source-family:dy-reviewed', 'dy_house_2025'),
+        compact_norm('ALBERT GARCIA'): ('ALBERT S. GARCIA', 'online-person:albert_garcia', 'source-family:garcia-bataan-reviewed', 'garcia_house_2025'),
+        compact_norm('MARIA ANGELA GARCIA'): ('MARIA ANGELA S. GARCIA', 'online-person:maria_angela_garcia', 'source-family:garcia-bataan-reviewed', 'garcia_house_2025'),
+        compact_norm('ANTONIO KHO'): ('ANTONIO T. KHO', 'online-person:antonio_kho', 'source-family:kho-masbate-reviewed', 'kho_house_2025'),
+        compact_norm('WILTON KHO'): ('WILTON TAN KHO', 'online-person:wilton_kho', 'source-family:kho-masbate-reviewed', 'kho_house_2025'),
     }
     family_source_by_key = {x['key']: x for x in documented_families}
     resignation_events = {}
