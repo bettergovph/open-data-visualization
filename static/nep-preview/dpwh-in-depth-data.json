@@ -1,5 +1,5 @@
 {
-  "generatedAtUtc": "2026-11-06T14:02:54.824474+00:00",
+  "generatedAtUtc": "2026-11-06T15:08:47.693639+00:00",
   "stage": "NEP FY2027 proposal documents",
   "summary": {
     "projectsWithBillRows": 7225,
@@ -216,14 +216,14 @@
     "linkedPct": 56.5,
     "directListedRows": 8763,
     "pairedNepRowsWithListedDocuments": 9577,
-    "listedAnyRows": 9718,
-    "listedAnyPct": 60.8,
+    "listedAnyRows": 12888,
+    "listedAnyPct": 80.7,
     "portalOnlyListedAnyRows": 9601,
     "portalOnlyMissingListedDocumentsRows": 6378,
     "portalOnlyMissingListedDocumentsAmountPesos": 183926806000,
-    "advanceCopyExactTitleMatchedRows": 134,
-    "advanceCopyExactTitleMatchedFiles": 137,
-    "combinedMissingListedDocumentsAmountPesos": 179735681000,
+    "advanceCopyExactTitleMatchedRows": 3307,
+    "advanceCopyExactTitleMatchedFiles": 5376,
+    "combinedMissingListedDocumentsAmountPesos": 89535802000,
     "listedDocumentRecords": 47374,
     "inspectedRows": 8763,
     "inspectedPct": 97.0,
@@ -231,9 +231,9 @@
     "missingAnyTypePct": 71.8,
     "noSelectedNepRows": 6105,
     "noSelectedNepPct": 38.2,
-    "missingListedDocumentsRows": 6261,
-    "doubleRedFlagRows": 5964,
-    "doubleRedFlagPct": 37.3,
+    "missingListedDocumentsRows": 3091,
+    "doubleRedFlagRows": 2794,
+    "doubleRedFlagPct": 17.5,
     "missingTypes": {
       "bp202": {
         "count": 0,
@@ -265,19 +265,47 @@
     },
     "sourceCommit": "34ef5d8cbbacda92f6503ffd9a428569f157f64d",
     "snapshotRetrievedAtUtc": "2026-10-18T08:46:20Z",
-    "documentCoverageMethod": "A DPWH Transparency record is counted when listed directly on the HGAB title match, on its selected NEP counterpart, or represented by a uniquely exact-title-matched advance-copy POW document. PDF links remain unpublished; title matching identifies document evidence, not proof that every attachment or scope is identical."
+    "documentCoverageMethod": "A project is counted as having Senate document evidence when a first-page native-text scan finds an exact normalized title or conservative relaxed POW title candidate in a Senate-provided BP 202 or POW file, or the existing advance-copy POW crosswalk assigns a unique exact title. DPWH Transparency Proposal links remain separate. This is file-presence evidence, not content verification; POW bill extraction may lag."
+  },
+  "senateDocumentTitleCoverage": {
+    "denominatorProjectRows": 6105,
+    "byType": {
+      "pow": {
+        "documentsScanned": 5508,
+        "exactMatchedDocuments": 2476,
+        "relaxedMatchedDocuments": 103,
+        "matchedProjectRows": 2504,
+        "exactMatchedProjectRows": 2415,
+        "coveragePct": 41.02,
+        "generatedAtUtc": "2026-11-06T14:49:27.153064+00:00"
+      },
+      "bp202": {
+        "documentsScanned": 5588,
+        "exactMatchedDocuments": 2888,
+        "relaxedMatchedDocuments": 0,
+        "matchedProjectRows": 2802,
+        "exactMatchedProjectRows": 2802,
+        "coveragePct": 45.9,
+        "generatedAtUtc": "2026-11-06T14:49:27.628591+00:00"
+      }
+    },
+    "combinedMatchedProjectRows": 3287,
+    "combinedExactMatchedProjectRows": 3228,
+    "combinedCoveragePct": 53.84,
+    "combinedExactCoveragePct": 52.87,
+    "method": "Read-only first-page native PDF title scan. Counts distinct HGAB-only project rows; BP 202 and POW source sets are deduplicated in the combined figure. Exact normalized title matches and conservative relaxed POW-title candidates are counted; this is a preliminary file-presence signal, not content verification."
   },
   "hgabPowSummary": {
-    "parsedDocuments": 2731,
-    "documentsWithBillRows": 2124,
-    "billRows": 47744,
-    "printedCategories": 11123,
+    "parsedDocuments": 3350,
+    "documentsWithBillRows": 2653,
+    "billRows": 63721,
+    "printedCategories": 14207,
     "exactTitleMatchedFiles": 137,
     "proposalLinkedFiles": 17,
     "exactTitleMatchedFilesInGapCohort": 120,
     "ambiguousTitleMatchedFiles": 4,
     "titleMatchAssessedFiles": 226,
-    "titleMatchNotAssessedFiles": 2505,
+    "titleMatchNotAssessedFiles": 3124,
     "titleMatchNoExactFiles": 85
   },
   "documentReconciliation": {
@@ -66767,7 +66795,7 @@
   "projectCount": 11034,
   "powPeerCount": 1966,
   "summaryPeerGroupCount": 7,
-  "hgabPowResultCount": 2731,
+  "hgabPowResultCount": 3350,
   "arrayShards": {
     "projects": [
       {
@@ -66808,9 +66836,9 @@
     "hgabPowResults": [
       {
         "path": "dpwh-in-depth-shards/hgabPowResults-001.json",
-        "itemCount": 2731,
-        "sizeBytes": 24768239,
-        "sha256": "72c4285f8c9f587778691973d0d3ae4ce8fc514193c625bac837e2597c6994ef"
+        "itemCount": 3350,
+        "sizeBytes": 32920321,
+        "sha256": "0954615ab58fee13b7028a7b0738b010fb9b166174c8986dc54def9fb73e2d0f"
       }
     ]
   },
