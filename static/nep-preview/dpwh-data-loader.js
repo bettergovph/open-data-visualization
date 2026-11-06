@@ -1,6 +1,7 @@
 /* Loads the public DPWH index and assembles its JSON shards. */
 (()=>{
   const pending=new Map();
+  const dataVersion=new URL(document.currentScript.src).searchParams.get('v')||'';
   window.loadDpwhHgabPowData=async index=>{
     if(index.hgabPowResults)return index.hgabPowResults;
     const shards=index.arrayShards?.hgabPowResults||[];
@@ -20,7 +21,7 @@
     const mode=options.mode||'full';
     if(pending.has(mode))return pending.get(mode);
     const task=(async()=>{
-      const response=await fetch('dpwh-in-depth-data.json',{cache:'no-cache'});
+      const response=await fetch('dpwh-in-depth-data.json?v='+encodeURIComponent(dataVersion),{cache:'no-cache'});
       if(!response.ok)throw Error('DPWH data index unavailable ('+response.status+')');
       const index=await response.json();
       if(mode==='summary'){
