@@ -34,7 +34,7 @@
     #vote-year-chart text{font:12px system-ui,sans-serif;fill:#52636e}
     #vote-year-chart .chart-value{font-weight:750;fill:#212121}
     .vote-table-wrap{margin-top:14px;overflow-x:auto;border:1px solid #dce4eb;border-radius:14px;background:#fff}
-    .vote-table{width:100%;border-collapse:collapse;min-width:1200px}.vote-past-position+.vote-past-position{margin-top:10px}.vote-table td:nth-child(4){min-width:260px}.vote-source-list{columns:2;column-gap:28px;padding-left:22px}.vote-source-list li{break-inside:avoid;margin:8px 0}.vote-source-list small{display:block;color:#647681}@media(max-width:700px){.vote-source-list{columns:1}}
+    .vote-table{width:100%;border-collapse:collapse;min-width:1200px;table-layout:fixed}.vote-table col.vote-col-screen{width:4%}.vote-table col.vote-col-name{width:26%}.vote-table col.vote-col-office{width:12%}.vote-table col.vote-col-past{width:16%}.vote-table col.vote-col-place{width:9%}.vote-table col.vote-col-party{width:7%}.vote-table col.vote-col-years{width:8%}.vote-table col.vote-col-concurrent{width:10%}.vote-table col.vote-col-history{width:8%}.vote-past-position+.vote-past-position{margin-top:10px}.vote-table td:nth-child(4){min-width:0}.vote-table th:first-child,.vote-table td:first-child{padding-left:7px;padding-right:7px;text-align:center}.vote-source-list{columns:2;column-gap:28px;padding-left:22px}.vote-source-list li{break-inside:avoid;margin:8px 0}.vote-source-list small{display:block;color:#647681}@media(max-width:700px){.vote-source-list{columns:1}}
     .vote-table th,.vote-table td{padding:11px 12px;border-bottom:1px solid #e8edf1;text-align:left;vertical-align:top}
     .vote-table th{position:sticky;top:0;background:#eef3fa;color:#344956;font-size:12px;letter-spacing:.03em;text-transform:uppercase}
     .vote-table td{color:#243b48;font-size:13px}
@@ -141,7 +141,7 @@ body.bettergov-research main :is(.repeat-hero-breakdown>div,.unit-hero-stats>div
       <p id="vote-status" role="status" aria-live="polite">Loading historical and cited public office records…</p>
       <p id="vote-photo-coverage" class="vote-photo-coverage" aria-live="polite">Checking verified portrait coverage…</p>
       <div class="vote-table-wrap">
-        <table class="vote-table"><thead><tr><th>Screen</th><th>Name · known aliases</th><th>Latest recorded office</th><th>Past positions · combined terms</th><th>Latest place</th><th>Party</th><th>Recorded election years</th><th>Concurrent family officeholders</th><th>Historical family members</th></tr></thead><tbody id="vote-body"><tr><td colspan="9">Loading records…</td></tr></tbody></table>
+        <table class="vote-table"><colgroup><col class="vote-col-screen"><col class="vote-col-name"><col class="vote-col-office"><col class="vote-col-past"><col class="vote-col-place"><col class="vote-col-party"><col class="vote-col-years"><col class="vote-col-concurrent"><col class="vote-col-history"></colgroup><thead><tr><th>Screen</th><th>Name · known aliases</th><th>Latest recorded office</th><th>Past positions · combined terms</th><th>Latest place</th><th>Party</th><th>Recorded election years</th><th>Concurrent family officeholders</th><th>Historical family members</th></tr></thead><tbody id="vote-body"><tr><td colspan="9">Loading records…</td></tr></tbody></table>
       </div>
       <div class="vote-pagination"><button type="button" id="vote-prev" disabled>Previous</button><span id="vote-page">Page 1</span><button type="button" id="vote-next" disabled>Next</button></div>
     </section>

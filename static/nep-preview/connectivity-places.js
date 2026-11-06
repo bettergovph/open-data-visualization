@@ -8,7 +8,8 @@
     const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(normalized));
     return [...new Uint8Array(digest)].map(x=>x.toString(16).padStart(2,'0')).join('');
   };
-  const load=async name=>{const r=await fetch(name);if(!r.ok)throw Error(`${name}: HTTP ${r.status}`);return r.json()};
+  const DATA_VERSION='20261106-venues17-properties8';
+  const load=async name=>{const url=new URL(name,location.href);url.searchParams.set('v',DATA_VERSION);const r=await fetch(url);if(!r.ok)throw Error(`${name}: HTTP ${r.status}`);return r.json()};
   async function routePlaces(file,prefix,property=false){
     if(!$(prefix+'-summary'))return;
     try{
