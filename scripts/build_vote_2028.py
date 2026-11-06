@@ -43,6 +43,81 @@ def first_last_key(value):
     return compact_norm(parts[0] + ' ' + parts[-1])
 
 
+def attach_verified_portraits(people):
+    """Attach only locally verified portraits with a roster or curated identity match."""
+    archive_path = OUT.parent / 'congress-historical-rosters.json'
+    if not archive_path.exists():
+        return
+    archive = json.loads(archive_path.read_text())
+    by_name = defaultdict(list)
+    def add_photo(name, local, source, photo_congress=None, basis='verified public portrait'):
+        if not name or not local or not (OUT.parent / local).is_file():
+            return
+        try:
+            photo_congress = int(photo_congress) if photo_congress not in (None, '') else None
+        except (TypeError, ValueError):
+            photo_congress = None
+        photo = {'localUrl': local, 'sourceUrl': source, 'photoCongress': photo_congress,
+                 'identityBasis': basis}
+        bucket = by_name[compact_norm(name)]
+        if photo not in bucket:
+            bucket.append(photo)
+    for photo in archive.get('portraits', []):
+        local = photo.get('localUrl')
+        if photo.get('status') != 'verified_image':
+            continue
+        add_photo(photo.get('personKey'), local, photo.get('sourceUrl'), photo.get('photoCongress'),
+                  photo.get('identityMatch') or 'identified historical House roster portrait')
+    audit_path = OUT.parent / 'integrated-historical-photo-audit.csv'
+    if audit_path.exists():
+        with audit_path.open(encoding='utf-8-sig', newline='') as source:
+            for row in csv.DictReader(source):
+                add_photo(row.get('Portrait subject'), row.get('Local image'), row.get('Photograph source'),
+                          row.get('Photograph Congress'), row.get('Identity evidence') or 'sourced historical roster portrait')
+    verification_path = OUT.parent / 'congress-portrait-verification.json'
+    if verification_path.exists():
+        images = json.loads(verification_path.read_text()).get('images', {})
+        overrides_path = OUT.parent / 'integrated-representative-photo-overrides.json'
+        if overrides_path.exists():
+            for row in json.loads(overrides_path.read_text()):
+                image = images.get(row.get('photoUrl'), {})
+                if image.get('status') == 'verified_image':
+                    add_photo(row.get('representative'), image.get('localUrl'), row.get('sourceUrl'),
+                              basis=row.get('representativeStatus') or 'identified official House portrait')
+    # These are documented name forms for the same rostered officials. Keep
+    # this list explicit so family-name similarity never assigns a portrait.
+    verified_name_forms = {
+        'ANNA BONDOC': 'Anna York Bondoc',
+        'ARTURO ROBES': 'Arthur Robes',
+        'ELIAS BULUT': 'Elias Bulut Jr.',
+        'FELICIANO BELMONTE': 'Feliciano Belmonte Jr.',
+        'FERDINAND MARTIN ROMUALDEZ': 'Martin Romualdez',
+        'GLORIA ARROYO': 'Gloria Macapagal Arroyo',
+        'GLORIA MACAPAGAL': 'Gloria Macapagal Arroyo',
+        'JOCELYN P TULFO': 'Jocelyn Tulfo',
+        'JURDIN ROMUALDO': 'Jurdin Jesus Romualdo',
+        'LUCY GOMEZ': 'Lucy Torres-Gomez',
+        'MOHAMAD DIMAPORO': 'Mohamad Khalid Dimaporo',
+        'PAOLO Z DUTERTE': 'Paolo Duterte',
+        'PROSPERO PICHAY': 'Prospero Pichay Jr.',
+        'ROMMEL ANGARA': 'Rommel T. Angara',
+        'SHAREE TAN': 'Sharee Ann Tan',
+        'XAVIER ROMUALDO': 'Xavier Jesus Romualdo',
+    }
+    for person in people:
+        names = [person.get('name'), *(person.get('aliases') or [])]
+        candidates = [photo for name in names for photo in by_name.get(compact_norm(name), [])]
+        variant = verified_name_forms.get(norm(person.get('name')))
+        if variant:
+            candidates.extend(by_name.get(compact_norm(variant), []))
+        if candidates:
+            person['portrait'] = sorted(
+                candidates,
+                key=lambda item: (item.get('photoCongress') == 20, item.get('photoCongress') or 0),
+                reverse=True,
+            )[0]
+
+
 def surname_key(value):
     """Return the final name token, excluding common generational suffixes."""
     parts = norm(value).split()
@@ -1285,6 +1360,7 @@ def build():
 
     records.sort(key=lambda r: (r['electionYear'], r['officeGroup'], norm(r['province']), norm(r['municipality']), norm(r['name'])))
     people = unique_people(records)
+    attach_verified_portraits(people)
     result = {
         'generatedAt': __import__('datetime').datetime.now(__import__('datetime').timezone.utc).isoformat(),
         'source': 'Historical elected-office records; Ateneo Policy Center historical election data (2004–2016); official 20th Congress roster; and cited public family-relationship sources',
@@ -1308,6 +1384,8 @@ def build():
         'summary': {
             'officialRows': len(records),
             'uniqueScreenedNames': len(people),
+            'uniqueNamesWithVerifiedPortrait': sum(bool(p.get('portrait')) for p in people),
+            'uniqueNamesWithoutVerifiedPortrait': sum(not p.get('portrait') for p in people),
             'screenedSourcePersonIdentities': len({key for person in people for key in person['personKeys']}),
             'uniqueNamesByYear': {str(year): sum(any(o['electionYear'] == year and o.get('doNotVote') for o in p['offices']) for p in people) for year in sorted({r['electionYear'] for r in records})},
             'noVoteRows': sum(r['doNotVote'] for r in records),

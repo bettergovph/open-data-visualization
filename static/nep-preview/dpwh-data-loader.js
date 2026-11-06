@@ -1,6 +1,21 @@
 /* Loads the public DPWH index and assembles its JSON shards. */
 (()=>{
   const pending=new Map();
+  window.loadDpwhHgabPowData=async index=>{
+    if(index.hgabPowResults)return index.hgabPowResults;
+    const shards=index.arrayShards?.hgabPowResults||[];
+    const parts=await Promise.all(shards.map(async shard=>{
+      const result=await fetch(shard.path+'?v='+encodeURIComponent(shard.sha256||''),{cache:'force-cache'});
+      if(!result.ok)throw Error('DPWH HGAB POW data shard unavailable ('+result.status+')');
+      const rows=await result.json();
+      if(!Array.isArray(rows)||(Number.isFinite(shard.itemCount)&&rows.length!==shard.itemCount))throw Error('Incomplete DPWH HGAB POW data shard');
+      return rows;
+    }));
+    const rows=parts.flat();
+    if(Number.isFinite(index.hgabPowResultCount)&&rows.length!==index.hgabPowResultCount)throw Error('DPWH HGAB POW data is incomplete');
+    index.hgabPowResults=rows;
+    return rows;
+  };
   window.loadDpwhInDepthData=(options={})=>{
     const mode=options.mode||'full';
     if(pending.has(mode))return pending.get(mode);
@@ -12,18 +27,6 @@
         if(!Array.isArray(index.projectDirectory))throw Error('DPWH project directory unavailable');
         if(Number.isFinite(index.projectCount)&&index.projectDirectory.length!==index.projectCount)throw Error('DPWH project directory is incomplete');
         index.projects=index.projectDirectory;
-        const hgabShards=index.arrayShards?.hgabPowResults;
-        if(hgabShards){
-          const parts=await Promise.all(hgabShards.map(async shard=>{
-            const result=await fetch(shard.path+'?v='+encodeURIComponent(shard.sha256||''),{cache:'force-cache'});
-            if(!result.ok)throw Error('DPWH HGAB POW data shard unavailable ('+result.status+')');
-            const rows=await result.json();
-            if(!Array.isArray(rows)||(Number.isFinite(shard.itemCount)&&rows.length!==shard.itemCount))throw Error('Incomplete DPWH HGAB POW data shard');
-            return rows;
-          }));
-          index.hgabPowResults=parts.flat();
-          if(Number.isFinite(index.hgabPowResultCount)&&index.hgabPowResults.length!==index.hgabPowResultCount)throw Error('DPWH HGAB POW data is incomplete');
-        }
         return index;
       }
       const arrays=index.arrayShards||null;
