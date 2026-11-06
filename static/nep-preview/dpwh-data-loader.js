@@ -12,6 +12,18 @@
         if(!Array.isArray(index.projectDirectory))throw Error('DPWH project directory unavailable');
         if(Number.isFinite(index.projectCount)&&index.projectDirectory.length!==index.projectCount)throw Error('DPWH project directory is incomplete');
         index.projects=index.projectDirectory;
+        const hgabShards=index.arrayShards?.hgabPowResults;
+        if(hgabShards){
+          const parts=await Promise.all(hgabShards.map(async shard=>{
+            const result=await fetch(shard.path+'?v='+encodeURIComponent(shard.sha256||''),{cache:'force-cache'});
+            if(!result.ok)throw Error('DPWH HGAB POW data shard unavailable ('+result.status+')');
+            const rows=await result.json();
+            if(!Array.isArray(rows)||(Number.isFinite(shard.itemCount)&&rows.length!==shard.itemCount))throw Error('Incomplete DPWH HGAB POW data shard');
+            return rows;
+          }));
+          index.hgabPowResults=parts.flat();
+          if(Number.isFinite(index.hgabPowResultCount)&&index.hgabPowResults.length!==index.hgabPowResultCount)throw Error('DPWH HGAB POW data is incomplete');
+        }
         return index;
       }
       const arrays=index.arrayShards||null;
@@ -30,7 +42,7 @@
           return rows;
         }));
         index[key]=parts.flat();
-        const countField={projects:'projectCount',powPeers:'powPeerCount',summaryPeerGroups:'summaryPeerGroupCount'}[key];
+        const countField={projects:'projectCount',powPeers:'powPeerCount',summaryPeerGroups:'summaryPeerGroupCount',hgabPowResults:'hgabPowResultCount'}[key];
         if(countField&&Number.isFinite(index[countField])&&index[key].length!==index[countField])throw Error('DPWH '+key+' data is incomplete');
       }));
       return index;
