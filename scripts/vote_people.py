@@ -28,6 +28,8 @@ def apply_reviewed_sources(records, house_records, family, documented_families, 
     added = replaced = enriched = 0
     for person in data['people']:
         aliases = {name_key(x) for x in [person['name'], *person.get('aliases', [])]}
+        provinces = {name_key(x) for x in [person['province'], *person.get('provinceAliases', [])]}
+        unlocated_house_aliases = {name_key(x) for x in person.get('unlocatedHouseAliases', [])}
         key = 'cited-person:' + person['id']
         matched = []
         for record in records:
@@ -39,7 +41,9 @@ def apply_reviewed_sources(records, house_records, family, documented_families, 
             # Place restrictions apply even to an exact full-name match. An
             # elected national office may have no local province in the export.
             if record['officeGroup'] not in {'President / Vice President', 'Senator'}:
-                if name_key(record.get('province')) != name_key(person['province']):
+                approved_unlocated_house = (record['officeGroup'] == 'Congress / party-list representative'
+                                             and not record.get('province') and name in unlocated_house_aliases)
+                if name_key(record.get('province')) not in provinces and not approved_unlocated_house:
                     continue
             matched.append(record)
         remove_ids = set()
@@ -86,8 +90,19 @@ def apply_reviewed_sources(records, house_records, family, documented_families, 
                                   for alias in person.get('aliases', [])],
             })
             added += 1
-    documented_families.extend(data['families'])
+    for item in data['families']:
+        existing = next((entry for entry in documented_families if entry['key'] == item['key']), None)
+        if existing is None:
+            documented_families.append(item)
+            continue
+        for field in ('members', 'sources', 'relationships'):
+            target = existing.setdefault(field, [])
+            target.extend(value for value in item.get(field, []) if value not in target)
+        if item['basis'] not in existing['basis']:
+            existing['basis'] += ' ' + item['basis']
     return records, {'reviewedPeople': len(data['people']), 'reviewedOfficeTerms': sum(len(p['roles']) for p in data['people']),
+                     'reviewedFamilyGroups': len(data['families']),
+                     'explicitRelationshipEdges': sum(len(item.get('relationships', [])) for item in data['families']),
                      'addedOfficeRows': added, 'replacedArchiveRows': replaced,
                      'enrichedHouseSeats': enriched, 'reviewedAt': data['reviewedAt']}, list(sources.values())
 

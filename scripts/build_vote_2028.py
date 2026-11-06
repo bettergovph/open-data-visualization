@@ -1227,9 +1227,11 @@ def build():
                                     str(r.get('sourceId', ''))))
         record = matches[0]
         duplicate_office_rows_removed += len(matches) - 1
+        sourced_house_seat = (record['officeGroup'] == 'Congress / party-list representative'
+                             and str(record.get('sourceId', '')).startswith(('20th-house-', 'reviewed-')))
         for field in ('region', 'province', 'municipality', 'district'):
             values = {r.get(field, '') for r in matches if r.get(field, '')}
-            if office_level(record['officeGroup']) == 'national' and field in {'province', 'municipality', 'district'}:
+            if office_level(record['officeGroup']) == 'national' and not sourced_house_seat and field in {'province', 'municipality', 'district'}:
                 record[field] = ''
             elif len(values) == 1:
                 record[field] = next(iter(values))
@@ -1389,6 +1391,9 @@ def build():
         if documented:
             items = items + [{'relationship': documented['basis'], 'sourceUrl': url,
                               'confidence': None} for url in documented['sources']]
+            items += [{'relationship': f"{edge['person1']} — {edge['relationship']} — {edge['person2']}",
+                       'sourceUrl': edge['sourceUrl'], 'confidence': None}
+                      for edge in documented.get('relationships', [])]
         if items:
             target = family_link_evidence.setdefault(record['familyKey'], [])
             target.extend(item for item in items if item not in target)
