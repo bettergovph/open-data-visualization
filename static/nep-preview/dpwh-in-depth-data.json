@@ -1,5 +1,5 @@
 {
-  "generatedAtUtc": "2026-11-06T16:13:53.699665+00:00",
+  "generatedAtUtc": "2026-11-06T16:39:20.966926+00:00",
   "stage": "NEP FY2027 proposal documents",
   "summary": {
     "projectsWithBillRows": 7225,
@@ -348,16 +348,16 @@
     "method": "Read-only first-page native PDF title scan. Counts distinct HGAB-only project rows; BP 202 and POW source sets are deduplicated in the combined figure. Exact normalized title matches and conservative relaxed POW-title candidates are counted; this is a preliminary file-presence signal, not content verification."
   },
   "hgabPowSummary": {
-    "parsedDocuments": 3905,
-    "documentsWithBillRows": 3053,
-    "billRows": 79855,
-    "printedCategories": 16628,
+    "parsedDocuments": 4002,
+    "documentsWithBillRows": 3147,
+    "billRows": 84050,
+    "printedCategories": 17023,
     "exactTitleMatchedFiles": 137,
     "proposalLinkedFiles": 17,
     "exactTitleMatchedFilesInGapCohort": 120,
     "ambiguousTitleMatchedFiles": 4,
     "titleMatchAssessedFiles": 226,
-    "titleMatchNotAssessedFiles": 3679,
+    "titleMatchNotAssessedFiles": 3776,
     "titleMatchNoExactFiles": 85
   },
   "documentReconciliation": {
@@ -66847,7 +66847,7 @@
   "projectCount": 11034,
   "powPeerCount": 1966,
   "summaryPeerGroupCount": 7,
-  "hgabPowResultCount": 3905,
+  "hgabPowResultCount": 4002,
   "arrayShards": {
     "projects": [
       {
@@ -66888,9 +66888,15 @@
     "hgabPowResults": [
       {
         "path": "dpwh-in-depth-shards/hgabPowResults-001.json",
-        "itemCount": 3905,
-        "sizeBytes": 41099885,
-        "sha256": "9d526e1c17ee705d66292708509b90f81d533b7ce9c6eac633c9201b6561d848"
+        "itemCount": 3948,
+        "sizeBytes": 41986114,
+        "sha256": "7336afdc235b4242b29e0e3e1d1def5238a2b9740db0125ba3a2496e7eb028d6"
+      },
+      {
+        "path": "dpwh-in-depth-shards/hgabPowResults-002.json",
+        "itemCount": 54,
+        "sizeBytes": 1180071,
+        "sha256": "6df886e94bc02427b5f48c185c15ef879847262ae23b92ef58d1c38707baca26"
       }
     ]
   },

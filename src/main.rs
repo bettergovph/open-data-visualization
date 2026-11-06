@@ -11,6 +11,10 @@ use utils::*;
 use serde::Deserialize;
 use std::path::Path;
 
+// Casual UI gate for the connectivity page's source-name display. This is
+// intentionally an obscurity measure; the downloadable source JSON remains public.
+const CONNECTIVITY_REVEAL_HASH: &str = "a2beb2f7684275d92b2835a3efacbae260c2b93b11c683af0101b535411342a0";
+
 // Route handlers
 
 // BetterGovPH Homepage
@@ -717,6 +721,31 @@ async fn budget_trivia_mobile(req: HttpRequest) -> Result<HttpResponse, ActixErr
     Ok(file.into_response(&req))
 }
 
+async fn connectivity_entry(req: HttpRequest) -> Result<HttpResponse, ActixError> {
+    let query = web::Query::<std::collections::HashMap<String, String>>::from_query(req.query_string());
+    let reveal_names = query.as_ref().ok()
+        .and_then(|values| values.get("hash"))
+        .map(|value| value == CONNECTIVITY_REVEAL_HASH)
+        .unwrap_or(false);
+    let path = "static/nep-preview/connectivity.html";
+    let mut html = std::fs::read_to_string(path)
+        .map_err(actix_web::error::ErrorInternalServerError)?;
+    if reveal_names {
+        html = html.replacen(
+            "<html lang=\"en\">",
+            "<html lang=\"en\" data-connectivity-reveal=\"true\">",
+            1,
+        );
+        let notice = "<aside role=\"status\" style=\"margin:12px;padding:12px 16px;border-left:5px solid #FCD116;background:#fff8df\"><strong>Source-name display enabled.</strong> Names are public-source labels and do not establish ownership, access, project benefit or involvement.</aside>";
+        html = html.replacen("<main>", &format!("<main>{notice}"), 1);
+    }
+    Ok(HttpResponse::Ok()
+        .content_type("text/html; charset=utf-8")
+        .insert_header(("Cache-Control", "no-store"))
+        .insert_header(("Referrer-Policy", "no-referrer"))
+        .body(html))
+}
+
 // DPWH 2026 Page
 async fn dpwh2026(req: HttpRequest) -> Result<HttpResponse, ActixError> {
     let tera = Tera::new("templates/**/*").map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
@@ -769,6 +798,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(cors)
             .service(web::resource("/static/nep-preview/ignorant.html").to(ignorant_entry))
             .service(web::resource("/static/nep-preview/budget-trivia.html").to(budget_trivia_entry))
+            .service(web::resource("/static/nep-preview/connectivity.html").to(connectivity_entry))
             .service(web::resource("/budget-trivia-mobile").to(budget_trivia_mobile))
             .service(
                 fs::Files::new("/static/nep-preview", "./static/nep-preview/")
