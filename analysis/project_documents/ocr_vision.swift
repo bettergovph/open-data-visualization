@@ -6,7 +6,15 @@ import Vision
 let arguments = CommandLine.arguments
 if arguments.count < 2 { fputs("Usage: swift ocr_vision.swift input.pdf [page-limit]\n", stderr); exit(2) }
 guard let pdf = PDFDocument(url: URL(fileURLWithPath: arguments[1])) else { exit(2) }
-let limit = arguments.count > 2 ? Int(arguments[2]) ?? 100 : 100
+let options = Array(arguments.dropFirst(2))
+let limit = options.compactMap(Int.init).first ?? 100
+let requestedPage = options.compactMap { value -> Int? in
+    guard value.hasPrefix("--page=") else { return nil }
+    return Int(value.dropFirst("--page=".count))
+}.first
+let includeCandidates = options.contains("--all-candidates")
+let preferredRotations = options.first(where: { $0.hasPrefix("--preferred-rotations=") })
+    .map { $0.dropFirst("--preferred-rotations=".count).split(separator: ",").compactMap { Int($0) } } ?? []
 var pages: [[String: Any]] = []
 func rotate(_ source: CGImage, clockwise: Bool) -> CGImage? {
     let width = source.width, height = source.height
@@ -55,8 +63,25 @@ func recognize(_ image: CGImage) -> (Int, [[Any]]) {
         }
     }
     let text = strings.joined(separator: " ").uppercased()
-    let cues = ["ITEM NO", "DESCRIPTION", "QUANTITY", "DIRECT COST", "TOTAL COST", "TOTAL UNIT COST"]
-    let score = cues.reduce(0) { $0 + (text.contains($1) ? 10 : 0) } + min(words.count, 30) / 3 + headerAlignment(words)
+    let cues = ["ITEM NO", "DESCRIPTION", "QUANTITY", "DIRECT COST", "TOTAL COST", "TOTAL UNIT COST", "BREAKDOWN OF EXPENDITURES", "PROGRAM OF WORKS"]
+    let headerScore = cues.reduce(0) { $0 + (text.contains($1) ? 18 : 0) }
+    let itemExpression = try! NSRegularExpression(pattern: "^(?:[A-Z]?\\d{3,4}(?:\\([^)]*\\))?[A-Z]?)$", options: [.caseInsensitive])
+    let numericExpression = try! NSRegularExpression(pattern: "^(?:₱|PHP|P)?[\\d,]+(?:\\.\\d+)?%?$", options: [.caseInsensitive])
+    var rowBins: [Int: (Int, Int)] = [:]
+    var shareBins: [Int: Int] = [:]
+    for word in words where word.count > 4 {
+        guard let y = word[1] as? CGFloat, let raw = word[4] as? String else { continue }
+        let token = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        let range = NSRange(token.startIndex..., in: token)
+        let bin = Int(y / 36)
+        if itemExpression.firstMatch(in: token, range: range) != nil { rowBins[bin, default: (0, 0)].0 += 1 }
+        if numericExpression.firstMatch(in: token, range: range) != nil {
+            rowBins[bin, default: (0, 0)].1 += 1
+            if token.contains("%") { shareBins[bin, default: 0] += 1 }
+        }
+    }
+    let structuredRows = rowBins.values.filter { $0.0 > 0 && $0.1 > 0 }.count
+    let score = headerScore + min(words.count, 60) / 4 + headerAlignment(words) + min(structuredRows, 30) * 8 + min(shareBins.count, 30) * 3
     return (score, words)
 }
 func headerAlignment(_ words: [[Any]]) -> Int {
@@ -69,23 +94,43 @@ func headerAlignment(_ words: [[Any]]) -> Int {
     }
     return (buckets.values.map(\.count).max() ?? 0) * 8
 }
+func render(_ page: PDFPage, scale: CGFloat) -> CGImage? {
+    let bounds = page.bounds(for: .mediaBox)
+    let image = page.thumbnail(of: NSSize(width: bounds.width * scale, height: bounds.height * scale), for: .mediaBox)
+    return image.cgImage(forProposedRect: nil, context: nil, hints: nil)
+}
 for number in 0..<min(pdf.pageCount, limit) {
+    if let requestedPage, number + 1 != requestedPage { continue }
     guard let page = pdf.page(at: number) else { continue }
     let bounds = page.bounds(for: .mediaBox)
     let scale = min(3.5, 2400 / max(bounds.width, bounds.height))
-    let image = page.thumbnail(of: NSSize(width: bounds.width * scale, height: bounds.height * scale), for: .mediaBox)
-    guard let cg = image.cgImage(forProposedRect: nil, context: nil, hints: nil) else { continue }
-    let candidates: [(Int, CGImage)] = [(0, cg)] +
+    guard let cg = render(page, scale: scale) else { continue }
+    var candidates: [(Int, CGImage)] = [(0, cg)] +
         (rotate(cg, clockwise: true).map { [(90, $0)] } ?? []) +
         (rotateHalfTurn(cg).map { [(180, $0)] } ?? []) +
         (rotate(cg, clockwise: false).map { [(270, $0)] } ?? [])
-    let ranked = candidates.map { candidate in
+    if includeCandidates, let highResolution = render(page, scale: min(4.5, 3200 / max(bounds.width, bounds.height))) {
+        // Four quarter-turns at normal resolution plus clockwise and
+        // counterclockwise landscape retries at higher resolution.
+        candidates += (rotate(highResolution, clockwise: true).map { [(90, $0)] } ?? [])
+        candidates += (rotate(highResolution, clockwise: false).map { [(270, $0)] } ?? [])
+    }
+    if number < preferredRotations.count {
+        let preferred = preferredRotations[number]
+        candidates = candidates.filter { $0.0 == preferred }
+    }
+    let ranked = candidates.map { candidate -> (Int, Int, CGImage, [[Any]]) in
         let (score, words) = recognize(candidate.1)
         return (score, candidate.0, candidate.1, words)
+    }.sorted { $0.0 > $1.0 }
+    guard let best = ranked.first else { continue }
+    var record: [String: Any] = ["page": number+1, "width": best.2.width, "height": best.2.height,
+                                "rotation": best.1, "score": best.0, "words": best.3]
+    if includeCandidates {
+        record["candidates"] = ranked.map { ["score": $0.0, "rotation": $0.1, "width": $0.2.width,
+                                              "height": $0.2.height, "words": $0.3] }
     }
-    let best = ranked.max { $0.0 < $1.0 }!
-    pages.append(["page": number+1, "width": best.2.width, "height": best.2.height,
-                  "rotation": best.1, "words": best.3])
+    pages.append(record)
 }
 let data = try JSONSerialization.data(withJSONObject: ["engine":"Apple Vision accurate; language correction disabled", "pages":pages], options: [.sortedKeys])
 FileHandle.standardOutput.write(data)

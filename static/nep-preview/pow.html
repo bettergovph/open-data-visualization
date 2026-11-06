@@ -60,4 +60,4 @@ fetch(DATA_URL).then(r=>{if(!r.ok)throw Error(`HTTP ${r.status}`);return r.json(
  query.addEventListener('input',()=>{page=0;render()});signal.addEventListener('change',()=>{page=0;render()});document.getElementById('prev').addEventListener('click',()=>{page--;render()});document.getElementById('next').addEventListener('click',()=>{page++;render()});render();
 }).catch(err=>{document.querySelector('main').insertAdjacentHTML('afterbegin',`<section class="card caution"><strong>Data unavailable.</strong> ${esc(err.message)}. The investigation data file could not be loaded.</section>`)});
 </script>
-</body></html>
+<script src="project-document-links.js?v=0602f053b800"></script></body></html>
