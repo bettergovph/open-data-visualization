@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-11-07",
+  "purpose": "Research file for future review of public display labels. This file does not itself mask or alter names in the UI.",
+  "scope": "Initial, non-exhaustive entries. Include only people who appear by name in the current site UI and for whom credible public reporting explicitly reports a cyberlibel filing. A reported filing is not a court finding and says nothing about the merits of the complaint.",
+  "entries": [
+    {
+      "id": "hermogenes-ebdane-jr",
+      "displayName": "Hermogenes Ebdane Jr.",
+      "uiNames": [
+        "HERMOGENES E. EBDANE JR."
+      ],
+      "uiLocations": [
+        {
+          "page": "development-council.html",
+          "dataFile": "static/nep-preview/development-council-data.json",
+          "nameField": "people[].name"
+        }
+      ],
+      "reportedConduct": "Reported as having filed a cyberlibel complaint against Daily Tribune reporter Sean Magbanua and environmental advocate Heidi Fernandez over reporting about dredging operations in Zambales.",
+      "recordStatus": "reported_filing",
+      "caseOutcome": "Not established by the cited reports; do not imply a finding on the complaint's merits.",
+      "sources": [
+        {
+          "publisher": "Daily Tribune",
+          "publishedAt": "2026-11-03",
+          "url": "https://tribune.net.ph/2026/11/03/anti-mining-group-condemns-cyberlibel-complaint-vs-zambales-advocate-tribune-journalist",
+          "supports": "Identifies Zambales Gov. Hermogenes Ebdane Jr. as the filer and names both respondents."
+        }
+      ],
+      "reviewNotes": "First in the review list as requested. Preserve the distinction between a complaint being filed and a court finding."
+    },
+    {
+      "id": "paolo-duterte",
+      "displayName": "Paolo Duterte",
+      "uiNames": [
+        "PAOLO Z. DUTERTE"
+      ],
+      "uiLocations": [
+        {
+          "page": "vote-2028.html",
+          "dataFile": "static/nep-preview/vote-2028-data.json",
+          "nameField": "people[].name"
+        }
+      ],
+      "reportedConduct": "Reported as having filed libel and cyberlibel complaints against NBI Director Melvin Matibag, former police officer Rodulfo Gracioso Jr., and GMA Network executives and journalists on 2026-10-23.",
+      "recordStatus": "reported_filing",
+      "caseOutcome": "Not established by the cited reports; do not imply a finding on the complaint's merits.",
+      "sources": [
+        {
+          "publisher": "Philstar.com",
+          "publishedAt": "2026-10-23",
+          "url": "https://www.philstar.com/headlines/2026/10/23/2565234/paolo-duterte-files-libel-cyber-libel-complaints-vs-nbi-chief-gracioso-gma-execs/amp/",
+          "supports": "Reports the filing date, filer, and parties named in the complaints."
+        },
+        {
+          "publisher": "Reporters Without Borders (RSF)",
+          "publishedAt": "2026-10-2026",
+          "url": "https://rsf.org/en/philippines-journalist-philip-lustre-jr-arrested-rsf-concerned-about-new-case-legal-intimidation",
+          "supports": "Independently reports the October 23 cyberlibel complaints filed by Paolo Duterte and identifies several media respondents."
+        }
+      ],
+      "reviewNotes": "Included because the current vote page lists Paolo Z. Duterte."
+    }
+  ]
+}
