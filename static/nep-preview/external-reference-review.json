@@ -1,1 +1,964 @@
-{"source":{"repository":"https://github.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS","website":"https://csiiiv.github.io/DPWH-NEP-HB-2027-ANALYSIS/app/#overview","commit":"34ef5d8cbbacda92f6503ffd9a428569f157f64d","retrievedAtUtc":"2026-10-18T08:46:20Z"},"refreshPolicy":"Documented human-reviewed source corrections take priority over older local automated extraction. The adoption step retains raw values, review flags, source hashes and bounded reading equivalence. No downloaded code executes. Extraction adoption does not certify cross-stage project identity or geographic attribution.","findings":[{"id":"nia-scope","priority":"Reviewed source adoption and annex coverage","pages":["nia-irrigation.html","nia.html","summary.html"],"finding":"The external NIA House annex contains 828 project rows / PHP 17,999,305,000; the local detailed schedule contains 828 / PHP 17,999,305,000. The external NEP detailed annex is now available (791 rows). The reviewed extraction takes priority over older local automated parsing. Newly recovered rows are parser corrections, not budget insertions."},{"id":"hfep-baseline","priority":"Detailed baseline now available","pages":["hfep.html"],"finding":"The external HFEP NEP ledger contains 464 facilities, PHP 14,472,519,000. Printed control minus the facility ledger is PHP 140,000. Preserve that discrepancy; do not manufacture a balancing row or treat unmatched facility names as certified insertions."},{"id":"dpwh-readings","priority":"House reading control cross-check","pages":["dpwh-hgab-comparison.html"],"finding":"External House controls contain 16,270 second-reading and 16,275 third-reading allocations; net operations change PHP 134,000,000. Local count and allocation controls agree: True. Repeated-key comparison groups are not the same grain as their member allocations."},{"id":"dpwh-matching","priority":"Methods and stages differ","pages":["dpwh-hgab.html","congress.html","summary.html"],"finding":"The external retained NEP/House comparison uses the SECOND reading and reports 5801 unmatched House candidates and 1341 unmatched NEP candidates. Our principal analysis uses the THIRD reading. Chainage/re-scoping fallbacks consume some external pairs; differing stations and altered geography still require independent review. The earlier 5,837/2,139 figures are not a current target."},{"id":"source-certification","priority":"Shared source limitation","pages":["dpwh.html","dpwh-hgab.html","repeats.html","congress.html"],"finding":"The external source verification manifest records comparison_ready=False. Balanced arithmetic does not certify every OCR title, amount, source scope or project identity. Its NEP review queue includes 3,193 pending checks; these are not confirmed extraction errors."},{"id":"fap-crosscheck","priority":"Agreement on unresolved cases","pages":["dpwh-hgab.html"],"finding":"Of our 4 unmatched FAP lines, 4 also remain house_unmatched in the downloaded comparison. External narrative and matching JSON can differ; retained row statuses must be checked before assuming every FAP loan has a counterpart. Keep unresolved cases separate and provisional."},{"id":"fmr-coordinate-changes","priority":"Review before changing cost denominators","pages":["fmr.html","cost-per-km.html","cost-matching.html"],"finding":"Compared with our imported FMR ledger, 0 records have changed data/review fields, including 0 with changed coordinate arrays. Numeric repairs, review flags and new provenance must be reconciled before changing distance-based rates or geographic attribution. The update report lists every changed source row."},{"id":"chainage-coverage","priority":"Different screening populations","pages":["cost-matching.html","cost-per-km.html"],"finding":"The external chainage table includes flood control, local/FAP scopes and three source stages. Its length counts cannot be compared directly with our selected domestic roads/bridges/FMR denominator. Chainage-derived funded extent and endpoint distance remain distinct."}],"additionalResearchLeads":[{"page":"nia-irrigation.html","title":"Largest NIA sub-program control reduction","note":"Other Irrigation System: NEP PHP 3,000,000,000 versus House PHP 460,000,000; change PHP -2,540,000,000. These are external printed-annex controls, not project identities or proof of a transfer.","congressional_representatives":[]},{"page":"hfep.html","title":"2. LGU Hospitals","note":"2. LGU Hospitals: NEP PHP 2,428,391,000 versus House PHP 5,558,546,000; change PHP 3,130,155,000. Opposing movements do not establish a direct transfer or service consequences.","congressional_representatives":[]},{"page":"hfep.html","title":"3. DOH Hospitals","note":"3. DOH Hospitals: NEP PHP 9,509,703,000 versus House PHP 3,131,703,000; change PHP -6,378,000,000. Opposing movements do not establish a direct transfer or service consequences.","congressional_representatives":[]}],"nia":{"nepRows":791,"nepPesos":17598181000,"referenceHouseRows":828,"referenceHousePesos":17999305000,"localHouseRows":828,"localHousePesos":17999305000,"controls":[{"sub_program":"National Irrigation System","control_amount":4662231000,"segment_start":{"page":1,"y0":120.0},"project_count":216,"project_sum":4662231000,"difference":0,"tallies":true},{"sub_program":"Communal Irrigation System","control_amount":1620000000,"segment_start":{"page":9,"y0":222.9},"project_count":192,"project_sum":1620000000,"difference":0,"tallies":true},{"sub_program":"Other Irrigation System","control_amount":3000000000,"segment_start":{"page":16,"y0":287.0},"project_count":13,"project_sum":3000000000,"difference":0,"tallies":true},{"sub_program":"Establishment of Pump Irrigation","control_amount":7915950000,"segment_start":{"page":17,"y0":100.0},"project_count":330,"project_sum":7915950000,"difference":0,"tallies":true},{"sub_program":"Special Irrigation","control_amount":200000000,"segment_start":{"page":29,"y0":272.0},"project_count":29,"project_sum":200000000,"difference":0,"tallies":true},{"sub_program":"Extension/Expansion","control_amount":200000000,"segment_start":{"page":30,"y0":398.0},"project_count":11,"project_sum":200000000,"difference":0,"tallies":true}],"controlComparison":[{"program":"National Irrigation System","nepPesos":4662231000,"referenceHousePesos":5471255000,"adjustmentPesos":809024000},{"program":"Communal Irrigation System","nepPesos":1620000000,"referenceHousePesos":3243000000,"adjustmentPesos":1623000000},{"program":"Other Irrigation System","nepPesos":3000000000,"referenceHousePesos":460000000,"adjustmentPesos":-2540000000},{"program":"Establishment of Pump Irrigation","nepPesos":7915950000,"referenceHousePesos":8466950000,"adjustmentPesos":551000000},{"program":"Special Irrigation","nepPesos":200000000,"referenceHousePesos":158100000,"adjustmentPesos":-41900000},{"program":"Extension/Expansion","nepPesos":200000000,"referenceHousePesos":200000000,"adjustmentPesos":0}],"readingComparison":{"method":"page.get_text() equality over PDF 896-941 of both I-B copies","identical_pages":46,"total_pages":46,"pages":[{"pdf_page":896,"native_text_identical":true},{"pdf_page":897,"native_text_identical":true},{"pdf_page":898,"native_text_identical":true},{"pdf_page":899,"native_text_identical":true},{"pdf_page":900,"native_text_identical":true},{"pdf_page":901,"native_text_identical":true},{"pdf_page":902,"native_text_identical":true},{"pdf_page":903,"native_text_identical":true},{"pdf_page":904,"native_text_identical":true},{"pdf_page":905,"native_text_identical":true},{"pdf_page":906,"native_text_identical":true},{"pdf_page":907,"native_text_identical":true},{"pdf_page":908,"native_text_identical":true},{"pdf_page":909,"native_text_identical":true},{"pdf_page":910,"native_text_identical":true},{"pdf_page":911,"native_text_identical":true},{"pdf_page":912,"native_text_identical":true},{"pdf_page":913,"native_text_identical":true},{"pdf_page":914,"native_text_identical":true},{"pdf_page":915,"native_text_identical":true},{"pdf_page":916,"native_text_identical":true},{"pdf_page":917,"native_text_identical":true},{"pdf_page":918,"native_text_identical":true},{"pdf_page":919,"native_text_identical":true},{"pdf_page":920,"native_text_identical":true},{"pdf_page":921,"native_text_identical":true},{"pdf_page":922,"native_text_identical":true},{"pdf_page":923,"native_text_identical":true},{"pdf_page":924,"native_text_identical":true},{"pdf_page":925,"native_text_identical":true},{"pdf_page":926,"native_text_identical":true},{"pdf_page":927,"native_text_identical":true},{"pdf_page":928,"native_text_identical":true},{"pdf_page":929,"native_text_identical":true},{"pdf_page":930,"native_text_identical":true},{"pdf_page":931,"native_text_identical":true},{"pdf_page":932,"native_text_identical":true},{"pdf_page":933,"native_text_identical":true},{"pdf_page":934,"native_text_identical":true},{"pdf_page":935,"native_text_identical":true},{"pdf_page":936,"native_text_identical":true},{"pdf_page":937,"native_text_identical":true},{"pdf_page":938,"native_text_identical":true},{"pdf_page":939,"native_text_identical":true},{"pdf_page":940,"native_text_identical":true},{"pdf_page":941,"native_text_identical":true}],"note":"Textual identity does not authenticate the legislative stage of either supplied copy."},"status":"Reviewed extraction adopted; local House count/total now agrees."},"hfep":{"nep":{"facilities":464,"ledgerPesos":14472519000,"columnPesos":{"infrastructure":7386456000,"medical_equipment":6834063000,"motor_vehicle":252000000},"verification":{"detail_pages":13,"source_rows":837,"facilities":464,"facility_ledger_total_php":14472519000,"grand_total_php":14472659000,"ledger_vs_grand_total_gap_php":{"infrastructure":0,"medical_equipment":-140000,"motor_vehicle":0,"total":-140000},"printed_discrepancies_count":1,"internal_control_checks":347,"failed_internal_controls":0,"vl_shared_rows":382,"vl_amount_agreements":382,"vl_amount_conflicts":0,"agency_check_echoes":2},"sourceMetadata":{"schema_version":1,"fiscal_year":2027,"currency":"PHP","source_unit":"pesos","unit_multiplier":1,"document":"NEP FY 2027 Executive Budget Proposal, HFEP detail annex","legislative_stage":"executive_proposal","scope":"DOH FY 2027 Health Facilities Enhancement Program capital outlays","source_pdf":"dbm-other-nep-line-data/HFEP_2.pdf","source_pps_json":"dbm-other-nep-line-data/HFEP.pdf_by_PP-StructrueV3.json","source_pps_sha256":"ba57cd3b0cb7390a6f557c8fb73d05246128bf511931acbe7b0174d6f8647cd7","source_vl_json":"dbm-other-nep-line-data/HFEP.pdf_by_PaddleOCR-VL-1.6.json","source_vl_sha256":"6b998b4491f5e5e1d41d5db5ecd0872cdd6f8e52ec0d531847da79ac01e7088d","volume_cross_control":{"source_pdf":"dbm-nep-data/NEP-2027-VOLUME-2A_OCR.pdf","pdf_page":282,"printed_page":274},"printed_page_offset":718,"extractor_sha256":"6aeb1bd4bdfe81c0df00fa317feb492ec18f8c4ee1e73250dc3eea734941a062","pymupdf_version":"1.28.2","ids":"artifact-local page/row identifiers; not cross-document identities"},"categories":{"1. Primary Care Facilities":506565000,"2. LGU Hospitals":2428391000,"3. DOH Hospitals":9509703000,"4. BUCAS":4400000,"5. Completion of Drug Abuse Treatment and Rehabilitation Centers":406500000,"6. Bureau of Quarantine":86120000,"7. Other Health Care Facilities":1530980000}},"house":{"facilities":513,"ledgerPesos":10021659000,"columnPesos":{"infrastructure":5990046000,"medical_equipment":3900913000,"motor_vehicle":130700000},"verification":{"detail_pages":17,"source_bands":1157,"band_role_counts":{"annex_heading":3,"column_header":17,"category":8,"blank_spacer":312,"subcategory":14,"region":91,"province":198,"facility":513,"grand_total":1},"table_words_accounted_for":5009,"nodes":826,"facilities":513,"facility_ledger_total_php":10021659000,"facility_ledger_infrastructure_php":5990046000,"facility_ledger_medical_equipment_php":3900913000,"facility_ledger_motor_vehicle_php":130700000,"internal_control_checks":311,"failed_internal_controls":0,"reading_comparison_identical_pages":17,"reading_comparison_total_pages":17},"sourceMetadata":{"schema_version":1,"fiscal_year":2027,"currency":"PHP","source_unit":"pesos_printed_on_annex","unit_multiplier":1,"document":"HB 10858 General Appropriations Bill, local HB_BUDGET copy","legislative_stage":"not_independently_authenticated","scope":"DOH FY 2027 Health Facilities Enhancement Program (HFEP) annex; not the entire DOH appropriation. The I-A HFEP allocation of PHP 10,088,832,000 additionally includes PHP 67,173,000 MOOE, which is outside this annex.","source_pdf":"HB_BUDGET/2 - HB 10858 VOL IB.pdf","source_sha256":"a82800c4cc2684566a37f7780d8f9131d2e7b2c97444d335d94df012dec065b6","source_pdf_pages":[877,893],"source_printed_pages":[857,873],"agency_control_pdf_pages":{"IA_allocation_table":[1067],"IA_special_provision":[1039]},"extractor_sha256":"35826ba02e7463b9d8172d90e6035dfc5543d9e84b28151f0b26b894b3570e45","pymupdf_version":"1.28.2","ids":"source-artifact-local page and band identifiers; not cross-document facility identities"},"categories":{"1. Primary Care Facilities":525190000,"2. LGU Hospitals":5558546000,"3. DOH Hospitals":3131703000,"4. BUCAS":4400000,"5. Drug Abuse Treatment and Rehabilitation Centers":296000000,"6. Bureau of Quarantine":1120000,"7. Other Health Care Facilities":302700000,"8. State Universities":202000000}},"localCapitalControls":{"nepMooePesos":67173000,"nepCapitalPesos":14472659000,"nepTotalPesos":14539832000,"hgabMooePesos":67173000,"hgabCapitalPesos":10021659000,"hgabTotalPesos":10088832000,"capitalAdjustmentPesos":-4451000000,"totalAdjustmentPesos":-4451000000,"hgabFacilityRows":513,"facilitySumMatchesPrintedCapitalControl":true,"source":{"programme":"Health Facilities Enhancement Program","sourceVolume":"1- HB 10858 FOR 3RD READING VOL I-A.pdf","sourcePage":1067,"printedPage":1057,"visibleRow":["41","Health Facilities Enhancement Program","67,173,000","10,021,659,000","10,088,832,000","41"],"mooePesos":67173000,"capitalOutlayPesos":10021659000,"totalPesos":10088832000,"sourcePdfSha256":"79f56b8d577246342b59cc996afdd707523268f0bde10378e3c1b5ef844451fd"}}},"dpwh":{"referenceSecondReading":{"nep_printed_php":642612015000,"house_printed_php":654102015000,"printed_delta_php":11490000000,"house_operations_printed_php":586941661000,"nep_operations_printed_php":572924074000,"house_gas_s2o_printed_php":67160354000,"nep_gas_s2o_printed_php":69687941000,"house_extracted_php":586941661000,"house_allocations":16270,"house_local_extracted_php":542192650000,"house_fap_php":44749011000,"nep_fap_php":117749011000,"house_operations_gap_php":0,"house_balanced_paps":44,"house_checked_paps":44,"house_fap_projects":29,"nep_evidence":{"checked":16760,"not_checked":4,"status_counts":{"within_bbox_agreement":13569,"native_row_ambiguity":3149,"native_text_review":28,"nearby_alignment_candidate":14},"review_candidates":3191},"match_counts":{"exact_candidate":9680,"house_unmatched":5801,"chainage_candidate":324,"fuzzy_candidate":385,"ambiguous":5,"location_amendment_candidate":29,"scope_amendment_candidate":35,"soft_match_candidate":11,"nep_unmatched":1341},"reviewed_pairs":0,"api":{"api_rows":11372,"api_php":445378063000,"unpaired_source_rows":23,"unpaired_source_php":9797000000}},"referenceReadings":{"second":{"allocations":16270,"named_projects":15972,"mooe_co_php":639179718000,"new_appropriations":654102015000,"personnel_services":14922297000,"mooe":24685746000,"capital_outlays":614493972000,"gas_total":18078293000,"s2o_total":49082061000,"regular_operations":528316707000,"local_projects":13875943000,"foreign_assisted_projects":44749011000,"operations_including_projects":586941661000},"third":{"allocations":16275,"named_projects":15977,"mooe_co_php":639179718000,"new_appropriations":654102015000,"personnel_services":14922297000,"mooe":24685746000,"capital_outlays":614493972000,"gas_total":18078293000,"s2o_total":48948061000,"regular_operations":528450707000,"local_projects":13875943000,"foreign_assisted_projects":44749011000,"operations_including_projects":587075661000},"control_deltas_php":{"new_appropriations":0,"personnel_services":0,"mooe":0,"capital_outlays":0,"gas_total":0,"s2o_total":-134000000,"regular_operations":134000000,"local_projects":0,"foreign_assisted_projects":0,"operations_including_projects":134000000},"status_counts":{"same_amount":16264,"third_only":5,"repeated_key":3},"allocation_delta_php":134000000,"positive_delta_php":134000000,"negative_delta_php":0},"localReadings":{"secondCandidateCount":16270,"thirdCandidateCount":16275,"secondAllocationPesos":586941661000,"thirdAllocationPesos":587075661000,"statusCounts":{"Retained · same amount":16270,"New in 3rd reading":5},"method":"Exact normalized titles are paired first; fuzzy candidates require at least 78% sequence similarity, exclude opposite directions and disjoint stated chainage, and are for manual review. Totals are extracted schedule allocations, not verified duplicate costs."},"localDomesticUnmatched":5549,"fapCrosscheck":[{"projectName":"Priority Bridges Crossing Pasig-Marikina and Manggahan Floodway Bridges Construction Project, under China Government Financing Facility","localAmountPesos":326075000,"localPage":"941","referenceStatuses":["house_unmatched"],"referenceNepTitles":[null],"congressional_representatives":[]},{"projectName":"Metro Manila Bridges Project, ADB 4168-PHI","localAmountPesos":310763000,"localPage":"941","referenceStatuses":["house_unmatched"],"referenceNepTitles":[null],"congressional_representatives":[]},{"projectName":"Road Network Development Project in Conflict-Affected Areas in Mindanao (RNDP- CAAM), JICA PH-F-P1","localAmountPesos":115254000,"localPage":"941","referenceStatuses":["house_unmatched"],"referenceNepTitles":[null],"congressional_representatives":[]},{"projectName":"Samal Island - Davao City Connector (SIDC) Project, China GCL no. 202200600763","localAmountPesos":54818000,"localPage":"941","referenceStatuses":["house_unmatched"],"referenceNepTitles":[null],"congressional_representatives":[]}]},"sourceVerification":{"comparison_ready":false,"comparisons":"Deferred until source evidence, coverage, and compatible scope are confirmed.","phase":"Verify each source hierarchy before comparisons","sources":[{"key":"hb","title":"DPWH House Bill — Native I-B","scope":"FY2027 new appropriations · DPWH only · I-B pages 9 and 13–110","grain":"I-B control tree: office allocations and FAP funding partitions. Native I-C supplies current named-project detail.","scale":1,"audit":{"total":654102015000,"nodes":2406,"leaf_count":1746,"internal_checks":660,"failures":[]},"evidence_status":"Native printed controls verified","coverage_status":"No unexplained amount rows in the I-B DPWH table","gaps":["Native I-C detail balances and title ownership is regression-checked; individual project identities and amendment completeness still require review."],"comparison_ready":false,"review_summary":{"needs_source_check":0,"types":{}},"page":"hb_native_verification.html","project_detail_summary":{"nodes":21500,"leaves":18812,"internal_nodes":2686,"recursive_checks":2686,"failed_nodes":0,"closing_control_checks":3,"failed_closing_controls":0,"unexplained_amount_rows":0,"unexplained_title_rows":0,"retained_second_observations":204,"retained_reference_nodes":2,"additive_leaf_total_php":639179718000,"named_project_leaves":15972,"fap_projects":29,"zero_funding_observations":9,"region_nodes":1490,"office_nodes":3570,"funding_leaves":51,"shared_controls_with_ib":56,"crossvolume_disagreements":0,"repair_counts":{"retain_second_observation":204,"fold_family_container":7,"null_glyph_cleanup":4,"recover_artifact_title":1,"retain_reference":2}},"congressional_representatives":[]},{"key":"nep","title":"DPWH NEP — Source hierarchy","scope":"FY2027 new appropriations · automatic appropriations excluded","grain":"Source expense classes, programs, offices, projects, and funding","scale":1,"audit":{"total":642612015000,"nodes":16764,"leaf_count":14210,"internal_checks":2552,"failures":[]},"evidence_status":"3193 pending source checks; 2 derived groupings shown as context","coverage_status":"Atomic source ledger reproduces the printed root","gaps":["Review 3149 ambiguous row areas, 28 text disagreements, 14 possible row-alignment issues, and 2 summary controls before certifying source evidence.","Retained OCR/PDF provenance is recorded; arithmetic alone does not verify labels or every printed amount."],"comparison_ready":false,"review_summary":{"needs_source_check":3193,"types":{"summary_check":2,"row_identity":3149,"amount_disagreement":28,"alignment":14,"derived_context":2}},"page":"nep_source_verification.html","congressional_representatives":[]},{"key":"dpwh_nep_api","title":"DPWH Transparency NEP — FY2027 API hierarchy","scope":"FY2027 NEP project listings · retained DPWH Transparency NEP data via BetterGov-hosted API","grain":"pap1 → pap2 → pap3 → region → office → project code","scale":1,"audit":{"total":445378063000,"nodes":14034,"leaf_count":11372,"internal_checks":2662,"failures":[]},"evidence_status":"Derived rollups and project identities checked against retained API rows","coverage_status":"11,372 projects reproduce the retained API count and amount summaries","gaps":["API groups are derived; source documents and release coverage still require confirmation before comparisons.","The API project listing has its own scope. It does not establish complete coverage of the printed NEP budget."],"comparison_ready":false,"review_summary":{"needs_source_check":0,"types":{}},"page":"dpwh_nep_api_verification.html","congressional_representatives":[]}]},"fmrCoordinateUpdates":[{"stage":"nep","oldRecords":704,"referenceRecords":704,"changedRecords":0,"removedIds":[],"details":[]},{"stage":"hgab","oldRecords":964,"referenceRecords":964,"changedRecords":0,"removedIds":[],"details":[]}],"chainageCoverage":{"nep":{"rows":3570,"withLength":3469},"hb2":{"rows":4334,"withLength":4223},"hb3":{"rows":4339,"withLength":4228}},"inputs":[{"repositoryPath":"analysis-nia/data/nep_nia_dataset.json","sourceUrl":"https://raw.githubusercontent.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS/34ef5d8cbbacda92f6503ffd9a428569f157f64d/analysis-nia/data/nep_nia_dataset.json","sha256":"685dabfc819030a02d6e53b43a038bea59b11dd872e9a4bb262cf13e8a4aa50c","localPath":"data_sources/csiiiv/snapshots/34ef5d8cbbacda92f6503ffd9a428569f157f64d/analysis-nia/data/nep_nia_dataset.json"},{"repositoryPath":"analysis-nia/data/hgab_nia_tree.json","sourceUrl":"https://raw.githubusercontent.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS/34ef5d8cbbacda92f6503ffd9a428569f157f64d/analysis-nia/data/hgab_nia_tree.json","sha256":"5c4808b5e28745b405b5222b0b4a3c2fca536ee0d32a7bb20bf81051787cac4f","localPath":"data_sources/csiiiv/snapshots/34ef5d8cbbacda92f6503ffd9a428569f157f64d/analysis-nia/data/hgab_nia_tree.json"},{"repositoryPath":"analysis-nia/data/hgab_nia_audit.json","sourceUrl":"https://raw.githubusercontent.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS/34ef5d8cbbacda92f6503ffd9a428569f157f64d/analysis-nia/data/hgab_nia_audit.json","sha256":"90c2bffadbbc899a126d282e86e3c80baa28be3284a62fdccdce86f35148b2b8","localPath":"data_sources/csiiiv/snapshots/34ef5d8cbbacda92f6503ffd9a428569f157f64d/analysis-nia/data/hgab_nia_audit.json"},{"repositoryPath":"analysis-hfep/data/nep_hfep_data_list.json","sourceUrl":"https://raw.githubusercontent.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS/34ef5d8cbbacda92f6503ffd9a428569f157f64d/analysis-hfep/data/nep_hfep_data_list.json","sha256":"3edd1cdb8cc62c4ef4e17a9a18f93862222a3e01ad5c94cfffd0f66b0864b74d","localPath":"data_sources/csiiiv/snapshots/34ef5d8cbbacda92f6503ffd9a428569f157f64d/analysis-hfep/data/nep_hfep_data_list.json"},{"repositoryPath":"analysis-hfep/data/hgab_hfep_data_list.json","sourceUrl":"https://raw.githubusercontent.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS/34ef5d8cbbacda92f6503ffd9a428569f157f64d/analysis-hfep/data/hgab_hfep_data_list.json","sha256":"0d8cfb9b7edd32805ec9c54981b6099d32301f0ca202c16a2b33a998dbde3277","localPath":"data_sources/csiiiv/snapshots/34ef5d8cbbacda92f6503ffd9a428569f157f64d/analysis-hfep/data/hgab_hfep_data_list.json"},{"repositoryPath":"analysis/data/source_comparison_2027.json","sourceUrl":"https://raw.githubusercontent.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS/34ef5d8cbbacda92f6503ffd9a428569f157f64d/analysis/data/source_comparison_2027.json","sha256":"9f500eb12e682f9c1086fa113426dee02cc23ddb4b4b7a1a75c1a541010889c4","localPath":"data_sources/csiiiv/snapshots/34ef5d8cbbacda92f6503ffd9a428569f157f64d/analysis/data/source_comparison_2027.json"},{"repositoryPath":"analysis/data/house_reading_changes_2027.json","sourceUrl":"https://raw.githubusercontent.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS/34ef5d8cbbacda92f6503ffd9a428569f157f64d/analysis/data/house_reading_changes_2027.json","sha256":"0e9f79d62b831ce88bbfa5bb01631c1829a87aa178aa02a756cd0aba7b5b78ea","localPath":"data_sources/csiiiv/snapshots/34ef5d8cbbacda92f6503ffd9a428569f157f64d/analysis/data/house_reading_changes_2027.json"},{"repositoryPath":"analysis/data/source_verification_overview.json","sourceUrl":"https://raw.githubusercontent.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS/34ef5d8cbbacda92f6503ffd9a428569f157f64d/analysis/data/source_verification_overview.json","sha256":"3cd6c9a46a2fc563881d733b5e5ce336bb17d0b29ec78ab5467b5b1b080db3e9","localPath":"data_sources/csiiiv/snapshots/34ef5d8cbbacda92f6503ffd9a428569f157f64d/analysis/data/source_verification_overview.json"},{"repositoryPath":"other-analysis/data/nep_fmr_coordinates_normalized.json","sourceUrl":"https://raw.githubusercontent.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS/34ef5d8cbbacda92f6503ffd9a428569f157f64d/other-analysis/data/nep_fmr_coordinates_normalized.json","sha256":"53d76f3a3bd928a355e9c25b641ed156820b4aeee4a4d3308ff6f951441ce2fc","localPath":"data_sources/csiiiv/snapshots/34ef5d8cbbacda92f6503ffd9a428569f157f64d/other-analysis/data/nep_fmr_coordinates_normalized.json"},{"repositoryPath":"other-analysis/data/hgab_fmr_coordinates_normalized.json","sourceUrl":"https://raw.githubusercontent.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS/34ef5d8cbbacda92f6503ffd9a428569f157f64d/other-analysis/data/hgab_fmr_coordinates_normalized.json","sha256":"c8c360514ad9ac908f435c7782bca879cfda01d26b102c97f2348f58dd7243c0","localPath":"data_sources/csiiiv/snapshots/34ef5d8cbbacda92f6503ffd9a428569f157f64d/other-analysis/data/hgab_fmr_coordinates_normalized.json"},{"repositoryPath":"analysis/data/chainage_units_2027.json","sourceUrl":"https://raw.githubusercontent.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS/34ef5d8cbbacda92f6503ffd9a428569f157f64d/analysis/data/chainage_units_2027.json","sha256":"745397373b162fef4fd9ff3efb0a66cf96245f0d4e51366672272f6383e5b036","localPath":"data_sources/csiiiv/snapshots/34ef5d8cbbacda92f6503ffd9a428569f157f64d/analysis/data/chainage_units_2027.json"}],"snapshotChanges":[]}
+{
+  "source": {
+    "repository": "https://github.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS",
+    "website": "https://csiiiv.github.io/DPWH-NEP-HB-2027-ANALYSIS/app/#overview",
+    "commit": "34ef5d8cbbacda92f6503ffd9a428569f157f64d",
+    "retrievedAtUtc": "2026-10-18T08:46:20Z"
+  },
+  "refreshPolicy": "Documented human-reviewed source corrections take priority over older local automated extraction. The adoption step retains raw values, review flags, source hashes and bounded reading equivalence. No downloaded code executes. Extraction adoption does not certify cross-stage project identity or geographic attribution.",
+  "findings": [
+    {
+      "id": "nia-scope",
+      "priority": "Reviewed source adoption and annex coverage",
+      "pages": [
+        "nia-irrigation.html",
+        "nia.html",
+        "summary.html"
+      ],
+      "finding": "The external NIA House annex contains 828 project rows / PHP 17,999,305,000; the local detailed schedule contains 828 / PHP 17,999,305,000. The external NEP detailed annex is now available (791 rows). The reviewed extraction takes priority over older local automated parsing. Newly recovered rows are parser corrections, not budget insertions."
+    },
+    {
+      "id": "hfep-baseline",
+      "priority": "Detailed baseline now available",
+      "pages": [
+        "hfep.html"
+      ],
+      "finding": "The external HFEP NEP ledger contains 464 facilities, PHP 14,472,519,000. Printed control minus the facility ledger is PHP 140,000. Preserve that discrepancy; do not manufacture a balancing row or treat unmatched facility names as certified insertions."
+    },
+    {
+      "id": "dpwh-readings",
+      "priority": "House reading control cross-check",
+      "pages": [
+        "dpwh-hgab-comparison.html"
+      ],
+      "finding": "External House controls contain 16,270 second-reading and 16,275 third-reading allocations; net operations change PHP 134,000,000. Local count and allocation controls agree: True. Repeated-key comparison groups are not the same grain as their member allocations."
+    },
+    {
+      "id": "dpwh-matching",
+      "priority": "Methods and stages differ",
+      "pages": [
+        "dpwh-hgab.html",
+        "congress.html",
+        "summary.html"
+      ],
+      "finding": "The external retained NEP/House comparison uses the SECOND reading and reports 5801 unmatched House candidates and 1341 unmatched NEP candidates. Our principal analysis uses the THIRD reading. Chainage/re-scoping fallbacks consume some external pairs; differing stations and altered geography still require independent review. The earlier 5,837/2,139 figures are not a current target."
+    },
+    {
+      "id": "source-certification",
+      "priority": "Shared source limitation",
+      "pages": [
+        "dpwh.html",
+        "dpwh-hgab.html",
+        "repeats.html",
+        "congress.html"
+      ],
+      "finding": "The external source verification manifest records comparison_ready=False. Balanced arithmetic does not certify every OCR title, amount, source scope or project identity. Its NEP review queue includes 3,193 pending checks; these are not confirmed extraction errors."
+    },
+    {
+      "id": "fap-crosscheck",
+      "priority": "Agreement on unresolved cases",
+      "pages": [
+        "dpwh-hgab.html"
+      ],
+      "finding": "Of our 4 unmatched FAP lines, 4 also remain house_unmatched in the downloaded comparison. External narrative and matching JSON can differ; retained row statuses must be checked before assuming every FAP loan has a counterpart. Keep unresolved cases separate and provisional."
+    },
+    {
+      "id": "fmr-coordinate-changes",
+      "priority": "Review before changing cost denominators",
+      "pages": [
+        "fmr.html",
+        "cost-per-km.html",
+        "cost-matching.html"
+      ],
+      "finding": "Compared with our imported FMR ledger, 0 records have changed data/review fields, including 0 with changed coordinate arrays. Numeric repairs, review flags and new provenance must be reconciled before changing distance-based rates or geographic attribution. The update report lists every changed source row."
+    },
+    {
+      "id": "chainage-coverage",
+      "priority": "Different screening populations",
+      "pages": [
+        "cost-matching.html",
+        "cost-per-km.html"
+      ],
+      "finding": "The external chainage table includes flood control, local/FAP scopes and three source stages. Its length counts cannot be compared directly with our selected domestic roads/bridges/FMR denominator. Chainage-derived funded extent and endpoint distance remain distinct."
+    }
+  ],
+  "additionalResearchLeads": [
+    {
+      "page": "nia-irrigation.html",
+      "title": "Largest NIA sub-program control reduction",
+      "note": "Other Irrigation System: NEP PHP 3,000,000,000 versus House PHP 460,000,000; change PHP -2,540,000,000. These are external printed-annex controls, not project identities or proof of a transfer."
+    },
+    {
+      "page": "hfep.html",
+      "title": "2. LGU Hospitals",
+      "note": "2. LGU Hospitals: NEP PHP 2,428,391,000 versus House PHP 5,558,546,000; change PHP 3,130,155,000. Opposing movements do not establish a direct transfer or service consequences."
+    },
+    {
+      "page": "hfep.html",
+      "title": "3. DOH Hospitals",
+      "note": "3. DOH Hospitals: NEP PHP 9,509,703,000 versus House PHP 3,131,703,000; change PHP -6,378,000,000. Opposing movements do not establish a direct transfer or service consequences."
+    }
+  ],
+  "nia": {
+    "nepRows": 791,
+    "nepPesos": 17598181000,
+    "referenceHouseRows": 828,
+    "referenceHousePesos": 17999305000,
+    "localHouseRows": 828,
+    "localHousePesos": 17999305000,
+    "controls": [
+      {
+        "sub_program": "National Irrigation System",
+        "control_amount": 4662231000,
+        "segment_start": {
+          "page": 1,
+          "y0": 120.0
+        },
+        "project_count": 216,
+        "project_sum": 4662231000,
+        "difference": 0,
+        "tallies": true
+      },
+      {
+        "sub_program": "Communal Irrigation System",
+        "control_amount": 1620000000,
+        "segment_start": {
+          "page": 9,
+          "y0": 222.9
+        },
+        "project_count": 192,
+        "project_sum": 1620000000,
+        "difference": 0,
+        "tallies": true
+      },
+      {
+        "sub_program": "Other Irrigation System",
+        "control_amount": 3000000000,
+        "segment_start": {
+          "page": 16,
+          "y0": 287.0
+        },
+        "project_count": 13,
+        "project_sum": 3000000000,
+        "difference": 0,
+        "tallies": true
+      },
+      {
+        "sub_program": "Establishment of Pump Irrigation",
+        "control_amount": 7915950000,
+        "segment_start": {
+          "page": 17,
+          "y0": 100.0
+        },
+        "project_count": 330,
+        "project_sum": 7915950000,
+        "difference": 0,
+        "tallies": true
+      },
+      {
+        "sub_program": "Special Irrigation",
+        "control_amount": 200000000,
+        "segment_start": {
+          "page": 29,
+          "y0": 272.0
+        },
+        "project_count": 29,
+        "project_sum": 200000000,
+        "difference": 0,
+        "tallies": true
+      },
+      {
+        "sub_program": "Extension/Expansion",
+        "control_amount": 200000000,
+        "segment_start": {
+          "page": 30,
+          "y0": 398.0
+        },
+        "project_count": 11,
+        "project_sum": 200000000,
+        "difference": 0,
+        "tallies": true
+      }
+    ],
+    "controlComparison": [
+      {
+        "program": "National Irrigation System",
+        "nepPesos": 4662231000,
+        "referenceHousePesos": 5471255000,
+        "adjustmentPesos": 809024000
+      },
+      {
+        "program": "Communal Irrigation System",
+        "nepPesos": 1620000000,
+        "referenceHousePesos": 3243000000,
+        "adjustmentPesos": 1623000000
+      },
+      {
+        "program": "Other Irrigation System",
+        "nepPesos": 3000000000,
+        "referenceHousePesos": 460000000,
+        "adjustmentPesos": -2540000000
+      },
+      {
+        "program": "Establishment of Pump Irrigation",
+        "nepPesos": 7915950000,
+        "referenceHousePesos": 8466950000,
+        "adjustmentPesos": 551000000
+      },
+      {
+        "program": "Special Irrigation",
+        "nepPesos": 200000000,
+        "referenceHousePesos": 158100000,
+        "adjustmentPesos": -41900000
+      },
+      {
+        "program": "Extension/Expansion",
+        "nepPesos": 200000000,
+        "referenceHousePesos": 200000000,
+        "adjustmentPesos": 0
+      }
+    ],
+    "readingComparison": {
+      "method": "page.get_text() equality over PDF 896-941 of both I-B copies",
+      "identical_pages": 46,
+      "total_pages": 46,
+      "pages": [
+        {
+          "pdf_page": 896,
+          "native_text_identical": true
+        },
+        {
+          "pdf_page": 897,
+          "native_text_identical": true
+        },
+        {
+          "pdf_page": 898,
+          "native_text_identical": true
+        },
+        {
+          "pdf_page": 899,
+          "native_text_identical": true
+        },
+        {
+          "pdf_page": 900,
+          "native_text_identical": true
+        },
+        {
+          "pdf_page": 901,
+          "native_text_identical": true
+        },
+        {
+          "pdf_page": 902,
+          "native_text_identical": true
+        },
+        {
+          "pdf_page": 903,
+          "native_text_identical": true
+        },
+        {
+          "pdf_page": 904,
+          "native_text_identical": true
+        },
+        {
+          "pdf_page": 905,
+          "native_text_identical": true
+        },
+        {
+          "pdf_page": 906,
+          "native_text_identical": true
+        },
+        {
+          "pdf_page": 907,
+          "native_text_identical": true
+        },
+        {
+          "pdf_page": 908,
+          "native_text_identical": true
+        },
+        {
+          "pdf_page": 909,
+          "native_text_identical": true
+        },
+        {
+          "pdf_page": 910,
+          "native_text_identical": true
+        },
+        {
+          "pdf_page": 911,
+          "native_text_identical": true
+        },
+        {
+          "pdf_page": 912,
+          "native_text_identical": true
+        },
+        {
+          "pdf_page": 913,
+          "native_text_identical": true
+        },
+        {
+          "pdf_page": 914,
+          "native_text_identical": true
+        },
+        {
+          "pdf_page": 915,
+          "native_text_identical": true
+        },
+        {
+          "pdf_page": 916,
+          "native_text_identical": true
+        },
+        {
+          "pdf_page": 917,
+          "native_text_identical": true
+        },
+        {
+          "pdf_page": 918,
+          "native_text_identical": true
+        },
+        {
+          "pdf_page": 919,
+          "native_text_identical": true
+        },
+        {
+          "pdf_page": 920,
+          "native_text_identical": true
+        },
+        {
+          "pdf_page": 921,
+          "native_text_identical": true
+        },
+        {
+          "pdf_page": 922,
+          "native_text_identical": true
+        },
+        {
+          "pdf_page": 923,
+          "native_text_identical": true
+        },
+        {
+          "pdf_page": 924,
+          "native_text_identical": true
+        },
+        {
+          "pdf_page": 925,
+          "native_text_identical": true
+        },
+        {
+          "pdf_page": 926,
+          "native_text_identical": true
+        },
+        {
+          "pdf_page": 927,
+          "native_text_identical": true
+        },
+        {
+          "pdf_page": 928,
+          "native_text_identical": true
+        },
+        {
+          "pdf_page": 929,
+          "native_text_identical": true
+        },
+        {
+          "pdf_page": 930,
+          "native_text_identical": true
+        },
+        {
+          "pdf_page": 931,
+          "native_text_identical": true
+        },
+        {
+          "pdf_page": 932,
+          "native_text_identical": true
+        },
+        {
+          "pdf_page": 933,
+          "native_text_identical": true
+        },
+        {
+          "pdf_page": 934,
+          "native_text_identical": true
+        },
+        {
+          "pdf_page": 935,
+          "native_text_identical": true
+        },
+        {
+          "pdf_page": 936,
+          "native_text_identical": true
+        },
+        {
+          "pdf_page": 937,
+          "native_text_identical": true
+        },
+        {
+          "pdf_page": 938,
+          "native_text_identical": true
+        },
+        {
+          "pdf_page": 939,
+          "native_text_identical": true
+        },
+        {
+          "pdf_page": 940,
+          "native_text_identical": true
+        },
+        {
+          "pdf_page": 941,
+          "native_text_identical": true
+        }
+      ],
+      "note": "Textual identity does not authenticate the legislative stage of either supplied copy."
+    },
+    "status": "Reviewed extraction adopted; local House count/total now agrees."
+  },
+  "hfep": {
+    "nep": {
+      "facilities": 464,
+      "ledgerPesos": 14472519000,
+      "columnPesos": {
+        "infrastructure": 7386456000,
+        "medical_equipment": 6834063000,
+        "motor_vehicle": 252000000
+      },
+      "verification": {
+        "detail_pages": 13,
+        "source_rows": 837,
+        "facilities": 464,
+        "facility_ledger_total_php": 14472519000,
+        "grand_total_php": 14472659000,
+        "ledger_vs_grand_total_gap_php": {
+          "infrastructure": 0,
+          "medical_equipment": -140000,
+          "motor_vehicle": 0,
+          "total": -140000
+        },
+        "printed_discrepancies_count": 1,
+        "internal_control_checks": 347,
+        "failed_internal_controls": 0,
+        "vl_shared_rows": 382,
+        "vl_amount_agreements": 382,
+        "vl_amount_conflicts": 0,
+        "agency_check_echoes": 2
+      },
+      "sourceMetadata": {
+        "schema_version": 1,
+        "fiscal_year": 2027,
+        "currency": "PHP",
+        "source_unit": "pesos",
+        "unit_multiplier": 1,
+        "document": "NEP FY 2027 Executive Budget Proposal, HFEP detail annex",
+        "legislative_stage": "executive_proposal",
+        "scope": "DOH FY 2027 Health Facilities Enhancement Program capital outlays",
+        "source_pdf": "dbm-other-nep-line-data/HFEP_2.pdf",
+        "source_pps_json": "dbm-other-nep-line-data/HFEP.pdf_by_PP-StructrueV3.json",
+        "source_pps_sha256": "ba57cd3b0cb7390a6f557c8fb73d05246128bf511931acbe7b0174d6f8647cd7",
+        "source_vl_json": "dbm-other-nep-line-data/HFEP.pdf_by_PaddleOCR-VL-1.6.json",
+        "source_vl_sha256": "6b998b4491f5e5e1d41d5db5ecd0872cdd6f8e52ec0d531847da79ac01e7088d",
+        "volume_cross_control": {
+          "source_pdf": "dbm-nep-data/NEP-2027-VOLUME-2A_OCR.pdf",
+          "pdf_page": 282,
+          "printed_page": 274
+        },
+        "printed_page_offset": 718,
+        "extractor_sha256": "6aeb1bd4bdfe81c0df00fa317feb492ec18f8c4ee1e73250dc3eea734941a062",
+        "pymupdf_version": "1.28.2",
+        "ids": "artifact-local page/row identifiers; not cross-document identities"
+      },
+      "categories": {
+        "1. Primary Care Facilities": 506565000,
+        "2. LGU Hospitals": 2428391000,
+        "3. DOH Hospitals": 9509703000,
+        "4. BUCAS": 4400000,
+        "5. Completion of Drug Abuse Treatment and Rehabilitation Centers": 406500000,
+        "6. Bureau of Quarantine": 86120000,
+        "7. Other Health Care Facilities": 1530980000
+      }
+    },
+    "house": {
+      "facilities": 513,
+      "ledgerPesos": 10021659000,
+      "columnPesos": {
+        "infrastructure": 5990046000,
+        "medical_equipment": 3900913000,
+        "motor_vehicle": 130700000
+      },
+      "verification": {
+        "detail_pages": 17,
+        "source_bands": 1157,
+        "band_role_counts": {
+          "annex_heading": 3,
+          "column_header": 17,
+          "category": 8,
+          "blank_spacer": 312,
+          "subcategory": 14,
+          "region": 91,
+          "province": 198,
+          "facility": 513,
+          "grand_total": 1
+        },
+        "table_words_accounted_for": 5009,
+        "nodes": 826,
+        "facilities": 513,
+        "facility_ledger_total_php": 10021659000,
+        "facility_ledger_infrastructure_php": 5990046000,
+        "facility_ledger_medical_equipment_php": 3900913000,
+        "facility_ledger_motor_vehicle_php": 130700000,
+        "internal_control_checks": 311,
+        "failed_internal_controls": 0,
+        "reading_comparison_identical_pages": 17,
+        "reading_comparison_total_pages": 17
+      },
+      "sourceMetadata": {
+        "schema_version": 1,
+        "fiscal_year": 2027,
+        "currency": "PHP",
+        "source_unit": "pesos_printed_on_annex",
+        "unit_multiplier": 1,
+        "document": "HB 10858 General Appropriations Bill, local HB_BUDGET copy",
+        "legislative_stage": "not_independently_authenticated",
+        "scope": "DOH FY 2027 Health Facilities Enhancement Program (HFEP) annex; not the entire DOH appropriation. The I-A HFEP allocation of PHP 10,088,832,000 additionally includes PHP 67,173,000 MOOE, which is outside this annex.",
+        "source_pdf": "HB_BUDGET/2 - HB 10858 VOL IB.pdf",
+        "source_sha256": "a82800c4cc2684566a37f7780d8f9131d2e7b2c97444d335d94df012dec065b6",
+        "source_pdf_pages": [
+          877,
+          893
+        ],
+        "source_printed_pages": [
+          857,
+          873
+        ],
+        "agency_control_pdf_pages": {
+          "IA_allocation_table": [
+            1067
+          ],
+          "IA_special_provision": [
+            1039
+          ]
+        },
+        "extractor_sha256": "35826ba02e7463b9d8172d90e6035dfc5543d9e84b28151f0b26b894b3570e45",
+        "pymupdf_version": "1.28.2",
+        "ids": "source-artifact-local page and band identifiers; not cross-document facility identities"
+      },
+      "categories": {
+        "1. Primary Care Facilities": 525190000,
+        "2. LGU Hospitals": 5558546000,
+        "3. DOH Hospitals": 3131703000,
+        "4. BUCAS": 4400000,
+        "5. Drug Abuse Treatment and Rehabilitation Centers": 296000000,
+        "6. Bureau of Quarantine": 1120000,
+        "7. Other Health Care Facilities": 302700000,
+        "8. State Universities": 202000000
+      }
+    },
+    "localCapitalControls": {
+      "nepMooePesos": 67173000,
+      "nepCapitalPesos": 14472659000,
+      "nepTotalPesos": 14539832000,
+      "hgabMooePesos": 67173000,
+      "hgabCapitalPesos": 10021659000,
+      "hgabTotalPesos": 10088832000,
+      "capitalAdjustmentPesos": -4451000000,
+      "totalAdjustmentPesos": -4451000000,
+      "hgabFacilityRows": 513,
+      "facilitySumMatchesPrintedCapitalControl": true,
+      "source": {
+        "programme": "Health Facilities Enhancement Program",
+        "sourceVolume": "1- HB 10858 FOR 3RD READING VOL I-A.pdf",
+        "sourcePage": 1067,
+        "printedPage": 1057,
+        "visibleRow": [
+          "41",
+          "Health Facilities Enhancement Program",
+          "67,173,000",
+          "10,021,659,000",
+          "10,088,832,000",
+          "41"
+        ],
+        "mooePesos": 67173000,
+        "capitalOutlayPesos": 10021659000,
+        "totalPesos": 10088832000,
+        "sourcePdfSha256": "79f56b8d577246342b59cc996afdd707523268f0bde10378e3c1b5ef844451fd"
+      }
+    }
+  },
+  "dpwh": {
+    "referenceSecondReading": {
+      "nep_printed_php": 642612015000,
+      "house_printed_php": 654102015000,
+      "printed_delta_php": 11490000000,
+      "house_operations_printed_php": 586941661000,
+      "nep_operations_printed_php": 572924074000,
+      "house_gas_s2o_printed_php": 67160354000,
+      "nep_gas_s2o_printed_php": 69687941000,
+      "house_extracted_php": 586941661000,
+      "house_allocations": 16270,
+      "house_local_extracted_php": 542192650000,
+      "house_fap_php": 44749011000,
+      "nep_fap_php": 117749011000,
+      "house_operations_gap_php": 0,
+      "house_balanced_paps": 44,
+      "house_checked_paps": 44,
+      "house_fap_projects": 29,
+      "nep_evidence": {
+        "checked": 16760,
+        "not_checked": 4,
+        "status_counts": {
+          "within_bbox_agreement": 13569,
+          "native_row_ambiguity": 3149,
+          "native_text_review": 28,
+          "nearby_alignment_candidate": 14
+        },
+        "review_candidates": 3191
+      },
+      "match_counts": {
+        "exact_candidate": 9680,
+        "house_unmatched": 5801,
+        "chainage_candidate": 324,
+        "fuzzy_candidate": 385,
+        "ambiguous": 5,
+        "location_amendment_candidate": 29,
+        "scope_amendment_candidate": 35,
+        "soft_match_candidate": 11,
+        "nep_unmatched": 1341
+      },
+      "reviewed_pairs": 0,
+      "api": {
+        "api_rows": 11372,
+        "api_php": 445378063000,
+        "unpaired_source_rows": 23,
+        "unpaired_source_php": 9797000000
+      }
+    },
+    "referenceReadings": {
+      "second": {
+        "allocations": 16270,
+        "named_projects": 15972,
+        "mooe_co_php": 639179718000,
+        "new_appropriations": 654102015000,
+        "personnel_services": 14922297000,
+        "mooe": 24685746000,
+        "capital_outlays": 614493972000,
+        "gas_total": 18078293000,
+        "s2o_total": 49082061000,
+        "regular_operations": 528316707000,
+        "local_projects": 13875943000,
+        "foreign_assisted_projects": 44749011000,
+        "operations_including_projects": 586941661000
+      },
+      "third": {
+        "allocations": 16275,
+        "named_projects": 15977,
+        "mooe_co_php": 639179718000,
+        "new_appropriations": 654102015000,
+        "personnel_services": 14922297000,
+        "mooe": 24685746000,
+        "capital_outlays": 614493972000,
+        "gas_total": 18078293000,
+        "s2o_total": 48948061000,
+        "regular_operations": 528450707000,
+        "local_projects": 13875943000,
+        "foreign_assisted_projects": 44749011000,
+        "operations_including_projects": 587075661000
+      },
+      "control_deltas_php": {
+        "new_appropriations": 0,
+        "personnel_services": 0,
+        "mooe": 0,
+        "capital_outlays": 0,
+        "gas_total": 0,
+        "s2o_total": -134000000,
+        "regular_operations": 134000000,
+        "local_projects": 0,
+        "foreign_assisted_projects": 0,
+        "operations_including_projects": 134000000
+      },
+      "status_counts": {
+        "same_amount": 16264,
+        "third_only": 5,
+        "repeated_key": 3
+      },
+      "allocation_delta_php": 134000000,
+      "positive_delta_php": 134000000,
+      "negative_delta_php": 0
+    },
+    "localReadings": {
+      "secondCandidateCount": 16270,
+      "thirdCandidateCount": 16275,
+      "secondAllocationPesos": 586941661000,
+      "thirdAllocationPesos": 587075661000,
+      "statusCounts": {
+        "Retained · same amount": 16270,
+        "New in 3rd reading": 5
+      },
+      "method": "Exact normalized titles are paired first; fuzzy candidates require at least 78% sequence similarity, exclude opposite directions and disjoint stated chainage, and are for manual review. Totals are extracted schedule allocations, not verified duplicate costs."
+    },
+    "localDomesticUnmatched": 5549,
+    "fapCrosscheck": [
+      {
+        "projectName": "Priority Bridges Crossing Pasig-Marikina and Manggahan Floodway Bridges Construction Project, under China Government Financing Facility",
+        "localAmountPesos": 326075000,
+        "localPage": "941",
+        "referenceStatuses": [
+          "house_unmatched"
+        ],
+        "referenceNepTitles": [
+          null
+        ]
+      },
+      {
+        "projectName": "Metro Manila Bridges Project, ADB 4168-PHI",
+        "localAmountPesos": 310763000,
+        "localPage": "941",
+        "referenceStatuses": [
+          "house_unmatched"
+        ],
+        "referenceNepTitles": [
+          null
+        ]
+      },
+      {
+        "projectName": "Road Network Development Project in Conflict-Affected Areas in Mindanao (RNDP- CAAM), JICA PH-F-P1",
+        "localAmountPesos": 115254000,
+        "localPage": "941",
+        "referenceStatuses": [
+          "house_unmatched"
+        ],
+        "referenceNepTitles": [
+          null
+        ]
+      },
+      {
+        "projectName": "Samal Island - Davao City Connector (SIDC) Project, China GCL no. 202200600763",
+        "localAmountPesos": 54818000,
+        "localPage": "941",
+        "referenceStatuses": [
+          "house_unmatched"
+        ],
+        "referenceNepTitles": [
+          null
+        ]
+      }
+    ]
+  },
+  "sourceVerification": {
+    "comparison_ready": false,
+    "comparisons": "Deferred until source evidence, coverage, and compatible scope are confirmed.",
+    "phase": "Verify each source hierarchy before comparisons",
+    "sources": [
+      {
+        "key": "hb",
+        "title": "DPWH House Bill — Native I-B",
+        "scope": "FY2027 new appropriations · DPWH only · I-B pages 9 and 13–110",
+        "grain": "I-B control tree: office allocations and FAP funding partitions. Native I-C supplies current named-project detail.",
+        "scale": 1,
+        "audit": {
+          "total": 654102015000,
+          "nodes": 2406,
+          "leaf_count": 1746,
+          "internal_checks": 660,
+          "failures": []
+        },
+        "evidence_status": "Native printed controls verified",
+        "coverage_status": "No unexplained amount rows in the I-B DPWH table",
+        "gaps": [
+          "Native I-C detail balances and title ownership is regression-checked; individual project identities and amendment completeness still require review."
+        ],
+        "comparison_ready": false,
+        "review_summary": {
+          "needs_source_check": 0,
+          "types": {}
+        },
+        "page": "hb_native_verification.html",
+        "project_detail_summary": {
+          "nodes": 21500,
+          "leaves": 18812,
+          "internal_nodes": 2686,
+          "recursive_checks": 2686,
+          "failed_nodes": 0,
+          "closing_control_checks": 3,
+          "failed_closing_controls": 0,
+          "unexplained_amount_rows": 0,
+          "unexplained_title_rows": 0,
+          "retained_second_observations": 204,
+          "retained_reference_nodes": 2,
+          "additive_leaf_total_php": 639179718000,
+          "named_project_leaves": 15972,
+          "fap_projects": 29,
+          "zero_funding_observations": 9,
+          "region_nodes": 1490,
+          "office_nodes": 3570,
+          "funding_leaves": 51,
+          "shared_controls_with_ib": 56,
+          "crossvolume_disagreements": 0,
+          "repair_counts": {
+            "retain_second_observation": 204,
+            "fold_family_container": 7,
+            "null_glyph_cleanup": 4,
+            "recover_artifact_title": 1,
+            "retain_reference": 2
+          }
+        }
+      },
+      {
+        "key": "nep",
+        "title": "DPWH NEP — Source hierarchy",
+        "scope": "FY2027 new appropriations · automatic appropriations excluded",
+        "grain": "Source expense classes, programs, offices, projects, and funding",
+        "scale": 1,
+        "audit": {
+          "total": 642612015000,
+          "nodes": 16764,
+          "leaf_count": 14210,
+          "internal_checks": 2552,
+          "failures": []
+        },
+        "evidence_status": "3193 pending source checks; 2 derived groupings shown as context",
+        "coverage_status": "Atomic source ledger reproduces the printed root",
+        "gaps": [
+          "Review 3149 ambiguous row areas, 28 text disagreements, 14 possible row-alignment issues, and 2 summary controls before certifying source evidence.",
+          "Retained OCR/PDF provenance is recorded; arithmetic alone does not verify labels or every printed amount."
+        ],
+        "comparison_ready": false,
+        "review_summary": {
+          "needs_source_check": 3193,
+          "types": {
+            "summary_check": 2,
+            "row_identity": 3149,
+            "amount_disagreement": 28,
+            "alignment": 14,
+            "derived_context": 2
+          }
+        },
+        "page": "nep_source_verification.html"
+      },
+      {
+        "key": "dpwh_nep_api",
+        "title": "DPWH Transparency NEP — FY2027 API hierarchy",
+        "scope": "FY2027 NEP project listings · retained DPWH Transparency NEP data via BetterGov-hosted API",
+        "grain": "pap1 → pap2 → pap3 → region → office → project code",
+        "scale": 1,
+        "audit": {
+          "total": 445378063000,
+          "nodes": 14034,
+          "leaf_count": 11372,
+          "internal_checks": 2662,
+          "failures": []
+        },
+        "evidence_status": "Derived rollups and project identities checked against retained API rows",
+        "coverage_status": "11,372 projects reproduce the retained API count and amount summaries",
+        "gaps": [
+          "API groups are derived; source documents and release coverage still require confirmation before comparisons.",
+          "The API project listing has its own scope. It does not establish complete coverage of the printed NEP budget."
+        ],
+        "comparison_ready": false,
+        "review_summary": {
+          "needs_source_check": 0,
+          "types": {}
+        },
+        "page": "dpwh_nep_api_verification.html"
+      }
+    ]
+  },
+  "fmrCoordinateUpdates": [
+    {
+      "stage": "nep",
+      "oldRecords": 704,
+      "referenceRecords": 704,
+      "changedRecords": 0,
+      "removedIds": [],
+      "details": []
+    },
+    {
+      "stage": "hgab",
+      "oldRecords": 964,
+      "referenceRecords": 964,
+      "changedRecords": 0,
+      "removedIds": [],
+      "details": []
+    }
+  ],
+  "chainageCoverage": {
+    "nep": {
+      "rows": 3570,
+      "withLength": 3469
+    },
+    "hb2": {
+      "rows": 4334,
+      "withLength": 4223
+    },
+    "hb3": {
+      "rows": 4339,
+      "withLength": 4228
+    }
+  },
+  "inputs": [
+    {
+      "repositoryPath": "analysis-nia/data/nep_nia_dataset.json",
+      "sourceUrl": "https://raw.githubusercontent.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS/34ef5d8cbbacda92f6503ffd9a428569f157f64d/analysis-nia/data/nep_nia_dataset.json",
+      "sha256": "685dabfc819030a02d6e53b43a038bea59b11dd872e9a4bb262cf13e8a4aa50c",
+      "localPath": "data_sources/csiiiv/snapshots/34ef5d8cbbacda92f6503ffd9a428569f157f64d/analysis-nia/data/nep_nia_dataset.json"
+    },
+    {
+      "repositoryPath": "analysis-nia/data/hgab_nia_tree.json",
+      "sourceUrl": "https://raw.githubusercontent.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS/34ef5d8cbbacda92f6503ffd9a428569f157f64d/analysis-nia/data/hgab_nia_tree.json",
+      "sha256": "5c4808b5e28745b405b5222b0b4a3c2fca536ee0d32a7bb20bf81051787cac4f",
+      "localPath": "data_sources/csiiiv/snapshots/34ef5d8cbbacda92f6503ffd9a428569f157f64d/analysis-nia/data/hgab_nia_tree.json"
+    },
+    {
+      "repositoryPath": "analysis-nia/data/hgab_nia_audit.json",
+      "sourceUrl": "https://raw.githubusercontent.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS/34ef5d8cbbacda92f6503ffd9a428569f157f64d/analysis-nia/data/hgab_nia_audit.json",
+      "sha256": "90c2bffadbbc899a126d282e86e3c80baa28be3284a62fdccdce86f35148b2b8",
+      "localPath": "data_sources/csiiiv/snapshots/34ef5d8cbbacda92f6503ffd9a428569f157f64d/analysis-nia/data/hgab_nia_audit.json"
+    },
+    {
+      "repositoryPath": "analysis-hfep/data/nep_hfep_data_list.json",
+      "sourceUrl": "https://raw.githubusercontent.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS/34ef5d8cbbacda92f6503ffd9a428569f157f64d/analysis-hfep/data/nep_hfep_data_list.json",
+      "sha256": "3edd1cdb8cc62c4ef4e17a9a18f93862222a3e01ad5c94cfffd0f66b0864b74d",
+      "localPath": "data_sources/csiiiv/snapshots/34ef5d8cbbacda92f6503ffd9a428569f157f64d/analysis-hfep/data/nep_hfep_data_list.json"
+    },
+    {
+      "repositoryPath": "analysis-hfep/data/hgab_hfep_data_list.json",
+      "sourceUrl": "https://raw.githubusercontent.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS/34ef5d8cbbacda92f6503ffd9a428569f157f64d/analysis-hfep/data/hgab_hfep_data_list.json",
+      "sha256": "0d8cfb9b7edd32805ec9c54981b6099d32301f0ca202c16a2b33a998dbde3277",
+      "localPath": "data_sources/csiiiv/snapshots/34ef5d8cbbacda92f6503ffd9a428569f157f64d/analysis-hfep/data/hgab_hfep_data_list.json"
+    },
+    {
+      "repositoryPath": "analysis/data/source_comparison_2027.json",
+      "sourceUrl": "https://raw.githubusercontent.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS/34ef5d8cbbacda92f6503ffd9a428569f157f64d/analysis/data/source_comparison_2027.json",
+      "sha256": "9f500eb12e682f9c1086fa113426dee02cc23ddb4b4b7a1a75c1a541010889c4",
+      "localPath": "data_sources/csiiiv/snapshots/34ef5d8cbbacda92f6503ffd9a428569f157f64d/analysis/data/source_comparison_2027.json"
+    },
+    {
+      "repositoryPath": "analysis/data/house_reading_changes_2027.json",
+      "sourceUrl": "https://raw.githubusercontent.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS/34ef5d8cbbacda92f6503ffd9a428569f157f64d/analysis/data/house_reading_changes_2027.json",
+      "sha256": "0e9f79d62b831ce88bbfa5bb01631c1829a87aa178aa02a756cd0aba7b5b78ea",
+      "localPath": "data_sources/csiiiv/snapshots/34ef5d8cbbacda92f6503ffd9a428569f157f64d/analysis/data/house_reading_changes_2027.json"
+    },
+    {
+      "repositoryPath": "analysis/data/source_verification_overview.json",
+      "sourceUrl": "https://raw.githubusercontent.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS/34ef5d8cbbacda92f6503ffd9a428569f157f64d/analysis/data/source_verification_overview.json",
+      "sha256": "3cd6c9a46a2fc563881d733b5e5ce336bb17d0b29ec78ab5467b5b1b080db3e9",
+      "localPath": "data_sources/csiiiv/snapshots/34ef5d8cbbacda92f6503ffd9a428569f157f64d/analysis/data/source_verification_overview.json"
+    },
+    {
+      "repositoryPath": "other-analysis/data/nep_fmr_coordinates_normalized.json",
+      "sourceUrl": "https://raw.githubusercontent.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS/34ef5d8cbbacda92f6503ffd9a428569f157f64d/other-analysis/data/nep_fmr_coordinates_normalized.json",
+      "sha256": "53d76f3a3bd928a355e9c25b641ed156820b4aeee4a4d3308ff6f951441ce2fc",
+      "localPath": "data_sources/csiiiv/snapshots/34ef5d8cbbacda92f6503ffd9a428569f157f64d/other-analysis/data/nep_fmr_coordinates_normalized.json"
+    },
+    {
+      "repositoryPath": "other-analysis/data/hgab_fmr_coordinates_normalized.json",
+      "sourceUrl": "https://raw.githubusercontent.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS/34ef5d8cbbacda92f6503ffd9a428569f157f64d/other-analysis/data/hgab_fmr_coordinates_normalized.json",
+      "sha256": "c8c360514ad9ac908f435c7782bca879cfda01d26b102c97f2348f58dd7243c0",
+      "localPath": "data_sources/csiiiv/snapshots/34ef5d8cbbacda92f6503ffd9a428569f157f64d/other-analysis/data/hgab_fmr_coordinates_normalized.json"
+    },
+    {
+      "repositoryPath": "analysis/data/chainage_units_2027.json",
+      "sourceUrl": "https://raw.githubusercontent.com/csiiiv/DPWH-NEP-HB-2027-ANALYSIS/34ef5d8cbbacda92f6503ffd9a428569f157f64d/analysis/data/chainage_units_2027.json",
+      "sha256": "745397373b162fef4fd9ff3efb0a66cf96245f0d4e51366672272f6383e5b036",
+      "localPath": "data_sources/csiiiv/snapshots/34ef5d8cbbacda92f6503ffd9a428569f157f64d/analysis/data/chainage_units_2027.json"
+    }
+  ],
+  "snapshotChanges": []
+}

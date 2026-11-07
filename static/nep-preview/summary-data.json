@@ -23,28 +23,26 @@
           "page": "rcs.html#rcs-stage-evidence",
           "label": "All 199 NEP → HGAB allocation traces"
         }
-      ],
-      "congressional_representatives": []
+      ]
     },
     {
       "rank": 2,
       "id": "insertions",
-      "title": "Two NEP matching screens give different candidate counts",
-      "lead": "5,549 supplied-comparison rows vs 6,105 / 15,979 native project rows",
-      "basis": "Source and matcher reconciliation; not a confirmed insertion count",
+      "title": "HGAB-only candidates after OO2 adjustment",
+      "lead": "5,491 domestic records remain after excluding 58 high-confidence OO2 matches",
+      "basis": "OO2-adjusted source and matcher reconciliation; review remains provisional",
       "page": "dpwh-OO2-hgab.html#hgab-insertion",
-      "question": "Which source rows explain the difference between the supplied comparison and the native one-to-one screen?",
-      "evidence": "The supplied comparison marks 5,549 domestic rows without a plausible NEP title counterpart, carrying ₱158.363B. The native one-to-one screen selects no NEP counterpart for 6,105 of 15,979 HGAB project rows. The 556-row difference is not a count of missing projects: the screens use different matching rules and row populations.",
-      "alternative": "Different project filters, grouped occurrences, parser boundaries, source versions and matching rules can change candidate counts.",
-      "next": "Reconcile project IDs and source pages, align project-level denominators, then adjudicate a sample against the original NEP and HGAB pages.",
-      "caution": "Neither count is a certified insertion total, and the counts are not independent confirmations of the same set of projects.",
+      "question": "Which remaining HGAB-only candidates have no NEP counterpart after the OO2 amendments are accounted for?",
+      "evidence": "The pre-OO2 screen had 5,549 domestic candidates. Excluding 58 unique HGAB lines with high-confidence OO2 amendment matches leaves 5,491, carrying ₱149.559B. Nine amendment rows remain under review and are not excluded from this count.",
+      "alternative": "OO2 title changes may refer to changed scope, and the workbook’s row totals do not reconcile; review candidates need source-level adjudication.",
+      "next": "Review the nine uncertain amendment-to-HGAB links against the source pages, scope and line amounts.",
+      "caution": "An OO2 match is a candidate correspondence, not proof of identical scope or formal NEP incorporation; HGAB-only remains a review classification, not a confirmed insertion.",
       "detailLinks": [
         {
           "page": "dpwh-OO2-hgab.html#hgab-insertion",
           "label": "OO2-adjusted domestic HGAB-only candidate table"
         }
-      ],
-      "congressional_representatives": []
+      ]
     },
     {
       "rank": 3,
@@ -54,7 +52,7 @@
       "basis": "Parser- and matching-dependent program screen",
       "page": "mpb.html#mpb-insertions",
       "question": "Which MPB lines are genuinely new, and what documented facility needs and designs support them?",
-      "evidence": "The HGAB MPB PAP contains 5,765 lines carrying ₱83.707B. 620 counterpart cases remain separate from insertion candidates. The historical screen has 819 comparison pairs covering 587 distinct NEP proposals.",
+      "evidence": "The HGAB MPB PAP contains 5,765 lines carrying ₱83.707B. 620 counterpart cases remain separate from insertion candidates. The historical screen has 1006 comparison pairs covering 689 distinct NEP proposals.",
       "alternative": "Renaming, combined occurrences and legitimate phased construction can explain unmatched or recurring titles. Similar amounts can reflect standard designs.",
       "next": "Audit original NEP/HGAB pages; obtain building purpose, floor area, design, quantities, contract scope and completion records.",
       "caution": "MPB overlaps the full DPWH insertion/repeat findings; do not add their amounts. Equal allocations are not equal construction unit prices.",
@@ -63,18 +61,17 @@
           "page": "mpb.html#mpb-insertions",
           "label": "MPB insertion candidate table"
         }
-      ],
-      "congressional_representatives": []
+      ]
     },
     {
       "rank": 4,
       "id": "repeats",
       "title": "Recurring project titles: inspect overlapping work before alleging duplication",
-      "lead": "1855 of 2135 NEP comparison pairs clearly retained in HGAB",
+      "lead": "2263 of 2598 NEP comparison pairs clearly retained in HGAB",
       "basis": "Scope-screened comparison candidates",
       "page": "repeats.html#repeat-hgab-survival",
       "question": "Are new appropriations paying for already-funded components or legitimate continuation?",
-      "evidence": "1194 of 1379 distinct NEP repeat-screen proposals have clear HGAB links. 24 proposals have explicit overlapping historical chainage. ₱48.207B is the unique NEP proposal allocation, not alleged loss.",
+      "evidence": "1370 of 1576 distinct NEP repeat-screen proposals have clear HGAB links. 26 proposals have explicit overlapping historical chainage. ₱51.293B is the unique NEP proposal allocation, not alleged loss.",
       "alternative": "Multi-year implementation, rehabilitation and distinct components can share names and segments.",
       "next": "Prioritize explicitly overlapping retained proposals and high amounts; compare contracts, quantities, tranche scopes and completion.",
       "caution": "The 737 headline counts NEP–old GAA comparison pairs. Potential retention and missing counterparts remain separate.",
@@ -83,8 +80,7 @@
           "page": "repeats.html#repeat-hgab-survival",
           "label": "Repeat-candidate HGAB retention evidence"
         }
-      ],
-      "congressional_representatives": []
+      ]
     },
     {
       "rank": 5,
@@ -103,8 +99,7 @@
           "page": "repeats.html#dpwh-investigation-evidence",
           "label": "Exact ₱5M clustering statistics"
         }
-      ],
-      "congressional_representatives": []
+      ]
     },
     {
       "rank": 6,
@@ -123,8 +118,7 @@
           "page": "budget-innovations.html#innovation-investigation-evidence",
           "label": "INSPIRE appropriation history"
         }
-      ],
-      "congressional_representatives": []
+      ]
     },
     {
       "rank": 7,
@@ -143,8 +137,7 @@
           "page": "cost-matching.html#cost-coverage",
           "label": "Missing-length coverage by category and program"
         }
-      ],
-      "congressional_representatives": []
+      ]
     },
     {
       "rank": 8,
@@ -171,8 +164,7 @@
           "page": "cost-per-km.html#length-density-groups",
           "label": "Peer groups and screening methodology"
         }
-      ],
-      "congressional_representatives": []
+      ]
     },
     {
       "rank": 9,
@@ -191,8 +183,7 @@
           "page": "cost-matching.html#short-segment-evidence",
           "label": "Original-source short-range examples"
         }
-      ],
-      "congressional_representatives": []
+      ]
     },
     {
       "rank": 10,
@@ -211,48 +202,45 @@
           "page": "dpwh.html#hgab-coverage",
           "label": "HGAB 3rd NEP-counterpart coverage"
         }
-      ],
-      "congressional_representatives": []
+      ]
     },
     {
       "rank": 11,
       "id": "hgab-no-listed-documents",
-      "title": "HGAB 3rd projects with no listed DPWH Transparency documents",
-      "lead": "15,228 / 15,979 project rows · 95.3%",
-      "basis": "DPWH Transparency FY2027 snapshot; local title reconciliation",
-      "page": "dpwh.html#hgab-coverage",
-      "question": "Are project documents available through another route, or should document links be added to the Transparency record?",
-      "evidence": "Rows without a matched transparency entry listing one or more documents are counted, including titles that do not match the snapshot.",
-      "alternative": "Documents may be available on another official page or not yet indexed in the captured snapshot.",
-      "next": "Verify the project identifier and query the responsible DPWH office for POW, geotagged photos and RDC records.",
-      "caution": "No listed document is a disclosure gap in this snapshot; it does not establish that no document exists.",
+      "title": "HGAB-only projects without a matched Senate supporting document",
+      "lead": "2,476 / 6,105 HGAB-only rows · 40.56%",
+      "basis": "Senate HGAB all-document scan; unique House-row title/code linkage",
+      "page": "dpwh.html#senate-supporting-document-coverage",
+      "question": "Which unmatched rows have files that need clearer title or file-code linkage?",
+      "evidence": "The expanded scan checks BP 202, POW, Development Council documents, geotagged-photo files, Certificates of Implementability and other PDFs for HGAB-only House rows.",
+      "alternative": "Image-only, damaged or ambiguously coded files can remain unmatched even when a document exists.",
+      "next": "Review per-project file counts and source documents, then resolve ambiguous or unreadable file associations.",
+      "caution": "A title/code match signals file presence, not verified contents; no match is not proof of absence.",
       "detailLinks": [
         {
-          "page": "dpwh.html#hgab-coverage",
-          "label": "DPWH Transparency document coverage"
+          "page": "dpwh.html#senate-supporting-document-coverage",
+          "label": "Senate HGAB all-document coverage"
         }
-      ],
-      "congressional_representatives": []
+      ]
     },
     {
       "rank": 12,
       "id": "hgab-missing-document-types",
-      "title": "Incomplete documentation: missing POW, geotagged photos or RDC",
-      "lead": "520 / 751 inspected attachment lists · 69.2%",
-      "basis": "Locally inspected attachment metadata; HGAB 3rd title matches",
-      "page": "dpwh.html#hgab-coverage",
-      "question": "Which listed attachment types are absent, and can DPWH provide the missing POW, photos or RDC?",
-      "evidence": "Counts cover only title-matched HGAB projects whose attachment metadata is locally inspected. The supporting section breaks missing POW, photos and RDC out separately.",
+      "title": "Proposal attachment lists missing a POW, photos or development-council document",
+      "lead": "6,289 / 8,763 inspected attachment lists · 71.8%",
+      "basis": "DPWH Transparency Proposal attachment metadata; HGAB 3rd title matches",
+      "page": "dpwh-transparency.html#proposal-attachment-type-gaps",
+      "question": "Which attachment types are absent from inspected Proposal lists, and should DPWH add them?",
+      "evidence": "Counts cover only HGAB projects with a directly matched Proposal record and locally inspected attachment metadata. They are Proposal-only statistics; Senate-provided HGAB files are counted separately.",
       "alternative": "The local snapshot may be incomplete, and an attachment may be indexed under another type or record.",
-      "next": "Review each project’s transparency entry and request missing categories from the implementing office.",
+      "next": "Review each matched Proposal record and request missing categories from the implementing office.",
       "caution": "Uninspected projects are unknown, not counted as missing; the missing-type groups can overlap.",
       "detailLinks": [
         {
-          "page": "dpwh.html#hgab-coverage",
-          "label": "POW, photo and RDC attachment coverage"
+          "page": "dpwh-transparency.html#proposal-attachment-type-gaps",
+          "label": "Proposal attachment coverage"
         }
-      ],
-      "congressional_representatives": []
+      ]
     }
   ],
   "statistics": {
@@ -272,20 +260,20 @@
       "correlation": "Undefined: allocation variance is zero; no correlation p-value reported."
     },
     "repeats": {
-      "comparisonPairs": 2135,
-      "uniqueCurrentProposals": 1379,
-      "uniqueCurrentPesos": 48206650750,
+      "comparisonPairs": 2598,
+      "uniqueCurrentProposals": 1576,
+      "uniqueCurrentPesos": 51293004750,
       "chainageStatuses": {
-        "overlap": 24,
-        "not stated": 641,
-        "incomplete": 651,
-        "not applicable": 819
+        "overlap": 27,
+        "not stated": 827,
+        "incomplete": 738,
+        "not applicable": 1006
       },
-      "overlapUniqueProposals": 24,
+      "overlapUniqueProposals": 26,
       "trancheStatuses": {
-        "not stated": 2110,
+        "not stated": 2572,
         "same tranche": 9,
-        "one side stated": 16
+        "one side stated": 17
       }
     },
     "fiveMillion": {
@@ -311,33 +299,33 @@
       "excludedScheduleAmountPesos": 0,
       "sourceLineItems": 16275,
       "sourceTotalPesos": 587075661000,
-      "uniquelyAssignedLines": 9328,
+      "uniquelyAssignedLines": 11570,
       "sharedAssignedLines": 2,
-      "unassignedLines": 6945,
-      "unassignedAmountPesos": 343708513000,
+      "unassignedLines": 4703,
+      "unassignedAmountPesos": 277788103000,
       "sharedSourceAmountPesos": 375000000,
-      "assignedSourceAmountPesos": 243367148000,
-      "strictAssignedPesos": 242992148000,
-      "strictExcludedLines": 6947,
-      "strictExcludedAmountPesos": 344083513000,
-      "strictCoveragePct": 41.39,
-      "printedCoordinateBoundaryAssignments": 640,
-      "printedCoordinateBoundaryAssignmentPesos": 16673304000,
-      "strictCoverageBeforePrintedCoordinatePct": 38.55,
+      "assignedSourceAmountPesos": 309287558000,
+      "strictAssignedPesos": 308912558000,
+      "strictExcludedLines": 4705,
+      "strictExcludedAmountPesos": 278163103000,
+      "strictCoveragePct": 52.62,
+      "printedCoordinateBoundaryAssignments": 456,
+      "printedCoordinateBoundaryAssignmentPesos": 13757384000,
+      "strictCoverageBeforePrintedCoordinatePct": 50.28,
       "districtCount": 254
     },
     "repeatRetention": {
-      "comparisonPairs": 2135,
-      "uniqueNEPProposals": 1379,
+      "comparisonPairs": 2598,
+      "uniqueNEPProposals": 1576,
       "pairStatuses": {
-        "Potential retained link": 118,
-        "Clear retained link": 1855,
-        "No selected or cited counterpart": 162
+        "Potential retained link": 143,
+        "Clear retained link": 2263,
+        "No selected or cited counterpart": 192
       },
       "uniqueStatuses": {
-        "Potential retained link": 76,
-        "Clear retained link": 1194,
-        "No selected or cited counterpart": 109
+        "Potential retained link": 84,
+        "Clear retained link": 1370,
+        "No selected or cited counterpart": 122
       }
     },
     "mpb": {
@@ -347,9 +335,9 @@
       "insertionPesos": 38746744000,
       "ambiguousLines": 620,
       "ambiguousPesos": 11114224000,
-      "repeatPairs": 819,
-      "repeatProposals": 587,
-      "historicalRepeatProjects": 548,
+      "repeatPairs": 1006,
+      "repeatProposals": 689,
+      "historicalRepeatProjects": 645,
       "removalCandidates": 137,
       "removalPesos": 2560500000,
       "adjustedLines": 127
@@ -576,26 +564,43 @@
     ],
     "lineItemReviewQueue": {
       "sourceOccurrences": 16275,
-      "flaggedOccurrences": 16083,
+      "baseDpwhFlaggedOccurrences": 16060,
+      "flagsOverviewProjectRows": 14806,
+      "fmrConnectivityRows": 878,
+      "flaggedOccurrences": 18004,
       "flagTypes": {
         "insertion": 6105,
         "missing_documents": 15228,
         "amount_group": 10519,
-        "historical_title": 638,
+        "summary_flag": 32816,
+        "historical_title": 709,
+        "missing_rdc": 7692,
+        "missing_photos": 1235,
         "chainage_overlap": 17,
         "high_meter_rate": 191,
-        "missing_photos": 109,
-        "missing_rdc": 501,
-        "missing_pow": 44,
         "very_short_range": 8,
-        "rehab_good_fair": 2
+        "missing_pow": 42,
+        "rehab_good_fair": 2,
+        "fmr_review": 174,
+        "fmr_flag": 661,
+        "fmr_double_flag": 43
       },
       "flagCountDistribution": {
-        "5": 6,
-        "4": 275,
-        "3": 4725,
-        "2": 6980,
-        "1": 4097
+        "15": 4,
+        "14": 3,
+        "13": 6,
+        "12": 4,
+        "11": 33,
+        "10": 45,
+        "9": 141,
+        "8": 440,
+        "7": 808,
+        "6": 4332,
+        "5": 1727,
+        "4": 4620,
+        "3": 1368,
+        "2": 2272,
+        "1": 2201
       },
       "top25Occurrences": 25
     },
@@ -611,15 +616,15 @@
   "sources": [
     {
       "file": "dpwh-data.json",
-      "sha256": "e805739dee77028658b2af48ef2731b156d70e3ffa20684007172f5243873733"
+      "sha256": "2257104ff2b3c30cae2ecfbdfaf7bfb36c2d1426371f4874d4c7c35b1891f61f"
     },
     {
       "file": "rcs-data.json",
-      "sha256": "8ed653b26c110fce2dda6136094d00080d1b31c7866048865faa57bffdb2c4a9"
+      "sha256": "a185bdd49397d4a639ea3065ec137859e8ad2720654076a85edb95b93f382faf"
     },
     {
       "file": "congress-data.json",
-      "sha256": "d10596a9186fa091509c2d6f56d49527c4d3d812f894e4a5d818329a2f52300c"
+      "sha256": "7bbb76535e276b9da4502f8a86bb0e10ac9b4d764e5cc0ef5d76be6fdab67655"
     },
     {
       "file": "budget-innovations-data.json",
@@ -627,7 +632,7 @@
     },
     {
       "file": "dpwh-hgab-comparison.json",
-      "sha256": "d635192cb29a871dea752758a421b7c54460719b835e8f777fcc4a98d6c636f5"
+      "sha256": "a760903371b5de16cfe6bf99cd71f9f797402e779dbf3a02f9930f05acd049f5"
     },
     {
       "file": "hgab-revision-data.json",
@@ -648,14 +653,19 @@
   ],
   "lineItemReviewQueue": {
     "data": "line-item-review-queue.json",
-    "ranking": "Flag count descending, allocation pesos descending, occurrence ID ascending for exact ties.",
-    "scope": "Domestic DPWH HGAB 3rd-reading occurrences only; not a ranking of the entire national budget.",
+    "ranking": "Displayed evidence-signal count descending, allocation pesos descending, occurrence ID ascending for exact ties. Signals from separate screens are identified by source and are not interchangeable weights.",
+    "scope": "Union of the detailed DPWH HGAB occurrence review, every project and review signal in the Flags overview, and FY2027 HGAB DA FMR records classified Flag, Double Flag or Review. Not a ranking of the entire national budget.",
     "method": {
-      "maximumPossibleFlags": 12,
+      "maximumPossibleFlags": null,
       "amountGroupMinimumOccurrences": 10,
       "amountGroupMinimumNamedOffices": 3,
       "amountGroupScope": "Identical PAP and positive exact peso amount; counts are allocation occurrences, not certified distinct construction contracts.",
       "historicalYears": [
+        2015,
+        2016,
+        2017,
+        2018,
+        2019,
         2020,
         2021,
         2022,
@@ -709,12 +719,12 @@
         "limits": "Review leads, not proof of waste or incorrect prioritization. Assessment and budget dates differ; later deterioration, structural/safety work or different funded components may justify rehabilitation. Last-surfacing inventory is older and cannot establish that no later work occurred."
       },
       "evidenceGaps": "Missing length and insufficient peers are cautions, not points. A sub-10m printed range gets a separate denominator-warning point and remains subject to source verification. Extreme rates require denominator/scope review and are omitted from rate charts.",
-      "summaryCoverage": "The queue has up to twelve possible flags: the prior nine screening types plus separate incomplete-documentation flags for missing POW, geotagged photos, and RDC among locally inspected attachment records. Potential NEP counterpart and no listed documents are separate flags; document-type flags are unknown outside inspected metadata.",
+      "summaryCoverage": "Includes every project record and review signal from the Flags overview, including NEP-only candidates and HGAB foreign-assisted rows omitted from the narrower DPWH ranking. Adds FY2027 FMR Flag, Double Flag and Review classes. Baseline FMR rows are not flagged and remain on connectivity.html. The different screens are evidence categories, not common weights.",
       "dependence": "Historical recurrence and chainage overlap are related indicators; scores are descriptive triage, not independent evidence or probabilities.",
       "limitations": [
         "Uniform packages can be legitimate. Exact appropriation amounts are not unit costs.",
         "Strict historical matching misses paraphrased titles and unresolved locations; no icon means this screen did not identify a review trigger, not that the project is verified.",
-        "The prior-year search uses locally available DPWH road, bridge, building and flood records from FY2020–FY2026; it is not a search of every project type or every agency.",
+        "The prior-year search uses FY2016–FY2018 title-classified DPWH GAA project-family records plus locally available DPWH road, bridge, building and flood records from FY2020–FY2026; FY2019 and earlier years are unavailable or unreconciled, and this is not a search of every project type or every agency.",
         "Matching/parser errors can produce insertion flags. Top 25 overlap other findings; do not sum them as losses.",
         "Current office, representative, role and party do not contribute any points."
       ]
@@ -777,6 +787,5 @@
       "adjustmentPesos": null,
       "limit": "Comparable NEP school baseline not built"
     }
-  ],
-  "congressional_representatives": []
+  ]
 }

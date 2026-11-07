@@ -654,8 +654,18 @@ def parse_pdf(path,output,allocation_pesos=None):
             # Keep a valid current sidecar if a fresh OCR invocation fails.
             pass
     current_context=None;current_cost_category=None;cost_categories=[];summary_pages=[];qualitative_facts=[]
-    for number,page in enumerate(document):
+    for number in range(len(document)):
         if number>=100:break
+        try:
+            page=document.load_page(number)
+        except Exception as exc:
+            # Some PDFs have a damaged page tree even though their PDF header
+            # and earlier pages are readable. Preserve the pages that do load
+            # and record the broken page so one corrupt object cannot abort the
+            # whole queue item indefinitely.
+            pages.append({'page':number+1,'status':'needs_manual_review','loadError':True,
+                          'message':f'PDF page could not be loaded: {type(exc).__name__}: {str(exc)[:240]}'})
+            continue
         precomputed_orientation_candidates=[]
         native_page_rotation=page.rotation
         page_rect_orientation='landscape' if page.rect.width>page.rect.height else 'portrait' if page.rect.height>page.rect.width else 'square'
@@ -985,7 +995,11 @@ def parse_pdf(path,output,allocation_pesos=None):
     named=[f for f in unique_facts if f['kind']=='named_component']
     breakdown_status='named_components_detected' if named else 'count_only_no_named_breakdown_detected' if declared else 'component_breakdown_not_detected'
     summary_metadata={'summaryPages':summary_pages,'qualitativeFacts':unique_facts,'componentBreakdownStatus':breakdown_status}
-    return {'status':'candidate_rows' if result else 'needs_ocr' if any(p['status']=='needs_ocr' for p in pages) else 'needs_manual_review' if any(p['status']=='needs_manual_review' for p in pages) else 'no_bill_rows_recovered','pdfSha256':hashlib.sha256(path.read_bytes()).hexdigest(),'pageCount':len(document),'pagesProcessed':len(pages),'pages':pages,'rows':result,'costCategoryBreakdown':unique_categories,'summaryMetadata':summary_metadata,'rowObservations':len(rows),'uniqueCandidateRows':len(result),'sumOfUniqueCandidateAmountsPesos':sum(r['amountPesos'] for r in result),'reconciledPowTotal':False,'itemizedDirectCostControls':itemized_controls,'amountBasis':'Each item records its cost basis; direct costs are not inclusive project costs. Printed category summaries are preserved as separate evidence and are not added to itemized rows.','limits':['Reconciled itemized direct-cost subtotals, when available, do not reconcile the complete POW including indirect costs, VAT and EAO. Candidate row extraction is not a complete or reconciled POW ledger. A largest recovered row is not necessarily the largest row in the full document.','Shares use the NEP allocation, not a confirmed POW grand total, contract payment or engineering valuation.','Quantities, material units, indirect costs and engineering scope require original-page verification. Structural concrete is not cement mass.','Printed category summaries and itemized bill rows are separate evidence and must not be summed together.','Repeated identical row observations are grouped with source pages rather than silently summed.']}
+    load_error=any(p.get('loadError') for p in pages)
+    status='needs_manual_review' if load_error else 'candidate_rows' if result else 'needs_ocr' if any(p.get('status')=='needs_ocr' for p in pages) else 'needs_manual_review' if any(p.get('status')=='needs_manual_review' for p in pages) else 'no_bill_rows_recovered'
+    limits=['Reconciled itemized direct-cost subtotals, when available, do not reconcile the complete POW including indirect costs, VAT and EAO. Candidate row extraction is not a complete or reconciled POW ledger. A largest recovered row is not necessarily the largest row in the full document.','Shares use the NEP allocation, not a confirmed POW grand total, contract payment or engineering valuation.','Quantities, material units, indirect costs and engineering scope require original-page verification. Structural concrete is not cement mass.','Printed category summaries and itemized bill rows are separate evidence and must not be summed together.','Repeated identical row observations are grouped with source pages rather than silently summed.']
+    if load_error:limits.append('At least one PDF page could not be loaded from the document page tree. Recovered rows are partial and require source-page review.')
+    return {'status':status,'pdfSha256':hashlib.sha256(path.read_bytes()).hexdigest(),'pageCount':len(document),'pagesProcessed':len(pages),'pages':pages,'rows':result,'costCategoryBreakdown':unique_categories,'summaryMetadata':summary_metadata,'rowObservations':len(rows),'uniqueCandidateRows':len(result),'sumOfUniqueCandidateAmountsPesos':sum(r['amountPesos'] for r in result),'reconciledPowTotal':False,'itemizedDirectCostControls':itemized_controls,'amountBasis':'Each item records its cost basis; direct costs are not inclusive project costs. Printed category summaries are preserved as separate evidence and are not added to itemized rows.','limits':limits}
 
 def render_photos(path,output):
     try:import pymupdf as fitz

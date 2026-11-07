@@ -23,13 +23,15 @@ def qualified_role(text,kind):
     if kind=='pow':
         # Keep DE and ADE separate; institutional headings are not names.
         return bool(re.fullmatch(r'(?:(?:OIC|Acting|Officer[ -]in[ -]Charge)[, .-]*)?(?:Assistant )?District Engineer(?:\s+.*)?[ .]*',normal(text),re.I))
-    if kind in ('rdc','pdc','ldc'):
-        return bool(re.search(r'\bgovernor\b|\bmayor\b|\bchair(?:person|man|woman)\b',text,re.I)) and not bool(re.search(r'vice|deputy|assistant|co-chair',text,re.I))
+    if kind in ('rdc','pdc','ldc','cdc','supporting'):
+        role = re.search(r'\bassistant\s+district\s+engineer\b|\bdistrict\s+engineer\b|\bgovernor\b|\bmayor\b|\bchair(?:person|man|woman)\b',text,re.I)
+        return bool(role) and not bool(re.search(r'vice|deputy|assistant governor|assistant mayor|co-chair',text,re.I))
     return False
 
 def role_kind(text,kind):
     text=normal(text)
-    if kind=='pow':return 'assistant_district_engineer' if re.search(r'\bassistant\b',text,re.I) else 'district_engineer'
+    if re.search(r'\bassistant\s+district\s+engineer\b',text,re.I):return 'assistant_district_engineer'
+    if re.search(r'\bdistrict\s+engineer\b',text,re.I):return 'district_engineer'
     if re.search(r'\bgovernor\b',text,re.I):return 'governor'
     if re.search(r'\bmayor\b',text,re.I):return 'mayor'
     return {'rdc':'rdc_chair','pdc':'pdc_chair','ldc':'ldc_chair'}.get(kind,'council_chair')
@@ -100,12 +102,14 @@ def designation_matches(name,kind,role):
     status=('exact_name_designation_match' if len(locations)==1 else 'exact_name_multiple_locality_matches') if matches else 'no_exact_name_designation_match'
     return {'status':status,'matches':matches}
 
-def extract(path,kind,output):
+def extract(path,kind,output=None,save_pages=True):
     import pymupdf
-    people=[];pages=[];unresolved=[]
+    people=[];pages=[];unresolved=[];source_page_count=0
     with pymupdf.open(path) as document:
         for i,page in enumerate(document):
-            words=page.get_text('words');records=lines(words);text=page.get_text();pages.append({'page':i+1,'text':text,'lines':records})
+            source_page_count += 1
+            words=page.get_text('words');records=lines(words);text=page.get_text()
+            if save_pages:pages.append({'page':i+1,'text':text,'lines':records})
             if not text.strip():unresolved.append({'page':i+1,'status':'needs_ocr'});continue
             for role in records:
                 t=role['text']
@@ -133,6 +137,7 @@ def extract(path,kind,output):
                 roster=designation_matches(name['text'],kind,role_text)
                 status=('Exact name and designation match in ODV roster; inspect the cited document and roster dates/locality.' if roster['status']=='exact_name_designation_match' else 'ODV has multiple exact-name locality records; designation is ambiguous.' if roster['status']=='exact_name_multiple_locality_matches' else 'Exact-name designation candidate in ODV; locality is unresolved. Check the cited document, source year and appointment.' if roster['status']=='exact_name_unresolved_locality' else 'ODV designation roster unavailable; inspect the cited document.' if roster['status']=='roster_unavailable' else 'Document-extracted candidate; inspect the cited page. No exact designation match in ODV; this does not establish current office, sponsorship or project responsibility.')
                 people.append({'name':name['text'],'roleText':role_text,'kind':found_role_kind,'sourcePage':i+1,'nameBbox':name['bbox'],'roleBboxes':[r['bbox'] for r in role_lines],'evidenceText':name['text']+' · '+role_text,'extractionMethod':'native PDF text; same-column name above explicit role','verificationStatus':status,'designationRegistry':roster})
-    output.mkdir(parents=True,exist_ok=True)
-    (output/(kind+'-signatory-source.json')).write_text(json.dumps(pages,ensure_ascii=False,indent=2)+'\n')
-    return {'status':'document_candidates' if people else 'needs_ocr' if unresolved and all(r['status']=='needs_ocr' for r in unresolved) else 'no_qualified_signatory_recovered','people':people,'sourcePages':len(pages),'unresolved':unresolved,'methodology':'Only explicit roles bound to an uppercase name directly above in the same signature column. DE and ADE remain distinct; vice-role titles are excluded. ODV matches use exact normalized full name plus designation; locality and year are context, not proof of current office or project responsibility.'}
+    if save_pages and output is not None:
+        output.mkdir(parents=True,exist_ok=True)
+        (output/(kind+'-signatory-source.json')).write_text(json.dumps(pages,ensure_ascii=False,indent=2)+'\n')
+    return {'status':'document_candidates' if people else 'needs_ocr' if unresolved and all(r['status']=='needs_ocr' for r in unresolved) else 'no_qualified_signatory_recovered','people':people,'sourcePages':source_page_count,'unresolved':unresolved,'methodology':'Only explicit roles bound to an uppercase name directly above in the same signature column. DE and ADE remain distinct; vice-role titles are excluded. ODV matches use exact normalized full name plus designation; locality and year are context, not proof of current office or project responsibility.'}
