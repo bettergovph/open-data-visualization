@@ -95,7 +95,9 @@ function paginate(table,wrap){
  state.nav.hidden=rows.length<=state.size&&rows.length<=10;
 }
 function update(table){
- if(table.closest('[data-report-table-exempt]'))return;
+ // The full HGAB coverage table owns its own search and pagination. Keep all
+ // seven columns even if a page wrapper or cached markup drops the section flag.
+ if(table.id==='all-hgab-document-coverage-table'||table.matches('[data-report-table-exempt]')||table.closest('[data-report-table-exempt]'))return;
  let wrap=table.parentElement;
  if(!wrap.classList.contains('report-table-scroll')){
   if(wrap.children.length===1&&/tablewrap|table-wrap|table-scroll|evidence-table|table-container/.test(wrap.className))wrap.classList.add('report-table-scroll');
