@@ -1,11 +1,11 @@
 {
-  "generatedAtUtc": "2026-11-07T13:30:11.589515+00:00",
+  "generatedAtUtc": "2026-11-07T14:23:49.797777+00:00",
   "stage": "NEP FY2027 proposal documents",
   "summary": {
     "projectsWithBillRows": 7225,
-    "billRowCount": 175777,
+    "billRowCount": 175747,
     "projectsInReviewSet": 11034,
-    "powCategoryCount": 41323
+    "powCategoryCount": 41351
   },
   "source": "https://api.dpwh.bettergov.ph",
   "scope": "This snapshot covers linked Proposal records and parsed HGAB POW line-item data available for review; it is not a whole-program inventory. Proposal source documents link to DPWH Transparency. HGAB PDF links are NR and are not published.",
@@ -366,93 +366,93 @@
   },
   "senateSupportingDocumentCoverage": {
     "denominatorProjectRows": 6105,
-    "projectsWithAtLeastOneMatchedDocument": 3854,
-    "projectsWithAtLeastOneMatchedDocumentPct": 63.13,
-    "projectRowsWithoutMatchedDocument": 2251,
-    "matchedFileRecords": 19312,
+    "projectsWithAtLeastOneMatchedDocument": 4034,
+    "projectsWithAtLeastOneMatchedDocumentPct": 66.08,
+    "projectRowsWithoutMatchedDocument": 2071,
+    "matchedFileRecords": 21214,
     "byType": {
       "POW": {
         "filesScanned": 6688,
-        "matchedProjectRows": 3679,
-        "matchedFileRecords": 3924,
+        "matchedProjectRows": 3858,
+        "matchedFileRecords": 4114,
         "exactTitleMatchedFiles": 793,
         "relaxedTitleMatchedFiles": 141,
-        "uniqueCodeSiblingFileMatches": 2990,
+        "uniqueCodeSiblingFileMatches": 3180,
         "scanErrors": 3,
         "filesWithoutNativeText": 1343
       },
       "BP 202": {
         "filesScanned": 5588,
-        "matchedProjectRows": 3561,
-        "matchedFileRecords": 3720,
-        "exactTitleMatchedFiles": 2985,
+        "matchedProjectRows": 3869,
+        "matchedFileRecords": 4155,
+        "exactTitleMatchedFiles": 3245,
         "relaxedTitleMatchedFiles": 0,
-        "uniqueCodeSiblingFileMatches": 735,
+        "uniqueCodeSiblingFileMatches": 910,
         "scanErrors": 0,
         "filesWithoutNativeText": 787
       },
       "Development Council": {
-        "filesScanned": 2962,
-        "matchedProjectRows": 1575,
-        "matchedFileRecords": 1724,
+        "filesScanned": 3381,
+        "matchedProjectRows": 1792,
+        "matchedFileRecords": 1995,
         "exactTitleMatchedFiles": 9,
         "relaxedTitleMatchedFiles": 0,
-        "uniqueCodeSiblingFileMatches": 1715,
+        "uniqueCodeSiblingFileMatches": 1986,
         "scanErrors": 0,
-        "filesWithoutNativeText": 2376
+        "filesWithoutNativeText": 2769
       },
       "Geotagged photos": {
-        "filesScanned": 5333,
-        "matchedProjectRows": 3087,
-        "matchedFileRecords": 3275,
-        "exactTitleMatchedFiles": 1928,
-        "relaxedTitleMatchedFiles": 190,
-        "uniqueCodeSiblingFileMatches": 1157,
+        "filesScanned": 5933,
+        "matchedProjectRows": 3385,
+        "matchedFileRecords": 3673,
+        "exactTitleMatchedFiles": 2073,
+        "relaxedTitleMatchedFiles": 333,
+        "uniqueCodeSiblingFileMatches": 1267,
         "scanErrors": 1,
-        "filesWithoutNativeText": 863
+        "filesWithoutNativeText": 943
       },
       "Certificate of Implementability": {
-        "filesScanned": 6114,
-        "matchedProjectRows": 3540,
-        "matchedFileRecords": 3716,
-        "exactTitleMatchedFiles": 1101,
+        "filesScanned": 6700,
+        "matchedProjectRows": 3815,
+        "matchedFileRecords": 4099,
+        "exactTitleMatchedFiles": 1151,
         "relaxedTitleMatchedFiles": 0,
-        "uniqueCodeSiblingFileMatches": 2615,
+        "uniqueCodeSiblingFileMatches": 2948,
         "scanErrors": 0,
-        "filesWithoutNativeText": 1312
+        "filesWithoutNativeText": 1625
       },
       "Other": {
-        "filesScanned": 4701,
-        "matchedProjectRows": 2085,
-        "matchedFileRecords": 2953,
-        "exactTitleMatchedFiles": 614,
-        "relaxedTitleMatchedFiles": 19,
-        "uniqueCodeSiblingFileMatches": 2320,
+        "filesScanned": 5044,
+        "matchedProjectRows": 2209,
+        "matchedFileRecords": 3178,
+        "exactTitleMatchedFiles": 650,
+        "relaxedTitleMatchedFiles": 51,
+        "uniqueCodeSiblingFileMatches": 2477,
         "scanErrors": 0,
-        "filesWithoutNativeText": 2601
+        "filesWithoutNativeText": 2759
       }
     },
     "signatoryCandidateCounts": {
-      "assistant_district_engineer": 2916,
-      "district_engineer": 3802,
-      "engineer": 3015,
-      "rdc_chair": 69,
-      "governor": 102,
+      "assistant_district_engineer": 2968,
+      "district_engineer": 3957,
+      "engineer": 3395,
+      "rdc_chair": 72,
+      "governor": 106,
       "pdc_chair": 90,
-      "mayor": 15,
+      "mayor": 17,
       "ldc_chair": 5
     },
     "signatoryCandidatesByDocumentType": {
       "POW": {
-        "assistant_district_engineer": 2916,
-        "district_engineer": 3802,
-        "engineer": 3015
+        "assistant_district_engineer": 2968,
+        "district_engineer": 3957,
+        "engineer": 3395
       },
       "Development Council": {
-        "rdc_chair": 69,
-        "governor": 102,
+        "rdc_chair": 72,
+        "governor": 106,
         "pdc_chair": 90,
-        "mayor": 15,
+        "mayor": 17,
         "ldc_chair": 5
       }
     },
@@ -460,10 +460,10 @@
     "matchingMethod": "Native text from the first PDF page. Exact normalized full-title matches and conservative relaxed title candidates are counted. Other files inherit a match only when they share a five-digit HGAB file code with a title-matched sibling and that code resolves to one House row. Image-only documents without extracted text and without a matched sibling remain unassigned."
   },
   "hgabPowSummary": {
-    "parsedDocuments": 6018,
-    "documentsWithBillRows": 4743,
-    "billRows": 149811,
-    "printedCategories": 24716,
+    "parsedDocuments": 6259,
+    "documentsWithBillRows": 4974,
+    "billRows": 156858,
+    "printedCategories": 25100,
     "titleScanDocuments": 5508,
     "exactTitleMatchedFiles": 2476,
     "relaxedTitleMatchedFiles": 103,
@@ -68683,45 +68683,45 @@
     }
   ],
   "projectCount": 11034,
-  "powPeerCount": 1966,
+  "powPeerCount": 1963,
   "summaryPeerGroupCount": 7,
-  "hgabPowResultCount": 6018,
-  "costUnitHgabResultCount": 5553,
+  "hgabPowResultCount": 6259,
+  "costUnitHgabResultCount": 5785,
   "arrayShards": {
     "projects": [
       {
         "path": "dpwh-in-depth-shards/projects-001.json",
-        "itemCount": 4154,
-        "sizeBytes": 41997823,
-        "sha256": "aa8c45c8e6d066bd4753fbf1d9bacf3b9d9387cd948d38eaff7eeb56cf322de9"
+        "itemCount": 4146,
+        "sizeBytes": 41998615,
+        "sha256": "2acf704e747495eb6d77d3b31e200cd53809b5fed91c5a33fd7164fadf133582"
       },
       {
         "path": "dpwh-in-depth-shards/projects-002.json",
-        "itemCount": 4386,
-        "sizeBytes": 41997900,
-        "sha256": "5df7ae5eeda088015f8ffd84085d9551bbdee82978b00555ef468c6a5d8baf14"
+        "itemCount": 4389,
+        "sizeBytes": 41990161,
+        "sha256": "6f34048ee0f8460ab082573fbd45055dc09a98ad44e1ec4b1068ff195567b68f"
       },
       {
         "path": "dpwh-in-depth-shards/projects-003.json",
-        "itemCount": 2494,
-        "sizeBytes": 30013792,
-        "sha256": "815872c16b67c5df43838477a5dd1e095698f3d7c5204e9177347661743a006d"
+        "itemCount": 2499,
+        "sizeBytes": 30076305,
+        "sha256": "80bfa0769e1e60372693091bc37b3545d15391154ba38c6e1300f2ee7347687b"
       }
     ],
     "powPeers": [
       {
         "path": "dpwh-in-depth-shards/powPeers-001.json",
-        "itemCount": 1966,
-        "sizeBytes": 39414404,
-        "sha256": "8ddb2f6ccf8859b3ae5350e92f4ec5cfc38b3abc87b695a6794defb1fb15c1df"
+        "itemCount": 1963,
+        "sizeBytes": 39406043,
+        "sha256": "5bc6091f9de3dd57e28f70702a08af73c1bb1000e7542f7ce99132ba9168297d"
       }
     ],
     "summaryPeerGroups": [
       {
         "path": "dpwh-in-depth-shards/summaryPeerGroups-001.json",
         "itemCount": 7,
-        "sizeBytes": 13191831,
-        "sha256": "697aa2d52b8e5d4396a9c5101b7f6e851663f8b4cd6c700e564b84b5adc7082b"
+        "sizeBytes": 13205522,
+        "sha256": "a901f7b06ecd3f87aa917257511d88697287a627df5df96ae201726abef22099"
       }
     ],
     "hgabPowResults": [
@@ -68733,17 +68733,17 @@
       },
       {
         "path": "dpwh-in-depth-shards/hgabPowResults-002.json",
-        "itemCount": 1836,
-        "sizeBytes": 33700529,
-        "sha256": "9a2a235225b8ff035f10ddfae4cbc7bdbc2533caeb9b9d5eeaaae5fd12ef5c2d"
+        "itemCount": 2077,
+        "sizeBytes": 37086293,
+        "sha256": "f84abd2b93ea0e4cac0d83321adab5bc6d334fcb573dc41be9f3c27087fc2db4"
       }
     ],
     "costUnitHgabResults": [
       {
         "path": "dpwh-in-depth-shards/costUnitHgabResults-001.json",
-        "itemCount": 5553,
-        "sizeBytes": 25155679,
-        "sha256": "903d0ed9becea9e632dee7b3c5ad27aa500755a8250f4c88ad122574bff6ec0d"
+        "itemCount": 5785,
+        "sizeBytes": 26214457,
+        "sha256": "52d978c4ffbb974d6b601d439036817cb4bc943c78fcdbdfe2958b830fd6fad0"
       }
     ]
   },
