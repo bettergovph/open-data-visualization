@@ -7,13 +7,13 @@ def extract_all_contractors():
     con = duckdb.connect()
     
     # Target the unified projects file
-    parquet_path = os.path.abspath('static/data/parquet/integrated_projects_matched.parquet')
+    parquet_path = os.path.abspath('data/parquet/integrated_projects_matched.parquet')
     
     if not os.path.exists(parquet_path):
         # Fallback to checking other likely candidates if the specific one isn't the "unified" one the user meant
         # But let's try this one first.
         print(f"⚠️ File not found at {parquet_path}, trying broad scan of parquet dir...")
-        parquet_path = os.path.abspath('static/data/parquet/*.parquet')
+        parquet_path = os.path.abspath('data/parquet/*.parquet')
     
     print(f"Reading from: {parquet_path}")
     
