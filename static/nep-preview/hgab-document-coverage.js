@@ -23,8 +23,8 @@
       const senate=r.senateHgabDocumentsMatched?'<strong>Matched</strong><small>'+esc((r.senateDocumentTypes||[]).join(', ')||'Supporting file')+' · '+fmt(r.senateMatchedFileRecords)+' file records</small>':'No matched Senate HGAB file';
       const signatories=(r.signatories||[]).map(s=>'<div><strong>'+esc(s.name)+'</strong>'+(s.role?' · '+esc(s.role):'')+(s.sources?.length?'<small>'+esc(s.sources.join('; '))+'</small>':'')+'</div>').join('');
       const signatoryCell='<strong>'+fmt(r.signatoryCandidateCount??(r.signatories||[]).length)+' candidates</strong>'+(signatories||'<small>No extracted signatory candidate</small>');
-      return '<tr><td>'+esc(r.hgabId)+'</td><td>'+esc(r.title)+'</td><td>'+esc(r.office)+(r.region?'<small>'+esc(r.region)+'</small>':'')+'</td><td class="num">'+peso(r.amountPesos)+'</td><td><strong>'+esc(match)+'</strong></td><td>'+proposal+'</td><td>'+senate+'</td><td>'+signatoryCell+'</td></tr>';
-    }).join('')||'<tr><td colspan="8">No HGAB projects match this search.</td></tr>';
+      return '<tr><td>'+esc(r.hgabId)+'</td><td>'+esc(r.title)+'</td><td>'+esc(r.office)+(r.region?'<small>'+esc(r.region)+'</small>':'')+'</td><td class="num">'+peso(r.amountPesos)+'</td><td>'+proposal+'</td><td>'+senate+'</td><td>'+signatoryCell+'</td></tr>';
+    }).join('')||'<tr><td colspan="7">No HGAB projects match this search.</td></tr>';
     count.textContent=fmt(filtered.length)+' of '+fmt(rows.length)+' HGAB projects';
     pageLabel.textContent=filtered.length?'Page '+(page+1)+' of '+pages+' · '+(start+1)+'–'+Math.min(start+perPage,filtered.length):'No rows';
     prev.disabled=page===0;next.disabled=page+1>=pages;
@@ -33,5 +33,5 @@
   size.addEventListener('change',()=>{page=0;render()});
   prev.addEventListener('click',()=>{page--;render()});
   next.addEventListener('click',()=>{page++;render()});
-  fetch('hgab-document-coverage.json?v=49702b58057b').then(r=>{if(!r.ok)throw Error('Coverage export unavailable ('+r.status+')');return r.json()}).then(d=>{rows=Array.isArray(d.projects)?d.projects:[];render()}).catch(e=>{body.innerHTML='<tr><td colspan="8">Could not load the all-HGAB coverage export. '+esc(e.message)+'</td></tr>';count.textContent='Coverage unavailable';console.error(e)});
+  fetch('hgab-document-coverage.json?v=196a802fa292').then(r=>{if(!r.ok)throw Error('Coverage export unavailable ('+r.status+')');return r.json()}).then(d=>{rows=Array.isArray(d.projects)?d.projects:[];render()}).catch(e=>{body.innerHTML='<tr><td colspan="7">Could not load the all-HGAB coverage export. '+esc(e.message)+'</td></tr>';count.textContent='Coverage unavailable';console.error(e)});
 })();
