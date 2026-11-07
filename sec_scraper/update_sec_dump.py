@@ -7,6 +7,12 @@ import json
 import os
 from datetime import datetime
 from typing import Dict, List, Any
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+SEC_DUMP = ROOT / 'database' / 'sec_dump.sql'
+if not SEC_DUMP.exists():
+    SEC_DUMP = ROOT.parent / 'nep' / 'data_sources' / 'odv-source-databases' / 'sec_dump.sql'
 
 def load_parsed_results(file_path: str = "parsed_sec_results.json") -> Dict[str, Any]:
     """Load parsed SEC results from JSON file."""
@@ -150,7 +156,7 @@ ALTER TABLE ONLY public.contractors
     
     return sql_content
 
-def update_sec_dump_file(sql_content: str, output_file: str = "../database/sec_dump.sql"):
+def update_sec_dump_file(sql_content: str, output_file: str | Path = SEC_DUMP):
     """
     Update the sec_dump.sql file with new content.
     
@@ -158,6 +164,8 @@ def update_sec_dump_file(sql_content: str, output_file: str = "../database/sec_d
         sql_content: SQL content to write
         output_file: Path to the sec_dump.sql file
     """
+    output_file = Path(output_file)
+    output_file.parent.mkdir(parents=True, exist_ok=True)
     with open(output_file, 'w', encoding='utf-8') as f:
         f.write(sql_content)
     

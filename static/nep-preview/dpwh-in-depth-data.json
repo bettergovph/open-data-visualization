@@ -1,5 +1,5 @@
 {
-  "generatedAtUtc": "2026-11-07T13:07:03.164353+00:00",
+  "generatedAtUtc": "2026-11-07T13:16:32.287199+00:00",
   "stage": "NEP FY2027 proposal documents",
   "summary": {
     "projectsWithBillRows": 7225,
@@ -366,104 +366,104 @@
   },
   "senateSupportingDocumentCoverage": {
     "denominatorProjectRows": 6105,
-    "projectsWithAtLeastOneMatchedDocument": 3776,
-    "projectsWithAtLeastOneMatchedDocumentPct": 61.85,
-    "projectRowsWithoutMatchedDocument": 2329,
-    "matchedFileRecords": 18855,
+    "projectsWithAtLeastOneMatchedDocument": 3815,
+    "projectsWithAtLeastOneMatchedDocumentPct": 62.49,
+    "projectRowsWithoutMatchedDocument": 2290,
+    "matchedFileRecords": 19049,
     "byType": {
       "POW": {
         "filesScanned": 6688,
-        "matchedProjectRows": 3605,
-        "matchedFileRecords": 3845,
+        "matchedProjectRows": 3642,
+        "matchedFileRecords": 3882,
         "exactTitleMatchedFiles": 793,
         "relaxedTitleMatchedFiles": 141,
-        "uniqueCodeSiblingFileMatches": 2911,
+        "uniqueCodeSiblingFileMatches": 2948,
         "scanErrors": 3,
         "filesWithoutNativeText": 1343
       },
       "BP 202": {
         "filesScanned": 5588,
-        "matchedProjectRows": 3482,
-        "matchedFileRecords": 3638,
-        "exactTitleMatchedFiles": 2922,
+        "matchedProjectRows": 3521,
+        "matchedFileRecords": 3677,
+        "exactTitleMatchedFiles": 2953,
         "relaxedTitleMatchedFiles": 0,
-        "uniqueCodeSiblingFileMatches": 716,
+        "uniqueCodeSiblingFileMatches": 724,
         "scanErrors": 0,
         "filesWithoutNativeText": 787
       },
       "Development Council": {
-        "filesScanned": 2843,
-        "matchedProjectRows": 1536,
-        "matchedFileRecords": 1680,
+        "filesScanned": 2878,
+        "matchedProjectRows": 1552,
+        "matchedFileRecords": 1697,
         "exactTitleMatchedFiles": 9,
         "relaxedTitleMatchedFiles": 0,
-        "uniqueCodeSiblingFileMatches": 1671,
+        "uniqueCodeSiblingFileMatches": 1688,
         "scanErrors": 0,
-        "filesWithoutNativeText": 2277
+        "filesWithoutNativeText": 2304
       },
       "Geotagged photos": {
-        "filesScanned": 5129,
-        "matchedProjectRows": 3013,
-        "matchedFileRecords": 3196,
-        "exactTitleMatchedFiles": 1875,
+        "filesScanned": 5205,
+        "matchedProjectRows": 3047,
+        "matchedFileRecords": 3230,
+        "exactTitleMatchedFiles": 1905,
         "relaxedTitleMatchedFiles": 190,
-        "uniqueCodeSiblingFileMatches": 1131,
+        "uniqueCodeSiblingFileMatches": 1135,
         "scanErrors": 1,
-        "filesWithoutNativeText": 775
+        "filesWithoutNativeText": 791
       },
       "Certificate of Implementability": {
-        "filesScanned": 5904,
-        "matchedProjectRows": 3460,
-        "matchedFileRecords": 3634,
-        "exactTitleMatchedFiles": 1077,
+        "filesScanned": 5987,
+        "matchedProjectRows": 3497,
+        "matchedFileRecords": 3671,
+        "exactTitleMatchedFiles": 1083,
         "relaxedTitleMatchedFiles": 0,
-        "uniqueCodeSiblingFileMatches": 2557,
+        "uniqueCodeSiblingFileMatches": 2588,
         "scanErrors": 0,
-        "filesWithoutNativeText": 1217
+        "filesWithoutNativeText": 1239
       },
       "Other": {
-        "filesScanned": 4503,
-        "matchedProjectRows": 2034,
-        "matchedFileRecords": 2862,
-        "exactTitleMatchedFiles": 607,
+        "filesScanned": 4584,
+        "matchedProjectRows": 2055,
+        "matchedFileRecords": 2892,
+        "exactTitleMatchedFiles": 610,
         "relaxedTitleMatchedFiles": 19,
-        "uniqueCodeSiblingFileMatches": 2236,
+        "uniqueCodeSiblingFileMatches": 2263,
         "scanErrors": 0,
-        "filesWithoutNativeText": 2491
+        "filesWithoutNativeText": 2531
       }
     },
     "signatoryCandidateCounts": {
-      "assistant_district_engineer": 2829,
-      "district_engineer": 3716,
-      "engineer": 2415,
+      "assistant_district_engineer": 2892,
+      "district_engineer": 3779,
+      "engineer": 2866,
       "rdc_chair": 68,
       "governor": 100,
       "pdc_chair": 90,
       "mayor": 14,
-      "ldc_chair": 4
+      "ldc_chair": 5
     },
     "signatoryCandidatesByDocumentType": {
       "POW": {
-        "assistant_district_engineer": 2829,
-        "district_engineer": 3716,
-        "engineer": 2415
+        "assistant_district_engineer": 2892,
+        "district_engineer": 3779,
+        "engineer": 2866
       },
       "Development Council": {
         "rdc_chair": 68,
         "governor": 100,
         "pdc_chair": 90,
         "mayor": 14,
-        "ldc_chair": 4
+        "ldc_chair": 5
       }
     },
     "deduplication": "Project counts use distinct House HGAB row IDs. File counts are distinct source paths within a project and type; byte-identical copies at different paths are not removed. T5 file-type counts inherit only from uniquely resolved HGAB file codes.",
     "matchingMethod": "Native text from the first PDF page. Exact normalized full-title matches and conservative relaxed title candidates are counted. Other files inherit a match only when they share a five-digit HGAB file code with a title-matched sibling and that code resolves to one House row. Image-only documents without extracted text and without a matched sibling remain unassigned."
   },
   "hgabPowSummary": {
-    "parsedDocuments": 5708,
-    "documentsWithBillRows": 4498,
-    "billRows": 142926,
-    "printedCategories": 23908,
+    "parsedDocuments": 5752,
+    "documentsWithBillRows": 4542,
+    "billRows": 144668,
+    "printedCategories": 23981,
     "titleScanDocuments": 5508,
     "exactTitleMatchedFiles": 2476,
     "relaxedTitleMatchedFiles": 103,
@@ -68685,8 +68685,8 @@
   "projectCount": 11034,
   "powPeerCount": 1966,
   "summaryPeerGroupCount": 7,
-  "hgabPowResultCount": 5708,
-  "costUnitHgabResultCount": 5272,
+  "hgabPowResultCount": 5752,
+  "costUnitHgabResultCount": 5316,
   "arrayShards": {
     "projects": [
       {
@@ -68733,17 +68733,17 @@
       },
       {
         "path": "dpwh-in-depth-shards/hgabPowResults-002.json",
-        "itemCount": 1561,
-        "sizeBytes": 30398143,
-        "sha256": "85b061e7c025e9b17790619ea5a57cdac1c12b48f5a6f59c5e5ff6932bb5b776"
+        "itemCount": 1605,
+        "sizeBytes": 31177434,
+        "sha256": "8447c301e26ac1519c0d3bd22ee7881d209fbebc68c960ad79436bc6d9252adf"
       }
     ],
     "costUnitHgabResults": [
       {
         "path": "dpwh-in-depth-shards/costUnitHgabResults-001.json",
-        "itemCount": 5272,
-        "sizeBytes": 24042334,
-        "sha256": "38f83f941a6f58824c0a2082a7e2a61db0d7b63c615b382cefe985fc59ad48a2"
+        "itemCount": 5316,
+        "sizeBytes": 24300193,
+        "sha256": "a9ff2d0a73c377466debaaeee429d79fa9d183e38ae4cb563bc6d1a43aa882ca"
       }
     ]
   },

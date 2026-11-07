@@ -17,6 +17,8 @@ import shutil
 ROOT_DIR = Path(__file__).parent.parent
 MERCHANT_PARQUET = ROOT_DIR / 'database' / 'philgeps_merchant_info.parquet'
 BACKUP_PARQUET = ROOT_DIR / 'database' / 'philgeps_merchant_info.parquet.backup'
+if not BACKUP_PARQUET.exists():
+    BACKUP_PARQUET = ROOT_DIR.parent / 'nep' / 'data_sources' / 'odv-source-databases' / BACKUP_PARQUET.name
 
 def parse_philgeps_number(philgeps_str):
     """Parse PhilGEPS number string to extract number and expiry."""

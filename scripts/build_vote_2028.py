@@ -13,13 +13,18 @@ from pathlib import Path
 from vote_people import apply_reviewed_sources, unique_people
 
 ROOT = Path(__file__).resolve().parents[1]
+NEP_SOURCE_DATABASES = ROOT.parent / 'nep/data_sources/odv-source-databases'
 SOURCE = ROOT / 'database/dynasty_dump.sql.gz'
+if not SOURCE.exists():
+    SOURCE = NEP_SOURCE_DATABASES / 'dynasty_dump.sql.gz'
 OUT = ROOT / 'static/nep-preview/vote-2028-data.json'
 HOUSE_ROSTER = ROOT / 'static/data/20th_congress_representatives.json'
 HOUSE_ROSTER_URL = 'https://www.congress.gov.ph/house-members'
 FAMILY_LINK_DIR = ROOT / 'family_analysis/family_parser'
 ODV_OFFICIALS = ROOT.parent / 'nep/data_sources/odv_dynasty/source_officials.csv.gz'
 ASOG_DATASET = ROOT / 'database/ASoG-POLITICAL-DYNASTIES-DATASET-V2016.xlsx'
+if not ASOG_DATASET.exists():
+    ASOG_DATASET = NEP_SOURCE_DATABASES / 'ASoG-POLITICAL-DYNASTIES-DATASET-V2016.xlsx'
 ODV_CONGRESSMEN = ROOT / 'static/data/congressmen_consolidated.json'
 REVIEWED_SOURCES = ROOT / 'database/vote_2028_reviewed_sources.json'
 

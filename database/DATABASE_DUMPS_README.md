@@ -1,7 +1,11 @@
 # Database Dumps
 
 ## Overview
-This directory contains PostgreSQL database dumps for the BetterGovPH visualization project. The dumps are too large for GitHub (>100MB), so they are stored locally and excluded from version control.
+Large source-only database files have been moved to the adjacent `nep` repository at `../nep/data_sources/odv-source-databases/`. They are not loaded by the Rust router or browser pages; the site uses generated static/API outputs. Use that directory as the source for offline restores and builders that consume the archived dump.
+
+```bash
+export ODV_SOURCE_DB_DIR="../nep/data_sources/odv-source-databases"
+```
 
 ## Available Dumps
 
@@ -69,25 +73,25 @@ Tracks party-list representatives:
 ### Restore Dynasty Database
 ```bash
 source .env
-PGPASSWORD="$POSTGRES_PASSWORD" psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -d dynasty < dynasty_dump.sql
+PGPASSWORD="$POSTGRES_PASSWORD" psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -d dynasty < "$ODV_SOURCE_DB_DIR/dynasty_dump.sql"
 # Or from compressed:
-gunzip -c dynasty_dump.sql.gz | PGPASSWORD="$POSTGRES_PASSWORD" psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -d dynasty
+gunzip -c "$ODV_SOURCE_DB_DIR/dynasty_dump.sql.gz" | PGPASSWORD="$POSTGRES_PASSWORD" psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -d dynasty
 ```
 
 ### Restore PhilGEPS Database
 ```bash
 source .env
-PGPASSWORD="$POSTGRES_PASSWORD" psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -d philgeps < philgeps_dump.sql
+PGPASSWORD="$POSTGRES_PASSWORD" psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -d philgeps < "$ODV_SOURCE_DB_DIR/philgeps_dump.sql"
 # Or from compressed:
-gunzip -c philgeps_dump.sql.gz | PGPASSWORD="$POSTGRES_PASSWORD" psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -d philgeps
+gunzip -c "$ODV_SOURCE_DB_DIR/philgeps_dump.sql.gz" | PGPASSWORD="$POSTGRES_PASSWORD" psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -d philgeps
 ```
 
 ### Restore Infrawatch Database
 ```bash
 source .env
-PGPASSWORD="$POSTGRES_PASSWORD" psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -d infrawatch < infrawatch_dump.sql
+PGPASSWORD="$POSTGRES_PASSWORD" psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -d infrawatch < "$ODV_SOURCE_DB_DIR/infrawatch_dump.sql"
 # Or from compressed:
-gunzip -c infrawatch_dump.sql.gz | PGPASSWORD="$POSTGRES_PASSWORD" psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -d infrawatch
+gunzip -c "$ODV_SOURCE_DB_DIR/infrawatch_dump.sql.gz" | PGPASSWORD="$POSTGRES_PASSWORD" psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -d infrawatch
 ```
 
 ## Creating New Dumps
@@ -98,16 +102,16 @@ To update the dumps after making changes:
 source .env
 
 # Dynasty database
-PGPASSWORD="$POSTGRES_PASSWORD" pg_dump -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -d dynasty --no-owner --no-acl --clean --if-exists > dynasty_dump.sql
+PGPASSWORD="$POSTGRES_PASSWORD" pg_dump -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -d dynasty --no-owner --no-acl --clean --if-exists > "$ODV_SOURCE_DB_DIR/dynasty_dump.sql"
 
 # PhilGEPS database
-PGPASSWORD="$POSTGRES_PASSWORD" pg_dump -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -d philgeps --no-owner --no-acl --clean --if-exists > philgeps_dump.sql
+PGPASSWORD="$POSTGRES_PASSWORD" pg_dump -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -d philgeps --no-owner --no-acl --clean --if-exists > "$ODV_SOURCE_DB_DIR/philgeps_dump.sql"
 
 # Infrawatch database
-PGPASSWORD="$POSTGRES_PASSWORD" pg_dump -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -d infrawatch --no-owner --no-acl --clean --if-exists > infrawatch_dump.sql
+PGPASSWORD="$POSTGRES_PASSWORD" pg_dump -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -d infrawatch --no-owner --no-acl --clean --if-exists > "$ODV_SOURCE_DB_DIR/infrawatch_dump.sql"
 
 # Compress for storage
-gzip -k dynasty_dump.sql philgeps_dump.sql infrawatch_dump.sql
+gzip -k "$ODV_SOURCE_DB_DIR/dynasty_dump.sql" "$ODV_SOURCE_DB_DIR/philgeps_dump.sql" "$ODV_SOURCE_DB_DIR/infrawatch_dump.sql"
 ```
 
 ## Notes
@@ -115,7 +119,7 @@ gzip -k dynasty_dump.sql philgeps_dump.sql infrawatch_dump.sql
 - Dumps include `--clean --if-exists` flags for safe restoration
 - `--no-owner --no-acl` flags make dumps portable across different PostgreSQL installations
 - Compressed `.gz` files are ~87% smaller than uncompressed dumps
-- All dumps are excluded from git via `.gitignore`
+- Source dumps are kept outside this repository in `../nep/data_sources/odv-source-databases/`
 
 ## Frasco Family Dynasty
 
