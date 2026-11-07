@@ -193,11 +193,34 @@ def catalog_coverage(pdf_root):
     }
 
 
+def refresh_senate_hgab_stats():
+    """Keep the page's Senate POW metrics aligned with the current DPWH report snapshot."""
+    source = json.loads(SOURCE.read_text(encoding="utf-8"))
+    parsed = source.get("hgabPowSummary") or {}
+    stats_path = OUTPUT.with_name("senate-hgab-pow-stats.json")
+    stats = json.loads(stats_path.read_text(encoding="utf-8")) if stats_path.exists() else {}
+    stats.update({
+        "source": "FY2027 DPWH in-depth data snapshot and read-only Senate POW title scan",
+        "parsedDocuments": parsed.get("parsedDocuments", 0),
+        "documentsWithBillRows": parsed.get("documentsWithBillRows", 0),
+        "billRows": parsed.get("billRows", 0),
+        "printedCategories": parsed.get("printedCategories", 0),
+        "titleScannedFiles": parsed.get("titleScanDocuments", 0),
+        "exactTitleMatchedFiles": parsed.get("exactTitleMatchedFiles", 0),
+        "relaxedTitleMatchedFiles": parsed.get("relaxedTitleMatchedFiles", 0),
+        "ambiguousTitleMatchFiles": parsed.get("ambiguousTitleMatchedFiles", 0),
+        "titleScanNoNativeText": parsed.get("titleScanNoNativeText", 0),
+        "titleScanErrors": parsed.get("titleScanErrors", 0),
+    })
+    stats_path.write_text(json.dumps(stats, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--pdf-root", type=Path, default=DEFAULT_PDF_ROOT)
     parser.add_argument("--refresh-metadata-only", action="store_true", help="refresh Ghostscript document properties in the existing report data")
     args = parser.parse_args()
+    refresh_senate_hgab_stats()
     if args.refresh_metadata_only:
         existing = json.loads(OUTPUT.read_text(encoding="utf-8"))
         existing["summary"].update(catalog_coverage(args.pdf_root))

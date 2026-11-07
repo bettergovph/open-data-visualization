@@ -1,0 +1,19 @@
+{
+  "generatedAtUtc": "2026-11-06T21:57:03.334073+00:00",
+  "source": "FY2027 DPWH in-depth data snapshot and read-only Senate POW title scan",
+  "parsedDocuments": 5413,
+  "documentsWithBillRows": 4242,
+  "billRows": 137975,
+  "printedCategories": 23138,
+  "titleScannedFiles": 5508,
+  "exactTitleMatchedFiles": 2476,
+  "relaxedTitleMatchedFiles": 103,
+  "hgabOnlyProjectRows": 6105,
+  "hgabOnlyRowsWithAtLeastOneTitleMatch": 2504,
+  "hgabOnlyProjectCoveragePct": 41.02,
+  "matchMethod": "Read-only first-page native-text title scan. Relaxed candidates require token recall >= 0.72, precision >= 0.78, Dice overlap >= 0.74, a shared specific token, matching numeric tokens when present, and a 0.05 lead over the runner-up. Rough estimate, not manually verified.",
+  "scopeNote": "The parser and title scanner have different denominators. A title match means at least one scanned Senate POW was linked to an HGAB-only row; this does not verify document contents or prove the project scope. The first-page scanner found no native text on 850 files and recorded 2 scan errors.",
+  "ambiguousTitleMatchFiles": 25,
+  "titleScanNoNativeText": 850,
+  "titleScanErrors": 2
+}
