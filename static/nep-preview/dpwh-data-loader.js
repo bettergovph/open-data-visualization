@@ -24,6 +24,19 @@
       const response=await Promise.race([fetch('dpwh-in-depth-data.json?v='+encodeURIComponent(dataVersion),{cache:'no-cache'}),new Promise((_,reject)=>setTimeout(()=>reject(Error('DPWH data index request timed out')),20000))]);
       if(!response.ok)throw Error('DPWH data index unavailable ('+response.status+')');
       const index=await response.json();
+      if(mode==='hgab-pow'){
+        const shards=index.arrayShards?.hgabPowResults||[];
+        const parts=await Promise.all(shards.map(async shard=>{
+          const result=await fetch(shard.path+'?v='+encodeURIComponent(shard.sha256||''),{cache:'force-cache'});
+          if(!result.ok)throw Error('DPWH HGAB POW data shard unavailable ('+result.status+')');
+          const rows=await result.json();
+          if(!Array.isArray(rows)||(Number.isFinite(shard.itemCount)&&rows.length!==shard.itemCount))throw Error('Incomplete DPWH HGAB POW data shard');
+          return rows;
+        }));
+        index.hgabPowResults=parts.flat();
+        if(Number.isFinite(index.hgabPowResultCount)&&index.hgabPowResults.length!==index.hgabPowResultCount)throw Error('DPWH HGAB POW data is incomplete');
+        return index;
+      }
       if(mode==='summary'){
         if(!Array.isArray(index.projectDirectory))throw Error('DPWH project directory unavailable');
         if(Number.isFinite(index.projectCount)&&index.projectDirectory.length!==index.projectCount)throw Error('DPWH project directory is incomplete');
@@ -34,7 +47,7 @@
       const legacy=Array.isArray(index.projectShards)?{projects:index.projectShards}:null;
       if(!arrays&&!legacy)return index;
       const sources=arrays||legacy;
-      await Promise.all(Object.entries(sources).filter(([key])=>mode!=='cost-per-unit'||key==='projects'||key==='summaryPeerGroups').map(async([key,shards])=>{
+      await Promise.all(Object.entries(sources).filter(([key])=>(mode!=='cost-per-unit'||key==='projects'||key==='summaryPeerGroups')&&!(mode==='full'&&document.getElementById('hgab-pow-rows')&&key==='hgabPowResults')).map(async([key,shards])=>{
         const parts=await Promise.all(shards.map(async shard=>{
           const file=shard.path+'?v='+encodeURIComponent(shard.sha256||'');
           const result=await fetch(file,{cache:'force-cache'});
