@@ -1,5 +1,5 @@
 {
-  "generatedAtUtc": "2026-11-07T18:32:28.439751+00:00",
+  "generatedAtUtc": "2026-11-07T18:46:24.023232+00:00",
   "stage": "NEP FY2027 proposal documents",
   "summary": {
     "projectsWithBillRows": 7225,
@@ -335,34 +335,6 @@
     "sourceCommit": "34ef5d8cbbacda92f6503ffd9a428569f157f64d",
     "snapshotRetrievedAtUtc": "2026-10-18T08:46:20Z",
     "documentCoverageMethod": "A project is counted as having Senate document evidence when a first-page native-text scan finds an exact normalized title or conservative relaxed POW title candidate in a Senate-provided BP 202 or POW file, or the existing advance-copy POW crosswalk assigns a unique exact title. DPWH Transparency Proposal links remain separate. This is file-presence evidence, not content verification; POW bill extraction may lag."
-  },
-  "senateDocumentTitleCoverage": {
-    "denominatorProjectRows": 6105,
-    "byType": {
-      "pow": {
-        "documentsScanned": 5508,
-        "exactMatchedDocuments": 2476,
-        "relaxedMatchedDocuments": 103,
-        "matchedProjectRows": 2504,
-        "exactMatchedProjectRows": 2415,
-        "coveragePct": 41.02,
-        "generatedAtUtc": "2026-11-06T21:57:03.334073+00:00"
-      },
-      "bp202": {
-        "documentsScanned": 5588,
-        "exactMatchedDocuments": 2888,
-        "relaxedMatchedDocuments": 0,
-        "matchedProjectRows": 2802,
-        "exactMatchedProjectRows": 2802,
-        "coveragePct": 45.9,
-        "generatedAtUtc": "2026-11-06T14:49:27.628591+00:00"
-      }
-    },
-    "combinedMatchedProjectRows": 3287,
-    "combinedExactMatchedProjectRows": 3228,
-    "combinedCoveragePct": 53.84,
-    "combinedExactCoveragePct": 52.87,
-    "method": "Read-only first-page native PDF title scan. Counts distinct HGAB-only project rows; BP 202 and POW source sets are deduplicated in the combined figure. Exact normalized title matches and conservative relaxed POW-title candidates are counted; this is a preliminary file-presence signal, not content verification."
   },
   "senateSupportingDocumentCoverage": {
     "denominatorProjectRows": 6105,
@@ -2624,6 +2596,43 @@
       }
     ],
     "note": "Every record in this reconciliation is a DPWH Transparency Proposal document link; Senate-provided HGAB POW files are reported separately. Selected-pair and direct-HGAB counts use project-level Proposal links present in the loaded snapshot and deduplicate by source URL. Direct HGAB matches can overlap selected-pair records; the unmatched Proposal inventory is the residual after taking their unique union and does not establish literal waste."
+  },
+  "senateSupportingDocumentCoverageAllHgab": {
+    "denominatorProjectRows": 15979,
+    "projectsWithAtLeastOneMatchedDocument": 4102,
+    "matchedFileRecords": 21135,
+    "projectsWithAtLeastOneMatchedDocumentPct": 25.67,
+    "bp202PowCombinedMatchedProjectRows": 4009,
+    "completeDocumentTypeNames": [
+      "BP 202",
+      "Certificate of Implementability",
+      "Development Council",
+      "Geotagged photos",
+      "POW"
+    ],
+    "completeDocumentTypeThreshold": 4,
+    "completeDocumentProjectRows": 3410,
+    "completeDocumentProjectRowsPct": 21.34,
+    "byType": {
+      "Certificate of Implementability": {
+        "matchedProjectRows": 3828
+      },
+      "Geotagged photos": {
+        "matchedProjectRows": 3435
+      },
+      "BP 202": {
+        "matchedProjectRows": 3858
+      },
+      "Other": {
+        "matchedProjectRows": 2214
+      },
+      "POW": {
+        "matchedProjectRows": 3936
+      },
+      "Development Council": {
+        "matchedProjectRows": 1805
+      }
+    }
   },
   "projectDirectory": [
     {
