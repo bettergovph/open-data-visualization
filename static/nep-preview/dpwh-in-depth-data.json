@@ -1,5 +1,5 @@
 {
-  "generatedAtUtc": "2026-11-06T21:51:20.277183+00:00",
+  "generatedAtUtc": "2026-11-06T22:10:54.399507+00:00",
   "stage": "NEP FY2027 proposal documents",
   "summary": {
     "projectsWithBillRows": 7225,
@@ -329,7 +329,7 @@
         "matchedProjectRows": 2504,
         "exactMatchedProjectRows": 2415,
         "coveragePct": 41.02,
-        "generatedAtUtc": "2026-11-06T14:49:27.153064+00:00"
+        "generatedAtUtc": "2026-11-06T21:57:03.334073+00:00"
       },
       "bp202": {
         "documentsScanned": 5588,
@@ -352,13 +352,17 @@
     "documentsWithBillRows": 4241,
     "billRows": 137965,
     "printedCategories": 23128,
-    "exactTitleMatchedFiles": 137,
+    "titleScanDocuments": 5508,
+    "exactTitleMatchedFiles": 2476,
+    "relaxedTitleMatchedFiles": 103,
     "proposalLinkedFiles": 17,
-    "exactTitleMatchedFilesInGapCohort": 120,
-    "ambiguousTitleMatchedFiles": 4,
-    "titleMatchAssessedFiles": 226,
-    "titleMatchNotAssessedFiles": 5186,
-    "titleMatchNoExactFiles": 85
+    "exactTitleMatchedFilesInGapCohort": 2195,
+    "ambiguousTitleMatchedFiles": 25,
+    "titleMatchAssessedFiles": 5508,
+    "titleMatchNotAssessedFiles": 0,
+    "titleMatchNoExactFiles": 3032,
+    "titleScanErrors": 2,
+    "titleScanNoNativeText": 850
   },
   "documentReconciliation": {
     "transparencyProjects": 11371,
@@ -370,11 +374,51 @@
     "selectedPairs": 10166,
     "selectedMatchSenateFiles": [
       {
+        "nepProject": "Bacolod Negros Occidental Economic Highway (BANOCEH ), Sta. 6 + 603 - Sta. 9 + 975, E. B. Magalona, Negros Occidental",
+        "hgabProject": "Bacolod Negros Occidental Economic Highway (BANOCEH), Sta. 6+770 - Sta. 7+410, Sta. 10+040 - Sta. 10+260, E.B. Magalona, Negros Occidental",
+        "hgabLedgerCode": "HB10858-3-0223-002067",
+        "senateFiles": [
+          "2027DPWH-HGAB-05776"
+        ]
+      },
+      {
+        "nepProject": "Bacolod Negros Occidental Economic Highway (BANOCEH ), Sta. 3 + 250 - Sta. 6 + 150, Silay City, Negros Occidental",
+        "hgabProject": "Bacolod Negros Occidental Economic Highway (BANOCEH), Sta. 2+497 - Sta. 3+270, Sta. 5+470 - Sta. 6+330, Silay City, Negros Occidental",
+        "hgabLedgerCode": "HB10858-3-0223-002066",
+        "senateFiles": [
+          "2027DPWH-HGAB-05801"
+        ]
+      },
+      {
+        "nepProject": "Bacolod Negros Occidental Economic Highway (BANOCEH ) (Victorias - Sagay ), Sta. 3 + 000 - Sta. 7 + 464, Manapla, Negros Occidental",
+        "hgabProject": "Bacolod Negros Occidental Economic Highway (BANOCEH) (Victorias - Sagay), Sta. 3+000 - Sta. 3+500, Manapla, Negros Occidental",
+        "hgabLedgerCode": "HB10858-3-0222-002062",
+        "senateFiles": [
+          "2027DPWH-HGAB-05803"
+        ]
+      },
+      {
+        "nepProject": "Bacolod Negros Occidental Economic Highway (BANOCEH ) (Victorias - Sagay ), Sta. 11 + 380 - Sta. 15 + 903, Cadiz City, Negros Occidental",
+        "hgabProject": "Bacolod Negros Occidental Economic Highway (BANOCEH) (Victorias - Sagay), Sta. 12+231 - Sta. 12+700 , Cadiz City, Negros Occidental",
+        "hgabLedgerCode": "HB10858-3-0222-002061",
+        "senateFiles": [
+          "2027DPWH-HGAB-05804"
+        ]
+      },
+      {
         "nepProject": "Piddig, Carasi (Ilocos Norte )- Calanasan-Langnao-Kabugao Road, Sta.18 + 783.20 - Sta. 25 + 350, Kabugao, Apayao",
         "hgabProject": "Piddig,Carasi (Ilocos Norte)-Calanasan-Langnao-Kabugao Road, Sta.18+783.20 - Sta. 25+350, Kabugao, Apayao",
         "hgabLedgerCode": "HB10858-3-0235-002273",
         "senateFiles": [
           "2027DPWH-HGAB-01231"
+        ]
+      },
+      {
+        "nepProject": "Rehabilitation of Kalabingkoho Pump Station, Barangay Malanday, Valenzuela City, 14, 721878, 120, 957836",
+        "hgabProject": "Rehabilitation of Kalabingkoho Pump Station, Barangay Malanday, Valenzuela City, 14.721878, 120.957836",
+        "hgabLedgerCode": "HB10858-3-0300-003532",
+        "senateFiles": [
+          "2027DPWH-HGAB-00140"
         ]
       },
       {
@@ -386,11 +430,68 @@
         ]
       },
       {
+        "nepProject": "Rehabilitation of Slope Protection Structure along Agno River, Barangay Darawey, Bayambang, Pangasinan",
+        "hgabProject": "Rehabilitation of Slope Protection Structure along Agno River, Barangay Darawey, Bayambang, Pangasinan",
+        "hgabLedgerCode": "HB10858-3-0365-004765",
+        "senateFiles": [
+          "2027DPWH-HGAB-00612"
+        ]
+      },
+      {
         "nepProject": "Construction of Drainage Canal along Bulana-Bulanao Norte-Laya West-Laya East Road, Sta.0 + 000 - Sta.12 + 819, Tabuk City, Kalinga",
         "hgabProject": "Construction of Drainage Canal along Bulana-Bulanao Norte-Laya West-Laya East Road, Sta.0+000 - Sta.8+856, Tabuk City, Kalinga",
         "hgabLedgerCode": "HB10858-3-0302-003554",
         "senateFiles": [
           "2027DPWH-HGAB-01394"
+        ]
+      },
+      {
+        "nepProject": "Construction of Multi-Purpose Building, Barangay San Juan, San Narciso, Zambales 15.003452, 120.095337",
+        "hgabProject": "Construction of Multi-Purpose Building (Main Building), Barangay San Juan, San Narciso, Zambales 15.003452, 120.095337",
+        "hgabLedgerCode": "HB10858-3-0636-010366",
+        "senateFiles": [
+          "2027DPWH-HGAB-12925",
+          "2027DPWH-HGAB-14180"
+        ]
+      },
+      {
+        "nepProject": "Construction of Multi-Purpose Building, Barangay 3, Calamba City, Laguna",
+        "hgabProject": "Construction of Multi-Purpose Building, Barangay 3, Calamba City, Laguna",
+        "hgabLedgerCode": "HB10858-3-0641-010431",
+        "senateFiles": [
+          "2027DPWH-HGAB-14487"
+        ]
+      },
+      {
+        "nepProject": "Construction of Multi-Purpose Building, Naval Station Leovigildo Gantioqui (NSLG ) (Multi- Purpose Hall ), San Miguel, San Antonio, Zambales 14.959169, 120.069629",
+        "hgabProject": "Construction of Multi-Purpose Building, Naval Station Leovigildo Gantioqui (NSLG) (Multi- Purpose Hall), San Miguel, San Antonio, Zambales 14.959169, 120.069629",
+        "hgabLedgerCode": "HB10858-3-0638-010394",
+        "senateFiles": [
+          "2027DPWH-HGAB-03534"
+        ]
+      },
+      {
+        "nepProject": "Butuan City-Malaybalay Rd - K1253 + 040 - K1253 + 162",
+        "hgabProject": "Butuan City-Malaybalay Rd - K1253 + 040 - K1253 + 162",
+        "hgabLedgerCode": "HB10858-3-0187-001403",
+        "senateFiles": [
+          "2027DPWH-HGAB-08242"
+        ]
+      },
+      {
+        "nepProject": "Radial Road (NRJ BCIR-NRJ Mayor Democrito D. Plaza II Ave .), (Mahay - Baan ) (Sta. 0 + 289 - Sta. 0 + 955.67 ), Butuan City",
+        "hgabProject": "Radial Road (NRJ BCIR-NRJ Mayor Democrito D. Plaza II Ave.), (Mahay - Baan) (Sta. 0+289 - Sta. 0+955.67), Butuan City",
+        "hgabLedgerCode": "HB10858-3-0233-002249",
+        "senateFiles": [
+          "2027DPWH-HGAB-08433"
+        ]
+      },
+      {
+        "nepProject": "Butuan City-Malaybalay Rd - K1261 + 535 - K1261 + 585",
+        "hgabProject": "Butuan City-Malaybalay Rd - K1261 + 535 - K1261 + 585",
+        "hgabLedgerCode": "HB10858-3-0187-001402",
+        "senateFiles": [
+          "2027DPWH-HGAB-08243"
         ]
       },
       {
@@ -418,11 +519,107 @@
         ]
       },
       {
+        "nepProject": "Construction of Drainage Structure at San Juan 1, Barangay Lapasan, Cagayan de Oro City",
+        "hgabProject": "Construction of Drainage Structure at Barangay Lapasan, Cagayan de Oro City, Misamis Oriental",
+        "hgabLedgerCode": "HB10858-3-0360-004677",
+        "senateFiles": [
+          "2027DPWH-HGAB-11122"
+        ]
+      },
+      {
+        "nepProject": "Rehabilitation of Road and Drainage Systems, Quintos Village and Zabarte Road, Barangay 172, Caloocan City",
+        "hgabProject": "Rehabilitation of Road and Drainage Systems along Quintos Village and Zabarte Road, Barangay172, Caloocan City",
+        "hgabLedgerCode": "HB10858-3-0451-006460",
+        "senateFiles": [
+          "2027DPWH-HGAB-11561"
+        ]
+      },
+      {
+        "nepProject": "Improvement of Road and Drainage Systems, Villa Reform III, Barangay 167, Caloocan City",
+        "hgabProject": "Improvement of Road and Drainage Systems, Villa Reform III Phase 2, Barangay 167, Caloocan City",
+        "hgabLedgerCode": "HB10858-3-0453-006490",
+        "senateFiles": [
+          "2027DPWH-HGAB-00469"
+        ]
+      },
+      {
+        "nepProject": "Rehabilitation of Road and Drainage along Manukan to S. De Guzman (C0 + 000 to C0 + 490 ), Barangay Parada, Valenzuela City",
+        "hgabProject": "Rehabilitation of Road and Drainage along Manukan (F. Francisco) (C0+000 to C0+277) , Barangay Parada, Valenzuela City",
+        "hgabLedgerCode": "HB10858-3-0455-006518",
+        "senateFiles": [
+          "2027DPWH-HGAB-00255"
+        ]
+      },
+      {
+        "nepProject": "Construction of Road, Barangay San Isidro, Naujan, Oriental Mindoro",
+        "hgabProject": "Rehabilitation of Road, Barangay San Isidro, Naujan, Oriental Mindoro",
+        "hgabLedgerCode": "HB10858-3-0554-008667",
+        "senateFiles": [
+          "2027DPWH-HGAB-05021"
+        ]
+      },
+      {
+        "nepProject": "Rehabilitation of Road and Drainage along Clemente Compound (C0 + 000 to C0 + 240 ), Barangay Gen T. De Leon, Valenzuela City",
+        "hgabProject": "Rehabilitation of Road and Drainage along Clemente Compound (C0+000 to C0+700), Barangay Gen T. De Leon, Valenzuela City",
+        "hgabLedgerCode": "HB10858-3-0454-006505",
+        "senateFiles": [
+          "2027DPWH-HGAB-00252"
+        ]
+      },
+      {
+        "nepProject": "Construction of Multi-Purpose Building (Covered Court ), Barangay 172, Caloocan City",
+        "hgabProject": "Construction (Completion) of Multi-Purpose Building (Covered Court) Urduja, Barangay 172, Caloocan City",
+        "hgabLedgerCode": "HB10858-3-0659-010765",
+        "senateFiles": [
+          "2027DPWH-HGAB-13169"
+        ]
+      },
+      {
+        "nepProject": "Construction of Road, Barangay Parang - Barangay Maidlang, City of Calapan, Oriental Mindoro",
+        "hgabProject": "Construction of Road, Barangay Parang - Barangay Maidlang, City of Calapan, Oriental Mindoro",
+        "hgabLedgerCode": "HB10858-3-0554-008666",
+        "senateFiles": [
+          "2027DPWH-HGAB-05007"
+        ]
+      },
+      {
+        "nepProject": "Rehabilitation of Road and Drainage along Abalos St . (C0 + 000 to C0 + 400 ), Barangay Marulas, Valenzuela City",
+        "hgabProject": "Rehabilitation of Road and Drainage along Abalos St. (C0+000 to C0+274), Barangay Marulas, Valenzuela City",
+        "hgabLedgerCode": "HB10858-3-0453-006499",
+        "senateFiles": [
+          "2027DPWH-HGAB-00259"
+        ]
+      },
+      {
+        "nepProject": "Construction of Road at Barangay Paltao, Pulilan, Bulacan",
+        "hgabProject": "Construction of Road and Drainage Canal at Barangay Paltao, Pulilan, Bulacan",
+        "hgabLedgerCode": "HB10858-3-0508-007664",
+        "senateFiles": [
+          "2027DPWH-HGAB-03042"
+        ]
+      },
+      {
         "nepProject": "Rehabilitation of Road and Drainage at Aria St, Barangay Talon 1, Las Pi ñ as City",
         "hgabProject": "Rehabilitation of Road and Drainage at Aria St, Barangay Talon 2, Las Piñas City",
         "hgabLedgerCode": "HB10858-3-0448-006407",
         "senateFiles": [
           "2027DPWH-HGAB-00525"
+        ]
+      },
+      {
+        "nepProject": "Rehabilitation of Road and Drainage along Igmidio St . (C0 + 000 to C0 + 259 ), Barangay Gen T. De Leon, Valenzuela City",
+        "hgabProject": "Rehabilitation of Road and Drainage along Igmidio St. (C0+000 to C0+259), Barangay Gen T. De Leon, Valenzuela City",
+        "hgabLedgerCode": "HB10858-3-0454-006512",
+        "senateFiles": [
+          "2027DPWH-HGAB-00245"
+        ]
+      },
+      {
+        "nepProject": "Rehabilitation of Road and Drainage along Peacock St . (C0 + 000 to C0 + 380 ), Barangay Gen T. De Leon, Valenzuela City",
+        "hgabProject": "Rehabilitation of Road and Drainage along Prodon (C0+000 to C0+320), Barangay Gen T. De Leon, Valenzuela City",
+        "hgabLedgerCode": "HB10858-3-0455-006520",
+        "senateFiles": [
+          "2027DPWH-HGAB-11579"
         ]
       },
       {
@@ -434,6 +631,30 @@
         ]
       },
       {
+        "nepProject": "Construction of Road, Balete Urban Center, Barangay Aranas, Balete, Aklan",
+        "hgabProject": "Construction of Road, Balete Urban Center, Barangay Aranas, Balete, Aklan",
+        "hgabLedgerCode": "HB10858-3-0566-008930",
+        "senateFiles": [
+          "2027DPWH-HGAB-05484"
+        ]
+      },
+      {
+        "nepProject": "Construction of Road at Purok 8, Upper Puerto, Barangay Puerto, Cagayan de Oro City",
+        "hgabProject": "Construction of Road at Upper Puerto, Barangay Puerto, Cagayan de Oro City",
+        "hgabLedgerCode": "HB10858-3-0608-009828",
+        "senateFiles": [
+          "2027DPWH-HGAB-09007"
+        ]
+      },
+      {
+        "nepProject": "Construction of Multi-Purpose Building, Natividad Subdivision, Barangay 168, Caloocan City",
+        "hgabProject": "Construction of Multi-Purpose Building, Natividad Subdivision Phase 4, Barangay 168, Caloocan City",
+        "hgabLedgerCode": "HB10858-3-0660-010779",
+        "senateFiles": [
+          "2027DPWH-HGAB-00470"
+        ]
+      },
+      {
         "nepProject": "Construction of Multi-Purpose Building (MPB ), (Barangay Hall ), Barangay Caglayan, Conner, Apayao",
         "hgabProject": "Construction of Multi-Purpose Building, Barangay Nabuangan, Conner, Apayao",
         "hgabLedgerCode": "HB10858-3-0690-011376",
@@ -442,11 +663,227 @@
         ]
       },
       {
+        "nepProject": "Rehabilitation of Road and Drainage along Victoria St . (C0 + 000 to C0 + 215 ), Barangay Gen T. De Leon, Valenzuela City",
+        "hgabProject": "Rehabilitation of Road and Drainage along Victoria St. (C0+000 to C0+215), Barangay Gen T. De Leon, Valenzuela City",
+        "hgabLedgerCode": "HB10858-3-0455-006529",
+        "senateFiles": [
+          "2027DPWH-HGAB-00251"
+        ]
+      },
+      {
         "nepProject": "Besao-Tubo (via Tamboan) Road, Sta. 11 + 387 - Sta. 13 + 587, Besao, Mountain Province",
         "hgabProject": "Besao-Tubo (via Tamboan) Road, Sta.11+387 - Sta.11+567, Besao, Mountain Province",
         "hgabLedgerCode": "HB10858-3-0241-002397",
         "senateFiles": [
           "2027DPWH-HGAB-10565"
+        ]
+      },
+      {
+        "nepProject": "Rehabilitation of Road and Drainage along Tolentino St . (C0 + 000 to C0 + 160 ), Barangay Gen T. De Leon, Valenzuela City",
+        "hgabProject": "Rehabilitation of Road and Drainage along Tolentino St. (C0+000 to C0+160), Barangay Gen T. De Leon, Valenzuela City",
+        "hgabLedgerCode": "HB10858-3-0455-006528",
+        "senateFiles": [
+          "2027DPWH-HGAB-00243"
+        ]
+      },
+      {
+        "nepProject": "Construction of Multi-Purpose Building (Barangay Hall) at Barangay Bagong Silang, San Pedro City, Laguna",
+        "hgabProject": "Construction of Multi-Purpose Building (Barangay Hall) at Barangay Bagong Silang, San Pedro City, Laguna",
+        "hgabLedgerCode": "HB10858-3-0772-013051",
+        "senateFiles": [
+          "2027DPWH-HGAB-14493"
+        ]
+      },
+      {
+        "nepProject": "Rehabilitation of Road and Drainage along Caimito St . (C0 + 000 to C0 + 360 ), Barangay Gen T. De Leon, Valenzuela City",
+        "hgabProject": "Rehabilitation of Road and Drainage along Caimito St. (C0+000 to C0+140), Barangay Gen T. De Leon, Valenzuela City",
+        "hgabLedgerCode": "HB10858-3-0454-006501",
+        "senateFiles": [
+          "2027DPWH-HGAB-00244"
+        ]
+      },
+      {
+        "nepProject": "Construction of Multi-Purpose Building (Covered Court ), Barangay Coral, Municipality of Ramos, Province of Tarlac",
+        "hgabProject": "Construction of Multi-Purpose Building (Covered Court), Barangay Coral-Iloco, Municipality of Ramos, Province of Tarlac",
+        "hgabLedgerCode": "HB10858-3-0744-012485",
+        "senateFiles": [
+          "2027DPWH-HGAB-03000"
+        ]
+      },
+      {
+        "nepProject": "Construction of Multi-Purpose Building (Covered Court ), Barangay Poblacion Toledo, Municipality of Ramos, Province of Tarlac",
+        "hgabProject": "Construction of Multi-Purpose Building (Covered Court), Barangay Toledo, Municipality of Ramos, Province of Tarlac",
+        "hgabLedgerCode": "HB10858-3-0745-012489",
+        "senateFiles": [
+          "2027DPWH-HGAB-03003"
+        ]
+      },
+      {
+        "nepProject": "Construction (Completion) of Multi-Purpose Building, Barangay Gatasan, Municipality of Catanauan, Quezon",
+        "hgabProject": "Construction (Completion) of Multi-Purpose Building, Barangay Gatasan, Municipality of Catanauan, Quezon",
+        "hgabLedgerCode": "HB10858-3-0782-013244",
+        "senateFiles": [
+          "2027DPWH-HGAB-04257"
+        ]
+      },
+      {
+        "nepProject": "Muntinlupa-Railroad Station Rd - K0028 + (- 018 ) - K0028 + 269",
+        "hgabProject": "Muntinlupa-Railroad Station Rd - K0028 + (-018) - K0028 + 152",
+        "hgabLedgerCode": "HB10858-3-0142-000625",
+        "senateFiles": [
+          "2027DPWH-HGAB-00020"
+        ]
+      },
+      {
+        "nepProject": "Construction of Drainage System at Zone 4, Barangay Bugo, Cagayan de Oro City",
+        "hgabProject": "Construction of Drainage System at Barangay Bugo, Cagayan de Oro City, Misamis Oriental",
+        "hgabLedgerCode": "HB10858-3-0360-004680",
+        "senateFiles": [
+          "2027DPWH-HGAB-11123"
+        ]
+      },
+      {
+        "nepProject": "Rehabilitation of Road and Drainage along New Prodon to Oriole St . (C0 + 000 to C0 + 320 ), Barangay Gen T. De Leon, Valenzuela City",
+        "hgabProject": "Rehabilitation of Road and Drainage along Parola B Street (C0+000 to C0+130), Gen T. De Leon, Valenzuela City",
+        "hgabLedgerCode": "HB10858-3-0454-006514",
+        "senateFiles": [
+          "2027DPWH-HGAB-11577"
+        ]
+      },
+      {
+        "nepProject": "Construction of Drainage System, Barangay Zone 5, Cadiz City, Negros Occidental",
+        "hgabProject": "Rehabilitation of Drainage System, Barangay Zone 5, Cadiz City, Negros Occidental",
+        "hgabLedgerCode": "HB10858-3-0355-004573",
+        "senateFiles": [
+          "2027DPWH-HGAB-05938"
+        ]
+      },
+      {
+        "nepProject": "Construction of Drainage System at Purok 4-A, Barangay Gusa, Cagayan de Oro City",
+        "hgabProject": "Construction of Drainage System at Barangay Gusa, Cagayan de Oro City",
+        "hgabLedgerCode": "HB10858-3-0360-004679",
+        "senateFiles": [
+          "2027DPWH-HGAB-09011"
+        ]
+      },
+      {
+        "nepProject": "Rehabilitation of Road and Drainage along G. Molina St . (C0 + 000 to C0 + 800 ), Barangay Bagbaguin, Valenzuela City",
+        "hgabProject": "Rehabilitation of Road and Drainage along Camia Street (C0+000 to C080), Gen T. De Leon, Valenzuela City",
+        "hgabLedgerCode": "HB10858-3-0454-006503",
+        "senateFiles": [
+          "2027DPWH-HGAB-11575"
+        ]
+      },
+      {
+        "nepProject": "Rehabilitation of Road and Drainage along M. Delos Reyes St . (C0 + 000 to C 1 + 130 ), Barangay Gen T. De Leon, Valenzuela City",
+        "hgabProject": "Rehabilitation of Road and Drainage along Rosal Street (C0+000 to C080), Gen T. De Leon, Valenzuela City",
+        "hgabLedgerCode": "HB10858-3-0454-006515",
+        "senateFiles": [
+          "2027DPWH-HGAB-11578"
+        ]
+      },
+      {
+        "nepProject": "Construction of Road, along right side of Creek from Barangay Venturanza to Barangay Agbanawan, Banga, Aklan",
+        "hgabProject": "Construction of Road, along Right Side of Creek from Barangay Venturanza to Barangay Agbanawan, Banga, Aklan",
+        "hgabLedgerCode": "HB10858-3-0566-008928",
+        "senateFiles": [
+          "2027DPWH-HGAB-12384"
+        ]
+      },
+      {
+        "nepProject": "Construction of Road, Sitio Pandan, Barangay Bay-ang, Batan, Aklan",
+        "hgabProject": "Construction of Road, Sitio Pandan, Barangay Bay-ang, Batan, Aklan",
+        "hgabLedgerCode": "HB10858-3-0567-008955",
+        "senateFiles": [
+          "2027DPWH-HGAB-05498"
+        ]
+      },
+      {
+        "nepProject": "Construction of Road, Sitio Tugbungan, Barangay Candelaria, New Washington, Aklan",
+        "hgabProject": "Construction of Road, Sitio Ilaya, Barangay Candelaria, New Washington, Aklan",
+        "hgabLedgerCode": "HB10858-3-0568-008960",
+        "senateFiles": [
+          "2027DPWH-HGAB-12385"
+        ]
+      },
+      {
+        "nepProject": "Construction of Road, Purok Kakahuyan, Barangay Rizal, Sagay City, Negros Occidental",
+        "hgabProject": "Construction of Road, Barangay Rizal, Sagay City, Negros Occidental",
+        "hgabLedgerCode": "HB10858-3-0576-009143",
+        "senateFiles": [
+          "2027DPWH-HGAB-12439"
+        ]
+      },
+      {
+        "nepProject": "Construction of Road at Purok 9 (Kamakawan ), Barangay Gusa, Cagayan de Oro City",
+        "hgabProject": "Construction of Road at Kamakawan, Barangay Gusa, Cagayan de Oro City",
+        "hgabLedgerCode": "HB10858-3-0608-009829",
+        "senateFiles": [
+          "2027DPWH-HGAB-09010"
+        ]
+      },
+      {
+        "nepProject": "Construction of Road at Upper Camaman-an, Barangay Camaman-an, Cagayan de Oro City",
+        "hgabProject": "Construction of Roads at Barangay Camaman-an, Cagayan de Oro City",
+        "hgabLedgerCode": "HB10858-3-0608-009830",
+        "senateFiles": [
+          "2027DPWH-HGAB-08994"
+        ]
+      },
+      {
+        "nepProject": "Construction of Road at Zone 2 Upper Agusan, Barangay Agusan, Cagayan de Oro City",
+        "hgabProject": "Construction of Road at Upper Agusan, Barangay Agusan, Cagayan de Oro City, Misamis Oriental",
+        "hgabLedgerCode": "HB10858-3-0609-009834",
+        "senateFiles": [
+          "2027DPWH-HGAB-12648"
+        ]
+      },
+      {
+        "nepProject": "Construction of Road at Zone 7 near Mother Theresa Foundation, Barangay Puerto, Cagayan de Oro City",
+        "hgabProject": "Construction of Road near Mother Theresa Foundation, Barangay Puerto, Cagayan de Oro City, Misamis Oriental",
+        "hgabLedgerCode": "HB10858-3-0609-009836",
+        "senateFiles": [
+          "2027DPWH-HGAB-09006"
+        ]
+      },
+      {
+        "nepProject": "Construction of Road with Drainage at D. S. Abejo Street, Barangay Puntod, Cagayan de Oro City",
+        "hgabProject": "Construction of Road with Drainage at Barangay Puntod, Cagayan de Oro City",
+        "hgabLedgerCode": "HB10858-3-0609-009838",
+        "senateFiles": [
+          "2027DPWH-HGAB-09015"
+        ]
+      },
+      {
+        "nepProject": "Construction of Road with Drainage at Purok 13, Barangay Tablon, Cagayan de Oro City",
+        "hgabProject": "Construction of Road with Drainage at Barangay Tablon, Cagayan de Oro City",
+        "hgabLedgerCode": "HB10858-3-0609-009839",
+        "senateFiles": [
+          "2027DPWH-HGAB-08999"
+        ]
+      },
+      {
+        "nepProject": "Construction Multi-Purpose Building (Covered Court ), Villa Angelica, Barangay 166, Caloocan City",
+        "hgabProject": "Construction (Completion) Multi-Purpose Building (Covered Court), Villa Angelica, Barangay 166, Caloocan City",
+        "hgabLedgerCode": "HB10858-3-0658-010751",
+        "senateFiles": [
+          "2027DPWH-HGAB-00464"
+        ]
+      },
+      {
+        "nepProject": "Construction of Multi-Purpose Building (Gym ), Barangay Poblacion East, Calasiao, Pangasinan",
+        "hgabProject": "Construction of Multi-Purpose Building, Barangay Poblacion East, Calasiao, Pangasinan",
+        "hgabLedgerCode": "HB10858-3-0689-011356",
+        "senateFiles": [
+          "2027DPWH-HGAB-00750"
+        ]
+      },
+      {
+        "nepProject": "Construction of Multi-Purpose Building (Gym ), Barangay Umando, Malasiqui, Pangasinan",
+        "hgabProject": "Construction of Multi-Purpose Building, Barangay Umando, Malasiqui, Pangasinan",
+        "hgabLedgerCode": "HB10858-3-0690-011366",
+        "senateFiles": [
+          "2027DPWH-HGAB-01171"
         ]
       },
       {
@@ -504,8 +941,1297 @@
         "senateFiles": [
           "2027DPWH-HGAB-01411"
         ]
+      },
+      {
+        "nepProject": "Muntinlupa-Insular Prison Rd - K0029 + 408 - K0029 + 554",
+        "hgabProject": "Muntinlupa-Insular Prison Rd - K0029 + 408 - K0029 + 465",
+        "hgabLedgerCode": "HB10858-3-0142-000624",
+        "senateFiles": [
+          "2027DPWH-HGAB-00019"
+        ]
+      },
+      {
+        "nepProject": "Muntinlupa-Insular Prison Rd - (S03292LZ) Chainage 090 - Chainage 204",
+        "hgabProject": "Muntinlupa-Insular Prison Rd - (S03292LZ) Chainage 090 - Chainage 146",
+        "hgabLedgerCode": "HB10858-3-0142-000623",
+        "senateFiles": [
+          "2027DPWH-HGAB-00017"
+        ]
+      },
+      {
+        "nepProject": "South Super H-way East Service Rd - K0022 + 212 - K0022 + 286",
+        "hgabProject": "South Super H-way East Service Rd - K0022 + 212 - K0022 + 252",
+        "hgabLedgerCode": "HB10858-3-0142-000626",
+        "senateFiles": [
+          "2027DPWH-HGAB-00018"
+        ]
       }
     ],
+    "selectedMatchHgabDocuments": [
+      {
+        "nepProject": "Bacolod Negros Occidental Economic Highway (BANOCEH ), Sta. 6 + 603 - Sta. 9 + 975, E. B. Magalona, Negros Occidental",
+        "hgabProject": "Bacolod Negros Occidental Economic Highway (BANOCEH), Sta. 6+770 - Sta. 7+410, Sta. 10+040 - Sta. 10+260, E.B. Magalona, Negros Occidental",
+        "hgabLedgerCode": "HB10858-3-0223-002067",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-05776"
+        ],
+        "fileCount": 10,
+        "byType": {
+          "POW": 2,
+          "Development Council": 2,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 2
+        }
+      },
+      {
+        "nepProject": "Bacolod Negros Occidental Economic Highway (BANOCEH ), Sta. 3 + 250 - Sta. 6 + 150, Silay City, Negros Occidental",
+        "hgabProject": "Bacolod Negros Occidental Economic Highway (BANOCEH), Sta. 2+497 - Sta. 3+270, Sta. 5+470 - Sta. 6+330, Silay City, Negros Occidental",
+        "hgabLedgerCode": "HB10858-3-0223-002066",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-05801"
+        ],
+        "fileCount": 10,
+        "byType": {
+          "POW": 2,
+          "Development Council": 2,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 2
+        }
+      },
+      {
+        "nepProject": "Bacolod Negros Occidental Economic Highway (BANOCEH ) (Victorias - Sagay ), Sta. 3 + 000 - Sta. 7 + 464, Manapla, Negros Occidental",
+        "hgabProject": "Bacolod Negros Occidental Economic Highway (BANOCEH) (Victorias - Sagay), Sta. 3+000 - Sta. 3+500, Manapla, Negros Occidental",
+        "hgabLedgerCode": "HB10858-3-0222-002062",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-05803"
+        ],
+        "fileCount": 10,
+        "byType": {
+          "POW": 2,
+          "Development Council": 2,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 2
+        }
+      },
+      {
+        "nepProject": "Bacolod Negros Occidental Economic Highway (BANOCEH ) (Victorias - Sagay ), Sta. 11 + 380 - Sta. 15 + 903, Cadiz City, Negros Occidental",
+        "hgabProject": "Bacolod Negros Occidental Economic Highway (BANOCEH) (Victorias - Sagay), Sta. 12+231 - Sta. 12+700 , Cadiz City, Negros Occidental",
+        "hgabLedgerCode": "HB10858-3-0222-002061",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-05804"
+        ],
+        "fileCount": 10,
+        "byType": {
+          "POW": 2,
+          "Development Council": 2,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 2
+        }
+      },
+      {
+        "nepProject": "Piddig, Carasi (Ilocos Norte )- Calanasan-Langnao-Kabugao Road, Sta.18 + 783.20 - Sta. 25 + 350, Kabugao, Apayao",
+        "hgabProject": "Piddig,Carasi (Ilocos Norte)-Calanasan-Langnao-Kabugao Road, Sta.18+783.20 - Sta. 25+350, Kabugao, Apayao",
+        "hgabLedgerCode": "HB10858-3-0235-002273",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-01231"
+        ],
+        "fileCount": 10,
+        "byType": {
+          "POW": 2,
+          "Development Council": 2,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 2
+        }
+      },
+      {
+        "nepProject": "Rehabilitation of Kalabingkoho Pump Station, Barangay Malanday, Valenzuela City, 14, 721878, 120, 957836",
+        "hgabProject": "Rehabilitation of Kalabingkoho Pump Station, Barangay Malanday, Valenzuela City, 14.721878, 120.957836",
+        "hgabLedgerCode": "HB10858-3-0300-003532",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-00140"
+        ],
+        "fileCount": 12,
+        "byType": {
+          "POW": 2,
+          "Development Council": 0,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 6
+        }
+      },
+      {
+        "nepProject": "Aguinaldo-Toboy-Natonin Road, Sta. 11 + 286 - Sta. 11 + 512",
+        "hgabProject": "Aguinaldo-Toboy-Natonin Road, Sta. 11+286 - Sta. 11+512",
+        "hgabLedgerCode": "HB10858-3-0234-002263",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-01315"
+        ],
+        "fileCount": 10,
+        "byType": {
+          "POW": 2,
+          "Development Council": 2,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 2
+        }
+      },
+      {
+        "nepProject": "Rehabilitation of Slope Protection Structure along Agno River, Barangay Darawey, Bayambang, Pangasinan",
+        "hgabProject": "Rehabilitation of Slope Protection Structure along Agno River, Barangay Darawey, Bayambang, Pangasinan",
+        "hgabLedgerCode": "HB10858-3-0365-004765",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-00612"
+        ],
+        "fileCount": 8,
+        "byType": {
+          "POW": 2,
+          "Development Council": 0,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 0,
+          "Other": 4
+        }
+      },
+      {
+        "nepProject": "Construction of Drainage Canal along Bulana-Bulanao Norte-Laya West-Laya East Road, Sta.0 + 000 - Sta.12 + 819, Tabuk City, Kalinga",
+        "hgabProject": "Construction of Drainage Canal along Bulana-Bulanao Norte-Laya West-Laya East Road, Sta.0+000 - Sta.8+856, Tabuk City, Kalinga",
+        "hgabLedgerCode": "HB10858-3-0302-003554",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-01394"
+        ],
+        "fileCount": 10,
+        "byType": {
+          "POW": 2,
+          "Development Council": 2,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 2
+        }
+      },
+      {
+        "nepProject": "Construction of Multi-Purpose Building, Barangay San Juan, San Narciso, Zambales 15.003452, 120.095337",
+        "hgabProject": "Construction of Multi-Purpose Building (Main Building), Barangay San Juan, San Narciso, Zambales 15.003452, 120.095337",
+        "hgabLedgerCode": "HB10858-3-0636-010366",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-12925",
+          "2027DPWH-HGAB-14180"
+        ],
+        "fileCount": 40,
+        "byType": {
+          "POW": 8,
+          "Development Council": 0,
+          "Geotagged photos": 8,
+          "BP": 0,
+          "Certificate of Implementability": 8,
+          "Other": 16
+        }
+      },
+      {
+        "nepProject": "Construction of Multi-Purpose Building, Barangay 3, Calamba City, Laguna",
+        "hgabProject": "Construction of Multi-Purpose Building, Barangay 3, Calamba City, Laguna",
+        "hgabLedgerCode": "HB10858-3-0641-010431",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-14487"
+        ],
+        "fileCount": 10,
+        "byType": {
+          "POW": 2,
+          "Development Council": 2,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 2
+        }
+      },
+      {
+        "nepProject": "Construction of Multi-Purpose Building, Naval Station Leovigildo Gantioqui (NSLG ) (Multi- Purpose Hall ), San Miguel, San Antonio, Zambales 14.959169, 120.069629",
+        "hgabProject": "Construction of Multi-Purpose Building, Naval Station Leovigildo Gantioqui (NSLG) (Multi- Purpose Hall), San Miguel, San Antonio, Zambales 14.959169, 120.069629",
+        "hgabLedgerCode": "HB10858-3-0638-010394",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-03534"
+        ],
+        "fileCount": 18,
+        "byType": {
+          "POW": 2,
+          "Development Council": 0,
+          "Geotagged photos": 4,
+          "BP": 0,
+          "Certificate of Implementability": 4,
+          "Other": 8
+        }
+      },
+      {
+        "nepProject": "Butuan City-Malaybalay Rd - K1253 + 040 - K1253 + 162",
+        "hgabProject": "Butuan City-Malaybalay Rd - K1253 + 040 - K1253 + 162",
+        "hgabLedgerCode": "HB10858-3-0187-001403",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-08242"
+        ],
+        "fileCount": 10,
+        "byType": {
+          "POW": 2,
+          "Development Council": 2,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 2
+        }
+      },
+      {
+        "nepProject": "Radial Road (NRJ BCIR-NRJ Mayor Democrito D. Plaza II Ave .), (Mahay - Baan ) (Sta. 0 + 289 - Sta. 0 + 955.67 ), Butuan City",
+        "hgabProject": "Radial Road (NRJ BCIR-NRJ Mayor Democrito D. Plaza II Ave.), (Mahay - Baan) (Sta. 0+289 - Sta. 0+955.67), Butuan City",
+        "hgabLedgerCode": "HB10858-3-0233-002249",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-08433"
+        ],
+        "fileCount": 10,
+        "byType": {
+          "POW": 2,
+          "Development Council": 2,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 2
+        }
+      },
+      {
+        "nepProject": "Butuan City-Malaybalay Rd - K1261 + 535 - K1261 + 585",
+        "hgabProject": "Butuan City-Malaybalay Rd - K1261 + 535 - K1261 + 585",
+        "hgabLedgerCode": "HB10858-3-0187-001402",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-08243"
+        ],
+        "fileCount": 10,
+        "byType": {
+          "POW": 2,
+          "Development Council": 2,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 2
+        }
+      },
+      {
+        "nepProject": "Construction of Panubtuban-Jolowon Road, Sta. 16 + 000 - Sta. 19 + 000, Lamut, Ifugao",
+        "hgabProject": "Construction of Panubtuban-Jolowon Road, Sta. 16+000 - Sta. 16+800, Lamut, Ifugao",
+        "hgabLedgerCode": "HB10858-3-0478-007024",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-11801"
+        ],
+        "fileCount": 10,
+        "byType": {
+          "POW": 2,
+          "Development Council": 2,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 2
+        }
+      },
+      {
+        "nepProject": "Construction of O-ong-Dalligan Road, Sta. 2 + 250 - Sta. 5 + 250, Kiangan, Ifugao",
+        "hgabProject": "Construction of O-ong-Dalligan Road, Sta. 2+250 - Sta. 4+000, Kiangan, Ifugao",
+        "hgabLedgerCode": "HB10858-3-0478-007025",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-11802"
+        ],
+        "fileCount": 10,
+        "byType": {
+          "POW": 2,
+          "Development Council": 2,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 2
+        }
+      },
+      {
+        "nepProject": "Kalinga-Abra Rd - K0465 + 736 - K0465 + 772, K0467 + 432 - K0467 + 463, K0468 + 403 - K0468 + 419, K0468 + 600 - K0468 + 628, K0476 + 221 - K0476 + 244, K0476 + 502 - K0476 + 526",
+        "hgabProject": "Kalinga-Abra Rd - K0465 + 736 - K0465 + 772, K0467 + 432 - K0467 + 463, K0468 + 403 - K0468 + 419, K0468+912 - K0468+976, K0476 + 221 - K0476 + 244, K0476 + 502 - K0476 + 526",
+        "hgabLedgerCode": "HB10858-3-0179-001255",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-01225"
+        ],
+        "fileCount": 10,
+        "byType": {
+          "POW": 2,
+          "Development Council": 2,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 2
+        }
+      },
+      {
+        "nepProject": "Construction of Drainage Structure at San Juan 1, Barangay Lapasan, Cagayan de Oro City",
+        "hgabProject": "Construction of Drainage Structure at Barangay Lapasan, Cagayan de Oro City, Misamis Oriental",
+        "hgabLedgerCode": "HB10858-3-0360-004677",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-11122"
+        ],
+        "fileCount": 12,
+        "byType": {
+          "POW": 2,
+          "Development Council": 2,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 4
+        }
+      },
+      {
+        "nepProject": "Rehabilitation of Road and Drainage Systems, Quintos Village and Zabarte Road, Barangay 172, Caloocan City",
+        "hgabProject": "Rehabilitation of Road and Drainage Systems along Quintos Village and Zabarte Road, Barangay172, Caloocan City",
+        "hgabLedgerCode": "HB10858-3-0451-006460",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-11561"
+        ],
+        "fileCount": 12,
+        "byType": {
+          "POW": 2,
+          "Development Council": 0,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 6
+        }
+      },
+      {
+        "nepProject": "Improvement of Road and Drainage Systems, Villa Reform III, Barangay 167, Caloocan City",
+        "hgabProject": "Improvement of Road and Drainage Systems, Villa Reform III Phase 2, Barangay 167, Caloocan City",
+        "hgabLedgerCode": "HB10858-3-0453-006490",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-00469"
+        ],
+        "fileCount": 12,
+        "byType": {
+          "POW": 2,
+          "Development Council": 0,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 6
+        }
+      },
+      {
+        "nepProject": "Rehabilitation of Road and Drainage along Manukan to S. De Guzman (C0 + 000 to C0 + 490 ), Barangay Parada, Valenzuela City",
+        "hgabProject": "Rehabilitation of Road and Drainage along Manukan (F. Francisco) (C0+000 to C0+277) , Barangay Parada, Valenzuela City",
+        "hgabLedgerCode": "HB10858-3-0455-006518",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-00255"
+        ],
+        "fileCount": 12,
+        "byType": {
+          "POW": 2,
+          "Development Council": 0,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 6
+        }
+      },
+      {
+        "nepProject": "Construction of Road, Barangay San Isidro, Naujan, Oriental Mindoro",
+        "hgabProject": "Rehabilitation of Road, Barangay San Isidro, Naujan, Oriental Mindoro",
+        "hgabLedgerCode": "HB10858-3-0554-008667",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-05021"
+        ],
+        "fileCount": 12,
+        "byType": {
+          "POW": 2,
+          "Development Council": 2,
+          "Geotagged photos": 2,
+          "BP": 2,
+          "Certificate of Implementability": 2,
+          "Other": 2
+        }
+      },
+      {
+        "nepProject": "Rehabilitation of Road and Drainage along Clemente Compound (C0 + 000 to C0 + 240 ), Barangay Gen T. De Leon, Valenzuela City",
+        "hgabProject": "Rehabilitation of Road and Drainage along Clemente Compound (C0+000 to C0+700), Barangay Gen T. De Leon, Valenzuela City",
+        "hgabLedgerCode": "HB10858-3-0454-006505",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-00252"
+        ],
+        "fileCount": 12,
+        "byType": {
+          "POW": 2,
+          "Development Council": 0,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 6
+        }
+      },
+      {
+        "nepProject": "Construction of Multi-Purpose Building (Covered Court ), Barangay 172, Caloocan City",
+        "hgabProject": "Construction (Completion) of Multi-Purpose Building (Covered Court) Urduja, Barangay 172, Caloocan City",
+        "hgabLedgerCode": "HB10858-3-0659-010765",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-13169"
+        ],
+        "fileCount": 12,
+        "byType": {
+          "POW": 2,
+          "Development Council": 0,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 6
+        }
+      },
+      {
+        "nepProject": "Construction of Road, Barangay Parang - Barangay Maidlang, City of Calapan, Oriental Mindoro",
+        "hgabProject": "Construction of Road, Barangay Parang - Barangay Maidlang, City of Calapan, Oriental Mindoro",
+        "hgabLedgerCode": "HB10858-3-0554-008666",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-05007"
+        ],
+        "fileCount": 12,
+        "byType": {
+          "POW": 2,
+          "Development Council": 2,
+          "Geotagged photos": 2,
+          "BP": 2,
+          "Certificate of Implementability": 2,
+          "Other": 2
+        }
+      },
+      {
+        "nepProject": "Rehabilitation of Road and Drainage along Abalos St . (C0 + 000 to C0 + 400 ), Barangay Marulas, Valenzuela City",
+        "hgabProject": "Rehabilitation of Road and Drainage along Abalos St. (C0+000 to C0+274), Barangay Marulas, Valenzuela City",
+        "hgabLedgerCode": "HB10858-3-0453-006499",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-00259"
+        ],
+        "fileCount": 12,
+        "byType": {
+          "POW": 2,
+          "Development Council": 0,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 6
+        }
+      },
+      {
+        "nepProject": "Construction of Road at Barangay Paltao, Pulilan, Bulacan",
+        "hgabProject": "Construction of Road and Drainage Canal at Barangay Paltao, Pulilan, Bulacan",
+        "hgabLedgerCode": "HB10858-3-0508-007664",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-03042"
+        ],
+        "fileCount": 10,
+        "byType": {
+          "POW": 2,
+          "Development Council": 0,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 4
+        }
+      },
+      {
+        "nepProject": "Rehabilitation of Road and Drainage at Aria St, Barangay Talon 1, Las Pi ñ as City",
+        "hgabProject": "Rehabilitation of Road and Drainage at Aria St, Barangay Talon 2, Las Piñas City",
+        "hgabLedgerCode": "HB10858-3-0448-006407",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-00525"
+        ],
+        "fileCount": 10,
+        "byType": {
+          "POW": 2,
+          "Development Council": 0,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 4
+        }
+      },
+      {
+        "nepProject": "Rehabilitation of Road and Drainage along Igmidio St . (C0 + 000 to C0 + 259 ), Barangay Gen T. De Leon, Valenzuela City",
+        "hgabProject": "Rehabilitation of Road and Drainage along Igmidio St. (C0+000 to C0+259), Barangay Gen T. De Leon, Valenzuela City",
+        "hgabLedgerCode": "HB10858-3-0454-006512",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-00245"
+        ],
+        "fileCount": 12,
+        "byType": {
+          "POW": 2,
+          "Development Council": 0,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 6
+        }
+      },
+      {
+        "nepProject": "Rehabilitation of Road and Drainage along Peacock St . (C0 + 000 to C0 + 380 ), Barangay Gen T. De Leon, Valenzuela City",
+        "hgabProject": "Rehabilitation of Road and Drainage along Prodon (C0+000 to C0+320), Barangay Gen T. De Leon, Valenzuela City",
+        "hgabLedgerCode": "HB10858-3-0455-006520",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-11579"
+        ],
+        "fileCount": 12,
+        "byType": {
+          "POW": 2,
+          "Development Council": 0,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 6
+        }
+      },
+      {
+        "nepProject": "Construction of Yuko - Duit Access Road, Tuplac, Kiangan, Ifugao",
+        "hgabProject": "Construction of Yuko - Duit Access Road, Baguinge, Kiangan, Ifugao",
+        "hgabLedgerCode": "HB10858-3-0478-007027",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-11803"
+        ],
+        "fileCount": 10,
+        "byType": {
+          "POW": 2,
+          "Development Council": 2,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 2
+        }
+      },
+      {
+        "nepProject": "Construction of Road, Balete Urban Center, Barangay Aranas, Balete, Aklan",
+        "hgabProject": "Construction of Road, Balete Urban Center, Barangay Aranas, Balete, Aklan",
+        "hgabLedgerCode": "HB10858-3-0566-008930",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-05484"
+        ],
+        "fileCount": 10,
+        "byType": {
+          "POW": 2,
+          "Development Council": 2,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 2
+        }
+      },
+      {
+        "nepProject": "Construction of Road at Purok 8, Upper Puerto, Barangay Puerto, Cagayan de Oro City",
+        "hgabProject": "Construction of Road at Upper Puerto, Barangay Puerto, Cagayan de Oro City",
+        "hgabLedgerCode": "HB10858-3-0608-009828",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-09007"
+        ],
+        "fileCount": 10,
+        "byType": {
+          "POW": 2,
+          "Development Council": 2,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 2
+        }
+      },
+      {
+        "nepProject": "Construction of Multi-Purpose Building, Natividad Subdivision, Barangay 168, Caloocan City",
+        "hgabProject": "Construction of Multi-Purpose Building, Natividad Subdivision Phase 4, Barangay 168, Caloocan City",
+        "hgabLedgerCode": "HB10858-3-0660-010779",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-00470"
+        ],
+        "fileCount": 12,
+        "byType": {
+          "POW": 2,
+          "Development Council": 0,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 6
+        }
+      },
+      {
+        "nepProject": "Construction of Multi-Purpose Building (MPB ), (Barangay Hall ), Barangay Caglayan, Conner, Apayao",
+        "hgabProject": "Construction of Multi-Purpose Building, Barangay Nabuangan, Conner, Apayao",
+        "hgabLedgerCode": "HB10858-3-0690-011376",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-13614"
+        ],
+        "fileCount": 12,
+        "byType": {
+          "POW": 2,
+          "Development Council": 2,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 4
+        }
+      },
+      {
+        "nepProject": "Rehabilitation of Road and Drainage along Victoria St . (C0 + 000 to C0 + 215 ), Barangay Gen T. De Leon, Valenzuela City",
+        "hgabProject": "Rehabilitation of Road and Drainage along Victoria St. (C0+000 to C0+215), Barangay Gen T. De Leon, Valenzuela City",
+        "hgabLedgerCode": "HB10858-3-0455-006529",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-00251"
+        ],
+        "fileCount": 12,
+        "byType": {
+          "POW": 2,
+          "Development Council": 0,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 6
+        }
+      },
+      {
+        "nepProject": "Besao-Tubo (via Tamboan) Road, Sta. 11 + 387 - Sta. 13 + 587, Besao, Mountain Province",
+        "hgabProject": "Besao-Tubo (via Tamboan) Road, Sta.11+387 - Sta.11+567, Besao, Mountain Province",
+        "hgabLedgerCode": "HB10858-3-0241-002397",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-10565"
+        ],
+        "fileCount": 10,
+        "byType": {
+          "POW": 2,
+          "Development Council": 2,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 2
+        }
+      },
+      {
+        "nepProject": "Rehabilitation of Road and Drainage along Tolentino St . (C0 + 000 to C0 + 160 ), Barangay Gen T. De Leon, Valenzuela City",
+        "hgabProject": "Rehabilitation of Road and Drainage along Tolentino St. (C0+000 to C0+160), Barangay Gen T. De Leon, Valenzuela City",
+        "hgabLedgerCode": "HB10858-3-0455-006528",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-00243"
+        ],
+        "fileCount": 12,
+        "byType": {
+          "POW": 2,
+          "Development Council": 0,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 6
+        }
+      },
+      {
+        "nepProject": "Construction of Multi-Purpose Building (Barangay Hall) at Barangay Bagong Silang, San Pedro City, Laguna",
+        "hgabProject": "Construction of Multi-Purpose Building (Barangay Hall) at Barangay Bagong Silang, San Pedro City, Laguna",
+        "hgabLedgerCode": "HB10858-3-0772-013051",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-14493"
+        ],
+        "fileCount": 10,
+        "byType": {
+          "POW": 2,
+          "Development Council": 2,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 2
+        }
+      },
+      {
+        "nepProject": "Rehabilitation of Road and Drainage along Caimito St . (C0 + 000 to C0 + 360 ), Barangay Gen T. De Leon, Valenzuela City",
+        "hgabProject": "Rehabilitation of Road and Drainage along Caimito St. (C0+000 to C0+140), Barangay Gen T. De Leon, Valenzuela City",
+        "hgabLedgerCode": "HB10858-3-0454-006501",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-00244"
+        ],
+        "fileCount": 12,
+        "byType": {
+          "POW": 2,
+          "Development Council": 0,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 6
+        }
+      },
+      {
+        "nepProject": "Construction of Multi-Purpose Building (Covered Court ), Barangay Coral, Municipality of Ramos, Province of Tarlac",
+        "hgabProject": "Construction of Multi-Purpose Building (Covered Court), Barangay Coral-Iloco, Municipality of Ramos, Province of Tarlac",
+        "hgabLedgerCode": "HB10858-3-0744-012485",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-03000"
+        ],
+        "fileCount": 10,
+        "byType": {
+          "POW": 2,
+          "Development Council": 0,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 4
+        }
+      },
+      {
+        "nepProject": "Construction of Multi-Purpose Building (Covered Court ), Barangay Poblacion Toledo, Municipality of Ramos, Province of Tarlac",
+        "hgabProject": "Construction of Multi-Purpose Building (Covered Court), Barangay Toledo, Municipality of Ramos, Province of Tarlac",
+        "hgabLedgerCode": "HB10858-3-0745-012489",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-03003"
+        ],
+        "fileCount": 10,
+        "byType": {
+          "POW": 2,
+          "Development Council": 0,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 4
+        }
+      },
+      {
+        "nepProject": "Construction (Completion) of Multi-Purpose Building, Barangay Gatasan, Municipality of Catanauan, Quezon",
+        "hgabProject": "Construction (Completion) of Multi-Purpose Building, Barangay Gatasan, Municipality of Catanauan, Quezon",
+        "hgabLedgerCode": "HB10858-3-0782-013244",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-04257"
+        ],
+        "fileCount": 12,
+        "byType": {
+          "POW": 2,
+          "Development Council": 2,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 4
+        }
+      },
+      {
+        "nepProject": "Muntinlupa-Railroad Station Rd - K0028 + (- 018 ) - K0028 + 269",
+        "hgabProject": "Muntinlupa-Railroad Station Rd - K0028 + (-018) - K0028 + 152",
+        "hgabLedgerCode": "HB10858-3-0142-000625",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-00020"
+        ],
+        "fileCount": 10,
+        "byType": {
+          "POW": 2,
+          "Development Council": 2,
+          "Geotagged photos": 2,
+          "BP": 2,
+          "Certificate of Implementability": 2,
+          "Other": 0
+        }
+      },
+      {
+        "nepProject": "Construction of Drainage System at Zone 4, Barangay Bugo, Cagayan de Oro City",
+        "hgabProject": "Construction of Drainage System at Barangay Bugo, Cagayan de Oro City, Misamis Oriental",
+        "hgabLedgerCode": "HB10858-3-0360-004680",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-11123"
+        ],
+        "fileCount": 12,
+        "byType": {
+          "POW": 2,
+          "Development Council": 2,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 4
+        }
+      },
+      {
+        "nepProject": "Rehabilitation of Road and Drainage along New Prodon to Oriole St . (C0 + 000 to C0 + 320 ), Barangay Gen T. De Leon, Valenzuela City",
+        "hgabProject": "Rehabilitation of Road and Drainage along Parola B Street (C0+000 to C0+130), Gen T. De Leon, Valenzuela City",
+        "hgabLedgerCode": "HB10858-3-0454-006514",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-11577"
+        ],
+        "fileCount": 12,
+        "byType": {
+          "POW": 2,
+          "Development Council": 0,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 6
+        }
+      },
+      {
+        "nepProject": "Construction of Drainage System, Barangay Zone 5, Cadiz City, Negros Occidental",
+        "hgabProject": "Rehabilitation of Drainage System, Barangay Zone 5, Cadiz City, Negros Occidental",
+        "hgabLedgerCode": "HB10858-3-0355-004573",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-05938"
+        ],
+        "fileCount": 10,
+        "byType": {
+          "POW": 2,
+          "Development Council": 0,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 4
+        }
+      },
+      {
+        "nepProject": "Construction of Drainage System at Purok 4-A, Barangay Gusa, Cagayan de Oro City",
+        "hgabProject": "Construction of Drainage System at Barangay Gusa, Cagayan de Oro City",
+        "hgabLedgerCode": "HB10858-3-0360-004679",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-09011"
+        ],
+        "fileCount": 12,
+        "byType": {
+          "POW": 2,
+          "Development Council": 2,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 4
+        }
+      },
+      {
+        "nepProject": "Rehabilitation of Road and Drainage along G. Molina St . (C0 + 000 to C0 + 800 ), Barangay Bagbaguin, Valenzuela City",
+        "hgabProject": "Rehabilitation of Road and Drainage along Camia Street (C0+000 to C080), Gen T. De Leon, Valenzuela City",
+        "hgabLedgerCode": "HB10858-3-0454-006503",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-11575"
+        ],
+        "fileCount": 12,
+        "byType": {
+          "POW": 2,
+          "Development Council": 0,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 6
+        }
+      },
+      {
+        "nepProject": "Rehabilitation of Road and Drainage along M. Delos Reyes St . (C0 + 000 to C 1 + 130 ), Barangay Gen T. De Leon, Valenzuela City",
+        "hgabProject": "Rehabilitation of Road and Drainage along Rosal Street (C0+000 to C080), Gen T. De Leon, Valenzuela City",
+        "hgabLedgerCode": "HB10858-3-0454-006515",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-11578"
+        ],
+        "fileCount": 12,
+        "byType": {
+          "POW": 2,
+          "Development Council": 0,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 6
+        }
+      },
+      {
+        "nepProject": "Construction of Road, along right side of Creek from Barangay Venturanza to Barangay Agbanawan, Banga, Aklan",
+        "hgabProject": "Construction of Road, along Right Side of Creek from Barangay Venturanza to Barangay Agbanawan, Banga, Aklan",
+        "hgabLedgerCode": "HB10858-3-0566-008928",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-12384"
+        ],
+        "fileCount": 10,
+        "byType": {
+          "POW": 2,
+          "Development Council": 2,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 2
+        }
+      },
+      {
+        "nepProject": "Construction of Road, Sitio Pandan, Barangay Bay-ang, Batan, Aklan",
+        "hgabProject": "Construction of Road, Sitio Pandan, Barangay Bay-ang, Batan, Aklan",
+        "hgabLedgerCode": "HB10858-3-0567-008955",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-05498"
+        ],
+        "fileCount": 10,
+        "byType": {
+          "POW": 2,
+          "Development Council": 2,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 2
+        }
+      },
+      {
+        "nepProject": "Construction of Road, Sitio Tugbungan, Barangay Candelaria, New Washington, Aklan",
+        "hgabProject": "Construction of Road, Sitio Ilaya, Barangay Candelaria, New Washington, Aklan",
+        "hgabLedgerCode": "HB10858-3-0568-008960",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-12385"
+        ],
+        "fileCount": 10,
+        "byType": {
+          "POW": 2,
+          "Development Council": 2,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 2
+        }
+      },
+      {
+        "nepProject": "Construction of Road, Purok Kakahuyan, Barangay Rizal, Sagay City, Negros Occidental",
+        "hgabProject": "Construction of Road, Barangay Rizal, Sagay City, Negros Occidental",
+        "hgabLedgerCode": "HB10858-3-0576-009143",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-12439"
+        ],
+        "fileCount": 10,
+        "byType": {
+          "POW": 2,
+          "Development Council": 0,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 4
+        }
+      },
+      {
+        "nepProject": "Construction of Road at Purok 9 (Kamakawan ), Barangay Gusa, Cagayan de Oro City",
+        "hgabProject": "Construction of Road at Kamakawan, Barangay Gusa, Cagayan de Oro City",
+        "hgabLedgerCode": "HB10858-3-0608-009829",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-09010"
+        ],
+        "fileCount": 10,
+        "byType": {
+          "POW": 2,
+          "Development Council": 2,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 2
+        }
+      },
+      {
+        "nepProject": "Construction of Road at Upper Camaman-an, Barangay Camaman-an, Cagayan de Oro City",
+        "hgabProject": "Construction of Roads at Barangay Camaman-an, Cagayan de Oro City",
+        "hgabLedgerCode": "HB10858-3-0608-009830",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-08994"
+        ],
+        "fileCount": 10,
+        "byType": {
+          "POW": 2,
+          "Development Council": 2,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 2
+        }
+      },
+      {
+        "nepProject": "Construction of Road at Zone 2 Upper Agusan, Barangay Agusan, Cagayan de Oro City",
+        "hgabProject": "Construction of Road at Upper Agusan, Barangay Agusan, Cagayan de Oro City, Misamis Oriental",
+        "hgabLedgerCode": "HB10858-3-0609-009834",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-12648"
+        ],
+        "fileCount": 12,
+        "byType": {
+          "POW": 2,
+          "Development Council": 4,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 2
+        }
+      },
+      {
+        "nepProject": "Construction of Road at Zone 7 near Mother Theresa Foundation, Barangay Puerto, Cagayan de Oro City",
+        "hgabProject": "Construction of Road near Mother Theresa Foundation, Barangay Puerto, Cagayan de Oro City, Misamis Oriental",
+        "hgabLedgerCode": "HB10858-3-0609-009836",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-09006"
+        ],
+        "fileCount": 10,
+        "byType": {
+          "POW": 2,
+          "Development Council": 2,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 2
+        }
+      },
+      {
+        "nepProject": "Construction of Road with Drainage at D. S. Abejo Street, Barangay Puntod, Cagayan de Oro City",
+        "hgabProject": "Construction of Road with Drainage at Barangay Puntod, Cagayan de Oro City",
+        "hgabLedgerCode": "HB10858-3-0609-009838",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-09015"
+        ],
+        "fileCount": 12,
+        "byType": {
+          "POW": 2,
+          "Development Council": 4,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 2
+        }
+      },
+      {
+        "nepProject": "Construction of Road with Drainage at Purok 13, Barangay Tablon, Cagayan de Oro City",
+        "hgabProject": "Construction of Road with Drainage at Barangay Tablon, Cagayan de Oro City",
+        "hgabLedgerCode": "HB10858-3-0609-009839",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-08999"
+        ],
+        "fileCount": 12,
+        "byType": {
+          "POW": 2,
+          "Development Council": 4,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 2
+        }
+      },
+      {
+        "nepProject": "Construction Multi-Purpose Building (Covered Court ), Villa Angelica, Barangay 166, Caloocan City",
+        "hgabProject": "Construction (Completion) Multi-Purpose Building (Covered Court), Villa Angelica, Barangay 166, Caloocan City",
+        "hgabLedgerCode": "HB10858-3-0658-010751",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-00464"
+        ],
+        "fileCount": 12,
+        "byType": {
+          "POW": 2,
+          "Development Council": 0,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 6
+        }
+      },
+      {
+        "nepProject": "Construction of Multi-Purpose Building (Gym ), Barangay Poblacion East, Calasiao, Pangasinan",
+        "hgabProject": "Construction of Multi-Purpose Building, Barangay Poblacion East, Calasiao, Pangasinan",
+        "hgabLedgerCode": "HB10858-3-0689-011356",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-00750"
+        ],
+        "fileCount": 8,
+        "byType": {
+          "POW": 2,
+          "Development Council": 0,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 2
+        }
+      },
+      {
+        "nepProject": "Construction of Multi-Purpose Building (Gym ), Barangay Umando, Malasiqui, Pangasinan",
+        "hgabProject": "Construction of Multi-Purpose Building, Barangay Umando, Malasiqui, Pangasinan",
+        "hgabLedgerCode": "HB10858-3-0690-011366",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-01171"
+        ],
+        "fileCount": 8,
+        "byType": {
+          "POW": 2,
+          "Development Council": 0,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 2
+        }
+      },
+      {
+        "nepProject": "Construction (Completion) of Multi-Purpose Building (MPB, Gymnasium ), Barangay Lower Maton, Pudtol, Apayao",
+        "hgabProject": "Construction (Completion) of Multi-Purpose Building, Barangay Lower Maton, Pudtol, Apayao",
+        "hgabLedgerCode": "HB10858-3-0690-011378",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-01422"
+        ],
+        "fileCount": 16,
+        "byType": {
+          "POW": 2,
+          "Development Council": 6,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 4
+        }
+      },
+      {
+        "nepProject": "Construction of Multi-Purpose building (Open Gym ), Barangay Bunga, Tadian, Mountain Province",
+        "hgabProject": "Construction of Multi-Purpose building, Barangay Bunga, Tadian, Mountain Province",
+        "hgabLedgerCode": "HB10858-3-0695-011482",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-01588"
+        ],
+        "fileCount": 12,
+        "byType": {
+          "POW": 2,
+          "Development Council": 4,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 2
+        }
+      },
+      {
+        "nepProject": "Construction of Multi-Purpose Building, Barangay Bila, Bauko, Mountain Province",
+        "hgabProject": "Construction (Completion) of Multi-Purpose Building, Barangay Bila, Bauko, Mountain Province",
+        "hgabLedgerCode": "HB10858-3-0696-011497",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-01477"
+        ],
+        "fileCount": 14,
+        "byType": {
+          "POW": 2,
+          "Development Council": 6,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 2
+        }
+      },
+      {
+        "nepProject": "Construction of Multi-Purpose Building, Barangay Caluttit, Bontoc, Mountain Province",
+        "hgabProject": "Construction of Multi-Purpose Building, Barangay Caluttit, Bontoc, Mountain Province",
+        "hgabLedgerCode": "HB10858-3-0696-011499",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-13690"
+        ],
+        "fileCount": 10,
+        "byType": {
+          "POW": 2,
+          "Development Council": 0,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 4
+        }
+      },
+      {
+        "nepProject": "Construction of Multi-Purpose Building, Barangay Poblacion, Bontoc, Mountain Province",
+        "hgabProject": "Construction (Completion) of Multi-Purpose Building, Barangay Poblacion, Bontoc, Mountain Province",
+        "hgabLedgerCode": "HB10858-3-0697-011504",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-01484"
+        ],
+        "fileCount": 12,
+        "byType": {
+          "POW": 2,
+          "Development Council": 4,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 2
+        }
+      },
+      {
+        "nepProject": "Construction of Multi-Purpose Building, Barangay Saclit, Sadanga, Mountain Province",
+        "hgabProject": "Construction (Completion) of Multi-Purpose Building, Barangay Saclit, Sadanga, Mountain Province",
+        "hgabLedgerCode": "HB10858-3-0697-011505",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-01487"
+        ],
+        "fileCount": 16,
+        "byType": {
+          "POW": 2,
+          "Development Council": 8,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 2
+        }
+      },
+      {
+        "nepProject": "Construction of Multi-Purpose Building (Open Gym of LNS ), Barangay Lower Uma, Lubuagan, Kalinga",
+        "hgabProject": "Construction of Multi-Purpose Building, Barangay Lower Uma, Lubuagan, Kalinga",
+        "hgabLedgerCode": "HB10858-3-0698-011530",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-01411"
+        ],
+        "fileCount": 10,
+        "byType": {
+          "POW": 2,
+          "Development Council": 2,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 2
+        }
+      },
+      {
+        "nepProject": "Muntinlupa-Insular Prison Rd - K0029 + 408 - K0029 + 554",
+        "hgabProject": "Muntinlupa-Insular Prison Rd - K0029 + 408 - K0029 + 465",
+        "hgabLedgerCode": "HB10858-3-0142-000624",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-00019"
+        ],
+        "fileCount": 10,
+        "byType": {
+          "POW": 2,
+          "Development Council": 2,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 2
+        }
+      },
+      {
+        "nepProject": "Muntinlupa-Insular Prison Rd - (S03292LZ) Chainage 090 - Chainage 204",
+        "hgabProject": "Muntinlupa-Insular Prison Rd - (S03292LZ) Chainage 090 - Chainage 146",
+        "hgabLedgerCode": "HB10858-3-0142-000623",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-00017"
+        ],
+        "fileCount": 10,
+        "byType": {
+          "POW": 2,
+          "Development Council": 2,
+          "Geotagged photos": 2,
+          "BP": 0,
+          "Certificate of Implementability": 2,
+          "Other": 2
+        }
+      },
+      {
+        "nepProject": "South Super H-way East Service Rd - K0022 + 212 - K0022 + 286",
+        "hgabProject": "South Super H-way East Service Rd - K0022 + 212 - K0022 + 252",
+        "hgabLedgerCode": "HB10858-3-0142-000626",
+        "senateFileCodes": [
+          "2027DPWH-HGAB-00018"
+        ],
+        "fileCount": 10,
+        "byType": {
+          "POW": 2,
+          "Development Council": 2,
+          "Geotagged photos": 2,
+          "BP": 2,
+          "Certificate of Implementability": 2,
+          "Other": 0
+        }
+      }
+    ],
+    "selectedPairHgabProjectsWithFiles": 74,
+    "selectedPairHgabFileCodes": 75,
+    "selectedPairHgabFileRecords": 846,
+    "selectedPairHgabFileInventoryAvailable": true,
     "selectedPairPortalProjects": 10118,
     "selectedPairProjectsWithLoadedDocuments": 9844,
     "selectedPairDocumentRecords": 45619,
@@ -66888,15 +68614,15 @@
     "hgabPowResults": [
       {
         "path": "dpwh-in-depth-shards/hgabPowResults-001.json",
-        "itemCount": 3981,
-        "sizeBytes": 41988234,
-        "sha256": "26750c7d01421281d4f99a4169f65407013ee9375b9e12323a1035933eba8323"
+        "itemCount": 3972,
+        "sizeBytes": 41989658,
+        "sha256": "6d125917bf522c184bbc717b3b59df33d0b07255ce0bc66fd61a34465805cdf8"
       },
       {
         "path": "dpwh-in-depth-shards/hgabPowResults-002.json",
-        "itemCount": 1431,
-        "sizeBytes": 27552687,
-        "sha256": "b486db24a7fe14c1a5927f00150372034b131004feb716a8b1c8c29006ad558c"
+        "itemCount": 1440,
+        "sizeBytes": 27889149,
+        "sha256": "0b5e049e47c967b189efed8971c3a578e7802dff9abb13ab73b0bdbdeffdb264"
       }
     ]
   },
