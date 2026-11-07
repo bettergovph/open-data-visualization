@@ -33,5 +33,5 @@
   size.addEventListener('change',()=>{page=0;render()});
   prev.addEventListener('click',()=>{page--;render()});
   next.addEventListener('click',()=>{page++;render()});
-  fetch('hgab-document-coverage.json?v=9bfc6c7c48bd').then(r=>{if(!r.ok)throw Error('Coverage export unavailable ('+r.status+')');return r.json()}).then(d=>{rows=Array.isArray(d.projects)?d.projects:[];render()}).catch(e=>{body.innerHTML='<tr><td colspan="7">Could not load the all-HGAB coverage export. '+esc(e.message)+'</td></tr>';count.textContent='Coverage unavailable';console.error(e)});
+  fetch('hgab-document-coverage.json?v=4e5f3f310629').then(r=>{if(!r.ok)throw Error('Coverage export unavailable ('+r.status+')');return r.json()}).then(d=>{rows=Array.isArray(d.projects)?d.projects:[];render()}).catch(e=>{body.innerHTML='<tr><td colspan="7">Could not load the all-HGAB coverage export. '+esc(e.message)+'</td></tr>';count.textContent='Coverage unavailable';console.error(e)});
 })();
