@@ -502,48 +502,6 @@
         }
       }
     ],
-    "lineItemReviewQueue": {
-      "sourceOccurrences": 16275,
-      "baseDpwhFlaggedOccurrences": 16060,
-      "flagsOverviewProjectRows": 14806,
-      "fmrConnectivityRows": 878,
-      "flaggedOccurrences": 18004,
-      "flagTypes": {
-        "insertion": 6105,
-        "missing_documents": 15228,
-        "amount_group": 10519,
-        "summary_flag": 32816,
-        "historical_title": 709,
-        "missing_rdc": 7692,
-        "missing_photos": 1235,
-        "chainage_overlap": 17,
-        "high_meter_rate": 191,
-        "very_short_range": 8,
-        "missing_pow": 42,
-        "rehab_good_fair": 2,
-        "fmr_review": 174,
-        "fmr_flag": 661,
-        "fmr_double_flag": 43
-      },
-      "flagCountDistribution": {
-        "15": 4,
-        "14": 3,
-        "13": 6,
-        "12": 4,
-        "11": 33,
-        "10": 45,
-        "9": 141,
-        "8": 440,
-        "7": 808,
-        "6": 4332,
-        "5": 1727,
-        "4": 4620,
-        "3": 1368,
-        "2": 2272,
-        "1": 2201
-      },
-      "top25Occurrences": 25
-    },
     "rcsStageTrace": {
       "districtOfficeLines": 199,
       "unchangedInHGAB": 199,
@@ -591,85 +549,6 @@
     "Bicam (House/Senate reconciliation)",
     "GAA (enacted)"
   ],
-  "lineItemReviewQueue": {
-    "data": "line-item-review-queue.json",
-    "ranking": "Displayed evidence-signal count descending, allocation pesos descending, occurrence ID ascending for exact ties. Signals from separate screens are identified by source and are not interchangeable weights.",
-    "scope": "Union of the detailed DPWH HGAB occurrence review, every project and review signal in the Flags overview, and FY2027 HGAB DA FMR records classified Flag, Double Flag or Review. Not a ranking of the entire national budget.",
-    "method": {
-      "maximumPossibleFlags": null,
-      "amountGroupMinimumOccurrences": 10,
-      "amountGroupMinimumNamedOffices": 3,
-      "amountGroupScope": "Identical PAP and positive exact peso amount; counts are allocation occurrences, not certified distinct construction contracts.",
-      "historicalYears": [
-        2015,
-        2016,
-        2017,
-        2018,
-        2019,
-        2020,
-        2021,
-        2022,
-        2023,
-        2024,
-        2025,
-        2026
-      ],
-      "historicalMatch": "Identical full normalized title after complete trailing metadata removal; same qualified municipality/province; direction/location/tranche conflict and disjoint stated chainage excluded.",
-      "weights": "One point per flag type. Multiple historical years do not add points.",
-      "highMeterRate": "Peers share category, structure group (overpasses/flyovers, viaducts and pedestrian structures separated), official PAP, a data-derived length band, and matched surface/condition/assessment-year context. Unknown context is pooled only with unknown context and remains explicitly unadjusted. At least 20 peers with stated length ≥10m. Candidate rate exceeds both 2× peer median and Q3+1.5×IQR. Chart extremes exceed max(2×median,Q3+3×IQR); sub-10m printed ranges also stay off rate charts. Lane inventory estimates do not enter these per-meter flags.",
-      "laneEvidence": "Title lane rates, inventory lane estimates and existing-bridge asset estimates are separate contextual measures. None adds a ranking point or replaces a missing funded length. Lane and station evidence is retained in lengthReview.",
-      "conditionAndSurfacing": {
-        "byCategory": {
-          "Roads": {
-            "lineItems": 6482,
-            "withContext": 471,
-            "fullyAssessedRoadRecords": 358,
-            "rehabGoodFairCandidates": 2,
-            "recentSurfacingCandidates": 0,
-            "bridgeGoodFairUndatedContext": 0
-          },
-          "Bridges": {
-            "lineItems": 1159,
-            "withContext": 649,
-            "fullyAssessedRoadRecords": 0,
-            "rehabGoodFairCandidates": 0,
-            "recentSurfacingCandidates": 0,
-            "bridgeGoodFairUndatedContext": 167
-          },
-          "FMR": {
-            "lineItems": 964,
-            "withContext": 0,
-            "fullyAssessedRoadRecords": 0,
-            "rehabGoodFairCandidates": 0,
-            "recentSurfacingCandidates": 0,
-            "bridgeGoodFairUndatedContext": 0
-          },
-          "Mixed roads / bridges": {
-            "lineItems": 116,
-            "withContext": 0,
-            "fullyAssessedRoadRecords": 0,
-            "rehabGoodFairCandidates": 0,
-            "recentSurfacingCandidates": 0,
-            "bridgeGoodFairUndatedContext": 0
-          }
-        },
-        "budgetYear": 2027,
-        "recentSurfacingWindowYears": 5,
-        "method": "Condition flag: rehabilitation/reconstruction/major repair only, full matched road range assessed Good/Fair with a known pre-budget assessment year. Recent-surfacing flag: rehabilitation, preventive maintenance or other explicitly described pavement work where the full matched range has a positive recorded last-surfacing year within five budget years; unknown/zero values are not filled. Widening, approaches, slope/drainage and off-carriageway scopes excluded. Bridge condition is displayed, but an unknown assessment year prevents the dated flag.",
-        "limits": "Review leads, not proof of waste or incorrect prioritization. Assessment and budget dates differ; later deterioration, structural/safety work or different funded components may justify rehabilitation. Last-surfacing inventory is older and cannot establish that no later work occurred."
-      },
-      "evidenceGaps": "Missing length and insufficient peers are cautions, not points. A sub-10m printed range gets a separate denominator-warning point and remains subject to source verification. Extreme rates require denominator/scope review and are omitted from rate charts.",
-      "summaryCoverage": "Includes every project record and review signal from the Flags overview, including NEP-only candidates and HGAB foreign-assisted rows omitted from the narrower DPWH ranking. Adds FY2027 FMR Flag, Double Flag and Review classes. Baseline FMR rows are not flagged and remain on connectivity.html. The different screens are evidence categories, not common weights.",
-      "dependence": "Historical recurrence and chainage overlap are related indicators; scores are descriptive triage, not independent evidence or probabilities.",
-      "limitations": [
-        "Uniform packages can be legitimate. Exact appropriation amounts are not unit costs.",
-        "Strict historical matching misses paraphrased titles and unresolved locations; no icon means this screen did not identify a review trigger, not that the project is verified.",
-        "The prior-year search uses FY2016–FY2018 title-classified DPWH GAA project-family records plus locally available DPWH road, bridge, building and flood records from FY2020–FY2026; FY2019 and earlier years are unavailable or unreconciled, and this is not a search of every project type or every agency.",
-        "Matching/parser errors can produce insertion flags. Top 25 overlap other findings; do not sum them as losses.",
-        "Current office, representative, role and party do not contribute any points."
-      ]
-    }
-  },
   "districtComparisonPolicy": {
     "scope": "All district rows are available for reader selection in the all-district ranking. No selected-district section or person-specific defaults.",
     "data": "congress-benchmark.json"
