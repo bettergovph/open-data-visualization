@@ -1,5 +1,5 @@
 {
-  "generatedAtUtc": "2026-11-07T16:57:25.117959+00:00",
+  "generatedAtUtc": "2026-11-07T18:15:26.029371+00:00",
   "stage": "NEP FY2027 proposal documents",
   "summary": {
     "projectsWithBillRows": 7225,
@@ -366,98 +366,247 @@
   },
   "senateSupportingDocumentCoverage": {
     "denominatorProjectRows": 6105,
-    "projectsWithAtLeastOneMatchedDocument": 4034,
-    "projectsWithAtLeastOneMatchedDocumentPct": 66.08,
-    "projectRowsWithoutMatchedDocument": 2071,
-    "matchedFileRecords": 21214,
+    "projectsWithAtLeastOneMatchedDocument": 3777,
+    "projectsWithAtLeastOneMatchedDocumentPct": 61.87,
+    "projectRowsWithoutMatchedDocument": 2328,
+    "matchedFileRecords": 19734,
     "byType": {
       "POW": {
-        "filesScanned": 6688,
-        "matchedProjectRows": 3858,
-        "matchedFileRecords": 4114,
+        "filesScanned": 6683,
+        "matchedProjectRows": 3620,
+        "matchedFileRecords": 3868,
         "exactTitleMatchedFiles": 793,
         "relaxedTitleMatchedFiles": 141,
-        "uniqueCodeSiblingFileMatches": 3180,
+        "uniqueCodeSiblingFileMatches": 2934,
+        "pdfFilesExpectedFromManifest": 6683,
+        "pdfFilesPresentOnT5": 6683,
+        "pdfFilesAvailableButNotScanned": 0,
+        "pdfFilesMissingFromT5": 0,
         "scanErrors": 3,
-        "filesWithoutNativeText": 1343
+        "filesWithoutNativeText": 1345
       },
       "BP 202": {
-        "filesScanned": 5588,
-        "matchedProjectRows": 3869,
-        "matchedFileRecords": 4155,
-        "exactTitleMatchedFiles": 3245,
+        "filesScanned": 6610,
+        "matchedProjectRows": 3599,
+        "matchedFileRecords": 3867,
+        "exactTitleMatchedFiles": 2599,
         "relaxedTitleMatchedFiles": 0,
-        "uniqueCodeSiblingFileMatches": 910,
+        "uniqueCodeSiblingFileMatches": 1268,
+        "pdfFilesExpectedFromManifest": 6611,
+        "pdfFilesPresentOnT5": 6610,
+        "pdfFilesAvailableButNotScanned": 0,
+        "pdfFilesMissingFromT5": 1,
         "scanErrors": 0,
-        "filesWithoutNativeText": 787
+        "filesWithoutNativeText": 1124
       },
       "Development Council": {
-        "filesScanned": 3381,
-        "matchedProjectRows": 1792,
-        "matchedFileRecords": 1995,
+        "filesScanned": 3374,
+        "matchedProjectRows": 1695,
+        "matchedFileRecords": 1880,
         "exactTitleMatchedFiles": 9,
         "relaxedTitleMatchedFiles": 0,
-        "uniqueCodeSiblingFileMatches": 1986,
+        "uniqueCodeSiblingFileMatches": 1871,
+        "pdfFilesExpectedFromManifest": 3374,
+        "pdfFilesPresentOnT5": 3374,
+        "pdfFilesAvailableButNotScanned": 0,
+        "pdfFilesMissingFromT5": 0,
         "scanErrors": 0,
-        "filesWithoutNativeText": 2769
+        "filesWithoutNativeText": 2762
       },
       "Geotagged photos": {
-        "filesScanned": 5933,
-        "matchedProjectRows": 3385,
-        "matchedFileRecords": 3673,
-        "exactTitleMatchedFiles": 2073,
+        "filesScanned": 5920,
+        "matchedProjectRows": 3194,
+        "matchedFileRecords": 3428,
+        "exactTitleMatchedFiles": 2072,
         "relaxedTitleMatchedFiles": 333,
-        "uniqueCodeSiblingFileMatches": 1267,
-        "scanErrors": 1,
+        "uniqueCodeSiblingFileMatches": 1023,
+        "pdfFilesExpectedFromManifest": 5921,
+        "pdfFilesPresentOnT5": 5920,
+        "pdfFilesAvailableButNotScanned": 0,
+        "pdfFilesMissingFromT5": 1,
+        "scanErrors": 2,
         "filesWithoutNativeText": 943
       },
       "Certificate of Implementability": {
-        "filesScanned": 6700,
-        "matchedProjectRows": 3815,
-        "matchedFileRecords": 4099,
-        "exactTitleMatchedFiles": 1151,
+        "filesScanned": 6693,
+        "matchedProjectRows": 3574,
+        "matchedFileRecords": 3787,
+        "exactTitleMatchedFiles": 1150,
         "relaxedTitleMatchedFiles": 0,
-        "uniqueCodeSiblingFileMatches": 2948,
-        "scanErrors": 0,
-        "filesWithoutNativeText": 1625
+        "uniqueCodeSiblingFileMatches": 2637,
+        "pdfFilesExpectedFromManifest": 6693,
+        "pdfFilesPresentOnT5": 6693,
+        "pdfFilesAvailableButNotScanned": 0,
+        "pdfFilesMissingFromT5": 0,
+        "scanErrors": 1,
+        "filesWithoutNativeText": 1622
       },
       "Other": {
-        "filesScanned": 5044,
-        "matchedProjectRows": 2209,
-        "matchedFileRecords": 3178,
-        "exactTitleMatchedFiles": 650,
+        "filesScanned": 5037,
+        "matchedProjectRows": 2055,
+        "matchedFileRecords": 2904,
+        "exactTitleMatchedFiles": 641,
         "relaxedTitleMatchedFiles": 51,
-        "uniqueCodeSiblingFileMatches": 2477,
+        "uniqueCodeSiblingFileMatches": 2212,
+        "pdfFilesExpectedFromManifest": 5037,
+        "pdfFilesPresentOnT5": 5037,
+        "pdfFilesAvailableButNotScanned": 0,
+        "pdfFilesMissingFromT5": 0,
         "scanErrors": 0,
-        "filesWithoutNativeText": 2759
+        "filesWithoutNativeText": 2757
       }
     },
     "signatoryCandidateCounts": {
-      "assistant_district_engineer": 2968,
-      "district_engineer": 3957,
-      "engineer": 3395,
+      "engineer": 30425,
+      "assistant_district_engineer": 2848,
+      "district_engineer": 3760,
       "rdc_chair": 72,
-      "governor": 106,
+      "governor": 105,
       "pdc_chair": 90,
       "mayor": 17,
       "ldc_chair": 5
     },
     "signatoryCandidatesByDocumentType": {
       "POW": {
-        "assistant_district_engineer": 2968,
-        "district_engineer": 3957,
-        "engineer": 3395
+        "engineer": 30425,
+        "assistant_district_engineer": 2848,
+        "district_engineer": 3760
       },
       "Development Council": {
         "rdc_chair": 72,
-        "governor": 106,
+        "governor": 105,
         "pdc_chair": 90,
         "mayor": 17,
         "ldc_chair": 5
       }
     },
     "deduplication": "Project counts use distinct House HGAB row IDs. File counts are distinct source paths within a project and type; byte-identical copies at different paths are not removed. T5 file-type counts inherit only from uniquely resolved HGAB file codes.",
-    "matchingMethod": "Native text from the first PDF page. Exact normalized full-title matches and conservative relaxed title candidates are counted. Other files inherit a match only when they share a five-digit HGAB file code with a title-matched sibling and that code resolves to one House row. Image-only documents without extracted text and without a matched sibling remain unassigned."
+    "matchingMethod": "Native text from the first PDF page. Exact normalized full-title matches and conservative relaxed title candidates are counted. Other files inherit a match only when they share a five-digit HGAB file code with a title-matched sibling and that code resolves to one House row. Image-only documents without extracted text and without a matched sibling remain unassigned.",
+    "localT5Inventory": {
+      "available": true,
+      "source": "T5 hash audit plus verified Cloudflare intake journal; exact manifest paths/hashes deduplicated",
+      "auditGeneratedAtUtc": "2026-11-07T17:58:27.512516+00:00",
+      "manifestEntries": 34420,
+      "manifestFilesPresentOnT5": 34418,
+      "manifestFilesNotPresentOnT5": 2,
+      "verifiedOriginalT5Entries": 29904,
+      "verifiedAlternateT5Entries": 45,
+      "downloadedIntoAttachmentCache": 4469,
+      "sizeMismatchAtAudit": 0,
+      "hashMismatchAtAudit": 0,
+      "missingAtAuditBeforeIntake": 2,
+      "extraT5FilesOutsideManifest": 50,
+      "files": 34418,
+      "projectCodes": 6673,
+      "byType": {
+        "BP 202": 6610,
+        "Certificate of Implementability": 6693,
+        "Geotagged photos": 5922,
+        "Development Council": 3384,
+        "POW": 6683,
+        "Other": 5126
+      },
+      "expectedByType": {
+        "BP 202": 6611,
+        "Certificate of Implementability": 6693,
+        "Geotagged photos": 5923,
+        "Development Council": 3384,
+        "POW": 6683,
+        "Other": 5126
+      },
+      "pdfFilesAvailable": 34317,
+      "pdfFilesExpected": 34319,
+      "pdfByType": {
+        "BP 202": 6610,
+        "Certificate of Implementability": 6693,
+        "Geotagged photos": 5920,
+        "Development Council": 3374,
+        "POW": 6683,
+        "Other": 5037
+      },
+      "pdfExpectedByType": {
+        "BP 202": 6611,
+        "Certificate of Implementability": 6693,
+        "Geotagged photos": 5921,
+        "Development Council": 3374,
+        "POW": 6683,
+        "Other": 5037
+      }
+    },
+    "cloudflareFileInventory": {
+      "available": true,
+      "source": "Cloudflare-file-links.jsonl; reconciled to the T5 hash audit and verified intake journal",
+      "files": 34420,
+      "projectCodes": 6673,
+      "byType": {
+        "BP 202": 6611,
+        "Certificate of Implementability": 6693,
+        "Geotagged photos": 5923,
+        "Development Council": 3384,
+        "POW": 6683,
+        "Other": 5126
+      },
+      "pdfFiles": 34319,
+      "pdfByType": {
+        "BP 202": 6611,
+        "Certificate of Implementability": 6693,
+        "Geotagged photos": 5921,
+        "Development Council": 3374,
+        "POW": 6683,
+        "Other": 5037
+      }
+    },
+    "t5CloudflareReconciliation": {
+      "available": true,
+      "source": "T5 hash audit plus verified Cloudflare intake journal; exact manifest paths/hashes deduplicated",
+      "auditGeneratedAtUtc": "2026-11-07T17:58:27.512516+00:00",
+      "manifestEntries": 34420,
+      "manifestFilesPresentOnT5": 34418,
+      "manifestFilesNotPresentOnT5": 2,
+      "verifiedOriginalT5Entries": 29904,
+      "verifiedAlternateT5Entries": 45,
+      "downloadedIntoAttachmentCache": 4469,
+      "sizeMismatchAtAudit": 0,
+      "hashMismatchAtAudit": 0,
+      "missingAtAuditBeforeIntake": 2,
+      "extraT5FilesOutsideManifest": 50,
+      "files": 34418,
+      "projectCodes": 6673,
+      "byType": {
+        "BP 202": 6610,
+        "Certificate of Implementability": 6693,
+        "Geotagged photos": 5922,
+        "Development Council": 3384,
+        "POW": 6683,
+        "Other": 5126
+      },
+      "expectedByType": {
+        "BP 202": 6611,
+        "Certificate of Implementability": 6693,
+        "Geotagged photos": 5923,
+        "Development Council": 3384,
+        "POW": 6683,
+        "Other": 5126
+      },
+      "pdfFilesAvailable": 34317,
+      "pdfFilesExpected": 34319,
+      "pdfByType": {
+        "BP 202": 6610,
+        "Certificate of Implementability": 6693,
+        "Geotagged photos": 5920,
+        "Development Council": 3374,
+        "POW": 6683,
+        "Other": 5037
+      },
+      "pdfExpectedByType": {
+        "BP 202": 6611,
+        "Certificate of Implementability": 6693,
+        "Geotagged photos": 5921,
+        "Development Council": 3374,
+        "POW": 6683,
+        "Other": 5037
+      }
+    }
   },
   "hgabPowSummary": {
     "parsedDocuments": 6259,
