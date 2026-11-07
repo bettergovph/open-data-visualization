@@ -76,7 +76,8 @@ function paginate(table,wrap){
  let state=pagination.get(table);
  // Preserve native filtering, sorting and pagination controls.
  const next=wrap.nextElementSibling;
- if(!state&&next?.matches('.pager,.pagination,[data-pagination]')&&next.querySelector('button'))return;
+ if(!state&&table.dataset.nativePagination==='true')return;
+ if(!state&&next?.matches('.pager,.pagination,.report-table-pagination,[data-pagination]')&&next.querySelector('button'))return;
  if(!state&&rows.length<=10)return;
  if(!state){
   const nav=document.createElement('nav');nav.className='report-table-pagination';nav.setAttribute('aria-label',label(table)+' pages');

@@ -4,124 +4,27 @@
   "findings": [
     {
       "rank": 1,
-      "id": "rcs",
-      "title": "RCS: identical budget packages across unequal rainfall proxies",
-      "lead": "199 offices × ₱4.2M = ₱835.800M",
-      "basis": "Direct allocation observation; rainfall need remains a proxy",
-      "page": "rcs.html#rcs-statistical-evidence",
-      "question": "What policy or engineering design justifies one identical budget unit per office?",
-      "evidence": "All district-office RCS lines have the same amount. Province/regional rainfall proxies differ by 2.59×. Alternative formulas move different numbers of budget units. All 199 DEO lines are retained unchanged in HGAB; no differentiated needs weighting is visible in the amounts.",
-      "alternative": "Standard package costs or a minimum coverage policy may justify equal allocations. Rainfall alone does not measure demand.",
-      "next": "Obtain siting, design capacity, water demand, catchment area and existing RCS inventory.",
-      "caution": "DEO is not LEG; province rainfall is not a district observation. Returning FY2026 program.",
+      "id": "hgab-no-nep-counterpart",
+      "title": "HGAB 3rd projects without a selected NEP counterpart",
+      "lead": "6,105 / 15,979 project rows · 38.2%",
+      "basis": "One-to-one stage matching screen; unmatched rows require source review",
+      "page": "dpwh.html#hgab-coverage",
+      "question": "Which HGAB 3rd projects are genuinely absent from NEP after title, scope and occurrence review?",
+      "evidence": "The current one-to-one comparison selected no NEP counterpart for these project rows. The comparison uses title and scope signals; unresolved and unmatched cases are not proof of new projects. All 199 DEO lines are retained unchanged in HGAB; no differentiated needs weighting is visible in the amounts.",
+      "alternative": "Renaming, title wrapping, scope changes, occurrence aggregation and parser errors can prevent counterpart selection.",
+      "next": "Review NEP and HGAB source pages side by side, then reconcile project scope, office, location and amount.",
+      "caution": "No selected counterpart means a review candidate, not a confirmed insertion.",
+      "costExposurePesos": 170494419000,
+      "costExposureBasis": "All HGAB-only row allocations; 6,105-row cohort",
       "detailLinks": [
         {
-          "page": "rcs.html#rcs-statistical-evidence",
-          "label": "Uniform allocation and rainfall evidence"
-        },
-        {
-          "page": "rcs.html#rcs-stage-evidence",
-          "label": "All 199 NEP → HGAB allocation traces"
+          "page": "dpwh.html#hgab-coverage",
+          "label": "HGAB 3rd NEP-counterpart coverage"
         }
       ]
     },
     {
       "rank": 2,
-      "id": "insertions",
-      "title": "HGAB-only candidates after OO2 adjustment",
-      "lead": "5,491 domestic records remain after excluding 58 high-confidence OO2 matches",
-      "basis": "OO2-adjusted source and matcher reconciliation; review remains provisional",
-      "page": "dpwh-OO2-hgab.html#hgab-insertion",
-      "question": "Which remaining HGAB-only candidates have no NEP counterpart after the OO2 amendments are accounted for?",
-      "evidence": "The pre-OO2 screen had 5,549 domestic candidates. Excluding 58 unique HGAB lines with high-confidence OO2 amendment matches leaves 5,491, carrying ₱149.559B. Nine amendment rows remain under review and are not excluded from this count.",
-      "alternative": "OO2 title changes may refer to changed scope, and the workbook’s row totals do not reconcile; review candidates need source-level adjudication.",
-      "next": "Review the nine uncertain amendment-to-HGAB links against the source pages, scope and line amounts.",
-      "caution": "An OO2 match is a candidate correspondence, not proof of identical scope or formal NEP incorporation; HGAB-only remains a review classification, not a confirmed insertion.",
-      "detailLinks": [
-        {
-          "page": "dpwh-OO2-hgab.html#hgab-insertion",
-          "label": "OO2-adjusted domestic HGAB-only candidate table"
-        }
-      ]
-    },
-    {
-      "rank": 3,
-      "id": "mpb",
-      "title": "Multi-purpose buildings: a large share needs NEP counterpart review",
-      "lead": "2,835 potential insertion candidates · ₱38.747B",
-      "basis": "Parser- and matching-dependent program screen",
-      "page": "mpb.html#mpb-insertions",
-      "question": "Which MPB lines are genuinely new, and what documented facility needs and designs support them?",
-      "evidence": "The HGAB MPB PAP contains 5,765 lines carrying ₱83.707B. 620 counterpart cases remain separate from insertion candidates. The historical screen has 1006 comparison pairs covering 689 distinct NEP proposals.",
-      "alternative": "Renaming, combined occurrences and legitimate phased construction can explain unmatched or recurring titles. Similar amounts can reflect standard designs.",
-      "next": "Audit original NEP/HGAB pages; obtain building purpose, floor area, design, quantities, contract scope and completion records.",
-      "caution": "MPB overlaps the full DPWH insertion/repeat findings; do not add their amounts. Equal allocations are not equal construction unit prices.",
-      "detailLinks": [
-        {
-          "page": "mpb.html#mpb-insertions",
-          "label": "MPB insertion candidate table"
-        }
-      ]
-    },
-    {
-      "rank": 4,
-      "id": "repeats",
-      "title": "Recurring project titles: inspect overlapping work before alleging duplication",
-      "lead": "2263 of 2598 NEP comparison pairs clearly retained in HGAB",
-      "basis": "Scope-screened comparison candidates",
-      "page": "repeats.html#repeat-hgab-survival",
-      "question": "Are new appropriations paying for already-funded components or legitimate continuation?",
-      "evidence": "1370 of 1576 distinct NEP repeat-screen proposals have clear HGAB links. 26 proposals have explicit overlapping historical chainage. ₱51.293B is the unique NEP proposal allocation, not alleged loss.",
-      "alternative": "Multi-year implementation, rehabilitation and distinct components can share names and segments.",
-      "next": "Prioritize explicitly overlapping retained proposals and high amounts; compare contracts, quantities, tranche scopes and completion.",
-      "caution": "The 737 headline counts NEP–old GAA comparison pairs. Potential retention and missing counterparts remain separate.",
-      "detailLinks": [
-        {
-          "page": "repeats.html#repeat-hgab-survival",
-          "label": "Repeat-candidate HGAB retention evidence"
-        }
-      ]
-    },
-    {
-      "rank": 5,
-      "id": "prices",
-      "title": "Exact ₱5M road and flood allocations cluster in the same offices",
-      "lead": "35 overlapping offices vs 21.7 expected under independence",
-      "basis": "Exploratory statistical association",
-      "page": "repeats.html#dpwh-investigation-evidence",
-      "question": "Does standard design, office workload or coordinated allocation explain the co-occurrence?",
-      "evidence": "Office odds ratio 5.34; unadjusted exact p=5.07e-06. Region-controlled result is also unusual under its stated null.",
-      "alternative": "Common specifications, office workload and project mix can create clustering.",
-      "next": "Pre-specify work-type and workload controls; inspect quantities and comparable prior-year prices.",
-      "caution": "Threshold/category selection was post hoc. Association does not establish procurement splitting or intent.",
-      "detailLinks": [
-        {
-          "page": "repeats.html#dpwh-investigation-evidence",
-          "label": "Exact ₱5M clustering statistics"
-        }
-      ]
-    },
-    {
-      "rank": 6,
-      "id": "inspire",
-      "title": "INSPIRE: a large returning named appropriation needs a whole-project ledger",
-      "lead": "₱835.000M proposed in FY2027",
-      "basis": "Direct appropriation history; scope unresolved",
-      "page": "budget-innovations.html#innovation-investigation-evidence",
-      "question": "What is the total approved cost and which unfinished components explain the new appropriation?",
-      "evidence": "Named GAA lines exist in FY2023 and FY2025; FY2027 is not a first appearance.",
-      "alternative": "A legitimate phased project can require multiple appropriations.",
-      "next": "Obtain total project cost, phases, progress, obligations, disbursements and procurement records.",
-      "caution": "Appropriations are not actual spending; stage/year sums do not prove duplication.",
-      "detailLinks": [
-        {
-          "page": "budget-innovations.html#innovation-investigation-evidence",
-          "label": "INSPIRE appropriation history"
-        }
-      ]
-    },
-    {
-      "rank": 7,
       "id": "length-coverage",
       "title": "Length and chainage gaps limit budget scrutiny",
       "lead": "Roads: 48.64% · Bridges: 94.39% · FMR: 99.69% without usable extracted length",
@@ -132,6 +35,8 @@
       "alternative": "Lengths may be recorded in engineering schedules or continuation text not recovered by this extraction; incomplete metadata need not reflect deliberate omission.",
       "next": "Inspect original source pages and obtain funded-segment boundaries, complete chainage, project quantities and bridge spans; reconcile extraction gaps before alleging disclosure failures.",
       "caution": "Missing includes absent and unusable extracted evidence, not proof the original documents lack length. Coordinate distances do not establish construction length; mixed scopes are separate.",
+      "costExposurePesos": 158977972000,
+      "costExposureBasis": "Allocations with absent or unusable extracted length",
       "detailLinks": [
         {
           "page": "cost-matching.html#cost-coverage",
@@ -140,7 +45,91 @@
       ]
     },
     {
-      "rank": 8,
+      "rank": 3,
+      "id": "insertions",
+      "title": "HGAB-only candidates after OO2 adjustment",
+      "lead": "5,491 domestic records remain after excluding 58 high-confidence OO2 matches",
+      "basis": "OO2-adjusted source and matcher reconciliation; review remains provisional",
+      "page": "dpwh-OO2-hgab.html#hgab-insertion",
+      "question": "Which remaining HGAB-only candidates have no NEP counterpart after the OO2 amendments are accounted for?",
+      "evidence": "The pre-OO2 screen had 5,549 domestic candidates. Excluding 58 unique HGAB lines with high-confidence OO2 amendment matches leaves 5,491, carrying ₱149.559B. Nine amendment rows remain under review and are not excluded from this count.",
+      "alternative": "OO2 title changes may refer to changed scope, and the workbook’s row totals do not reconcile; review candidates need source-level adjudication.",
+      "next": "Review the nine uncertain amendment-to-HGAB links against the source pages, scope and line amounts.",
+      "caution": "An OO2 match is a candidate correspondence, not proof of identical scope or formal NEP incorporation; HGAB-only remains a review classification, not a confirmed insertion.",
+      "costExposurePesos": 149558895000,
+      "costExposureBasis": "OO2-adjusted domestic HGAB-only candidate allocations",
+      "detailLinks": [
+        {
+          "page": "dpwh-OO2-hgab.html#hgab-insertion",
+          "label": "OO2-adjusted domestic HGAB-only candidate table"
+        }
+      ]
+    },
+    {
+      "rank": 4,
+      "id": "hgab-no-listed-documents",
+      "title": "HGAB-only projects without a matched Senate supporting document",
+      "lead": "2,476 / 6,105 HGAB-only rows · 40.56%",
+      "basis": "Senate HGAB all-document scan; unique House-row title/code linkage",
+      "page": "dpwh.html#senate-supporting-document-coverage",
+      "question": "Which unmatched rows have files that need clearer title or file-code linkage?",
+      "evidence": "The expanded scan checks BP 202, POW, Development Council documents, geotagged-photo files, Certificates of Implementability and other PDFs for HGAB-only House rows.",
+      "alternative": "Image-only, damaged or ambiguously coded files can remain unmatched even when a document exists.",
+      "next": "Review per-project file counts and source documents, then resolve ambiguous or unreadable file associations.",
+      "caution": "A title/code match signals file presence, not verified contents; no match is not proof of absence.",
+      "costExposurePesos": 64663665000,
+      "costExposureBasis": "Allocations for HGAB-only rows without a matched supporting file",
+      "detailLinks": [
+        {
+          "page": "dpwh.html#senate-supporting-document-coverage",
+          "label": "Senate HGAB all-document coverage"
+        }
+      ]
+    },
+    {
+      "rank": 5,
+      "id": "repeats",
+      "title": "Recurring project titles: inspect overlapping work before alleging duplication",
+      "lead": "2263 of 2598 NEP comparison pairs clearly retained in HGAB",
+      "basis": "Scope-screened comparison candidates",
+      "page": "repeats.html#repeat-hgab-survival",
+      "question": "Are new appropriations paying for already-funded components or legitimate continuation?",
+      "evidence": "1370 of 1576 distinct NEP repeat-screen proposals have clear HGAB links. 26 proposals have explicit overlapping historical chainage. ₱51.293B is the unique NEP proposal allocation, not alleged loss.",
+      "alternative": "Multi-year implementation, rehabilitation and distinct components can share names and segments.",
+      "next": "Prioritize explicitly overlapping retained proposals and high amounts; compare contracts, quantities, tranche scopes and completion.",
+      "caution": "The 737 headline counts NEP–old GAA comparison pairs. Potential retention and missing counterparts remain separate.",
+      "costExposurePesos": 51293004750,
+      "costExposureBasis": "Unique current NEP proposal allocations in the repeat screen",
+      "detailLinks": [
+        {
+          "page": "repeats.html#repeat-hgab-survival",
+          "label": "Repeat-candidate HGAB retention evidence"
+        }
+      ]
+    },
+    {
+      "rank": 6,
+      "id": "mpb",
+      "title": "Multi-purpose buildings: a large share needs NEP counterpart review",
+      "lead": "2,835 potential insertion candidates · ₱38.747B",
+      "basis": "Parser- and matching-dependent program screen",
+      "page": "mpb.html#mpb-insertions",
+      "question": "Which MPB lines are genuinely new, and what documented facility needs and designs support them?",
+      "evidence": "The HGAB MPB PAP contains 5,765 lines carrying ₱83.707B. 620 counterpart cases remain separate from insertion candidates. The historical screen has 1006 comparison pairs covering 689 distinct NEP proposals.",
+      "alternative": "Renaming, combined occurrences and legitimate phased construction can explain unmatched or recurring titles. Similar amounts can reflect standard designs.",
+      "next": "Audit original NEP/HGAB pages; obtain building purpose, floor area, design, quantities, contract scope and completion records.",
+      "caution": "MPB overlaps the full DPWH insertion/repeat findings; do not add their amounts. Equal allocations are not equal construction unit prices.",
+      "costExposurePesos": 38746744000,
+      "costExposureBasis": "MPB insertion-candidate allocations",
+      "detailLinks": [
+        {
+          "page": "mpb.html#mpb-insertions",
+          "label": "MPB insertion candidate table"
+        }
+      ]
+    },
+    {
+      "rank": 7,
       "id": "cost-per-km",
       "title": "Allocation per stated meter: inspect scope before comparing rates",
       "lead": "189 road and 2 bridge high-rate candidates · FMR peers insufficient",
@@ -151,6 +140,8 @@
       "alternative": "Terrain, width, structures, approaches, rehabilitation scope and components outside the stated segment can explain large differences. Tiny printed ranges or parser errors can produce extreme ratios.",
       "next": "Verify station endpoints on original pages, then compare quantities, width, funded extent, designs and bill-of-quantity costs within the same work type. Investigate unusually short denominators before interpreting extreme ratios.",
       "caution": "These are appropriations per stated segment meter, not verified construction unit costs. Bridge chainage is not necessarily bridge span. No cross-category average, overpricing estimate or corruption probability is established. Inventory lanes are existing asset characteristics, not verified funded quantities; widening needs additional funded lanes. Overpasses, flyovers and viaducts use bridge peers.",
+      "costExposurePesos": 29317489000,
+      "costExposureBasis": "Allocation of high-rate screen candidates",
       "detailLinks": [
         {
           "page": "cost-per-km.html#cost-roads",
@@ -167,7 +158,53 @@
       ]
     },
     {
+      "rank": 8,
+      "id": "rcs",
+      "title": "RCS: identical budget packages across unequal rainfall proxies",
+      "lead": "199 offices × ₱4.2M = ₱835.800M",
+      "basis": "Direct allocation observation; rainfall need remains a proxy",
+      "page": "rcs.html#rcs-statistical-evidence",
+      "question": "What policy or engineering design justifies one identical budget unit per office?",
+      "evidence": "All district-office RCS lines have the same amount. Province/regional rainfall proxies differ by 2.59×. Alternative formulas move different numbers of budget units.",
+      "alternative": "Standard package costs or a minimum coverage policy may justify equal allocations. Rainfall alone does not measure demand.",
+      "next": "Obtain siting, design capacity, water demand, catchment area and existing RCS inventory.",
+      "caution": "DEO is not LEG; province rainfall is not a district observation. Returning FY2026 program.",
+      "costExposurePesos": 835800000,
+      "costExposureBasis": "199 equal RCS office allocations",
+      "detailLinks": [
+        {
+          "page": "rcs.html#rcs-statistical-evidence",
+          "label": "Uniform allocation and rainfall evidence"
+        },
+        {
+          "page": "rcs.html#rcs-stage-evidence",
+          "label": "All 199 NEP → HGAB allocation traces"
+        }
+      ]
+    },
+    {
       "rank": 9,
+      "id": "inspire",
+      "title": "INSPIRE: a large returning named appropriation needs a whole-project ledger",
+      "lead": "₱835.000M proposed in FY2027",
+      "basis": "Direct appropriation history; scope unresolved",
+      "page": "budget-innovations.html#innovation-investigation-evidence",
+      "question": "What is the total approved cost and which unfinished components explain the new appropriation?",
+      "evidence": "Named GAA lines exist in FY2023 and FY2025; FY2027 is not a first appearance.",
+      "alternative": "A legitimate phased project can require multiple appropriations.",
+      "next": "Obtain total project cost, phases, progress, obligations, disbursements and procurement records.",
+      "caution": "Appropriations are not actual spending; stage/year sums do not prove duplication.",
+      "costExposurePesos": 835000000,
+      "costExposureBasis": "FY2027 proposed allocation",
+      "detailLinks": [
+        {
+          "page": "budget-innovations.html#innovation-investigation-evidence",
+          "label": "INSPIRE appropriation history"
+        }
+      ]
+    },
+    {
+      "rank": 10,
       "id": "short-printed-ranges",
       "title": "Very short printed road ranges need engineering clarification",
       "lead": "3 checked road ranges imply less than 5 meters",
@@ -178,6 +215,8 @@
       "alternative": "A source-document typo, station convention, short component within a larger project, or broader funded scope can explain these values. A very short printed range does not establish the physical length actually funded.",
       "next": "Request corrected or certified station endpoints, funded-segment plans, engineering quantities and allocation scope; verify notation before interpreting extreme allocation-per-meter rates.",
       "caution": "This is a printed-range/denominator issue, not evidence that most road projects are short or overpriced. Sampled title agreement rules out a title-transcription mismatch for those examples, not source errors or engineering ambiguity. Bridge lengths require separate interpretation.",
+      "costExposurePesos": 390000000,
+      "costExposureBasis": "Allocation for source-checked short-range candidates",
       "detailLinks": [
         {
           "page": "cost-matching.html#short-segment-evidence",
@@ -186,40 +225,23 @@
       ]
     },
     {
-      "rank": 10,
-      "id": "hgab-no-nep-counterpart",
-      "title": "HGAB 3rd projects without a selected NEP counterpart",
-      "lead": "6,105 / 15,979 project rows · 38.2%",
-      "basis": "One-to-one stage matching screen; unmatched rows require source review",
-      "page": "dpwh.html#hgab-coverage",
-      "question": "Which HGAB 3rd projects are genuinely absent from NEP after title, scope and occurrence review?",
-      "evidence": "The current one-to-one comparison selected no NEP counterpart for these project rows. The comparison uses title and scope signals; unresolved and unmatched cases are not proof of new projects.",
-      "alternative": "Renaming, title wrapping, scope changes, occurrence aggregation and parser errors can prevent counterpart selection.",
-      "next": "Review NEP and HGAB source pages side by side, then reconcile project scope, office, location and amount.",
-      "caution": "No selected counterpart means a review candidate, not a confirmed insertion.",
-      "detailLinks": [
-        {
-          "page": "dpwh.html#hgab-coverage",
-          "label": "HGAB 3rd NEP-counterpart coverage"
-        }
-      ]
-    },
-    {
       "rank": 11,
-      "id": "hgab-no-listed-documents",
-      "title": "HGAB-only projects without a matched Senate supporting document",
-      "lead": "2,476 / 6,105 HGAB-only rows · 40.56%",
-      "basis": "Senate HGAB all-document scan; unique House-row title/code linkage",
-      "page": "dpwh.html#senate-supporting-document-coverage",
-      "question": "Which unmatched rows have files that need clearer title or file-code linkage?",
-      "evidence": "The expanded scan checks BP 202, POW, Development Council documents, geotagged-photo files, Certificates of Implementability and other PDFs for HGAB-only House rows.",
-      "alternative": "Image-only, damaged or ambiguously coded files can remain unmatched even when a document exists.",
-      "next": "Review per-project file counts and source documents, then resolve ambiguous or unreadable file associations.",
-      "caution": "A title/code match signals file presence, not verified contents; no match is not proof of absence.",
+      "id": "prices",
+      "title": "Exact ₱5M road and flood allocations cluster in the same offices",
+      "lead": "35 overlapping offices vs 21.7 expected under independence",
+      "basis": "Exploratory statistical association",
+      "page": "repeats.html#dpwh-investigation-evidence",
+      "question": "Does standard design, office workload or coordinated allocation explain the co-occurrence?",
+      "evidence": "Office odds ratio 5.34; unadjusted exact p=5.07e-06. Region-controlled result is also unusual under its stated null.",
+      "alternative": "Common specifications, office workload and project mix can create clustering.",
+      "next": "Pre-specify work-type and workload controls; inspect quantities and comparable prior-year prices.",
+      "caution": "Threshold/category selection was post hoc. Association does not establish procurement splitting or intent.",
+      "costExposurePesos": 350000000,
+      "costExposureBasis": "Minimum: one exact ₱5M road and one flood entry in each overlapping office",
       "detailLinks": [
         {
-          "page": "dpwh.html#senate-supporting-document-coverage",
-          "label": "Senate HGAB all-document coverage"
+          "page": "repeats.html#dpwh-investigation-evidence",
+          "label": "Exact ₱5M clustering statistics"
         }
       ]
     },
@@ -235,6 +257,8 @@
       "alternative": "The local snapshot may be incomplete, and an attachment may be indexed under another type or record.",
       "next": "Review each matched Proposal record and request missing categories from the implementing office.",
       "caution": "Uninspected projects are unknown, not counted as missing; the missing-type groups can overlap.",
+      "costExposurePesos": null,
+      "costExposureBasis": "No comparable allocation total in the current Proposal attachment-list extract",
       "detailLinks": [
         {
           "page": "dpwh-transparency.html#proposal-attachment-type-gaps",

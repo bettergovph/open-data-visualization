@@ -21,7 +21,7 @@
     const mode=options.mode||'full';
     if(pending.has(mode))return pending.get(mode);
     const task=(async()=>{
-      const response=await fetch('dpwh-in-depth-data.json?v='+encodeURIComponent(dataVersion),{cache:'no-cache'});
+      const response=await Promise.race([fetch('dpwh-in-depth-data.json?v='+encodeURIComponent(dataVersion),{cache:'no-cache'}),new Promise((_,reject)=>setTimeout(()=>reject(Error('DPWH data index request timed out')),20000))]);
       if(!response.ok)throw Error('DPWH data index unavailable ('+response.status+')');
       const index=await response.json();
       if(mode==='summary'){
