@@ -47,7 +47,7 @@
       const legacy=Array.isArray(index.projectShards)?{projects:index.projectShards}:null;
       if(!arrays&&!legacy)return index;
       const sources=arrays||legacy;
-      await Promise.all(Object.entries(sources).filter(([key])=>(mode!=='cost-per-unit'||key==='projects'||key==='summaryPeerGroups')&&!(mode==='full'&&document.getElementById('hgab-pow-rows')&&key==='hgabPowResults')).map(async([key,shards])=>{
+      await Promise.all(Object.entries(sources).filter(([key])=>mode==='cost-per-unit'?['projects','summaryPeerGroups','costUnitHgabResults'].includes(key):key!=='costUnitHgabResults'&&!(mode==='full'&&document.getElementById('hgab-pow-rows')&&key==='hgabPowResults')).map(async([key,shards])=>{
         const parts=await Promise.all(shards.map(async shard=>{
           const file=shard.path+'?v='+encodeURIComponent(shard.sha256||'');
           const result=await fetch(file,{cache:'force-cache'});
@@ -59,7 +59,7 @@
           return rows;
         }));
         index[key]=parts.flat();
-        const countField={projects:'projectCount',powPeers:'powPeerCount',summaryPeerGroups:'summaryPeerGroupCount',hgabPowResults:'hgabPowResultCount'}[key];
+        const countField={projects:'projectCount',powPeers:'powPeerCount',summaryPeerGroups:'summaryPeerGroupCount',hgabPowResults:'hgabPowResultCount',costUnitHgabResults:'costUnitHgabResultCount'}[key];
         if(countField&&Number.isFinite(index[countField])&&index[key].length!==index[countField])throw Error('DPWH '+key+' data is incomplete');
       }));
       return index;

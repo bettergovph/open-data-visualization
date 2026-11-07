@@ -1,5 +1,5 @@
 {
-  "generatedAtUtc": "2026-11-07T11:35:23.963035+00:00",
+  "generatedAtUtc": "2026-11-07T11:51:30.339254+00:00",
   "stage": "NEP FY2027 proposal documents",
   "summary": {
     "projectsWithBillRows": 7225,
@@ -46,17 +46,22 @@
     "e electrical works": "electrical works",
     "iii electrical works": "electrical works",
     "vol iii electrical works": "electrical works",
+    "part iii d electrical": "electrical works",
+    "part f electrical works": "electrical works",
     "earthworks": "earthworks",
     "earthwork": "earthworks",
     "earth work": "earthworks",
     "earth works": "earthworks",
     "c earthwork": "earthworks",
     "c earthworks": "earthworks",
+    "part iii a earthwork": "earthworks",
+    "part c earthworks": "earthworks",
     "mechanical works": "mechanical works",
     "mechanical": "mechanical works",
     "mechanical work": "mechanical works",
     "iii mechanical works": "mechanical works",
     "part mechanical": "mechanical works",
+    "part iii e mechanical": "mechanical works",
     "plumbing and sanitary works": "plumbing and sanitary works",
     "plumbing": "plumbing and sanitary works",
     "plumbing works": "plumbing and sanitary works",
@@ -80,6 +85,7 @@
     "facillties for the engineer": "facilities for the engineer",
     "afacilities for the engineer": "facilities for the engineer",
     "a facilities fot the engineer": "facilities for the engineer",
+    "part a facilities for the engineer": "facilities for the engineer",
     "other general requirements": "other general requirements",
     "other general requirement": "other general requirements",
     "other general requirements gad related activities": "other general requirements",
@@ -97,6 +103,7 @@
     "vol iii other general requirements": "other general requirements",
     "part other general requirements": "other general requirements",
     "other general reouirements": "other general requirements",
+    "part b other general requirements": "other general requirements",
     "fire protection works": "fire protection works",
     "fire protection": "fire protection works",
     "fire protection work": "fire protection works",
@@ -110,6 +117,7 @@
     "vol iii reinforced concrete": "reinforced concrete",
     "d reinforced concrete": "reinforced concrete",
     "plain and reinforced concrete": "reinforced concrete",
+    "part iii b plain and reinforce concrete": "reinforced concrete",
     "finishing and other civil works": "finishing and other civil works",
     "finishings and other civil works": "finishing and other civil works",
     "finishing other civil works": "finishing and other civil works",
@@ -148,6 +156,8 @@
     "parte finishing and other civil works": "finishing and other civil works",
     "finishing and other civdl works": "finishing and other civil works",
     "finshings and other civil works": "finishing and other civil works",
+    "part iii c finishing and other civil works": "finishing and other civil works",
+    "finishing and civil works": "finishing and other civil works",
     "subbase and base course": "subbase and base course",
     "sub base and base course": "subbase and base course",
     "subbase and base courses": "subbase and base course",
@@ -187,6 +197,8 @@
     "project billboard signboard": "project billboard signboard",
     "1 project billboard signboard": "project billboard signboard",
     "project billboard sign board": "project billboard signboard",
+    "billboard signboard": "project billboard signboard",
+    "billboard sign board": "project billboard signboard",
     "mobilization demobilization": "mobilization demobilization",
     "mobilization and demobilization": "mobilization demobilization",
     "structure excavation common soil": "structure excavation common soil",
@@ -194,12 +206,15 @@
     "subgrade preparation common material": "subgrade preparation common material",
     "painting works steel": "painting works steel",
     "painting works masonry concrete": "painting works masonry concrete",
+    "painting works concrete": "painting works masonry concrete",
     "structural steel trusses": "structural steel trusses",
     "structural steel purlins": "structural steel purlins",
     "metal structure accessories steel plates": "metal structure accessories steel plates",
     "metal structure accessories bolts and rods": "metal structure accessories bolts and rods",
     "metal structure accessories sagrods": "metal structure accessories sagrods",
     "metal structure accessories tumbuckle": "metal structure accessories tumbuckle",
+    "metal structure accessories turnbuckle": "metal structure accessories tumbuckle",
+    "metal structure accessories turn buckle": "metal structure accessories tumbuckle",
     "wires and wiring devices": "wires and wiring devices",
     "wires wiring devices": "wires and wiring devices",
     "33 wires and wiring devices": "wires and wiring devices",
@@ -242,8 +257,10 @@
     "and wring wires devices": "wires and wiring devices",
     "wiring wires devices 1101 33": "wires and wiring devices",
     "1101 33 wires wiring devices": "wires and wiring devices",
+    "wiring and wiring devices": "wires and wiring devices",
     "occupational safety and health program": "occupational safety and health program",
-    "occupational safety and health": "occupational safety and health program"
+    "occupational safety and health": "occupational safety and health program",
+    "occupational safety health program": "occupational safety and health program"
   },
   "powBillLabels": {
     "project billboard signboard": "Project Billboard / Signboard",
@@ -448,7 +465,7 @@
     "titleScanDocuments": 5508,
     "exactTitleMatchedFiles": 2476,
     "relaxedTitleMatchedFiles": 103,
-    "proposalLinkedFiles": 17,
+    "proposalLinkedFiles": 19,
     "exactTitleMatchedFilesInGapCohort": 2195,
     "ambiguousTitleMatchedFiles": 25,
     "titleMatchAssessedFiles": 5508,
@@ -68667,6 +68684,7 @@
   "powPeerCount": 1966,
   "summaryPeerGroupCount": 7,
   "hgabPowResultCount": 5413,
+  "costUnitHgabResultCount": 5003,
   "arrayShards": {
     "projects": [
       {
@@ -68708,14 +68726,22 @@
       {
         "path": "dpwh-in-depth-shards/hgabPowResults-001.json",
         "itemCount": 3973,
-        "sizeBytes": 41996748,
-        "sha256": "34bed3274b013a29c103bcf4f84926609caf9b8f52799225889ca466f065afe5"
+        "sizeBytes": 41996820,
+        "sha256": "4f5794194083371fb0ac82b59a71c8ad972a948c62636ef6d5481070b85136bf"
       },
       {
         "path": "dpwh-in-depth-shards/hgabPowResults-002.json",
         "itemCount": 1440,
         "sizeBytes": 27889149,
         "sha256": "0b5e049e47c967b189efed8971c3a578e7802dff9abb13ab73b0bdbdeffdb264"
+      }
+    ],
+    "costUnitHgabResults": [
+      {
+        "path": "dpwh-in-depth-shards/costUnitHgabResults-001.json",
+        "itemCount": 5003,
+        "sizeBytes": 23208793,
+        "sha256": "f3238af78b9e2cf22f4e54b822130ed9019532606e3b00f569c59f5f2fcde84b"
       }
     ]
   },
