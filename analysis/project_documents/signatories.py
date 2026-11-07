@@ -21,10 +21,11 @@ def lines(words):
 
 def qualified_role(text,kind):
     if kind=='pow':
-        # Keep DE and ADE separate; institutional headings are not names.
-        return bool(re.fullmatch(r'(?:(?:OIC|Acting|Officer[ -]in[ -]Charge)[, .-]*)?(?:Assistant )?District Engineer(?:\s+.*)?[ .]*',normal(text),re.I))
+        # Keep DE and ADE separate while also accepting other explicit engineer
+        # signatory titles. The full-line check avoids matching body-text mentions.
+        return bool(re.fullmatch(r'(?:(?:OIC|Acting|Officer[ -]in[ -]Charge)[, .-]*)?(?:(?:Assistant|District|Project|Resident|Materials|Supervising|Design|Construction|Field|Site|Quality Control|Quality Assurance)\s+)*Engineer(?:\s+.*)?[ .]*',normal(text),re.I))
     if kind in ('rdc','pdc','ldc','cdc','supporting'):
-        role = re.search(r'\bassistant\s+district\s+engineer\b|\bdistrict\s+engineer\b|\bgovernor\b|\bmayor\b|\bchair(?:person|man|woman)\b',text,re.I)
+        role = re.search(r'\bassistant\s+district\s+engineer\b|\bdistrict\s+engineer\b|\b(?:project|resident|materials|supervising|design|construction|field|site)?\s*engineer\b|\bgovernor\b|\bmayor\b|\bchair(?:person|man|woman)\b',text,re.I)
         return bool(role) and not bool(re.search(r'vice|deputy|assistant governor|assistant mayor|co-chair',text,re.I))
     return False
 
@@ -32,6 +33,7 @@ def role_kind(text,kind):
     text=normal(text)
     if re.search(r'\bassistant\s+district\s+engineer\b',text,re.I):return 'assistant_district_engineer'
     if re.search(r'\bdistrict\s+engineer\b',text,re.I):return 'district_engineer'
+    if re.search(r'\bengineer\b',text,re.I):return 'engineer'
     if re.search(r'\bgovernor\b',text,re.I):return 'governor'
     if re.search(r'\bmayor\b',text,re.I):return 'mayor'
     return {'rdc':'rdc_chair','pdc':'pdc_chair','ldc':'ldc_chair'}.get(kind,'council_chair')
@@ -57,7 +59,7 @@ def _officials_by_name():
              province, municipality_city, year
       FROM read_parquet('{ODV_ROSTER.as_posix()}')
       WHERE regexp_matches(upper(coalesce(position,'')),
-        '(^| )(DISTRICT ENGINEER|ASSISTANT DISTRICT ENGINEER|GOVERNOR|MAYOR)( |$)')
+        '(^| )(DISTRICT ENGINEER|ASSISTANT DISTRICT ENGINEER|ENGINEER|GOVERNOR|MAYOR)( |$)')
     """
     if rows is None:
         try:
@@ -84,6 +86,7 @@ def designation_matches(name,kind,role):
         rows=[r for r in rows if ('ASSISTANT DISTRICT ENGINEER' in (r.get('position') or '').upper()) == (role=='assistant_district_engineer') and 'DISTRICT ENGINEER' in (r.get('position') or '').upper()]
     elif role=='governor':rows=[r for r in rows if re.search(r'\bGOVERNOR\b',(r.get('position') or '').upper()) and not re.search(r'\bVICE\b',(r.get('position') or '').upper())]
     elif role=='mayor':rows=[r for r in rows if re.search(r'\bMAYOR\b',(r.get('position') or '').upper()) and not re.search(r'\bVICE\b',(r.get('position') or '').upper())]
+    elif role=='engineer':rows=[r for r in rows if re.search(r'\bENGINEER\b',(r.get('position') or '').upper())]
     grouped={}
     for r in rows:
         item={k:r.get(k) for k in ('position','province','municipality_city','organization')}

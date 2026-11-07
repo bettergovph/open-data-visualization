@@ -1,5 +1,5 @@
 {
-  "generatedAtUtc": "2026-11-07T12:59:58.448556+00:00",
+  "generatedAtUtc": "2026-11-07T13:07:03.164353+00:00",
   "stage": "NEP FY2027 proposal documents",
   "summary": {
     "projectsWithBillRows": 7225,
@@ -366,75 +366,76 @@
   },
   "senateSupportingDocumentCoverage": {
     "denominatorProjectRows": 6105,
-    "projectsWithAtLeastOneMatchedDocument": 3639,
-    "projectsWithAtLeastOneMatchedDocumentPct": 59.61,
-    "projectRowsWithoutMatchedDocument": 2466,
-    "matchedFileRecords": 18555,
+    "projectsWithAtLeastOneMatchedDocument": 3776,
+    "projectsWithAtLeastOneMatchedDocumentPct": 61.85,
+    "projectRowsWithoutMatchedDocument": 2329,
+    "matchedFileRecords": 18855,
     "byType": {
       "POW": {
-        "filesScanned": 6271,
-        "matchedProjectRows": 3468,
-        "matchedFileRecords": 3593,
-        "exactTitleMatchedFiles": 575,
-        "relaxedTitleMatchedFiles": 125,
-        "uniqueCodeSiblingFileMatches": 2893,
+        "filesScanned": 6688,
+        "matchedProjectRows": 3605,
+        "matchedFileRecords": 3845,
+        "exactTitleMatchedFiles": 793,
+        "relaxedTitleMatchedFiles": 141,
+        "uniqueCodeSiblingFileMatches": 2911,
         "scanErrors": 3,
-        "filesWithoutNativeText": 1295
+        "filesWithoutNativeText": 1343
       },
       "BP 202": {
         "filesScanned": 5588,
-        "matchedProjectRows": 3467,
-        "matchedFileRecords": 3623,
-        "exactTitleMatchedFiles": 2913,
+        "matchedProjectRows": 3482,
+        "matchedFileRecords": 3638,
+        "exactTitleMatchedFiles": 2922,
         "relaxedTitleMatchedFiles": 0,
-        "uniqueCodeSiblingFileMatches": 710,
+        "uniqueCodeSiblingFileMatches": 716,
         "scanErrors": 0,
         "filesWithoutNativeText": 787
       },
       "Development Council": {
-        "filesScanned": 2841,
+        "filesScanned": 2843,
         "matchedProjectRows": 1536,
         "matchedFileRecords": 1680,
         "exactTitleMatchedFiles": 9,
         "relaxedTitleMatchedFiles": 0,
         "uniqueCodeSiblingFileMatches": 1671,
         "scanErrors": 0,
-        "filesWithoutNativeText": 2275
+        "filesWithoutNativeText": 2277
       },
       "Geotagged photos": {
-        "filesScanned": 5108,
-        "matchedProjectRows": 2998,
-        "matchedFileRecords": 3181,
-        "exactTitleMatchedFiles": 1861,
+        "filesScanned": 5129,
+        "matchedProjectRows": 3013,
+        "matchedFileRecords": 3196,
+        "exactTitleMatchedFiles": 1875,
         "relaxedTitleMatchedFiles": 190,
-        "uniqueCodeSiblingFileMatches": 1130,
+        "uniqueCodeSiblingFileMatches": 1131,
         "scanErrors": 1,
-        "filesWithoutNativeText": 773
+        "filesWithoutNativeText": 775
       },
       "Certificate of Implementability": {
-        "filesScanned": 5883,
-        "matchedProjectRows": 3444,
-        "matchedFileRecords": 3618,
+        "filesScanned": 5904,
+        "matchedProjectRows": 3460,
+        "matchedFileRecords": 3634,
         "exactTitleMatchedFiles": 1077,
         "relaxedTitleMatchedFiles": 0,
-        "uniqueCodeSiblingFileMatches": 2541,
+        "uniqueCodeSiblingFileMatches": 2557,
         "scanErrors": 0,
-        "filesWithoutNativeText": 1213
+        "filesWithoutNativeText": 1217
       },
       "Other": {
-        "filesScanned": 4501,
-        "matchedProjectRows": 2033,
-        "matchedFileRecords": 2860,
+        "filesScanned": 4503,
+        "matchedProjectRows": 2034,
+        "matchedFileRecords": 2862,
         "exactTitleMatchedFiles": 607,
         "relaxedTitleMatchedFiles": 19,
-        "uniqueCodeSiblingFileMatches": 2234,
+        "uniqueCodeSiblingFileMatches": 2236,
         "scanErrors": 0,
         "filesWithoutNativeText": 2491
       }
     },
     "signatoryCandidateCounts": {
-      "assistant_district_engineer": 2790,
-      "district_engineer": 3451,
+      "assistant_district_engineer": 2829,
+      "district_engineer": 3716,
+      "engineer": 2415,
       "rdc_chair": 68,
       "governor": 100,
       "pdc_chair": 90,
@@ -443,8 +444,9 @@
     },
     "signatoryCandidatesByDocumentType": {
       "POW": {
-        "assistant_district_engineer": 2790,
-        "district_engineer": 3451
+        "assistant_district_engineer": 2829,
+        "district_engineer": 3716,
+        "engineer": 2415
       },
       "Development Council": {
         "rdc_chair": 68,
@@ -458,10 +460,10 @@
     "matchingMethod": "Native text from the first PDF page. Exact normalized full-title matches and conservative relaxed title candidates are counted. Other files inherit a match only when they share a five-digit HGAB file code with a title-matched sibling and that code resolves to one House row. Image-only documents without extracted text and without a matched sibling remain unassigned."
   },
   "hgabPowSummary": {
-    "parsedDocuments": 5690,
-    "documentsWithBillRows": 4480,
-    "billRows": 142012,
-    "printedCategories": 23884,
+    "parsedDocuments": 5708,
+    "documentsWithBillRows": 4498,
+    "billRows": 142926,
+    "printedCategories": 23908,
     "titleScanDocuments": 5508,
     "exactTitleMatchedFiles": 2476,
     "relaxedTitleMatchedFiles": 103,
@@ -68683,8 +68685,8 @@
   "projectCount": 11034,
   "powPeerCount": 1966,
   "summaryPeerGroupCount": 7,
-  "hgabPowResultCount": 5690,
-  "costUnitHgabResultCount": 5254,
+  "hgabPowResultCount": 5708,
+  "costUnitHgabResultCount": 5272,
   "arrayShards": {
     "projects": [
       {
@@ -68731,17 +68733,17 @@
       },
       {
         "path": "dpwh-in-depth-shards/hgabPowResults-002.json",
-        "itemCount": 1543,
-        "sizeBytes": 29988420,
-        "sha256": "cc6cd575dc624fc3ddbb2ff4cc5ae47831bc61cda2cb11e6d1ad6523b54e9c26"
+        "itemCount": 1561,
+        "sizeBytes": 30398143,
+        "sha256": "85b061e7c025e9b17790619ea5a57cdac1c12b48f5a6f59c5e5ff6932bb5b776"
       }
     ],
     "costUnitHgabResults": [
       {
         "path": "dpwh-in-depth-shards/costUnitHgabResults-001.json",
-        "itemCount": 5254,
-        "sizeBytes": 23907124,
-        "sha256": "3aa7f064b79f1c5c185af40ee0f5ead8954f4baff36ba0950982a4424f092913"
+        "itemCount": 5272,
+        "sizeBytes": 24042334,
+        "sha256": "38f83f941a6f58824c0a2082a7e2a61db0d7b63c615b382cefe985fc59ad48a2"
       }
     ]
   },
