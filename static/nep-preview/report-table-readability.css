@@ -24,6 +24,7 @@
 .report-table-pagination button:disabled{opacity:.45;cursor:default}
 .report-table-pagination button:not(:disabled):hover{background:#EAF0FF}
 .report-table-pagination button:focus-visible,.report-table-pagination select:focus-visible{outline:3px solid #0038A8;outline-offset:2px}
+.report-table-pagination-top{margin-bottom:4px}.report-table-pagination-bottom{margin-top:4px}.report-table-export-json{margin-left:auto!important;padding:8px 12px!important;border:1px solid #0038A8!important;border-radius:7px!important;background:#EAF0FF!important;color:#0038A8!important;font:600 13px/1.3 system-ui,sans-serif!important;cursor:pointer}.report-table-export-json:hover{background:#DBEAFE!important}.report-table-scroll>.report-table-export-json{display:block;margin:10px 0 10px auto!important}
 @media print{.report-table-pagination{display:none!important}.report-table-scroll tr.report-page-hidden{display:table-row!important}}
 
 .tablewrap:has(>.report-table-scroll),.table-wrap:has(>.report-table-scroll),.table-scroll:has(>.report-table-scroll),.table-container:has(>.report-table-scroll){max-height:none!important;overflow:visible!important;min-width:0!important;max-width:100%!important}
