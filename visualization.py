@@ -499,6 +499,16 @@ CONNECTIVITY_MANUAL_GREENS_FILE = Path(".connectivity-manual-greens.json")
 CONNECTIVITY_MANUAL_GREEN_REASONS = {
     "near-produce", "closes-loop", "extends-road", "road-segment", "connects-road-segments", "near-school", "near-health-center", "near-hospital",
 }
+CONNECTIVITY_MANUAL_RED_REASONS = {
+    "sizeable-private-property-connection",
+    "section2-visitor-venue",
+    "section2-subdivision-village",
+    "section2-large-residential-property",
+    "section2-restricted-access-property",
+    "section2-private-property-cue",
+    "section2-coordinate-quality",
+    "baywalk-shoreline-review",
+}
 
 
 def _require_connectivity_annotation_access(hash_value: str) -> None:
@@ -551,6 +561,11 @@ async def save_connectivity_annotations(request: Request, hash: str = Query(defa
         raise HTTPException(status_code=400, detail="greenReasons must be a list")
     green_reasons = sorted({reason for reason in raw_reasons
                             if isinstance(reason, str) and reason in CONNECTIVITY_MANUAL_GREEN_REASONS})
+    raw_red_reasons = body.get("redReasons", [])
+    if not isinstance(raw_red_reasons, list):
+        raise HTTPException(status_code=400, detail="redReasons must be a list")
+    red_reasons = sorted({reason for reason in raw_red_reasons
+                          if isinstance(reason, str) and reason in CONNECTIVITY_MANUAL_RED_REASONS})
     green_note, red_reason = body.get("greenNote", ""), body.get("redReason", "")
     if not isinstance(green_note, str) or not isinstance(red_reason, str):
         raise HTTPException(status_code=400, detail="Manual reasons must be text")
@@ -561,6 +576,7 @@ async def save_connectivity_annotations(request: Request, hash: str = Query(defa
         "greenReasons": green_reasons,
         "reasons": green_reasons,
         "greenNote": green_note.strip()[:2000],
+        "redReasons": red_reasons,
         "redReason": red_reason.strip()[:2000],
     }
     # Write only to the one ignored annotation file. Preserve its existing mode.
