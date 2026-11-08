@@ -27,7 +27,7 @@ function mirrorPager(table,wrap,bottom){
  const sync=()=>clones.forEach((clone,index)=>{const original=originals[index];if(!original)return;clone.disabled=Boolean(original.disabled);if('value'in clone)clone.value=original.value;if(clone.tagName==='BUTTON'||clone.tagName==='A')clone.textContent=original.textContent});
  clones.forEach((clone,index)=>{const original=originals[index];if(!original)return;if(clone.tagName==='SELECT'||clone.tagName==='INPUT')clone.addEventListener('change',()=>{original.value=clone.value;original.dispatchEvent(new Event('change',{bubbles:true}))});else clone.addEventListener('click',event=>{event.preventDefault();original.click()})});
  const observer=new MutationObserver(sync);observer.observe(bottom,{subtree:true,childList:true,attributes:true,characterData:true});bottom.addEventListener('click',()=>requestAnimationFrame(sync));sync();
- addJsonExport(top,table);addJsonExport(bottom,table);
+ addJsonExport(top,table);
 }
 const sharedScript=document.currentScript?.src||new URL('report-table-readability.js',location.href).href;
 let evidenceLoader;
@@ -90,7 +90,7 @@ function paginate(table,wrap){
   const top=makeNav('top'),bottom=makeNav('bottom');wrap.before(top.nav);wrap.after(bottom.nav);
   state={page:0,size:10,navs:[top,bottom]};pagination.set(table,state);
   for(const nav of state.navs){nav.previous.onclick=()=>{state.page--;scan()};nav.following.onclick=()=>{state.page++;scan()};nav.select.onchange=()=>{state.size=Number(nav.select.value);state.page=0;scan()}}
-  addJsonExport(top.nav,table);addJsonExport(bottom.nav,table);
+  addJsonExport(top.nav,table);
  }
  const pages=Math.max(1,Math.ceil(rows.length/state.size));state.page=Math.max(0,Math.min(state.page,pages-1));
  rows.forEach((row,i)=>row.classList.toggle('report-page-hidden',i<state.page*state.size||i>=(state.page+1)*state.size));
