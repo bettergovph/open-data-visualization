@@ -2,7 +2,7 @@
 
 use actix_files as fs;
 use actix_cors::Cors;
-use actix_web::{web, App, Error as ActixError, HttpRequest, HttpResponse, HttpServer};
+use actix_web::{guard, web, App, Error as ActixError, HttpRequest, HttpResponse, HttpServer};
 use tera::{Tera, Context};
 
 mod utils;
@@ -27,7 +27,29 @@ async fn favicon() -> Result<fs::NamedFile, ActixError> {
 async fn robots() -> Result<fs::NamedFile, ActixError> {
     fs::NamedFile::open("static/robots.txt").map_err(|e| actix_web::error::ErrorNotFound(e))
 }
+async fn research_other_pages_redirect(req: HttpRequest) -> HttpResponse {
+    let target = format!("https://visualizations.bettergov.ph{}", req.uri());
+    HttpResponse::Found()
+        .append_header(("Location", target))
+        .finish()
+}
+async fn visualizations_nep_preview_redirect(req: HttpRequest) -> HttpResponse {
+    let target = format!("https://research.bettergov.ph{}", req.uri());
+    HttpResponse::Found()
+        .append_header(("Location", target))
+        .finish()
+}
+async fn research_preview_home() -> HttpResponse {
+    HttpResponse::Found()
+        .append_header(("Location", "https://research.bettergov.ph/static/nep-preview/"))
+        .finish()
+}
 async fn home(req: HttpRequest) -> Result<HttpResponse, ActixError> {
+    if is_research_host(&req) {
+        return Ok(HttpResponse::Found()
+            .append_header(("Location", "https://research.bettergov.ph/static/nep-preview/"))
+            .finish());
+    }
     let tera = Tera::new("templates/**/*").map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
     let mut context = Context::new();
     
@@ -804,8 +826,26 @@ async fn main() -> std::io::Result<()> {
             .allow_any_header();
 
         App::new()
+            .service(
+                web::scope("")
+                    .guard(guard::Host("research.bettergov.ph"))
+                    .service(web::resource("/").to(research_preview_home))
+                    .service(web::resource("/static/nep-preview/ignorant.html").to(ignorant_entry))
+                    .service(web::resource("/static/nep-preview/budget-trivia.html").to(budget_trivia_entry))
+                    .service(web::resource("/static/nep-preview/connectivity.html").to(connectivity_entry))
+                    .service(web::resource("/static/nep-preview/index.html").to(nep_preview_index_entry))
+                    .service(
+                        fs::Files::new("/static/nep-preview", "./static/nep-preview/")
+                            .index_file("summary.html")
+                            .redirect_to_slash_directory(),
+                    )
+                    .default_service(web::to(research_other_pages_redirect)),
+            )
             .configure(project_documents::configure)
             .wrap(cors)
+            .service(web::resource("/static/nep-preview").guard(guard::Host("visualizations.bettergov.ph")).to(visualizations_nep_preview_redirect))
+            .service(web::resource("/static/nep-preview/").guard(guard::Host("visualizations.bettergov.ph")).to(visualizations_nep_preview_redirect))
+            .service(web::resource("/static/nep-preview/{tail:.*}").guard(guard::Host("visualizations.bettergov.ph")).to(visualizations_nep_preview_redirect))
             .service(web::resource("/static/nep-preview/ignorant.html").to(ignorant_entry))
             .service(web::resource("/static/nep-preview/budget-trivia.html").to(budget_trivia_entry))
             .service(web::resource("/static/nep-preview/connectivity.html").to(connectivity_entry))

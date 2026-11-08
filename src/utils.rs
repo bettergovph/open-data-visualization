@@ -4,15 +4,21 @@ use std::collections::HashMap;
 
 // Function: get_site_branding
 pub fn get_site_branding(req: &actix_web::HttpRequest) -> (String, String) {
-    let host = req.headers().get("host")
-        .and_then(|h| h.to_str().ok())
-        .unwrap_or("visualizations.bettergov.ph");
-
-    if host.contains("research.bettergov.ph") {
+    if is_research_host(req) {
         ("BetterGovPH Research".to_string(), "https://research.bettergov.ph".to_string())
     } else {
         ("BetterGovPH Data Visualizations".to_string(), "https://visualizations.bettergov.ph".to_string())
     }
+}
+
+pub fn is_research_host(req: &actix_web::HttpRequest) -> bool {
+    req.headers().get("host")
+        .and_then(|h| h.to_str().ok())
+        .unwrap_or("")
+        .split(':')
+        .next()
+        .map(|host| host.eq_ignore_ascii_case("research.bettergov.ph"))
+        .unwrap_or(false)
 }
 
 // Function: load_frontend_env
