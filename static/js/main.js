@@ -183,7 +183,6 @@ async function checkAuthStatus() {
 
     console.log('🔍 main.js: Checking authentication status...');
     console.log('🔍 main.js: Current URL:', window.location.href);
-    console.log('🔍 main.js: Cookies present:', document.cookie ? 'Yes' : 'No');
 
     try {
         const response = await fetch('/api/auth/me-cookie', {
@@ -442,10 +441,8 @@ function ensureLogoutVisibility() {
 const logoutSpan = document.getElementById('logout');
 if (logoutSpan) {
     logoutSpan.addEventListener('click', function() {
-        // Get the current token from localStorage or cookies
-        const currentToken = localStorage.getItem('auth_token') || 
-                           (document.cookie.split('; ').find(row => row.startsWith('auth_token=')) || '').split('=')[1] ||
-                           (document.cookie.split('; ').find(row => row.startsWith('auth_token_fallback=')) || '').split('=')[1];
+        // Get the current token from localStorage
+        const currentToken = localStorage.getItem('auth_token') || '';
         
         // Set a flag to prevent auth checks during logout
         window.isLoggingOut = true;
@@ -664,4 +661,4 @@ style.textContent = `
         animation: error-shake 0.5s ease-in-out;
     }
 `;
-document.head.appendChild(style); 
+document.head.appendChild(style);

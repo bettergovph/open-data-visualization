@@ -86,10 +86,10 @@
   actions.className = 'dcs-actions';
   const note = document.createElement('span');
   note.className = 'dcs-note';
-  note.textContent = 'Preliminary research · open to correction';
+  note.textContent = 'No need to accept any cookies—we have none.';
   const button = document.createElement('button');
   button.type = 'button';
-  button.textContent = 'Accept all';
+  button.textContent = 'Accept none';
   button.addEventListener('click', () => banner.remove());
   actions.append(note, button);
   body.append(fact, fullDetails, punchline, actions);

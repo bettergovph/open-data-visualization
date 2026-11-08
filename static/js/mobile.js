@@ -597,11 +597,8 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // console.log('🔍 [JS] DEBUG: Mobile logout handler triggered');
             
-            // Get the current token from localStorage or cookies
-            const currentToken = localStorage.getItem('auth_token') || 
-                               (document.cookie.split('; ').find(row => row.startsWith('auth_token=')) || '').split('=')[1] ||
-                               (document.cookie.split('; ').find(row => row.startsWith('auth_basic_email=')) || '').split('=')[1] ||
-                               (document.cookie.split('; ').find(row => row.startsWith('auth_token_fallback=')) || '').split('=')[1];
+            // Get the current token from localStorage
+            const currentToken = localStorage.getItem('auth_token') || '';
             
             // console.log('🔍 [JS] DEBUG: Current token found:', !!currentToken);
             
@@ -809,7 +806,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     initializeMobileBudget();
     // console.log('🔍 Mobile: initializeMobileBudget call completed');
-}); 
+});
 
 // Mobile Budget Functions
 let mobileBudgetData = [];
@@ -1314,4 +1311,4 @@ function formatNumber(num) {
 // Cleanup on page unload
 window.addEventListener('beforeunload', function() {
     mobileAuthSessionManager.destroy();
-}); 
+});
