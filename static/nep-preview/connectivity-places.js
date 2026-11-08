@@ -17,12 +17,17 @@
   const pointSegmentDistance=(p,a,b)=>{const dx=b[0]-a[0],dy=b[1]-a[1],den=dx*dx+dy*dy,t=den?Math.max(0,Math.min(1,((p[0]-a[0])*dx+(p[1]-a[1])*dy)/den)):0;return Math.hypot(p[0]-a[0]-t*dx,p[1]-a[1]-t*dy)};
   const googleRouteLink=r=>{const check=routeCoordinateGap(r);if(!check)return '';if(check.distance>20000)return `<strong style="display:inline-block;padding:4px 7px;color:#8f1515;background:#fee2e2;border:1px solid #dc2626;border-radius:4px" title="Source endpoint coordinates are implausibly far apart for this FMR record; verify them before routing">⚠ RED FLAG: source coordinates about ${fmt(check.distance/1000)} km apart; spatial analysis suppressed</strong>`;const c=check.coordinates,url='https://www.google.com/maps/dir/?api=1&origin='+encodeURIComponent(c[0]+','+c[1])+'&destination='+encodeURIComponent(c[2]+','+c[3])+'&travelmode=driving';return `<a href="${url}" target="_blank" rel="noopener noreferrer" title="Google Maps suggested driving route and distance between endpoints; not the project alignment or straight-line measurement">Route + distance ↗</a>`};
   const DATA_VERSION='20261106-venues18-properties9-routecheck5';
-  const load=async name=>{const url=new URL(name,location.href);url.searchParams.set('v',DATA_VERSION);const r=await fetch(url);if(!r.ok)throw Error(`${name}: HTTP ${r.status}`);return r.json()};
+  const requests=new Map();
+  const load=name=>{const url=new URL(name,location.href);url.searchParams.set('v',DATA_VERSION);const key=url.href;if(!requests.has(key))requests.set(key,fetch(url).then(r=>{if(!r.ok)throw Error(`${name}: HTTP ${r.status}`);return r.json()}));return requests.get(key)};
+  const loadRows=async name=>{const manifest=await load(name);if(!Array.isArray(manifest.shards))return manifest;const chunks=await Promise.all(manifest.shards.map(shard=>load(shard.file)));return {...manifest,rows:chunks.flatMap(chunk=>chunk.rows||[])}};
+  let publicServicesPromise;
+  const loadPublicServices=()=>publicServicesPromise||(publicServicesPromise=loadRows('connectivity-public-services-data.json'));
   async function routePlaces(file,prefix,property=false){
     if(!$(prefix+'-summary'))return;
     try{
+      await new Promise(resolve=>{const target=$(prefix+'-summary');if(!('IntersectionObserver'in window)||!target){resolve();return}const observer=new IntersectionObserver(entries=>{if(entries.some(entry=>entry.isIntersecting)){observer.disconnect();resolve()}},{rootMargin:'700px'});observer.observe(target)});
       const [data,screenData,venueData,serviceData]=await Promise.all([
-        load(file),load('connectivity-data.json'),property?load('connectivity-remote-fmr-venues.json'):Promise.resolve(null),load('connectivity-public-services-data.json')
+        load(file),load('connectivity-data.json'),property?load('connectivity-remote-fmr-venues.json'):Promise.resolve(null),loadPublicServices()
       ]);
       const screenById=new Map((screenData.projects||[]).map(r=>[String(r.id),r]));
       const venueCounts=new Map();
