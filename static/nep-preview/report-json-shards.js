@@ -34,6 +34,8 @@
     const originalFetch=window.fetch.bind(window);
     window.fetch=(input,init)=>{
       let url;try{url=new URL(typeof input==='string'?input:input.url,document.baseURI)}catch(_){return originalFetch(input,init)}
+      const method=String(init?.method||(typeof input!=='string'&&input.method)||'GET').toUpperCase();
+      if(method!=='GET')return originalFetch(input,init);
       const name=url.pathname.split('/').pop();
       if(!shardedAssets.has(name))return originalFetch(input,init);
       const indexUrl=new URL(name.replace(/\.json$/,'-index.json'),url);

@@ -20,6 +20,13 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "static" / "nep-preview"
+NEP_ROOT = ROOT.parent / "nep"
+if (NEP_ROOT / "report_json_shards.py").is_file():
+    import sys
+    sys.path.insert(0, str(NEP_ROOT))
+    from report_json_shards import write_sharded_json
+else:
+    write_sharded_json = None
 ROSTER_PATH = ROOT / "static" / "data" / "20th_congress_representatives.json"
 DISTRICTS_PATH = ROOT / "static" / "data" / "districts.json"
 
@@ -268,7 +275,11 @@ def main() -> None:
                     row["congressional_representatives"] = names
                     changed = True
         if args.write and changed:
+            if filename in {"dpwh-data.json", "dpwh-hgab-comparison.json"} and write_sharded_json is None:
+                raise RuntimeError("Sharded JSON publisher is unavailable; refusing to leave page indexes stale")
             path.write_text(json.dumps(document, ensure_ascii=False, separators=(",", ":")) + "\n")
+            if filename in {"dpwh-data.json", "dpwh-hgab-comparison.json"}:
+                write_sharded_json(path, document)
 
     mode = "wrote" if args.write else "would add"
     print(f"Second-pass representative matches ({mode}):")

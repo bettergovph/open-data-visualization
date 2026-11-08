@@ -41,5 +41,6 @@
   next.addEventListener('click',()=>{page++;render()});
   const source=section?.dataset.hgabCoverageSource;
   if(!source){body.innerHTML='<tr><td colspan="7">Coverage source is not configured.</td></tr>';count.textContent='Coverage unavailable';return;}
-  fetch(source).then(r=>{if(!r.ok)throw Error('Coverage export unavailable ('+r.status+')');return r.json()}).then(d=>{rows=Array.isArray(d.projects)?d.projects:[];render()}).catch(e=>{body.innerHTML='<tr><td colspan="7">Could not load the document coverage export. '+esc(e.message)+'</td></tr>';count.textContent='Coverage unavailable';console.error(e)});
+  const indexSource=source.replace(/\.json(?:\?.*)?$/,'-index.json');
+  (window.loadReportShardedJson?window.loadReportShardedJson(indexSource):fetch(source).then(r=>{if(!r.ok)throw Error('Coverage export unavailable ('+r.status+')');return r.json()})).then(d=>{rows=Array.isArray(d.projects)?d.projects:[];render()}).catch(e=>{body.innerHTML='<tr><td colspan="7">Could not load the document coverage export. '+esc(e.message)+'</td></tr>';count.textContent='Coverage unavailable';console.error(e)});
 })();
