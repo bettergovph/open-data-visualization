@@ -9,7 +9,7 @@ BetterGovPH Open Data Visualizations is an independent data visualization platfo
 The application consists of two services:
 
 1. **visualization.service** - Rust ActixWeb frontend (port 8888)
-2. **visualization_api.service** - Python FastAPI backend (port 8000)
+2. **visualization_api.service** - Python FastAPI backend (172.30.147.217:8001)
 
 ### Installation
 
@@ -325,4 +325,4 @@ Successfully installed alabaster-0.7.16 arrow-1.3.0 babel-2.17.0 bibtexparser-1.
 ## Ports Used
 
 - **Frontend**: 8889 (Rust/ActixWeb)
-- **Backend**: 8000 (Python/FastAPI)
+- **Backend**: 172.30.147.217:8001 (Python/FastAPI)

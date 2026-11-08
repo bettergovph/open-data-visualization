@@ -47,7 +47,8 @@
   const spread = rows => Math.max(0, ...rows.map(row => Number(row.distanceMeters) || 0));
   const sortedGroups = [...groups.entries()].sort((a, b) => spread(b[1]) - spread(a[1]) || a[0].localeCompare(b[0]));
   const boundaries = new Map((boundaryData?.features || []).map(feature => [feature.municipalityGroup, feature]));
-  const projectDetails = source.projectDetails || {};
+  const projectDetails = {};
+  const projectDetailIds = new Set(reportData.projectDetailIds || []);
   const amountCounts = new Map();
   for (const row of reportData.prices || []) {
     const amount = Number(row.amountPesos);
@@ -177,9 +178,22 @@
     }
   });
 
-  function showProject(projectId, viewportPopup = false) {
-    const detail = projectDetails[projectId];
-    if (!projectCard || !detail) return;
+  async function showProject(projectId, viewportPopup = false) {
+    if (!projectCard) return;
+    let detail = projectDetails[projectId];
+    if (!detail) {
+      projectCard.hidden = false;
+      projectCard.classList.toggle('mpb-map-project-card--viewport', viewportPopup);
+      projectCard.textContent = `Loading project details for ${projectId}…`;
+      try {
+        detail = await window.loadMpbProjectDetail(projectId);
+        if (!detail) throw new Error('Project details are unavailable.');
+        projectDetails[projectId] = detail;
+      } catch (error) {
+        projectCard.textContent = `Project details could not be loaded: ${error.message}`;
+        return;
+      }
+    }
     let hasMatchingMap = false;
     if (viewportPopup) {
       const matchingGroup = [...groups.entries()].find(([, rows]) => rows.some(row =>
@@ -237,7 +251,7 @@
   }
 
   openProjectCard = showProject;
-  window.ReportMpbDetails={hasRecord:id=>Boolean(projectDetails[id])};
+  window.ReportMpbDetails={hasRecord:id=>projectDetailIds.has(id)};
   if (pendingProject) {
     const selected = pendingProject; pendingProject = null;
     showProject(selected.id, selected.viewportPopup);
