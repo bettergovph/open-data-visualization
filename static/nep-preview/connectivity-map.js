@@ -12,7 +12,7 @@
   const cropShards=new Map();
   const fetchJson=async name=>{const r=await fetch(name,{cache:name.startsWith('connectivity-cropland-shards/')?'force-cache':'no-cache'});if(!r.ok)throw Error(`${name}: HTTP ${r.status}`);return r.json()};
   const payload=()=>payloadPromise||(payloadPromise=fetchJson('connectivity-map-data.json'));
-  const boundaries=()=>boundaryPromise||(boundaryPromise=fetchJson('out-of-place-boundaries.json'));
+  const boundaries=()=>boundaryPromise||(boundaryPromise=window.loadReportShardedJson?window.loadReportShardedJson('out-of-place-boundaries-index.json'):fetchJson('out-of-place-boundaries.json'));
   async function cropForProject(id){const index=await(cropIndexPromise||(cropIndexPromise=fetchJson('connectivity-cropland-map.json')));const ref=index.projects?.[id];if(!ref)return null;if(!cropShards.has(ref.path))cropShards.set(ref.path,fetchJson(ref.path));return (await cropShards.get(ref.path))[id]||null;}
 
   function utm51(lon,lat){

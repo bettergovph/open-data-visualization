@@ -497,7 +497,7 @@ async def root():
 CONNECTIVITY_ADMIN_HASH_DIR = Path(".connectivity-admin-hashes")
 CONNECTIVITY_MANUAL_GREENS_FILE = Path(".connectivity-manual-greens.json")
 CONNECTIVITY_MANUAL_GREEN_REASONS = {
-    "near-produce", "closes-loop", "extends-road", "near-school", "near-health-center", "near-hospital",
+    "near-produce", "closes-loop", "extends-road", "road-segment", "connects-road-segments", "near-school", "near-health-center", "near-hospital",
 }
 
 
