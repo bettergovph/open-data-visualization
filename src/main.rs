@@ -710,6 +710,13 @@ async fn ignorant_entry() -> HttpResponse {
         .finish()
 }
 
+// Keep the retired preview index URL working while the summary page owns the landing route.
+async fn nep_preview_index_entry() -> HttpResponse {
+    HttpResponse::MovedPermanently()
+        .append_header(("Location", "/static/nep-preview/summary.html"))
+        .finish()
+}
+
 async fn budget_trivia_mobile(req: HttpRequest) -> Result<HttpResponse, ActixError> {
     if !is_mobile(&req) {
         return Ok(HttpResponse::Found()
@@ -799,10 +806,11 @@ async fn main() -> std::io::Result<()> {
             .service(web::resource("/static/nep-preview/ignorant.html").to(ignorant_entry))
             .service(web::resource("/static/nep-preview/budget-trivia.html").to(budget_trivia_entry))
             .service(web::resource("/static/nep-preview/connectivity.html").to(connectivity_entry))
+            .service(web::resource("/static/nep-preview/index.html").to(nep_preview_index_entry))
             .service(web::resource("/budget-trivia-mobile").to(budget_trivia_mobile))
             .service(
                 fs::Files::new("/static/nep-preview", "./static/nep-preview/")
-                    .index_file("index.html")
+                    .index_file("summary.html")
                     .redirect_to_slash_directory(),
             )
             .service(fs::Files::new("/static", "./static/"))
