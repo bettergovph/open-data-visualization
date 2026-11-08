@@ -11,9 +11,12 @@ use utils::*;
 use serde::Deserialize;
 use std::path::Path;
 
-// Casual UI gate for the connectivity page's source-name display. This is
-// intentionally an obscurity measure; the downloadable source JSON remains public.
-const CONNECTIVITY_REVEAL_HASH: &str = "a2beb2f7684275d92b2835a3efacbae260c2b93b11c683af0101b535411342a0";
+// Casual UI gate: the matching token is a marker filename in this ignored directory.
+fn connectivity_admin_token_exists(value: &str) -> bool {
+    value.len() == 64
+        && value.bytes().all(|byte| byte.is_ascii_hexdigit())
+        && Path::new(".connectivity-admin-hashes").join(value).is_file()
+}
 
 // Route handlers
 
@@ -732,7 +735,7 @@ async fn connectivity_entry(req: HttpRequest) -> Result<HttpResponse, ActixError
     let query = web::Query::<std::collections::HashMap<String, String>>::from_query(req.query_string());
     let reveal_names = query.as_ref().ok()
         .and_then(|values| values.get("hash"))
-        .map(|value| value == CONNECTIVITY_REVEAL_HASH)
+        .map(|value| connectivity_admin_token_exists(value))
         .unwrap_or(false);
     let path = "static/nep-preview/connectivity.html";
     let mut html = std::fs::read_to_string(path)
@@ -751,76 +754,6 @@ async fn connectivity_entry(req: HttpRequest) -> Result<HttpResponse, ActixError
         .insert_header(("Cache-Control", "no-store"))
         .insert_header(("Referrer-Policy", "no-referrer"))
         .body(html))
-}
-
-fn connectivity_admin_authorized(req: &HttpRequest) -> bool {
-    web::Query::<std::collections::HashMap<String, String>>::from_query(req.query_string())
-        .ok()
-        .and_then(|values| values.get("hash").cloned())
-        .map(|value| value == CONNECTIVITY_REVEAL_HASH)
-        .unwrap_or(false)
-}
-
-const CONNECTIVITY_MANUAL_GREENS_FILE: &str = ".connectivity-manual-greens.json";
-const CONNECTIVITY_MANUAL_GREEN_REASONS: [&str; 6] = [
-    "near-produce", "closes-loop", "extends-road", "near-school", "near-health-center", "near-hospital",
-];
-
-fn read_connectivity_manual_greens() -> serde_json::Value {
-    std::fs::read_to_string(CONNECTIVITY_MANUAL_GREENS_FILE)
-        .ok()
-        .and_then(|text| serde_json::from_str(&text).ok())
-        .filter(|value: &serde_json::Value| value.is_object())
-        .unwrap_or_else(|| serde_json::json!({"schemaVersion":1,"projects":{}}))
-}
-
-async fn connectivity_manual_greens_get(req: HttpRequest) -> Result<HttpResponse, ActixError> {
-    if !connectivity_admin_authorized(&req) {
-        return Ok(HttpResponse::Forbidden().finish());
-    }
-    Ok(HttpResponse::Ok()
-        .insert_header(("Cache-Control", "no-store"))
-        .json(read_connectivity_manual_greens()))
-}
-
-async fn connectivity_manual_greens_post(
-    req: HttpRequest,
-    body: web::Json<serde_json::Value>,
-) -> Result<HttpResponse, ActixError> {
-    if !connectivity_admin_authorized(&req) {
-        return Ok(HttpResponse::Forbidden().finish());
-    }
-    let id = body.get("id").and_then(|v| v.as_str()).unwrap_or("").trim();
-    if id.is_empty() || id.len() > 100 {
-        return Ok(HttpResponse::BadRequest().body("Invalid project id"));
-    }
-    let green_reasons: Vec<&str> = body.get("greenReasons").or_else(|| body.get("reasons"))
-        .and_then(|v| v.as_array())
-        .into_iter().flatten().filter_map(|v| v.as_str())
-        .filter(|reason| CONNECTIVITY_MANUAL_GREEN_REASONS.contains(reason))
-        .collect();
-    let green_note = body.get("greenNote").and_then(|v| v.as_str()).unwrap_or("").trim();
-    let red_reason = body.get("redReason").and_then(|v| v.as_str()).unwrap_or("").trim();
-    let mut document = read_connectivity_manual_greens();
-    let projects = document.get_mut("projects").and_then(|v| v.as_object_mut())
-        .ok_or_else(|| actix_web::error::ErrorInternalServerError("Invalid manual green data"))?;
-    // Retain an explicit empty record so a cleared server annotation overrides
-    // any older copy already embedded in the public connectivity dataset.
-    projects.insert(id.to_string(), serde_json::json!({
-        "greenReasons":&green_reasons,
-        "reasons":&green_reasons,
-        "greenNote":green_note.chars().take(2000).collect::<String>(),
-        "redReason":red_reason.chars().take(2000).collect::<String>()
-    }));
-    let serialized = serde_json::to_vec_pretty(&document)
-        .map_err(actix_web::error::ErrorInternalServerError)?;
-    let temporary = format!("{}.tmp", CONNECTIVITY_MANUAL_GREENS_FILE);
-    std::fs::write(&temporary, serialized).map_err(actix_web::error::ErrorInternalServerError)?;
-    std::fs::rename(&temporary, CONNECTIVITY_MANUAL_GREENS_FILE)
-        .map_err(actix_web::error::ErrorInternalServerError)?;
-    Ok(HttpResponse::Ok()
-        .insert_header(("Cache-Control", "no-store"))
-        .json(document))
 }
 
 // DPWH 2026 Page
@@ -876,9 +809,6 @@ async fn main() -> std::io::Result<()> {
             .service(web::resource("/static/nep-preview/ignorant.html").to(ignorant_entry))
             .service(web::resource("/static/nep-preview/budget-trivia.html").to(budget_trivia_entry))
             .service(web::resource("/static/nep-preview/connectivity.html").to(connectivity_entry))
-            .service(web::resource("/api/connectivity/manual-greens")
-                .route(web::get().to(connectivity_manual_greens_get))
-                .route(web::post().to(connectivity_manual_greens_post)))
             .service(web::resource("/static/nep-preview/index.html").to(nep_preview_index_entry))
             .service(web::resource("/budget-trivia-mobile").to(budget_trivia_mobile))
             .service(

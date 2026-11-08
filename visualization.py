@@ -492,6 +492,84 @@ async def root():
     return {"message": "BetterGovPH API", "status": "running"}
 
 
+# Connectivity writes are stored only in the ignored annotation JSON file.
+# The matching token is represented by a marker filename, never by source code.
+CONNECTIVITY_ADMIN_HASH_DIR = Path(".connectivity-admin-hashes")
+CONNECTIVITY_MANUAL_GREENS_FILE = Path(".connectivity-manual-greens.json")
+CONNECTIVITY_MANUAL_GREEN_REASONS = {
+    "near-produce", "closes-loop", "extends-road", "near-school", "near-health-center", "near-hospital",
+}
+
+
+def _require_connectivity_annotation_access(hash_value: str) -> None:
+    if (not re.fullmatch(r"[0-9a-fA-F]{64}", hash_value or "")
+            or not (CONNECTIVITY_ADMIN_HASH_DIR / hash_value).is_file()):
+        raise HTTPException(status_code=403, detail="Access denied")
+
+
+def _read_connectivity_annotations() -> Dict[str, Any]:
+    try:
+        value = json.loads(CONNECTIVITY_MANUAL_GREENS_FILE.read_text(encoding="utf-8"))
+        if isinstance(value, dict) and isinstance(value.get("projects"), dict):
+            return value
+    except FileNotFoundError:
+        pass
+    except (OSError, json.JSONDecodeError) as exc:
+        raise HTTPException(status_code=500, detail="Manual connectivity file is unreadable") from exc
+    return {"schemaVersion": 1, "projects": {}}
+
+
+@app.get("/api/connectivity/manual-greens")
+async def get_connectivity_annotations(hash: str = Query(default="")) -> JSONResponse:
+    _require_connectivity_annotation_access(hash)
+    return JSONResponse(content=_read_connectivity_annotations(), headers={"Cache-Control": "no-store"})
+
+
+@app.post("/api/connectivity/manual-greens")
+async def save_connectivity_annotations(request: Request, hash: str = Query(default="")) -> JSONResponse:
+    _require_connectivity_annotation_access(hash)
+    try:
+        body = await request.json()
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail="Invalid JSON body") from exc
+    if not isinstance(body, dict):
+        raise HTTPException(status_code=400, detail="Expected a JSON object")
+
+    project_id = body.get("id")
+    if not isinstance(project_id, str) or not project_id.strip() or len(project_id) > 100:
+        raise HTTPException(status_code=400, detail="Invalid project id")
+    project_id = project_id.strip()
+    try:
+        published = json.loads(Path("static/nep-preview/connectivity-data.json").read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise HTTPException(status_code=503, detail="Connectivity project list is unavailable") from exc
+    if not any(str(row.get("id") or "") == project_id for row in published.get("projects", [])):
+        raise HTTPException(status_code=404, detail="Unknown connectivity project id")
+
+    raw_reasons = body.get("greenReasons", body.get("reasons", []))
+    if not isinstance(raw_reasons, list):
+        raise HTTPException(status_code=400, detail="greenReasons must be a list")
+    green_reasons = sorted({reason for reason in raw_reasons
+                            if isinstance(reason, str) and reason in CONNECTIVITY_MANUAL_GREEN_REASONS})
+    green_note, red_reason = body.get("greenNote", ""), body.get("redReason", "")
+    if not isinstance(green_note, str) or not isinstance(red_reason, str):
+        raise HTTPException(status_code=400, detail="Manual reasons must be text")
+
+    document = _read_connectivity_annotations()
+    document["schemaVersion"] = 1
+    document["projects"][project_id] = {
+        "greenReasons": green_reasons,
+        "reasons": green_reasons,
+        "greenNote": green_note.strip()[:2000],
+        "redReason": red_reason.strip()[:2000],
+    }
+    # Write only to the one ignored annotation file. Preserve its existing mode.
+    CONNECTIVITY_MANUAL_GREENS_FILE.write_text(
+        json.dumps(document, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
+    return JSONResponse(content=document, headers={"Cache-Control": "no-store"})
+
+
 @app.get("/api/integrated/coverage")
 async def get_integrated_coverage(refresh: bool = Query(False)) -> JSONResponse:
     if refresh:
