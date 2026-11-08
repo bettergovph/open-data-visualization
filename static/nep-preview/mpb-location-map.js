@@ -373,7 +373,7 @@
     loadStarted = true;
     summary.textContent = 'Loading map project records…';
     Promise.all([
-      fetch('mpb-municipality-boundaries.json?v=20261025-boundary-view-4').then(response=>{if(!response.ok)throw Error('Boundary data unavailable');return response.json()}).catch(()=>null),
+      (window.loadReportShardedJson?window.loadReportShardedJson('mpb-municipality-boundaries-index.json?v=20261025-boundary-view-4'):fetch('mpb-municipality-boundaries.json?v=20261025-boundary-view-4').then(response=>{if(!response.ok)throw Error('Boundary data unavailable');return response.json()})).catch(()=>null),
       window.loadMpbReportData ? window.loadMpbReportData() : fetch('mpb-data.json').then(response=>{if(!response.ok)throw Error('MPB project source unavailable');return response.json()})
     ]).then(([boundary,data])=>{window.MPB_REPORT_DATA=data;init(boundary,data)}).catch(error=>{summary.textContent='Could not load MPB map project records: '+error.message});
   };
