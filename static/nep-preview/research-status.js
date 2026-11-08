@@ -24,11 +24,16 @@
       });
   }
 
-  // Satirical disclaimer banner: it borrows the visual language of cookie
-  // prompts, but sets and stores no cookie or preference. It only appears on
-  // report pages that already contain the page's factual disclaimer.
+  // Satirical disclaimer banner: no cookies are used. Dismissal is remembered
+  // in sessionStorage for this tab so it stays closed while browsing reports.
   const disclaimer = document.getElementById('report-evidence-notice');
   if (!disclaimer || document.getElementById('disclaimer-cookie-satire')) return;
+  const dismissalKey = 'bettergov-disclaimer-banner-dismissed';
+  try {
+    if (window.sessionStorage.getItem(dismissalKey) === '1') return;
+  } catch (_) {
+    // If browser storage is unavailable, keep the banner dismissible per page.
+  }
 
   const style = document.createElement('style');
   style.id = 'disclaimer-cookie-satire-style';
@@ -90,7 +95,14 @@
   const button = document.createElement('button');
   button.type = 'button';
   button.textContent = 'Accept none';
-  button.addEventListener('click', () => banner.remove());
+  button.addEventListener('click', () => {
+    try {
+      window.sessionStorage.setItem(dismissalKey, '1');
+    } catch (_) {
+      // Dismissal still works on this page when browser storage is unavailable.
+    }
+    banner.remove();
+  });
   actions.append(note, button);
   body.append(fact, fullDetails, punchline, actions);
   banner.append(head, body);
