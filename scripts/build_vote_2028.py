@@ -8,11 +8,15 @@ import unicodedata
 import csv
 import zipfile
 import xml.etree.ElementTree as ET
+import sys
 from collections import defaultdict
 from pathlib import Path
 from vote_people import apply_reviewed_sources, unique_people
 
 ROOT = Path(__file__).resolve().parents[1]
+NEP_ROOT = ROOT.parent / 'nep'
+if str(NEP_ROOT) not in sys.path:
+    sys.path.insert(0, str(NEP_ROOT))
 NEP_SOURCE_DATABASES = ROOT.parent / 'nep/data_sources/odv-source-databases'
 SOURCE = ROOT / 'database/dynasty_dump.sql.gz'
 if not SOURCE.exists():
@@ -1508,6 +1512,8 @@ def build():
     page = re.sub(r'vote-2028-data\.json(?:\?v=[A-Za-z0-9_-]+)?', 'vote-2028-data.json?v=' + version, page_path.read_text())
     script_version = hashlib.sha256(script.encode()).hexdigest()[:12]
     page = re.sub(r'vote-2028\.js\?v=[A-Za-z0-9_-]+', 'vote-2028.js?v=' + script_version, page)
+    from report_table_presentation import apply_page_table_module
+    page, _ = apply_page_table_module('vote-2028.html', page)
     page_path.write_text(page)
     return result['summary']
 
