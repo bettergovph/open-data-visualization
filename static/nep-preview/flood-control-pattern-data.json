@@ -1,9 +1,9 @@
 {
   "generatedFrom": {
-    "floodContracts": "DPWH flood-control contract data",
-    "mpbAnalysis": "DPWH MPB project data",
-    "districtAnnualAnalysis": "annual district allocation data",
-    "floodScope": "archived DPWH flood-control contract records",
+    "floodContracts": "static/data/flood_control_data_with_jv.json",
+    "mpbAnalysis": "static/nep-preview/mpb-data.json",
+    "districtAnnualAnalysis": "static/nep-preview/integrated-district-data.json",
+    "floodScope": "DPWH flood-control contract records in the archived project dataset",
     "mpbScope": "FY2027 HGAB 3rd-reading MPB budget lines and comparison candidates"
   },
   "flood": {
@@ -824,16 +824,6 @@
         },
         {
           "category": "Multi-purpose building",
-          "district": "Taguig · Lone District",
-          "beforePesos": 525000000,
-          "afterPesos": 1169000000,
-          "changePesos": 644000000,
-          "changePct": 122.7,
-          "beforeLineItems": 15,
-          "afterLineItems": 23
-        },
-        {
-          "category": "Multi-purpose building",
           "district": "Ilocos Norte · 2nd District",
           "beforePesos": 153000000,
           "afterPesos": 673000000,
@@ -851,6 +841,16 @@
           "changePct": 160.0,
           "beforeLineItems": 14,
           "afterLineItems": 42
+        },
+        {
+          "category": "Multi-purpose building",
+          "district": "Valenzuela · 2nd District",
+          "beforePesos": 175000000,
+          "afterPesos": 544600000,
+          "changePesos": 369600000,
+          "changePct": 211.2,
+          "beforeLineItems": 11,
+          "afterLineItems": 10
         }
       ],
       "Road": [
@@ -57316,94 +57316,6 @@
         "changeVsMaximumPct": -96.2
       },
       {
-        "district": "Taguig · Lone District",
-        "districtId": "leg:taguig:lone",
-        "category": "Multi-purpose building",
-        "currentAmountPesos": 200000000,
-        "currentLineItems": 1,
-        "historyPoints": [
-          {
-            "year": 2015,
-            "stage": "GAA",
-            "amountPesos": 24000000,
-            "lineItems": 2
-          },
-          {
-            "year": 2016,
-            "stage": "GAA",
-            "amountPesos": null,
-            "lineItems": null
-          },
-          {
-            "year": 2017,
-            "stage": "GAA",
-            "amountPesos": 165000000,
-            "lineItems": 17
-          },
-          {
-            "year": 2018,
-            "stage": "GAA",
-            "amountPesos": 118500000,
-            "lineItems": 18
-          },
-          {
-            "year": 2019,
-            "stage": "GAA",
-            "amountPesos": 296614000,
-            "lineItems": 15
-          },
-          {
-            "year": 2020,
-            "stage": "GAA",
-            "amountPesos": 3266800000,
-            "lineItems": 41
-          },
-          {
-            "year": 2021,
-            "stage": "GAA",
-            "amountPesos": 3011180000,
-            "lineItems": 50
-          },
-          {
-            "year": 2022,
-            "stage": "GAA",
-            "amountPesos": 525000000,
-            "lineItems": 15
-          },
-          {
-            "year": 2023,
-            "stage": "GAA",
-            "amountPesos": 1169000000,
-            "lineItems": 23
-          },
-          {
-            "year": 2024,
-            "stage": "GAA",
-            "amountPesos": null,
-            "lineItems": null
-          },
-          {
-            "year": 2025,
-            "stage": "GAA",
-            "amountPesos": 682000000,
-            "lineItems": 19
-          },
-          {
-            "year": 2026,
-            "stage": "GAA",
-            "amountPesos": 1412000000,
-            "lineItems": 22
-          }
-        ],
-        "historicalYearsAvailable": 10,
-        "historicalAveragePesos": 1067009400.0,
-        "historicalMaximumPesos": 3266800000,
-        "historicalPeakYear": 2020,
-        "changeVsAveragePct": -81.3,
-        "excessOverMaximumPesos": -3066800000,
-        "changeVsMaximumPct": -93.9
-      },
-      {
         "district": "Tarlac · 1st District",
         "districtId": "leg:tarlac:1st",
         "category": "Road",
@@ -66579,26 +66491,26 @@
         {
           "year": 2016,
           "stage": "GAA",
-          "amountPesos": 2897967000,
-          "lineItems": 92
+          "amountPesos": 2797967000,
+          "lineItems": 89
         },
         {
           "year": 2017,
           "stage": "GAA",
-          "amountPesos": 5884025000,
-          "lineItems": 241
+          "amountPesos": 5874025000,
+          "lineItems": 237
         },
         {
           "year": 2018,
           "stage": "GAA",
-          "amountPesos": 11011062000,
-          "lineItems": 279
+          "amountPesos": 10837562000,
+          "lineItems": 275
         },
         {
           "year": 2019,
           "stage": "GAA",
-          "amountPesos": 3931060000,
-          "lineItems": 167
+          "amountPesos": 3831060000,
+          "lineItems": 165
         },
         {
           "year": 2020,
@@ -66615,32 +66527,32 @@
         {
           "year": 2022,
           "stage": "GAA",
-          "amountPesos": 13614210000,
-          "lineItems": 347
+          "amountPesos": 13594210000,
+          "lineItems": 346
         },
         {
           "year": 2023,
           "stage": "GAA",
-          "amountPesos": 10205222000,
-          "lineItems": 235
+          "amountPesos": 10165222000,
+          "lineItems": 233
         },
         {
           "year": 2024,
           "stage": "GAA",
-          "amountPesos": 15299135000,
-          "lineItems": 319
+          "amountPesos": 15287135000,
+          "lineItems": 318
         },
         {
           "year": 2025,
           "stage": "GAA",
-          "amountPesos": 17829264000,
-          "lineItems": 359
+          "amountPesos": 17809264000,
+          "lineItems": 358
         },
         {
           "year": 2026,
           "stage": "GAA",
-          "amountPesos": 15178120000,
-          "lineItems": 271
+          "amountPesos": 15153120000,
+          "lineItems": 270
         },
         {
           "year": 2027,
@@ -66653,74 +66565,74 @@
         {
           "year": 2015,
           "stage": "GAA",
-          "amountPesos": 3286457000,
-          "lineItems": 131
+          "amountPesos": 3236457000,
+          "lineItems": 130
         },
         {
           "year": 2016,
           "stage": "GAA",
-          "amountPesos": 11800346000,
-          "lineItems": 538
+          "amountPesos": 11705346000,
+          "lineItems": 533
         },
         {
           "year": 2017,
           "stage": "GAA",
-          "amountPesos": 36504008000,
-          "lineItems": 1807
+          "amountPesos": 36428008000,
+          "lineItems": 1792
         },
         {
           "year": 2018,
           "stage": "GAA",
-          "amountPesos": 61720494000,
-          "lineItems": 2024
+          "amountPesos": 61291494000,
+          "lineItems": 1984
         },
         {
           "year": 2019,
           "stage": "GAA",
-          "amountPesos": 42261839000,
-          "lineItems": 1536
+          "amountPesos": 42168539000,
+          "lineItems": 1520
         },
         {
           "year": 2020,
           "stage": "GAA",
-          "amountPesos": 59963210000,
-          "lineItems": 1906
+          "amountPesos": 59739210000,
+          "lineItems": 1897
         },
         {
           "year": 2021,
           "stage": "GAA",
-          "amountPesos": 71906296000,
-          "lineItems": 2369
+          "amountPesos": 71602954000,
+          "lineItems": 2357
         },
         {
           "year": 2022,
           "stage": "GAA",
-          "amountPesos": 111146408000,
-          "lineItems": 2477
+          "amountPesos": 110926408000,
+          "lineItems": 2473
         },
         {
           "year": 2023,
           "stage": "GAA",
-          "amountPesos": 153037942000,
-          "lineItems": 2540
+          "amountPesos": 152654942000,
+          "lineItems": 2529
         },
         {
           "year": 2024,
           "stage": "GAA",
-          "amountPesos": 216087134000,
-          "lineItems": 3215
+          "amountPesos": 215862134000,
+          "lineItems": 3208
         },
         {
           "year": 2025,
           "stage": "GAA",
-          "amountPesos": 212415722000,
-          "lineItems": 3153
+          "amountPesos": 212056357000,
+          "lineItems": 3140
         },
         {
           "year": 2026,
           "stage": "GAA",
-          "amountPesos": 8747869000,
-          "lineItems": 378
+          "amountPesos": 8657869000,
+          "lineItems": 374
         },
         {
           "year": 2027,
@@ -66733,8 +66645,8 @@
         {
           "year": 2015,
           "stage": "GAA",
-          "amountPesos": 1025286000,
-          "lineItems": 209
+          "amountPesos": 1001286000,
+          "lineItems": 207
         },
         {
           "year": 2016,
@@ -66745,44 +66657,44 @@
         {
           "year": 2017,
           "stage": "GAA",
-          "amountPesos": 6206816000,
-          "lineItems": 2326
+          "amountPesos": 6041816000,
+          "lineItems": 2309
         },
         {
           "year": 2018,
           "stage": "GAA",
-          "amountPesos": 12838506000,
-          "lineItems": 3694
+          "amountPesos": 12720006000,
+          "lineItems": 3676
         },
         {
           "year": 2019,
           "stage": "GAA",
-          "amountPesos": 18109084000,
-          "lineItems": 5252
+          "amountPesos": 17812470000,
+          "lineItems": 5237
         },
         {
           "year": 2020,
           "stage": "GAA",
-          "amountPesos": 30598049000,
-          "lineItems": 5268
+          "amountPesos": 27331249000,
+          "lineItems": 5227
         },
         {
           "year": 2021,
           "stage": "GAA",
-          "amountPesos": 42929372000,
-          "lineItems": 7054
+          "amountPesos": 39918192000,
+          "lineItems": 7004
         },
         {
           "year": 2022,
           "stage": "GAA",
-          "amountPesos": 38754460000,
-          "lineItems": 4418
+          "amountPesos": 38229460000,
+          "lineItems": 4403
         },
         {
           "year": 2023,
           "stage": "GAA",
-          "amountPesos": 45122859000,
-          "lineItems": 4393
+          "amountPesos": 43953859000,
+          "lineItems": 4370
         },
         {
           "year": 2024,
@@ -66793,94 +66705,94 @@
         {
           "year": 2025,
           "stage": "GAA",
-          "amountPesos": 61633792000,
-          "lineItems": 5840
+          "amountPesos": 60951792000,
+          "lineItems": 5821
         },
         {
           "year": 2026,
           "stage": "GAA",
-          "amountPesos": 58569893000,
-          "lineItems": 4907
+          "amountPesos": 58444893000,
+          "lineItems": 4904
         },
         {
           "year": 2027,
           "stage": "HGAB 3rd",
-          "amountPesos": 62356501000,
-          "lineItems": 4739
+          "amountPesos": 62156501000,
+          "lineItems": 4738
         }
       ],
       "Road": [
         {
           "year": 2015,
           "stage": "GAA",
-          "amountPesos": 11522925000,
-          "lineItems": 368
+          "amountPesos": 11447925000,
+          "lineItems": 358
         },
         {
           "year": 2016,
           "stage": "GAA",
-          "amountPesos": 19975813000,
-          "lineItems": 773
+          "amountPesos": 19925327000,
+          "lineItems": 770
         },
         {
           "year": 2017,
           "stage": "GAA",
-          "amountPesos": 24843561000,
-          "lineItems": 2746
+          "amountPesos": 24730561000,
+          "lineItems": 2741
         },
         {
           "year": 2018,
           "stage": "GAA",
-          "amountPesos": 58929773000,
-          "lineItems": 3246
+          "amountPesos": 58852451000,
+          "lineItems": 3244
         },
         {
           "year": 2019,
           "stage": "GAA",
-          "amountPesos": 43663376000,
-          "lineItems": 3298
+          "amountPesos": 43502069000,
+          "lineItems": 3287
         },
         {
           "year": 2020,
           "stage": "GAA",
-          "amountPesos": 64502481000,
-          "lineItems": 3426
+          "amountPesos": 62261569000,
+          "lineItems": 3380
         },
         {
           "year": 2021,
           "stage": "GAA",
-          "amountPesos": 94821359000,
-          "lineItems": 4817
+          "amountPesos": 93236439000,
+          "lineItems": 4770
         },
         {
           "year": 2022,
           "stage": "GAA",
-          "amountPesos": 109145116000,
-          "lineItems": 4162
+          "amountPesos": 108915220000,
+          "lineItems": 4148
         },
         {
           "year": 2023,
           "stage": "GAA",
-          "amountPesos": 104619406000,
-          "lineItems": 3504
+          "amountPesos": 104287706000,
+          "lineItems": 3489
         },
         {
           "year": 2024,
           "stage": "GAA",
-          "amountPesos": 94556044000,
-          "lineItems": 3875
+          "amountPesos": 94316044000,
+          "lineItems": 3864
         },
         {
           "year": 2025,
           "stage": "GAA",
-          "amountPesos": 150494308000,
-          "lineItems": 4555
+          "amountPesos": 149926108000,
+          "lineItems": 4529
         },
         {
           "year": 2026,
           "stage": "GAA",
-          "amountPesos": 87288515000,
-          "lineItems": 3208
+          "amountPesos": 86556481000,
+          "lineItems": 3174
         },
         {
           "year": 2027,
@@ -67183,245 +67095,245 @@
           "stage": "GAA",
           "amountPesos": 1620552000,
           "lineItems": 17,
-          "otherYearsAveragePesos": 10128798909.09,
+          "otherYearsAveragePesos": 10083298909.09,
           "otherYearsCount": 11,
-          "changeVsOtherYearsPct": -84.0
+          "changeVsOtherYearsPct": -83.9
         },
         {
           "year": 2016,
           "stage": "GAA",
-          "amountPesos": 2897967000,
-          "lineItems": 92,
-          "otherYearsAveragePesos": 10012670272.73,
+          "amountPesos": 2797967000,
+          "lineItems": 89,
+          "otherYearsAveragePesos": 9976261181.82,
           "otherYearsCount": 11,
-          "changeVsOtherYearsPct": -71.1
+          "changeVsOtherYearsPct": -72.0
         },
         {
           "year": 2017,
           "stage": "GAA",
-          "amountPesos": 5884025000,
-          "lineItems": 241,
-          "otherYearsAveragePesos": 9741210454.55,
+          "amountPesos": 5874025000,
+          "lineItems": 237,
+          "otherYearsAveragePesos": 9696619545.45,
           "otherYearsCount": 11,
-          "changeVsOtherYearsPct": -39.6
+          "changeVsOtherYearsPct": -39.4
         },
         {
           "year": 2018,
           "stage": "GAA",
-          "amountPesos": 11011062000,
-          "lineItems": 279,
-          "otherYearsAveragePesos": 9275116181.82,
+          "amountPesos": 10837562000,
+          "lineItems": 275,
+          "otherYearsAveragePesos": 9245388909.09,
           "otherYearsCount": 11,
-          "changeVsOtherYearsPct": 18.7
+          "changeVsOtherYearsPct": 17.2
         },
         {
           "year": 2019,
           "stage": "GAA",
-          "amountPesos": 3931060000,
-          "lineItems": 167,
-          "otherYearsAveragePesos": 9918752727.27,
+          "amountPesos": 3831060000,
+          "lineItems": 165,
+          "otherYearsAveragePesos": 9882343636.36,
           "otherYearsCount": 11,
-          "changeVsOtherYearsPct": -60.4
+          "changeVsOtherYearsPct": -61.2
         },
         {
           "year": 2020,
           "stage": "GAA",
           "amountPesos": 5556721000,
           "lineItems": 186,
-          "otherYearsAveragePesos": 9770965363.64,
+          "otherYearsAveragePesos": 9725465363.64,
           "otherYearsCount": 11,
-          "changeVsOtherYearsPct": -43.1
+          "changeVsOtherYearsPct": -42.9
         },
         {
           "year": 2021,
           "stage": "GAA",
           "amountPesos": 10010002000,
           "lineItems": 298,
-          "otherYearsAveragePesos": 9366121636.36,
+          "otherYearsAveragePesos": 9320621636.36,
           "otherYearsCount": 11,
-          "changeVsOtherYearsPct": 6.9
+          "changeVsOtherYearsPct": 7.4
         },
         {
           "year": 2022,
           "stage": "GAA",
-          "amountPesos": 13614210000,
-          "lineItems": 347,
-          "otherYearsAveragePesos": 9038466363.64,
+          "amountPesos": 13594210000,
+          "lineItems": 346,
+          "otherYearsAveragePesos": 8994784545.45,
           "otherYearsCount": 11,
-          "changeVsOtherYearsPct": 50.6
+          "changeVsOtherYearsPct": 51.1
         },
         {
           "year": 2023,
           "stage": "GAA",
-          "amountPesos": 10205222000,
-          "lineItems": 235,
-          "otherYearsAveragePesos": 9348374363.64,
+          "amountPesos": 10165222000,
+          "lineItems": 233,
+          "otherYearsAveragePesos": 9306510727.27,
           "otherYearsCount": 11,
           "changeVsOtherYearsPct": 9.2
         },
         {
           "year": 2024,
           "stage": "GAA",
-          "amountPesos": 15299135000,
-          "lineItems": 319,
-          "otherYearsAveragePesos": 8885291363.64,
+          "amountPesos": 15287135000,
+          "lineItems": 318,
+          "otherYearsAveragePesos": 8840882272.73,
           "otherYearsCount": 11,
-          "changeVsOtherYearsPct": 72.2
+          "changeVsOtherYearsPct": 72.9
         },
         {
           "year": 2025,
           "stage": "GAA",
-          "amountPesos": 17829264000,
-          "lineItems": 359,
-          "otherYearsAveragePesos": 8655279636.36,
+          "amountPesos": 17809264000,
+          "lineItems": 358,
+          "otherYearsAveragePesos": 8611597818.18,
           "otherYearsCount": 11,
-          "changeVsOtherYearsPct": 106.0
+          "changeVsOtherYearsPct": 106.8
         },
         {
           "year": 2026,
           "stage": "GAA",
-          "amountPesos": 15178120000,
-          "lineItems": 271,
-          "otherYearsAveragePesos": 8896292727.27,
+          "amountPesos": 15153120000,
+          "lineItems": 270,
+          "otherYearsAveragePesos": 8853065454.55,
           "otherYearsCount": 11,
-          "changeVsOtherYearsPct": 70.6
+          "changeVsOtherYearsPct": 71.2
         },
         {
           "year": 2027,
           "stage": "HGAB 3rd",
           "amountPesos": 19282174000,
           "lineItems": 328,
-          "otherYearsAveragePesos": 9419778333.33,
+          "otherYearsAveragePesos": 9378070000.0,
           "otherYearsCount": 12,
-          "changeVsOtherYearsPct": 104.7
+          "changeVsOtherYearsPct": 105.6
         }
       ],
       "Flood control": [
         {
           "year": 2015,
           "stage": "GAA",
-          "amountPesos": 3286457000,
-          "lineItems": 131,
-          "otherYearsAveragePesos": 89599206181.82,
+          "amountPesos": 3236457000,
+          "lineItems": 130,
+          "otherYearsAveragePesos": 89372114636.36,
           "otherYearsCount": 11,
-          "changeVsOtherYearsPct": -96.3
+          "changeVsOtherYearsPct": -96.4
         },
         {
           "year": 2016,
           "stage": "GAA",
-          "amountPesos": 11800346000,
-          "lineItems": 538,
-          "otherYearsAveragePesos": 88825216272.73,
+          "amountPesos": 11705346000,
+          "lineItems": 533,
+          "otherYearsAveragePesos": 88602215636.36,
           "otherYearsCount": 11,
-          "changeVsOtherYearsPct": -86.7
+          "changeVsOtherYearsPct": -86.8
         },
         {
           "year": 2017,
           "stage": "GAA",
-          "amountPesos": 36504008000,
-          "lineItems": 1807,
-          "otherYearsAveragePesos": 86579428818.18,
+          "amountPesos": 36428008000,
+          "lineItems": 1792,
+          "otherYearsAveragePesos": 86354700909.09,
           "otherYearsCount": 11,
           "changeVsOtherYearsPct": -57.8
         },
         {
           "year": 2018,
           "stage": "GAA",
-          "amountPesos": 61720494000,
-          "lineItems": 2024,
-          "otherYearsAveragePesos": 84287021000.0,
+          "amountPesos": 61291494000,
+          "lineItems": 1984,
+          "otherYearsAveragePesos": 84094384000.0,
           "otherYearsCount": 11,
-          "changeVsOtherYearsPct": -26.8
+          "changeVsOtherYearsPct": -27.1
         },
         {
           "year": 2019,
           "stage": "GAA",
-          "amountPesos": 42261839000,
-          "lineItems": 1536,
-          "otherYearsAveragePesos": 86055989636.36,
+          "amountPesos": 42168539000,
+          "lineItems": 1520,
+          "otherYearsAveragePesos": 85832834454.55,
           "otherYearsCount": 11,
           "changeVsOtherYearsPct": -50.9
         },
         {
           "year": 2020,
           "stage": "GAA",
-          "amountPesos": 59963210000,
-          "lineItems": 1906,
-          "otherYearsAveragePesos": 84446774090.91,
+          "amountPesos": 59739210000,
+          "lineItems": 1897,
+          "otherYearsAveragePesos": 84235500727.27,
           "otherYearsCount": 11,
-          "changeVsOtherYearsPct": -29.0
+          "changeVsOtherYearsPct": -29.1
         },
         {
           "year": 2021,
           "stage": "GAA",
-          "amountPesos": 71906296000,
-          "lineItems": 2369,
-          "otherYearsAveragePesos": 83361039000.0,
+          "amountPesos": 71602954000,
+          "lineItems": 2357,
+          "otherYearsAveragePesos": 83156978545.45,
           "otherYearsCount": 11,
-          "changeVsOtherYearsPct": -13.7
+          "changeVsOtherYearsPct": -13.9
         },
         {
           "year": 2022,
           "stage": "GAA",
-          "amountPesos": 111146408000,
-          "lineItems": 2477,
-          "otherYearsAveragePesos": 79793756090.91,
+          "amountPesos": 110926408000,
+          "lineItems": 2473,
+          "otherYearsAveragePesos": 79582119090.91,
           "otherYearsCount": 11,
-          "changeVsOtherYearsPct": 39.3
+          "changeVsOtherYearsPct": 39.4
         },
         {
           "year": 2023,
           "stage": "GAA",
-          "amountPesos": 153037942000,
-          "lineItems": 2540,
-          "otherYearsAveragePesos": 75985434818.18,
+          "amountPesos": 152654942000,
+          "lineItems": 2529,
+          "otherYearsAveragePesos": 75788616000.0,
           "otherYearsCount": 11,
           "changeVsOtherYearsPct": 101.4
         },
         {
           "year": 2024,
           "stage": "GAA",
-          "amountPesos": 216087134000,
-          "lineItems": 3215,
-          "otherYearsAveragePesos": 70253690090.91,
+          "amountPesos": 215862134000,
+          "lineItems": 3208,
+          "otherYearsAveragePesos": 70042507636.36,
           "otherYearsCount": 11,
-          "changeVsOtherYearsPct": 207.6
+          "changeVsOtherYearsPct": 208.2
         },
         {
           "year": 2025,
           "stage": "GAA",
-          "amountPesos": 212415722000,
-          "lineItems": 3153,
-          "otherYearsAveragePesos": 70587454818.18,
+          "amountPesos": 212056357000,
+          "lineItems": 3140,
+          "otherYearsAveragePesos": 70388487363.64,
           "otherYearsCount": 11,
-          "changeVsOtherYearsPct": 200.9
+          "changeVsOtherYearsPct": 201.3
         },
         {
           "year": 2026,
           "stage": "GAA",
-          "amountPesos": 8747869000,
-          "lineItems": 378,
-          "otherYearsAveragePesos": 89102714181.82,
+          "amountPesos": 8657869000,
+          "lineItems": 374,
+          "otherYearsAveragePesos": 88879259000.0,
           "otherYearsCount": 11,
-          "changeVsOtherYearsPct": -90.2
+          "changeVsOtherYearsPct": -90.3
         },
         {
           "year": 2027,
           "stage": "HGAB 3rd",
           "amountPesos": 51499640000,
           "lineItems": 1109,
-          "otherYearsAveragePesos": 82406477083.33,
+          "otherYearsAveragePesos": 82194143166.67,
           "otherYearsCount": 12,
-          "changeVsOtherYearsPct": -37.5
+          "changeVsOtherYearsPct": -37.3
         }
       ],
       "Multi-purpose building": [
         {
           "year": 2015,
           "stage": "GAA",
-          "amountPesos": 1025286000,
-          "lineItems": 209,
-          "otherYearsAveragePesos": 29057717818.18,
+          "amountPesos": 1001286000,
+          "lineItems": 207,
+          "otherYearsAveragePesos": 28206891090.91,
           "otherYearsCount": 11,
           "changeVsOtherYearsPct": -96.5
         },
@@ -67430,227 +67342,227 @@
           "stage": "GAA",
           "amountPesos": 898360000,
           "lineItems": 265,
-          "otherYearsAveragePesos": 29069256545.45,
+          "otherYearsAveragePesos": 28216248000.0,
           "otherYearsCount": 11,
-          "changeVsOtherYearsPct": -96.9
+          "changeVsOtherYearsPct": -96.8
         },
         {
           "year": 2017,
           "stage": "GAA",
-          "amountPesos": 6206816000,
-          "lineItems": 2326,
-          "otherYearsAveragePesos": 28586669636.36,
+          "amountPesos": 6041816000,
+          "lineItems": 2309,
+          "otherYearsAveragePesos": 27748661090.91,
           "otherYearsCount": 11,
-          "changeVsOtherYearsPct": -78.3
+          "changeVsOtherYearsPct": -78.2
         },
         {
           "year": 2018,
           "stage": "GAA",
-          "amountPesos": 12838506000,
-          "lineItems": 3694,
-          "otherYearsAveragePesos": 27983788727.27,
+          "amountPesos": 12720006000,
+          "lineItems": 3676,
+          "otherYearsAveragePesos": 27141552909.09,
           "otherYearsCount": 11,
-          "changeVsOtherYearsPct": -54.1
+          "changeVsOtherYearsPct": -53.1
         },
         {
           "year": 2019,
           "stage": "GAA",
-          "amountPesos": 18109084000,
-          "lineItems": 5252,
-          "otherYearsAveragePesos": 27504645272.73,
+          "amountPesos": 17812470000,
+          "lineItems": 5237,
+          "otherYearsAveragePesos": 26678601636.36,
           "otherYearsCount": 11,
-          "changeVsOtherYearsPct": -34.2
+          "changeVsOtherYearsPct": -33.2
         },
         {
           "year": 2020,
           "stage": "GAA",
-          "amountPesos": 30598049000,
-          "lineItems": 5268,
-          "otherYearsAveragePesos": 26369284818.18,
+          "amountPesos": 27331249000,
+          "lineItems": 5227,
+          "otherYearsAveragePesos": 25813258090.91,
           "otherYearsCount": 11,
-          "changeVsOtherYearsPct": 16.0
+          "changeVsOtherYearsPct": 5.9
         },
         {
           "year": 2021,
           "stage": "GAA",
-          "amountPesos": 42929372000,
-          "lineItems": 7054,
-          "otherYearsAveragePesos": 25248255454.55,
+          "amountPesos": 39918192000,
+          "lineItems": 7004,
+          "otherYearsAveragePesos": 24668990545.45,
           "otherYearsCount": 11,
-          "changeVsOtherYearsPct": 70.0
+          "changeVsOtherYearsPct": 61.8
         },
         {
           "year": 2022,
           "stage": "GAA",
-          "amountPesos": 38754460000,
-          "lineItems": 4418,
-          "otherYearsAveragePesos": 25627792909.09,
+          "amountPesos": 38229460000,
+          "lineItems": 4403,
+          "otherYearsAveragePesos": 24822511636.36,
           "otherYearsCount": 11,
-          "changeVsOtherYearsPct": 51.2
+          "changeVsOtherYearsPct": 54.0
         },
         {
           "year": 2023,
           "stage": "GAA",
-          "amountPesos": 45122859000,
-          "lineItems": 4393,
-          "otherYearsAveragePesos": 25048847545.45,
+          "amountPesos": 43953859000,
+          "lineItems": 4370,
+          "otherYearsAveragePesos": 24302111727.27,
           "otherYearsCount": 11,
-          "changeVsOtherYearsPct": 80.1
+          "changeVsOtherYearsPct": 80.9
         },
         {
           "year": 2024,
           "stage": "GAA",
           "amountPesos": 3973705000,
           "lineItems": 292,
-          "otherYearsAveragePesos": 28789679727.27,
+          "otherYearsAveragePesos": 27936671181.82,
           "otherYearsCount": 11,
-          "changeVsOtherYearsPct": -86.2
+          "changeVsOtherYearsPct": -85.8
         },
         {
           "year": 2025,
           "stage": "GAA",
-          "amountPesos": 61633792000,
-          "lineItems": 5840,
-          "otherYearsAveragePesos": 23547853636.36,
+          "amountPesos": 60951792000,
+          "lineItems": 5821,
+          "otherYearsAveragePesos": 22756845090.91,
           "otherYearsCount": 11,
-          "changeVsOtherYearsPct": 161.7
+          "changeVsOtherYearsPct": 167.8
         },
         {
           "year": 2026,
           "stage": "GAA",
-          "amountPesos": 58569893000,
-          "lineItems": 4907,
-          "otherYearsAveragePesos": 23826389909.09,
+          "amountPesos": 58444893000,
+          "lineItems": 4904,
+          "otherYearsAveragePesos": 22984745000.0,
           "otherYearsCount": 11,
-          "changeVsOtherYearsPct": 145.8
+          "changeVsOtherYearsPct": 154.3
         },
         {
           "year": 2027,
           "stage": "HGAB 3rd",
-          "amountPesos": 62356501000,
-          "lineItems": 4739,
-          "otherYearsAveragePesos": 26721681833.33,
+          "amountPesos": 62156501000,
+          "lineItems": 4738,
+          "otherYearsAveragePesos": 25939757333.33,
           "otherYearsCount": 12,
-          "changeVsOtherYearsPct": 133.4
+          "changeVsOtherYearsPct": 139.6
         }
       ],
       "Road": [
         {
           "year": 2015,
           "stage": "GAA",
-          "amountPesos": 11522925000,
-          "lineItems": 368,
-          "otherYearsAveragePesos": 77530886545.45,
+          "amountPesos": 11447925000,
+          "lineItems": 358,
+          "otherYearsAveragePesos": 76955452272.73,
           "otherYearsCount": 11,
           "changeVsOtherYearsPct": -85.1
         },
         {
           "year": 2016,
           "stage": "GAA",
-          "amountPesos": 19975813000,
-          "lineItems": 773,
-          "otherYearsAveragePesos": 76762442181.82,
+          "amountPesos": 19925327000,
+          "lineItems": 770,
+          "otherYearsAveragePesos": 76184779363.64,
           "otherYearsCount": 11,
-          "changeVsOtherYearsPct": -74.0
+          "changeVsOtherYearsPct": -73.8
         },
         {
           "year": 2017,
           "stage": "GAA",
-          "amountPesos": 24843561000,
-          "lineItems": 2746,
-          "otherYearsAveragePesos": 76319919636.36,
+          "amountPesos": 24730561000,
+          "lineItems": 2741,
+          "otherYearsAveragePesos": 75747939909.09,
           "otherYearsCount": 11,
           "changeVsOtherYearsPct": -67.4
         },
         {
           "year": 2018,
           "stage": "GAA",
-          "amountPesos": 58929773000,
-          "lineItems": 3246,
-          "otherYearsAveragePesos": 73221173090.91,
+          "amountPesos": 58852451000,
+          "lineItems": 3244,
+          "otherYearsAveragePesos": 72645949909.09,
           "otherYearsCount": 11,
-          "changeVsOtherYearsPct": -19.5
+          "changeVsOtherYearsPct": -19.0
         },
         {
           "year": 2019,
           "stage": "GAA",
-          "amountPesos": 43663376000,
-          "lineItems": 3298,
-          "otherYearsAveragePesos": 74609027363.64,
+          "amountPesos": 43502069000,
+          "lineItems": 3287,
+          "otherYearsAveragePesos": 74041439181.82,
           "otherYearsCount": 11,
-          "changeVsOtherYearsPct": -41.5
+          "changeVsOtherYearsPct": -41.2
         },
         {
           "year": 2020,
           "stage": "GAA",
-          "amountPesos": 64502481000,
-          "lineItems": 3426,
-          "otherYearsAveragePesos": 72714563272.73,
+          "amountPesos": 62261569000,
+          "lineItems": 3380,
+          "otherYearsAveragePesos": 72336030090.91,
           "otherYearsCount": 11,
-          "changeVsOtherYearsPct": -11.3
+          "changeVsOtherYearsPct": -13.9
         },
         {
           "year": 2021,
           "stage": "GAA",
-          "amountPesos": 94821359000,
-          "lineItems": 4817,
-          "otherYearsAveragePesos": 69958301636.36,
+          "amountPesos": 93236439000,
+          "lineItems": 4770,
+          "otherYearsAveragePesos": 69520132818.18,
           "otherYearsCount": 11,
-          "changeVsOtherYearsPct": 35.5
+          "changeVsOtherYearsPct": 34.1
         },
         {
           "year": 2022,
           "stage": "GAA",
-          "amountPesos": 109145116000,
-          "lineItems": 4162,
-          "otherYearsAveragePesos": 68656141909.09,
+          "amountPesos": 108915220000,
+          "lineItems": 4148,
+          "otherYearsAveragePesos": 68094789090.91,
           "otherYearsCount": 11,
-          "changeVsOtherYearsPct": 59.0
+          "changeVsOtherYearsPct": 59.9
         },
         {
           "year": 2023,
           "stage": "GAA",
-          "amountPesos": 104619406000,
-          "lineItems": 3504,
-          "otherYearsAveragePesos": 69067570090.91,
+          "amountPesos": 104287706000,
+          "lineItems": 3489,
+          "otherYearsAveragePesos": 68515472181.82,
           "otherYearsCount": 11,
-          "changeVsOtherYearsPct": 51.5
+          "changeVsOtherYearsPct": 52.2
         },
         {
           "year": 2024,
           "stage": "GAA",
-          "amountPesos": 94556044000,
-          "lineItems": 3875,
-          "otherYearsAveragePesos": 69982421181.82,
+          "amountPesos": 94316044000,
+          "lineItems": 3864,
+          "otherYearsAveragePesos": 69421986909.09,
           "otherYearsCount": 11,
-          "changeVsOtherYearsPct": 35.1
+          "changeVsOtherYearsPct": 35.9
         },
         {
           "year": 2025,
           "stage": "GAA",
-          "amountPesos": 150494308000,
-          "lineItems": 4555,
-          "otherYearsAveragePesos": 64897124454.55,
+          "amountPesos": 149926108000,
+          "lineItems": 4529,
+          "otherYearsAveragePesos": 64366526545.45,
           "otherYearsCount": 11,
-          "changeVsOtherYearsPct": 131.9
+          "changeVsOtherYearsPct": 132.9
         },
         {
           "year": 2026,
           "stage": "GAA",
-          "amountPesos": 87288515000,
-          "lineItems": 3208,
-          "otherYearsAveragePesos": 70643105636.36,
+          "amountPesos": 86556481000,
+          "lineItems": 3174,
+          "otherYearsAveragePesos": 70127401727.27,
           "otherYearsCount": 11,
-          "changeVsOtherYearsPct": 23.6
+          "changeVsOtherYearsPct": 23.4
         },
         {
           "year": 2027,
           "stage": "HGAB 3rd",
           "amountPesos": 100526485000,
           "lineItems": 3253,
-          "otherYearsAveragePesos": 72030223083.33,
+          "otherYearsAveragePesos": 71496491666.67,
           "otherYearsCount": 12,
-          "changeVsOtherYearsPct": 39.6
+          "changeVsOtherYearsPct": 40.6
         }
       ]
     },
@@ -67659,175 +67571,245 @@
         "year": 2015,
         "stage": "GAA",
         "sourceRowsClassified": 8080,
-        "assignedRows": 725,
-        "assignedPesos": 17455220000,
-        "unresolvedRows": 7355,
-        "unresolvedPesos": 123188161000
+        "assignedRows": 712,
+        "assignedPesos": 17306220000,
+        "unresolvedRows": 7368,
+        "unresolvedPesos": 123337161000
       },
       {
         "year": 2016,
         "stage": "GAA",
         "sourceRowsClassified": 5829,
-        "assignedRows": 1668,
-        "assignedPesos": 35572486000,
-        "unresolvedRows": 4161,
-        "unresolvedPesos": 141212074000
+        "assignedRows": 1657,
+        "assignedPesos": 35327000000,
+        "unresolvedRows": 4172,
+        "unresolvedPesos": 141457560000
       },
       {
         "year": 2017,
         "stage": "GAA",
         "sourceRowsClassified": 13402,
-        "assignedRows": 7120,
-        "assignedPesos": 73438410000,
-        "unresolvedRows": 6282,
-        "unresolvedPesos": 127966374000
+        "assignedRows": 7079,
+        "assignedPesos": 73074410000,
+        "unresolvedRows": 6323,
+        "unresolvedPesos": 128330374000
       },
       {
         "year": 2018,
         "stage": "GAA",
         "sourceRowsClassified": 12624,
-        "assignedRows": 9243,
-        "assignedPesos": 144499835000,
-        "unresolvedRows": 3381,
-        "unresolvedPesos": 193913148000
+        "assignedRows": 9179,
+        "assignedPesos": 143701513000,
+        "unresolvedRows": 3445,
+        "unresolvedPesos": 194711470000
       },
       {
         "year": 2019,
         "stage": "GAA",
         "sourceRowsClassified": 13254,
-        "assignedRows": 10253,
-        "assignedPesos": 107965359000,
-        "unresolvedRows": 3001,
-        "unresolvedPesos": 97592654000
+        "assignedRows": 10209,
+        "assignedPesos": 107314138000,
+        "unresolvedRows": 3045,
+        "unresolvedPesos": 98243875000
       },
       {
         "year": 2020,
         "stage": "GAA",
         "sourceRowsClassified": 14728,
-        "assignedRows": 10786,
-        "assignedPesos": 160620461000,
-        "unresolvedRows": 3942,
-        "unresolvedPesos": 162039175000
+        "assignedRows": 10690,
+        "assignedPesos": 154888749000,
+        "unresolvedRows": 4038,
+        "unresolvedPesos": 167770887000
       },
       {
         "year": 2021,
         "stage": "GAA",
         "sourceRowsClassified": 20235,
-        "assignedRows": 14538,
-        "assignedPesos": 219667029000,
-        "unresolvedRows": 5697,
-        "unresolvedPesos": 210313439000
+        "assignedRows": 14429,
+        "assignedPesos": 214767587000,
+        "unresolvedRows": 5806,
+        "unresolvedPesos": 215212881000
       },
       {
         "year": 2022,
         "stage": "GAA",
         "sourceRowsClassified": 15829,
-        "assignedRows": 11404,
-        "assignedPesos": 272660194000,
-        "unresolvedRows": 4425,
-        "unresolvedPesos": 193571640000
+        "assignedRows": 11370,
+        "assignedPesos": 271665298000,
+        "unresolvedRows": 4459,
+        "unresolvedPesos": 194566536000
       },
       {
         "year": 2023,
         "stage": "GAA",
         "sourceRowsClassified": 15197,
-        "assignedRows": 10672,
-        "assignedPesos": 312985429000,
-        "unresolvedRows": 4525,
-        "unresolvedPesos": 218028853000
+        "assignedRows": 10621,
+        "assignedPesos": 311061729000,
+        "unresolvedRows": 4576,
+        "unresolvedPesos": 219952553000
       },
       {
         "year": 2024,
         "stage": "GAA",
         "sourceRowsClassified": 11562,
-        "assignedRows": 7701,
-        "assignedPesos": 329916018000,
-        "unresolvedRows": 3861,
-        "unresolvedPesos": 226618902000
+        "assignedRows": 7682,
+        "assignedPesos": 329439018000,
+        "unresolvedRows": 3880,
+        "unresolvedPesos": 227095902000
       },
       {
         "year": 2025,
         "stage": "GAA",
         "sourceRowsClassified": 18627,
-        "assignedRows": 13907,
-        "assignedPesos": 442373086000,
-        "unresolvedRows": 4720,
-        "unresolvedPesos": 258706178000
+        "assignedRows": 13848,
+        "assignedPesos": 440743521000,
+        "unresolvedRows": 4779,
+        "unresolvedPesos": 260335743000
       },
       {
         "year": 2026,
         "stage": "GAA",
         "sourceRowsClassified": 11797,
-        "assignedRows": 8764,
-        "assignedPesos": 169784397000,
-        "unresolvedRows": 3033,
-        "unresolvedPesos": 106426858000
+        "assignedRows": 8722,
+        "assignedPesos": 168812363000,
+        "unresolvedRows": 3075,
+        "unresolvedPesos": 107398892000
       },
       {
         "year": 2027,
         "stage": "HGAB 3rd",
         "sourceRowsClassified": 11873,
-        "assignedRows": 9429,
-        "assignedPesos": 233664800000,
-        "unresolvedRows": 2444,
-        "unresolvedPesos": 146431290000
+        "assignedRows": 9428,
+        "assignedPesos": 233464800000,
+        "unresolvedRows": 2445,
+        "unresolvedPesos": 146631290000
       }
     ],
     "method": {
       "classifier": "Shared title classifier for multi-purpose buildings, flood control, bridges, and roads.",
       "attribution": "Current legislative-district roster and strict qualified-location rules. Unique assignments only; shared and unresolved titles remain excluded from district totals.",
-      "timeLimit": "Project locations are assigned to current legislative district boundaries. Representative labels are year-specific: sourced historical term intervals for FY2020–FY2025 and the current 20th Congress roster for FY2026–FY2027. Ambiguous, missing, and default-only term records are left unresolved.",
+      "timeLimit": "Project locations are assigned to current legislative district boundaries. Historical names and portraits follow the corresponding Congress roster where the seat can be reconciled with the current district. Election-year fiscal snapshots use the incoming Congress as cohort context; this does not identify who enacted or sponsored a budget. Portrait creation Congress is recorded separately from the member roster Congress.",
       "representativeCoverage": {
+        "2015|GAA": {
+          "congress": 16,
+          "resolvedDistricts": 191,
+          "unresolvedDistricts": 63,
+          "portraitDistricts": 136,
+          "mappedPortraitDistricts": 136,
+          "missingPortraitDistricts": 55,
+          "contextLabel": "16th Congress roster context; current allocation geography"
+        },
+        "2016|GAA": {
+          "congress": 17,
+          "resolvedDistricts": 204,
+          "unresolvedDistricts": 50,
+          "portraitDistricts": 140,
+          "mappedPortraitDistricts": 140,
+          "missingPortraitDistricts": 64,
+          "contextLabel": "17th Congress roster context; current allocation geography"
+        },
+        "2017|GAA": {
+          "congress": 17,
+          "resolvedDistricts": 204,
+          "unresolvedDistricts": 50,
+          "portraitDistricts": 140,
+          "mappedPortraitDistricts": 140,
+          "missingPortraitDistricts": 64,
+          "contextLabel": "17th Congress roster context; current allocation geography"
+        },
+        "2018|GAA": {
+          "congress": 17,
+          "resolvedDistricts": 204,
+          "unresolvedDistricts": 50,
+          "portraitDistricts": 140,
+          "mappedPortraitDistricts": 140,
+          "missingPortraitDistricts": 64,
+          "contextLabel": "17th Congress roster context; current allocation geography"
+        },
+        "2019|GAA": {
+          "congress": 18,
+          "resolvedDistricts": 224,
+          "unresolvedDistricts": 30,
+          "portraitDistricts": 159,
+          "mappedPortraitDistricts": 159,
+          "missingPortraitDistricts": 65,
+          "contextLabel": "18th Congress roster context; current allocation geography"
+        },
         "2020|GAA": {
-          "resolvedDistricts": 199,
-          "unresolvedDistricts": 55,
-          "ambiguousDistricts": 7,
-          "missingTermDistricts": 48
+          "congress": 18,
+          "resolvedDistricts": 224,
+          "unresolvedDistricts": 30,
+          "portraitDistricts": 159,
+          "mappedPortraitDistricts": 159,
+          "missingPortraitDistricts": 65,
+          "contextLabel": "18th Congress roster context; current allocation geography"
         },
         "2021|GAA": {
-          "resolvedDistricts": 199,
-          "unresolvedDistricts": 55,
-          "ambiguousDistricts": 7,
-          "missingTermDistricts": 48
+          "congress": 18,
+          "resolvedDistricts": 224,
+          "unresolvedDistricts": 30,
+          "portraitDistricts": 159,
+          "mappedPortraitDistricts": 159,
+          "missingPortraitDistricts": 65,
+          "contextLabel": "18th Congress roster context; current allocation geography"
         },
         "2022|GAA": {
-          "resolvedDistricts": 199,
-          "unresolvedDistricts": 55,
-          "ambiguousDistricts": 7,
-          "missingTermDistricts": 48
+          "congress": 19,
+          "resolvedDistricts": 249,
+          "unresolvedDistricts": 5,
+          "portraitDistricts": 248,
+          "mappedPortraitDistricts": 248,
+          "missingPortraitDistricts": 1,
+          "contextLabel": "19th Congress roster context; current allocation geography"
         },
         "2023|GAA": {
-          "resolvedDistricts": 182,
-          "unresolvedDistricts": 72,
-          "ambiguousDistricts": 1,
-          "missingTermDistricts": 71
+          "congress": 19,
+          "resolvedDistricts": 249,
+          "unresolvedDistricts": 5,
+          "portraitDistricts": 248,
+          "mappedPortraitDistricts": 248,
+          "missingPortraitDistricts": 1,
+          "contextLabel": "19th Congress roster context; current allocation geography"
         },
         "2024|GAA": {
-          "resolvedDistricts": 184,
-          "unresolvedDistricts": 70,
-          "ambiguousDistricts": 1,
-          "missingTermDistricts": 69
+          "congress": 19,
+          "resolvedDistricts": 249,
+          "unresolvedDistricts": 5,
+          "portraitDistricts": 248,
+          "mappedPortraitDistricts": 248,
+          "missingPortraitDistricts": 1,
+          "contextLabel": "19th Congress roster context; current allocation geography"
         },
         "2025|GAA": {
-          "resolvedDistricts": 184,
-          "unresolvedDistricts": 70,
-          "ambiguousDistricts": 1,
-          "missingTermDistricts": 69
+          "congress": 20,
+          "resolvedDistricts": 253,
+          "unresolvedDistricts": 1,
+          "portraitDistricts": 253,
+          "mappedPortraitDistricts": 253,
+          "missingPortraitDistricts": 0,
+          "contextLabel": "20th Congress roster context; current allocation geography"
         },
         "2026|GAA": {
-          "resolvedDistricts": 254,
-          "unresolvedDistricts": 0,
-          "ambiguousDistricts": 0,
-          "missingTermDistricts": 0
+          "congress": 20,
+          "resolvedDistricts": 253,
+          "unresolvedDistricts": 1,
+          "portraitDistricts": 253,
+          "mappedPortraitDistricts": 253,
+          "missingPortraitDistricts": 0,
+          "contextLabel": "20th Congress roster context; current allocation geography"
         },
         "2027|HGAB 3rd": {
-          "resolvedDistricts": 254,
-          "unresolvedDistricts": 0,
-          "ambiguousDistricts": 0,
-          "missingTermDistricts": 0
+          "congress": 20,
+          "resolvedDistricts": 253,
+          "unresolvedDistricts": 1,
+          "portraitDistricts": 253,
+          "mappedPortraitDistricts": 253,
+          "missingPortraitDistricts": 0,
+          "contextLabel": "20th Congress roster context; current allocation geography"
         }
       },
-      "representativeSource": "Sourced historical representative term intervals and the current 20th Congress roster for FY2026–FY2027. Broad default 2016–2025 terms are excluded.",
+      "representativeRosterCheckedDate": "2026-11-04",
+      "representativeSource": "House of Representatives, House Members · 20th Congress (https://www.congress.gov.ph/house-members), with current seat corrections for Antipolo 2nd, Cavite 4th, and the Taguig City/Taguig City-Pateros seats. Historical identities use the sourced 16th–19th Congress district rosters and attributed Commons portraits in congress-historical-rosters.json. Portraits may come from another term only when the individual identity matches; photo Congress and roster Congress remain separate.",
       "sources": "FY2015 DBM DPWH account-level GAA CSV with capital-outlay PAP candidates; FY2016–FY2018 title-classified DPWH current-new-appropriation rows from the BetterGov GAA Explorer baseline; FY2019 UACS-coded named project rows from the DBM Technical GAA DPWH schedule; FY2020–FY2025 integrated annual GAA data; FY2026 DPWH Details Enrolled Copy; FY2027 House GAB 3rd-reading DPWH schedule. FY2015–FY2019 use separate historical source layers; FY2027 is a proposal, not enacted GAA."
     }
   },

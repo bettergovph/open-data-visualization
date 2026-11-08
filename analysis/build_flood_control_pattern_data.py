@@ -331,6 +331,12 @@ def main():
         version = hashlib.sha256(OUT.read_bytes()).hexdigest()[:12]
         text = page.read_text()
         text = re.sub(r"flood-control-pattern-data\.json(?:\?v=[^'\"]*)?", f"flood-control-pattern-data.json?v={version}", text)
+        import sys
+        nep_root = ROOT.parent / "nep"
+        if str(nep_root) not in sys.path:
+            sys.path.insert(0, str(nep_root))
+        from uniform_report_menu import apply_page as apply_uniform_menu
+        text = apply_uniform_menu(text, "flood-control.html")
         page.write_text(text)
     print(f"Wrote {OUT}")
 
