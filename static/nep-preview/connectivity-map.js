@@ -1,5 +1,4 @@
 (()=>{
-  const revealNames=document.documentElement.dataset.connectivityReveal==='true';
   const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const number=x=>Number(x||0).toLocaleString('en-PH');
   const venueHash=async value=>{
@@ -88,11 +87,12 @@
   async function open(id){
     const dlg=ensureDialog(),content=dlg.querySelector('#connectivity-map-content');dlg.querySelector('#connectivity-map-title').textContent='FMR and road connection details';content.textContent='Loading route, road and municipality geometry…';dlg.showModal();
     try{
+      const canRevealNames=Boolean(await window.connectivityAdminAccess);
       const [data,bounds]=await Promise.all([payload(),boundaries()]),project=data.projects?.find?.(row=>String(row.id)===String(id))||data.projects?.[id];
       if(!project)throw Error('Map geometry is not available for this project record.');
       const road=project.roadSection?data.roads?.[project.roadSection]:null;
       let cropGeometry=null,cropFailed=false;if(data.farmLocationAvailable&&!project.coordinateQualityFlag){try{cropGeometry=await cropForProject(String(project.id));}catch{cropFailed=true;}}
-      const displayProject={...project,cropGeometry,venues:await Promise.all((project.venues||[]).map(async v=>({...v,name:revealNames?v.name:`SHA-256 ${await venueHash(v.name)}`})))};
+      const displayProject={...project,cropGeometry,venues:await Promise.all((project.venues||[]).map(async v=>({...v,name:canRevealNames?v.name:`SHA-256 ${await venueHash(v.name)}`})))};
       dlg.querySelector('#connectivity-map-title').textContent=project.title||'Connectivity map';
       dlg.querySelector('#connectivity-map-subtitle').textContent=[project.region,project.roadName,project.roadClass,project.nearestDistanceMeters==null?'':`${number(project.nearestDistanceMeters)} m to nearest road`,project.farmDistanceMeters!=null?`${number(project.farmDistanceMeters)} m to mapped cropland`:project.farmCoverage1000m?'>1 km to mapped cropland':'Cropland distance unresolved'].filter(Boolean).join(' · ');
         const shareUrl=new URL(location.href);shareUrl.search='';shareUrl.hash='';shareUrl.searchParams.set('map',String(project.id));

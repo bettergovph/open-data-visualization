@@ -11,13 +11,6 @@ use utils::*;
 use serde::Deserialize;
 use std::path::Path;
 
-// Casual UI gate: the matching token is a marker filename in this ignored directory.
-fn connectivity_admin_token_exists(value: &str) -> bool {
-    value.len() == 64
-        && value.bytes().all(|byte| byte.is_ascii_hexdigit())
-        && Path::new(".connectivity-admin-hashes").join(value).is_file()
-}
-
 // Route handlers
 
 // BetterGovPH Homepage
@@ -753,29 +746,15 @@ async fn budget_trivia_mobile(req: HttpRequest) -> Result<HttpResponse, ActixErr
     Ok(file.into_response(&req))
 }
 
-async fn connectivity_entry(req: HttpRequest) -> Result<HttpResponse, ActixError> {
-    let query = web::Query::<std::collections::HashMap<String, String>>::from_query(req.query_string());
-    let reveal_names = query.as_ref().ok()
-        .and_then(|values| values.get("hash"))
-        .map(|value| connectivity_admin_token_exists(value))
-        .unwrap_or(false);
+async fn connectivity_entry() -> Result<HttpResponse, ActixError> {
     let path = "static/nep-preview/connectivity.html";
-    let mut html = std::fs::read_to_string(path)
+    let page = std::fs::read(path)
         .map_err(actix_web::error::ErrorInternalServerError)?;
-    if reveal_names {
-        html = html.replacen(
-            "<html lang=\"en\">",
-            "<html lang=\"en\" data-connectivity-reveal=\"true\" data-connectivity-admin=\"true\">",
-            1,
-        );
-        let notice = "<aside role=\"status\" style=\"margin:12px;padding:12px 16px;border-left:5px solid #FCD116;background:#fff8df\"><strong>Source-name display enabled.</strong> Names are public-source labels and do not establish ownership, access, project benefit or involvement. Section 1 also has admin controls for saving human-reviewed green exemptions.</aside>";
-        html = html.replacen("<main>", &format!("<main>{notice}"), 1);
-    }
     Ok(HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")
         .insert_header(("Cache-Control", "no-store"))
         .insert_header(("Referrer-Policy", "no-referrer"))
-        .body(html))
+        .body(page))
 }
 
 // DPWH 2026 Page
