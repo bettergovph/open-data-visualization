@@ -7,7 +7,7 @@
   const key=v=>String(v||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/[^A-Z0-9]/g,'');
   const place=r=>[r.municipality,r.province].filter(Boolean).join(', ')||r.district||r.region||'Place not recorded';
   const term=o=>`${fmtYear(o.officeStartYear??o.electionYear)}–${fmtYear(o.termThroughYear)}`;
-  let people=[],families={},familyEvidence={},page=0,pageSize=50,view=[],sourceNames=new Map();
+  let people=[],families={},familyEvidence={},page=0,pageSize=50,view=[],sourceNames=new Map(),comelecRows=[],comelecPage=0,comelecPageSize=20;
   function sourceLink(url,label){return /^https?:\/\//i.test(url||'')?`<a href="${esc(url)}" target="_blank" rel="noreferrer">${esc(label||sourceNames.get(url)||'Source')}</a>`:''}
   const urls=o=>[...new Set([o.roleSourceUrl,...(o.roleSourceUrls||[]),...(o.sourceUrls||[])].filter(Boolean))];
   function officeSources(o){return urls(o).map((url,i)=>sourceLink(url,`Source${urls(o).length>1?' '+(i+1):''}`)).join(' · ')}
@@ -54,10 +54,30 @@
     status.textContent=`${fmt(first)}–${fmt(last)} of ${fmt(view.length)} unique names · sorted by highest recorded office, then name. Year and office filters match the same recorded term.`;
     pageLabel.textContent=`Page ${fmt(page+1)} of ${fmt(pages)}`;prev.disabled=page===0;next.disabled=page>=pages-1;
   }
+  function renderComelec(){
+    const input=$('comelec-results-search'),tbody=$('comelec-results-body'),label=$('comelec-results-page'),previous=$('comelec-results-prev'),following=$('comelec-results-next'),message=$('comelec-results-status');
+    if(!tbody)return;
+    const query=(input?.value||'').trim().toLowerCase();
+    const rows=comelecRows.filter(row=>!query||[row.locality,row.district,row.contest,...(row.candidates||[]).flatMap(c=>[c.name,c.party])].join(' ').toLowerCase().includes(query));
+    const pages=Math.max(1,Math.ceil(rows.length/comelecPageSize));comelecPage=Math.min(comelecPage,pages-1);
+    tbody.innerHTML=rows.slice(comelecPage*comelecPageSize,(comelecPage+1)*comelecPageSize).map(row=>{
+      const winner=row.winner;
+      const winnerCell=winner?`<strong>${esc(winner.name)}</strong>${winner.party?`<small>${esc(winner.party)}</small>`:''}<small>${fmt(winner.votes)} votes</small>`:'Not available';
+      const others=(row.candidates||[]).filter(c=>c.rank!==1).map(c=>`${esc(c.name)}${c.party?` · ${esc(c.party)}`:''} · ${fmt(c.votes)}`).join('<br>')||'—';
+      return `<tr><td><strong>${esc(row.locality||row.contest)}</strong><small>${esc(row.district||'District not parsed')}</small></td><td>${winnerCell}</td><td>${others}</td></tr>`;
+    }).join('')||'<tr><td colspan="3">No 2025 House results match this search.</td></tr>';
+    if(message)message.textContent=`${fmt(rows.length)} of ${fmt(comelecRows.length)} House district contests · aggregated 2025 COMELEC results.`;
+    if(label)label.textContent=`Page ${fmt(comelecPage+1)} of ${fmt(pages)}`;
+    if(previous)previous.disabled=comelecPage===0;if(following)following.disabled=comelecPage>=pages-1;
+  }
   function setup(data){
     people=data.people||[];families=data.families||{};familyEvidence=data.familyLinkEvidence||{};
     const photoCoverage=$('vote-photo-coverage');if(photoCoverage){const count=people.filter(p=>p.portrait).length;photoCoverage.textContent=`Verified portrait matches: ${fmt(count)} of ${fmt(people.length)} unique names. Initials mark records without a verified portrait match; similar names are left unpictured.`}
     sourceNames=new Map((data.reviewedOnlineSources||[]).map(s=>[s.url,s.title]));
+    comelecRows=data.comelecHouseResults2025||[];
+    const comelecSearch=$('comelec-results-search');if(comelecSearch)comelecSearch.addEventListener('input',()=>{comelecPage=0;renderComelec()});
+    const comelecPrev=$('comelec-results-prev'),comelecNext=$('comelec-results-next');if(comelecPrev)comelecPrev.onclick=()=>{if(comelecPage>0){comelecPage--;renderComelec()}};if(comelecNext)comelecNext.onclick=()=>{comelecPage++;renderComelec()};
+    renderComelec();
     $('vote-total').textContent=fmt(data.summary?.officialRows||0);
     $('vote-no-total').textContent=fmt(people.length);
     $('vote-house-total').textContent=fmt(data.summary?.currentHouseRosterRows||0);
@@ -102,5 +122,5 @@
     years.forEach((year,i)=>{const x=left+i*step+(step-bw)/2,bh=values[i]/max*ph,y=top+ph-bh;parts.push(`<rect x="${x}" y="${y}" width="${bw}" height="${bh}" rx="5" fill="#b42318"><title>${year}: ${fmt(values[i])} unique names</title></rect><text class="chart-value" x="${x+bw/2}" y="${Math.max(top-4,y-7)}" text-anchor="middle">${fmt(values[i])}</text><text x="${x+bw/2}" y="${h-17}" text-anchor="middle">${year}</text>`)});
     parts.push(`<line x1="${left}" y1="${top+ph}" x2="${w-right}" y2="${top+ph}" stroke="#8d9ba5"/>`);svg.innerHTML=parts.join('');
   }
-  fetch('vote-2028-data.json?v=5f6c142eb648').then(r=>{if(!r.ok)throw Error('Vote 2028 data is unavailable');return r.json()}).then(setup).catch(e=>{status.textContent=`Could not load the historical records: ${e.message}`;body.innerHTML='<tr><td colspan="9">The dataset could not be loaded.</td></tr>'});
+  fetch('vote-2028-data.json?v=36d3a9225890').then(r=>{if(!r.ok)throw Error('Vote 2028 data is unavailable');return r.json()}).then(setup).catch(e=>{status.textContent=`Could not load the historical records: ${e.message}`;body.innerHTML='<tr><td colspan="9">The dataset could not be loaded.</td></tr>';const msg=$('comelec-results-status');if(msg)msg.textContent=`Could not load COMELEC results: ${e.message}`});
 })();

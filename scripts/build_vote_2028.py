@@ -31,6 +31,36 @@ if not ASOG_DATASET.exists():
     ASOG_DATASET = NEP_SOURCE_DATABASES / 'ASoG-POLITICAL-DYNASTIES-DATASET-V2016.xlsx'
 ODV_CONGRESSMEN = ROOT / 'static/data/congressmen_consolidated.json'
 REVIEWED_SOURCES = ROOT / 'database/vote_2028_reviewed_sources.json'
+COMMISSION_2025_RESULTS = ROOT / 'static/data/elections_2025_winners.json'
+
+
+def load_comelec_house_results():
+    """Normalize the locally aggregated 2025 COMELEC House contest results."""
+    if not COMMISSION_2025_RESULTS.exists():
+        return []
+    raw = json.loads(COMMISSION_2025_RESULTS.read_text(encoding='utf-8'))
+    rows = []
+    district_re = re.compile(r'\s+-\s+(FIRST|SECOND|THIRD|FOURTH|FIFTH|SIXTH|SEVENTH|EIGHTH|NINTH|TENTH|LONE|AT LARGE)\s+LEGDIST\s*$', re.I)
+    for contest, result in sorted(raw.items()):
+        if 'HOUSE OF REPRESENTATIVES' not in contest.upper():
+            continue
+        # The contest prefix itself contains “House of Representatives”; the
+        # final “of” introduces the geography.
+        location = re.split(r'\s+of\s+', contest, flags=re.I)[-1].strip()
+        match = district_re.search(location)
+        district = ('At-large' if match.group(1).upper() == 'AT LARGE' else match.group(1).title() + ' District') if match else ''
+        locality = location[:match.start()].strip(' -') if match else location.strip()
+        candidates = []
+        for candidate in result.get('candidates', []):
+            # COMELEC candidate labels commonly include ballot sequence and party.
+            label = re.sub(r'^\s*\d+\.\s*', '', str(candidate.get('name', ''))).strip()
+            party_match = re.search(r'\s*\(([^()]*)\)\s*$', label)
+            party = party_match.group(1).strip() if party_match else ''
+            name = label[:party_match.start()].strip() if party_match else label
+            candidates.append({'name': name, 'party': party, 'votes': int(candidate.get('votes') or 0), 'rank': int(candidate.get('rank') or 0)})
+        winner = next((candidate for candidate in candidates if candidate['rank'] == 1), None)
+        rows.append({'contest': contest, 'locality': locality, 'district': district, 'winner': winner, 'candidates': candidates})
+    return rows
 
 
 def norm(value):
@@ -1412,6 +1442,7 @@ def build():
     records.sort(key=lambda r: (r['electionYear'], r['officeGroup'], norm(r['province']), norm(r['municipality']), norm(r['name'])))
     people = unique_people(records)
     attach_verified_portraits(people)
+    comelec_house_results = load_comelec_house_results()
     result = {
         'generatedAt': __import__('datetime').datetime.now(__import__('datetime').timezone.utc).isoformat(),
         'source': 'Historical elected-office records; Ateneo Policy Center historical election data (2004–2016); official 20th Congress roster; and cited public family-relationship sources',
@@ -1420,6 +1451,8 @@ def build():
         'recordsScope': 'The records array contains officeholders whose linked-family records meet the displayed one-at-a-time criterion in one or more modeled years. The families object retains linked historical family-member office records for context.',
         'peopleScope': 'One row per normalized full name. Each row retains all recorded office terms, source person identities and family groups; a display grouping does not infer a family relationship between namesakes. Power order uses the highest recorded office: President, Vice President, Senator, Representative, Governor, Vice Governor, Mayor, Vice Mayor, Provincial Board Member, Councilor, Barangay Captain.',
         'reviewedOnlineSources': reviewed_sources,
+        'comelecHouseResults2025': comelec_house_results,
+        'comelecHouseResultsScope': '2025 COMELEC House of Representatives precinct results aggregated by the existing ODV extraction into contest-level candidate vote totals. The display includes the winner and up to three highest-vote candidates per district; it is an election result record, not a 2028 candidate list.',
         'onlineEnrichment': reviewed_summary,
         'method': {
             'noVoteRule': 'A red marker means at least two distinct linked family members held office in the same modeled calendar year. A family with exactly one local and one national officeholder in that year is excluded. Links come from ODV-verified relationships, shared ODV dynasty_family_id, or specifically cited public family sources; shared surnames alone do not count.',
@@ -1434,6 +1467,7 @@ def build():
         },
         'summary': {
             'officialRows': len(records),
+            'comelecHouseContests2025': len(comelec_house_results),
             'uniqueScreenedNames': len(people),
             'uniqueNamesWithVerifiedPortrait': sum(bool(p.get('portrait')) for p in people),
             'uniqueNamesWithoutVerifiedPortrait': sum(not p.get('portrait') for p in people),

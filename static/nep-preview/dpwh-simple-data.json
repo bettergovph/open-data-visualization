@@ -1,5 +1,5 @@
 {
-  "generatedAtUtc": "2026-11-10T10:34:16.939198+00:00",
+  "generatedAtUtc": "2026-11-10T12:57:09.342503+00:00",
   "lengthCoverage": {
     "roads": {
       "lineItems": 6482,
@@ -28,6 +28,32 @@
       "q1PesosPerMeter": 495867.77,
       "medianPesosPerMeter": 916666.67,
       "q3PesosPerMeter": 1807142.86
+    }
+  },
+  "highestAllocationPerStatedMeter": {
+    "Roads": {
+      "projectId": "HB10858-3-0229-002172",
+      "projectName": "Lanuza - Tandag Bypass Road (SDCR Alternate Route), Sta. 17+580.9 - Sta. 17+581.487, Surigao del Sur",
+      "office": "Central Office",
+      "region": "Region XIII",
+      "amountPesos": 180000000,
+      "statedLengthMeters": 0.587,
+      "pesosPerStatedMeter": 306643952.3,
+      "rateReview": "Very short printed range · verify length first",
+      "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf",
+      "sourcePage": "229"
+    },
+    "Bridges": {
+      "projectId": "HB10858-3-0423-005908",
+      "projectName": "Rehabilitation of Burol Overpass, Sta. 1+120 - Sta. 1+145, Provincial Road, Borol 2nd, Balagtas, Bulacan",
+      "office": "Central Office",
+      "region": "Region III",
+      "amountPesos": 150000000,
+      "statedLengthMeters": 25.0,
+      "pesosPerStatedMeter": 6000000.0,
+      "rateReview": "Insufficient peers · no high-rate conclusion",
+      "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf",
+      "sourcePage": "423"
     }
   },
   "burolOverpass": {
@@ -74,7 +100,17 @@
       "q1Pesos": 3389.06,
       "medianPesos": 3871.165,
       "q3Pesos": 4897.33,
-      "maximumPesos": 45442.6925
+      "maximumPesos": 45442.6925,
+      "highestUnitRateProject": {
+        "code": "2027DPWH-Proposal-38559",
+        "name": "Construction of Road, Sitio Kimundo, Barangay Lagandang to Barangay New Pangasinan, Isulan, Sultan Kudarat",
+        "unitCost": 45442.6925,
+        "quantity": 4.0,
+        "pages": [
+          2
+        ],
+        "source": "Proposal POW"
+      }
     },
     "Bridges": {
       "projectCount": 189,
@@ -83,7 +119,17 @@
       "q1Pesos": 3213.42,
       "medianPesos": 3554.293333333333,
       "q3Pesos": 4359.456666666667,
-      "maximumPesos": 11291.94
+      "maximumPesos": 11291.94,
+      "highestUnitRateProject": {
+        "code": "2027DPWH-Proposal-09695",
+        "name": "Reconstruction of Bridge at Langkaan Road, Barangay De Ocampo, Trece Martires City, Cavite",
+        "unitCost": 11291.94,
+        "quantity": 1.0,
+        "pages": [
+          2
+        ],
+        "source": "Proposal POW"
+      }
     }
   },
   "methods": {
