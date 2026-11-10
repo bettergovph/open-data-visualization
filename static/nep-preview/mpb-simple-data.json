@@ -1,0 +1,177 @@
+{
+  "generatedAtUtc": "2026-11-10T07:44:41.070161+00:00",
+  "recipientBarangays2027": {
+    "returning": 3225,
+    "firstTime": 1071,
+    "total": 4296
+  },
+  "documents2027": {
+    "fiscalYear": 2027,
+    "stage": "HGAB 3rd reading",
+    "source": "MPB HGAB project IDs reconciled to all-HGAB Proposal and Senate document coverage by House ledger ID",
+    "documentCoverageGeneratedAtUtc": "2026-11-09T13:34:24.837779+00:00",
+    "denominatorProjectRows": 5765,
+    "completeDocumentProjectRows": 3762,
+    "completeDocumentProjectRowsPct": 65.26,
+    "incompleteDocumentProjectRows": 2003,
+    "proposalCompleteDocumentProjectRows": 2039,
+    "senateCompleteDocumentProjectRows": 1720,
+    "completeDocumentTypeThreshold": 4,
+    "completeDocumentTypeNames": [
+      "BP 202",
+      "Certificate of Implementability",
+      "Development Council",
+      "Geotagged photos",
+      "POW"
+    ],
+    "countsByMatchedTypeCount": [
+      {
+        "matchedTypeCount": 0,
+        "projectRows": 1245,
+        "projectRowsPct": 21.6
+      },
+      {
+        "matchedTypeCount": 1,
+        "projectRows": 54,
+        "projectRowsPct": 0.94
+      },
+      {
+        "matchedTypeCount": 2,
+        "projectRows": 95,
+        "projectRowsPct": 1.65
+      },
+      {
+        "matchedTypeCount": 3,
+        "projectRows": 609,
+        "projectRowsPct": 10.56
+      },
+      {
+        "matchedTypeCount": 4,
+        "projectRows": 2330,
+        "projectRowsPct": 40.42
+      },
+      {
+        "matchedTypeCount": 5,
+        "projectRows": 1432,
+        "projectRowsPct": 24.84
+      }
+    ],
+    "method": "Each FY2027 MPB HGAB ledger row is joined by its House project ID. Proposal and Senate HGAB document types are combined and deduplicated. Complete means at least four of five named types: POW, BP 202, Development Council, geotagged photos, and Certificate of Implementability. Other document types are excluded. A title match or file presence does not verify document contents."
+  },
+  "coverage2027": {
+    "officialBarangays": 42010,
+    "recipientBarangays": 4296,
+    "titleBarangayMatches": 5147,
+    "barangaysWithMultipleTitles": 576
+  },
+  "history2015To2026": {
+    "officialBarangays": 42010,
+    "none": 18222,
+    "oneToThree": 21151,
+    "fourOrMore": 2637
+  },
+  "poverty2015To2027": {
+    "points": [
+      {
+        "region": "BARMM",
+        "povertyPct": 23.5,
+        "allocationPerBarangayPesos": 2809588.100686499
+      },
+      {
+        "region": "REGION 9",
+        "povertyPct": 24.2,
+        "allocationPerBarangayPesos": 4561754.537597234
+      },
+      {
+        "region": "CAR",
+        "povertyPct": 4.4,
+        "allocationPerBarangayPesos": 7376807.300509338
+      },
+      {
+        "region": "REGION 13",
+        "povertyPct": 14.9,
+        "allocationPerBarangayPesos": 8110867.37804878
+      },
+      {
+        "region": "MIMAROPA",
+        "povertyPct": 16.3,
+        "allocationPerBarangayPesos": 8732671.91780822
+      },
+      {
+        "region": "NCR",
+        "povertyPct": 1.1,
+        "allocationPerBarangayPesos": 49285067.638483964
+      },
+      {
+        "region": "REGION 1",
+        "povertyPct": 8.4,
+        "allocationPerBarangayPesos": 5510559.534741353
+      },
+      {
+        "region": "REGION 10",
+        "povertyPct": 18.4,
+        "allocationPerBarangayPesos": 11698908.011869436
+      },
+      {
+        "region": "REGION 11",
+        "povertyPct": 11.3,
+        "allocationPerBarangayPesos": 17002795.180722892
+      },
+      {
+        "region": "REGION 12",
+        "povertyPct": 17.0,
+        "allocationPerBarangayPesos": 11625171.376481313
+      },
+      {
+        "region": "REGION 2",
+        "povertyPct": 7.2,
+        "allocationPerBarangayPesos": 9194872.349632194
+      },
+      {
+        "region": "REGION 3",
+        "povertyPct": 5.7,
+        "allocationPerBarangayPesos": 17270634.13848631
+      },
+      {
+        "region": "REGION 4A",
+        "povertyPct": 5.3,
+        "allocationPerBarangayPesos": 14706519.288577154
+      },
+      {
+        "region": "REGION 5",
+        "povertyPct": 20.3,
+        "allocationPerBarangayPesos": 6931280.034572169
+      },
+      {
+        "region": "REGION 8",
+        "povertyPct": 20.3,
+        "allocationPerBarangayPesos": 3493589.6907216497
+      }
+    ],
+    "tests": {
+      "method": "Two-sided permutation test of Spearman rank correlation; 20,000 permutations with fixed seed",
+      "excludedForBoundaryOverlap": [
+        "REGION 6",
+        "REGION 7",
+        "NIR"
+      ],
+      "n": 15,
+      "coverage": {
+        "rho": -0.1966041893191964,
+        "permutations": 20000,
+        "pValue": 0.47872606369681514
+      },
+      "allocationPerBarangay": {
+        "rho": -0.6630923112492897,
+        "permutations": 20000,
+        "pValue": 0.008549572521373932
+      }
+    },
+    "dataSnapshotUtc": "2026-11-09T12:09:54.477960+00:00"
+  },
+  "sourceSha256": {
+    "mpb_analysis.json": "df491b43f15ead01e5cf36d166f8d8d7cef5533b24de43f6a2f3a9cce3efe229",
+    "mpb-regional-province-data.json": "03bb4dbe2162e417b8abfe1c5016be16f8c10eefb8c8b12c1632146626604bbb",
+    "mpb-barangay-base-data.json": "e718b9be3952d4c89bac8c91a1e1218faf0a60f98e0c29f231ac82277c1591ae"
+  }
+}
