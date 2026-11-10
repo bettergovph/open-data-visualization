@@ -1,0 +1,70 @@
+{
+ "schema": 1,
+ "dataset": "bettergovph/philgeps-v2",
+ "title": "PhilGEPS procurement notices and awards, 2000–2025 (v2)",
+ "built_at": "2026-11-10T15:28:32Z",
+ "pipeline": {
+  "repo": "https://github.com/bettergovph/ai-budget",
+  "source": "https://github.com/csiiiv/philgeps_data_v2",
+  "source_commit": "c39cb8077739d804fa71bbebb9210f00c0661f19",
+  "drive": "https://drive.google.com/drive/folders/1Km2gqIfaY_9ZotjvePFZVSMEuxud6WWA",
+  "this_step": "scripts/hf/publish.py philgeps-v2 (drops the withheld columns, renames)",
+  "commit": "faa26b862cd7e0446601d41cbcf93ec28f43a7fb"
+ },
+ "facts": {
+  "rows": 18515260,
+  "source_files": 70,
+  "periods": [
+   "2000-11--2000-12",
+   "2025-07--2025-09"
+  ],
+  "bid_published": [
+   "2000-12-01",
+   "2025-09-30"
+  ],
+  "award_date": [
+   "1920-01-08",
+   "2034-10-04"
+  ],
+  "drive_sha256": {
+   "philgeps_normalized.parquet": "fa8b0ec8a55a123a69c0742cbd78309136b69ae54324c1c5bb22449a5fc26d55",
+   "philgeps_cleaned.parquet": "56283851709e5b5ee95cbc169c85c4cdf8095433868bc580cc36a51918a5be36"
+  },
+  "withheld": {
+   "created_by": {
+    "rows": 8392977,
+    "distinct": 62829
+   },
+   "awardee_contact_person": {
+    "rows": 2716421,
+    "distinct": 89025
+   }
+  },
+  "rows_flagged": 806356
+ },
+ "files": [
+  {
+   "file": "philgeps-2000-2025.parquet",
+   "bytes": 1179924787,
+   "sha256": "fb0ef259ceada8cbed82da1205c83c987b93bc4240199c567424447b5aa9a00a",
+   "rows": 18515260
+  },
+  {
+   "file": "philgeps-2000-2025-typed.parquet",
+   "bytes": 1224062358,
+   "sha256": "37fbc990a68236c59e52af12797358e5c0d2ddde8bcfbf7c2eb3d458ee866a31",
+   "rows": 18515260
+  },
+  {
+   "file": "sources.parquet",
+   "bytes": 13129,
+   "sha256": "73868a706c0afe614f031d5215fc8348c54f0eb4b1db42bce9b668c6f5f08e64",
+   "rows": 70
+  },
+  {
+   "file": "source-catalog.json",
+   "bytes": 195862,
+   "sha256": "e4fe6495aa97fa435991883dacfbb8613094526542ad1e6c685fb4f4c132a974"
+  }
+ ]
+}
