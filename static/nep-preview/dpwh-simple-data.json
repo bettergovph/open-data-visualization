@@ -1,0 +1,100 @@
+{
+  "generatedAtUtc": "2026-11-10T10:34:16.939198+00:00",
+  "lengthCoverage": {
+    "roads": {
+      "lineItems": 6482,
+      "withStatedLength": 3329,
+      "withoutUsableLength": 3153,
+      "assetLengthsMatched": 595,
+      "assetLengthWhenTitleLengthMissing": 9
+    },
+    "bridges": {
+      "lineItems": 1159,
+      "withStatedLength": 65,
+      "withoutUsableLength": 1094,
+      "existingSpansMatched": 754
+    },
+    "policy": "Existing road-section lengths and bridge spans are offline inventory dimensions. They do not replace the funded work length when the project title does not state a usable length."
+  },
+  "allocationPerStatedMeter": {
+    "Roads": {
+      "records": 3329,
+      "q1PesosPerMeter": 21000.0,
+      "medianPesosPerMeter": 34722.22,
+      "q3PesosPerMeter": 62500.0
+    },
+    "Bridges": {
+      "records": 65,
+      "q1PesosPerMeter": 495867.77,
+      "medianPesosPerMeter": 916666.67,
+      "q3PesosPerMeter": 1807142.86
+    }
+  },
+  "burolOverpass": {
+    "project": "Rehabilitation of Burol Overpass, Sta. 1+120 - Sta. 1+145, Provincial Road, Borol 2nd, Balagtas, Bulacan",
+    "program": "BIP - Access Roads and/or Bridges from the National Roads leading to Major/ Strategic Public Buildings/ Facilities",
+    "allocationPesos": 150000000,
+    "statedLengthMeters": 25.0,
+    "inventoryBridgeId": null,
+    "inventorySpanMeters": null,
+    "inventoryCondition": "No inventory condition match",
+    "conditionAssessmentDate": "Not available in matched records",
+    "dpwhTransparencyDocumentStatus": "5+ documents listed",
+    "dpwhTransparencyDocumentStatusCode": "five_or_more_listed",
+    "dpwhTransparencyDocumentCount": 5,
+    "dpwhTransparencyMatchBasis": "exact_title_amount",
+    "sourceVolume": "3- HB 10858 FOR 3RD READING VOL I-C .pdf",
+    "sourcePage": "423"
+  },
+  "bridgeRehabilitation": {
+    "projects": 290,
+    "withInventoryBridgeId": 270,
+    "withInventoryCondition": 226,
+    "conditionCounts": {
+      "Bad · assessment year unknown": 1,
+      "Poor · assessment year unknown": 58,
+      "Fair · assessment year unknown": 138,
+      "Good · assessment year unknown": 29,
+      "No inventory condition match": 64
+    },
+    "transparencyDocumentStatuses": {
+      "5+ documents listed": 3,
+      "Fewer than 5 listed": 254,
+      "Candidate title match · review": 0,
+      "No verified title match in snapshot": 33,
+      "No exact-title record in snapshot": 0
+    }
+  },
+  "transparencySnapshotRetrievedAtUtc": "2026-10-18T08:46:20Z",
+  "billboards": {
+    "Roads": {
+      "projectCount": 2106,
+      "unit": "each",
+      "costBasis": "as_submitted",
+      "q1Pesos": 3389.06,
+      "medianPesos": 3871.165,
+      "q3Pesos": 4897.33,
+      "maximumPesos": 45442.6925
+    },
+    "Bridges": {
+      "projectCount": 189,
+      "unit": "each",
+      "costBasis": "as_submitted",
+      "q1Pesos": 3213.42,
+      "medianPesos": 3554.293333333333,
+      "q3Pesos": 4359.456666666667,
+      "maximumPesos": 11291.94
+    }
+  },
+  "methods": {
+    "costPerMeter": "Whole HGAB allocation divided by a usable length stated in the project title. It is a screening ratio, not verified construction cost; scope, width, funded extent and quantities may differ.",
+    "bridgeInventory": "Bridge IDs and condition labels are supported matches to offline DPWH inventory records. Assessment dates are unavailable in the matched records.",
+    "transparency": "The DPWH Transparency snapshot reports listed document counts, not physical completion. Its snapshot date and exact-title reconciliation appear in bridge-rehabilitation-review.json.",
+    "billboard": "POW item amount divided by quantity, for the merged Project Billboard / Signboard item with unit each. Proposal POW rows are replaced by linked Senate HGAB POW rows where available."
+  },
+  "sources": {
+    "analysis_output/cost_per_km.json": "9f689329ab0bbfb546111c937646767af49e906fd38c4566d0d526f5283ff9d3",
+    "analysis_output/bridge-rehabilitation-review.json": "106cbf5610ee2439df9eb1aad1b9f397d5251fef43e037171a3efb9fff02b30b",
+    "analysis_output/dpwh-in-depth-data.json": "5043982aa803d344e6ea14b015bc80165b43759c55ead9af3b3238f7b9db4d83"
+  }
+}
