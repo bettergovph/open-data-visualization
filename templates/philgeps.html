@@ -168,6 +168,23 @@
 
     <!-- Main Content -->
     <div style="padding: 6rem;">
+        <section style="max-width:1400px;margin:0 auto 24px;background:#eff6ff;border:1px solid #93c5fd;border-radius:12px;padding:20px;">
+            <h2 style="margin:0 0 6px;color:#123b75;">PhilGEPS v2 awarded contracts · 2000–2025</h2>
+            <p style="margin:0 0 12px;color:#334155;">Award records searched from the v2 typed dataset. Amounts are reported once per award even when an award spans several line items. Repeated source exports remain separately represented when their award details differ.</p>
+            <form id="philgeps-v2-search" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+                <input id="philgeps-v2-query" type="search" placeholder="Search awardee, title, or reference" style="flex:1;min-width:240px;padding:9px;border:1px solid #94a3b8;border-radius:7px;">
+                <button style="padding:9px 14px;border:0;border-radius:7px;background:#1d4ed8;color:white;">Search v2 awards</button>
+            </form>
+            <p id="philgeps-v2-status" role="status" style="font-size:13px;color:#475569;">Loading PhilGEPS v2 awards…</p>
+            <div style="overflow:auto;max-height:480px;">
+                <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                    <thead><tr style="text-align:left;background:#dbeafe;"><th style="padding:8px;">Award date</th><th style="padding:8px;">Awardee</th><th style="padding:8px;">Award / items</th><th style="padding:8px;">Amount</th><th style="padding:8px;">Reference</th><th style="padding:8px;">Agency · area</th></tr></thead>
+                    <tbody id="philgeps-v2-rows"><tr><td colspan="6" style="padding:10px;">Loading…</td></tr></tbody>
+                </table>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;margin-top:12px;"><button id="philgeps-v2-prev" type="button">Previous</button><span id="philgeps-v2-page"></span><button id="philgeps-v2-next" type="button">Next</button></div>
+            <p style="font-size:12px;color:#64748b;margin-bottom:0;">Independent, unofficial normalization of published PhilGEPS exports. See the <a href="/sources">source catalog</a> for dataset provenance and caveats.</p>
+        </section>
         <section>
             <div style="max-width: 1400px; margin: 0 auto;">
 
@@ -3220,6 +3237,50 @@
             if (officerRows.length > 8) lines.push(`${officerRows.length - 8} more officer/incorporator records`);
             return lines;
         }
+    </script>
+
+    <script>
+        (() => {
+            const form = document.getElementById('philgeps-v2-search');
+            if (!form) return;
+            let page = 1;
+            const pageSize = 25;
+            const query = document.getElementById('philgeps-v2-query');
+            const body = document.getElementById('philgeps-v2-rows');
+            const status = document.getElementById('philgeps-v2-status');
+            const pageLabel = document.getElementById('philgeps-v2-page');
+            const previous = document.getElementById('philgeps-v2-prev');
+            const next = document.getElementById('philgeps-v2-next');
+            const money = value => value == null ? '—' : '₱' + Number(value).toLocaleString('en-PH', {maximumFractionDigits: 2});
+            async function load() {
+                status.textContent = 'Loading PhilGEPS v2 awards…';
+                body.replaceChildren();
+                try {
+                    const params = new URLSearchParams({page, page_size: pageSize, search: query.value.trim()});
+                    const response = await fetch(`/api/philgeps/v2/awards?${params}`);
+                    const data = await response.json();
+                    if (!response.ok || !data.success) throw new Error(data.error || 'Could not load awards');
+                    for (const award of data.data) {
+                        const tr = document.createElement('tr');
+                        for (const value of [award.award_date || '—', award.awardee || '—', [award.title, award.items].filter(Boolean).join(' · ') || '—', money(award.amount), award.reference || '—', [award.agency, award.area_of_delivery].filter(Boolean).join(' · ') || '—']) {
+                            const td = document.createElement('td'); td.style.cssText = 'padding:8px;border-top:1px solid #dbe3ee;vertical-align:top;'; td.textContent = value; tr.appendChild(td);
+                        }
+                        body.appendChild(tr);
+                    }
+                    if (!data.data.length) { const tr = document.createElement('tr'); const td = document.createElement('td'); td.colSpan = 6; td.textContent = 'No matching awards.'; td.style.padding = '10px'; tr.appendChild(td); body.appendChild(tr); }
+                    status.textContent = `${Number(data.total).toLocaleString()} award records · PhilGEPS v2`;
+                    pageLabel.textContent = `Page ${data.page} of ${data.total_pages}`;
+                    previous.disabled = page <= 1; next.disabled = page >= data.total_pages;
+                } catch (error) {
+                    status.textContent = error.message;
+                    const tr = document.createElement('tr'); const td = document.createElement('td'); td.colSpan = 6; td.textContent = error.message; td.style.padding = '10px'; tr.appendChild(td); body.appendChild(tr);
+                }
+            }
+            form.addEventListener('submit', event => { event.preventDefault(); page = 1; load(); });
+            previous.addEventListener('click', () => { if (page > 1) { page--; load(); } });
+            next.addEventListener('click', () => { page++; load(); });
+            load();
+        })();
     </script>
 
     {% include "footer.html" %}

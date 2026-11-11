@@ -6745,6 +6745,62 @@ async def flood_dime_correlation_all_api():
     except Exception as e:
         return JSONResponse({"success": False, "error": str(e), "contractors": []})
 
+@app.get("/api/philgeps/v2/awards")
+async def get_philgeps_v2_awards(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    search: str = Query("", description="Search awardee, title, or reference"),
+):
+    """Search deduplicated award records from the local PhilGEPS v2 dataset."""
+    import duckdb
+    from pathlib import Path
+
+    parquet = Path(__file__).parent / "data" / "philgeps-v2" / "philgeps-2000-2025-typed.parquet"
+    if not parquet.exists():
+        return JSONResponse({"success": False, "error": "PhilGEPS v2 dataset not found", "data": [], "total": 0})
+    escaped = search.strip().replace("'", "''")
+    path = str(parquet).replace("'", "''")
+    predicates = ["award_date IS NOT NULL", "awardee_organization_name IS NOT NULL",
+                  "(award_reference_no IS NOT NULL OR contract_no IS NOT NULL)"]
+    if escaped:
+        predicates.append(
+            f"(awardee_organization_name ILIKE '%{escaped}%' OR award_title ILIKE '%{escaped}%' "
+            f"OR notice_title ILIKE '%{escaped}%' OR award_reference_no ILIKE '%{escaped}%')")
+    where = " AND ".join(predicates)
+    con = duckdb.connect()
+    try:
+        base = f"FROM read_parquet('{path}') WHERE {where}"
+        total = con.execute(f"SELECT count(*) FROM (SELECT coalesce(nullif(award_reference_no,''),contract_no) award_id, awardee_organization_name, award_title {base} GROUP BY ALL)").fetchone()[0]
+        offset = (page - 1) * page_size
+        rows = con.execute(f"""
+            SELECT coalesce(nullif(award_reference_no,''), contract_no) AS reference,
+                   award_title AS title, awardee_organization_name AS awardee,
+                   max(contract_amount) AS amount, min(award_date)::DATE AS award_date,
+                   any_value(procuring_entity_name) AS agency,
+                   any_value(area_of_delivery) AS area_of_delivery,
+                   count(*) AS source_line_rows,
+                   string_agg(DISTINCT nullif(item_name,''), '; ' ORDER BY nullif(item_name,'')) AS items
+            {base}
+            GROUP BY reference, title, awardee
+            ORDER BY award_date DESC NULLS LAST, awardee, title
+            LIMIT {page_size} OFFSET {offset}
+        """).fetchall()
+        columns = ["reference", "title", "awardee", "amount", "award_date", "agency", "area_of_delivery", "source_line_rows", "items"]
+        payload = []
+        for row in rows:
+            item = dict(zip(columns, row))
+            item["amount"] = float(item["amount"]) if item["amount"] is not None else None
+            item["award_date"] = item["award_date"].isoformat() if item["award_date"] else None
+            item["source_line_rows"] = int(item["source_line_rows"] or 0)
+            payload.append(item)
+        return JSONResponse({"success": True, "data": payload,
+                             "total": total, "page": page, "page_size": page_size,
+                             "total_pages": (total + page_size - 1) // page_size,
+                             "source": "PhilGEPS v2 typed layer"})
+    finally:
+        con.close()
+
+
 @app.get("/api/philgeps/merchants")
 async def get_philgeps_merchants(
     page: int = Query(1, ge=1, description="Page number"),
