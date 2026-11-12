@@ -51,10 +51,16 @@
     return /^Region I\b/i.test(value) ? 'Region I' : '';
   };
   const powUnit = unit => ({ 'cu.m': 'cum', 'sq.m': 'sqm', kg: 'kg', m: 'm', l: 'ltr' })[String(unit || '').toLowerCase()] || String(unit || '').toLowerCase();
-  const hasComparableRate = (item, rates) => {
+  const cmpdRateFor = (item, rates) => {
     const region = sourceRegion(item.region);
     const unit = unitKey(powUnit(item.unit));
-    return rates.some(rate => rate.region === region && unitKey(rate.unit) === unit);
+    const sameUnit = rates.filter(rate =>
+      unitKey(rate.unit) === unit && rate.average != null && Number.isFinite(Number(rate.average))
+    );
+    const regional = sameUnit.find(rate => rate.region === region);
+    if (regional) return { rate: regional, estimated: false };
+    const highestAvailable = sameUnit.sort((a, b) => Number(b.average) - Number(a.average))[0];
+    return highestAvailable ? { rate: highestAvailable, estimated: true } : null;
   };
   const median = values => {
     const middle = Math.floor(values.length / 2);
@@ -159,21 +165,25 @@
       (!referenceUnits.size || referenceUnits.has(unitKey(item.unit))) &&
       (!search || normalized([item.project, item.description, item.office, item.region].join(' ')).includes(search))
     );
-    const comparablePow = found.filter(item => hasComparableRate(item, rates));
+    const matchedPow = found.map(item => ({ item, match: cmpdRateFor(item, rates) }))
+      .filter(entry => entry.match);
+    const estimatedCount = matchedPow.filter(entry => entry.match.estimated).length;
     const code = rates[0]?.code || '—';
     summary.textContent = name + ' · ' + (rates[0]?.unit || 'unit unavailable') + ' · ' +
       found.length.toLocaleString('en-PH') + ' text-matched POW rows · ' +
-      comparablePow.length.toLocaleString('en-PH') + ' with a regional/unit CMPD rate · material code ' + code;
-    drawBoxplot(comparablePow);
+      matchedPow.length.toLocaleString('en-PH') + ' with a CMPD reference (' +
+      estimatedCount.toLocaleString('en-PH') + ' estimates) · material code ' + code;
+    drawBoxplot(matchedPow.map(entry => entry.item));
 
     rowsBody.innerHTML = found.map(item => {
-      const region = sourceRegion(item.region);
-      const comparable = rates.find(rate =>
-        rate.region === region && unitKey(rate.unit) === unitKey(powUnit(item.unit))
-      );
-      const cmpdPrice = comparable
-        ? peso(comparable.average) + '<small>' + escapeHtml(comparable.region) + ' · CMPD p. ' + escapeHtml(comparable.page) + '</small>'
-        : 'No comparable regional rate<small>Region/unit not available in supplied extract</small>';
+      const match = cmpdRateFor(item, rates);
+      const cmpdPrice = match
+        ? peso(match.rate.average) + (match.estimated
+          ? '<small><strong>Estimate only</strong> · highest available same-unit rate (' +
+            escapeHtml(match.rate.region) + ' · CMPD p. ' + escapeHtml(match.rate.page) +
+            '). No CMPD rate for ' + escapeHtml(item.region || 'this region') + '.</small>'
+          : '<small>' + escapeHtml(match.rate.region) + ' · CMPD p. ' + escapeHtml(match.rate.page) + '</small>')
+        : 'No same-unit CMPD rate available<small>No published reference for this unit in the supplied extract.</small>';
       const powUrl = escapeHtml(item.powUrl);
       const source = item.powUrl
         ? '<a href="' + powUrl + '#page=' + encodeURIComponent(item.page) + '" target="_blank" rel="noopener">POW p. ' + escapeHtml(item.page) + ' ↗</a>'
