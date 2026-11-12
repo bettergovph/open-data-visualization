@@ -21,12 +21,16 @@
     'asphalt concrete': ['asphalt concrete', 'hot laid asphalt'],
     'portland cement': ['portland cement'],
     'fine aggregate sand': ['fine aggregate', 'concrete sand'],
-    'concrete hollow blocks': ['concrete hollow block', 'chb'],
+    'concrete hollow block': ['concrete hollow block', 'chb'],
     'reinforcing steel': ['reinforcing steel', 'deformed bars', 'reinforcing bars'],
     'ready mix concrete': ['ready mix concrete', 'ready mixed concrete'],
     gravel: ['gravel']
   };
   const normalized = value => String(value || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+  const materialLabel = name => /\bchb\b|concrete hollow blocks?/i.test(name)
+    ? 'CONCRETE HOLLOW BLOCK (CHB)'
+    : name;
+  const isChbMaterial = name => materialLabel(name) === 'CONCRETE HOLLOW BLOCK (CHB)';
   const termsFor = name => {
     const key = normalized(name);
     return Object.entries(aliases).find(([alias]) => key.includes(alias))?.[1] || [key];
@@ -179,7 +183,9 @@
 
   function draw(data) {
     const name = materialSelect.value;
-    const rates = data.rates.filter(rate => rate.description === name);
+    const rates = data.rates.filter(rate => isChbMaterial(name)
+      ? isChbMaterial(rate.description)
+      : rate.description === name);
     const terms = termsFor(name);
     const search = normalized(searchInput.value);
     const found = data.candidates.filter(item =>
@@ -228,7 +234,7 @@
       return response.json();
     })
     .then(data => {
-      const materials = [...new Set(data.rates.map(rate => rate.description))]
+      const materials = [...new Set(data.rates.map(rate => materialLabel(rate.description))]
         .filter(name => data.candidates.some(item => termsFor(name).some(term => normalized(item.description).includes(term))))
         .sort((a, b) => a.localeCompare(b));
       if (!materials.length) throw new Error('No matching CMPD materials were found in the supplied data.');
