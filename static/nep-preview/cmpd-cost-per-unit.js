@@ -12,28 +12,18 @@
   const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, char => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
   })[char]);
-  const aliases = {
-    'common borrow': ['common borrow'],
-    'selected borrow': ['selected borrow'],
-    'aggregate subbase course': ['aggregate subbase', 'subbase course'],
-    'aggregate base course': ['aggregate base course', 'base course'],
-    'cement concrete pavement': ['cement concrete pavement', 'pccp'],
-    'asphalt concrete': ['asphalt concrete', 'hot laid asphalt'],
-    'portland cement': ['portland cement'],
-    'fine aggregate sand': ['fine aggregate', 'concrete sand'],
-    'concrete hollow block': ['concrete hollow block', 'chb'],
-    'reinforcing steel': ['reinforcing steel', 'deformed bars', 'reinforcing bars'],
-    'ready mix concrete': ['ready mix concrete', 'ready mixed concrete'],
-    gravel: ['gravel']
-  };
   const normalized = value => String(value || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
   const materialLabel = name => /\bchb\b|concrete hollow blocks?/i.test(name)
     ? 'CONCRETE HOLLOW BLOCK (CHB)'
     : name;
   const isChbMaterial = name => materialLabel(name) === 'CONCRETE HOLLOW BLOCK (CHB)';
-  const termsFor = name => {
+  const materialCategory = name => {
+    if (isChbMaterial(name)) return 'concrete hollow blocks';
     const key = normalized(name);
-    return Object.entries(aliases).find(([alias]) => key.includes(alias))?.[1] || [key];
+    return ['cement concrete pavement', 'asphalt concrete', 'aggregate subbase',
+      'aggregate base course', 'common borrow', 'selected borrow', 'reinforcing steel',
+      'portland cement', 'ready mix concrete', 'fine aggregate sand', 'gravel']
+      .find(category => key.includes(category)) || key;
   };
   const unitKey = unit => {
     const key = String(unit || '').toLowerCase().replace(/m³/g, 'm3').replace(/m²/g, 'm2')
@@ -186,10 +176,9 @@
     const rates = data.rates.filter(rate => isChbMaterial(name)
       ? isChbMaterial(rate.description)
       : rate.description === name);
-    const terms = termsFor(name);
     const search = normalized(searchInput.value);
     const found = data.candidates.filter(item =>
-      terms.some(term => normalized(item.description).includes(term)) &&
+      normalized(item.material) === materialCategory(name) &&
       (!search || normalized([item.project, item.description, item.office, item.region].join(' ')).includes(search))
     );
     const matchedPow = found.map(item => ({ item, match: cmpdRateFor(item, rates) }))
@@ -234,8 +223,9 @@
       return response.json();
     })
     .then(data => {
+      const candidateCategories = new Set(data.candidates.map(item => normalized(item.material)));
       const materials = [...new Set(data.rates.map(rate => materialLabel(rate.description)))]
-        .filter(name => data.candidates.some(item => termsFor(name).some(term => normalized(item.description).includes(term))))
+        .filter(name => candidateCategories.has(materialCategory(name)))
         .sort((a, b) => a.localeCompare(b));
       if (!materials.length) throw new Error('No matching CMPD materials were found in the supplied data.');
       materialSelect.innerHTML = materials.map(name =>
