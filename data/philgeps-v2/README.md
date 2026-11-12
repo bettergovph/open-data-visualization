@@ -31,6 +31,10 @@ This dataset holds every row of the 70 notice and award exports published by the
 > - The exports name no currency for their amounts. PHP is assumed but not confirmed.
 > - A notice, an award, an amount or a flag does not by itself establish irregularity or wrongdoing by any agency, supplier or official.
 
+## Local storage note
+
+The untyped `philgeps-2000-2025.parquet` and small `sources.parquet` catalog are cold/offline inputs stored in the adjacent `nep/data_sources/odv-source-databases/philgeps-v2/` archive. A local symlink preserves this path for offline use. The typed dataset stays at this ODV path because the live API reads it.
+
 ## Which file to use
 
 | File | Config | Contents |

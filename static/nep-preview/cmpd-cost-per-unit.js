@@ -217,13 +217,14 @@
       '<tr><td class="cmpd-empty" colspan="6">No reference rates are available for this material.</td></tr>';
   }
 
-  fetch('cmpd-cost-per-unit-data.json')
+  const dataVersion = document.querySelector('meta[name="cmpd-data-version"]')?.content || '';
+  fetch('cmpd-cost-per-unit-data.json?v=' + encodeURIComponent(dataVersion))
     .then(response => {
       if (!response.ok) throw new Error('Source data returned HTTP ' + response.status);
       return response.json();
     })
     .then(data => {
-      const candidateCategories = new Set(data.candidates.map(item => normalized(item.material)));
+      const candidateCategories = new Set(Object.keys(data.candidateShards || {}));
       const materials = [...new Set(data.rates.map(rate => materialLabel(rate.description)))]
         .filter(name => candidateCategories.has(materialCategory(name)))
         .sort((a, b) => a.localeCompare(b));
@@ -231,10 +232,42 @@
       materialSelect.innerHTML = materials.map(name =>
         '<option value="' + escapeHtml(name) + '">' + escapeHtml(name) + '</option>'
       ).join('');
-      materialSelect.addEventListener('change', () => draw(data));
-      searchInput.addEventListener('input', () => draw(data));
-      draw(data);
-      pageLoading.hidden = true;
+      const candidateCache = new Map();
+      const showError = error => {
+        pageLoading.hidden = true;
+        errorBox.hidden = false;
+        errorBox.textContent = 'Data unavailable: ' + error.message;
+        summary.textContent = 'The CMPD and POW comparison data could not be loaded.';
+        boxplotPanel.hidden = true;
+        boxplot.innerHTML = '';
+        rowsBody.innerHTML = '<tr><td class="cmpd-empty" colspan="5">Data unavailable.</td></tr>';
+        ratesBody.innerHTML = '<tr><td class="cmpd-empty" colspan="6">Data unavailable.</td></tr>';
+      };
+      const drawSelected = async () => {
+        const category = materialCategory(materialSelect.value);
+        let candidates = candidateCache.get(category);
+        if (!candidates) {
+          pageLoading.hidden = false;
+          summary.textContent = 'Loading ' + materialSelect.value + ' POW matches…';
+          const shardNames = data.candidateShards[category] || [];
+          const shards = await Promise.all(shardNames.map(name =>
+            fetch(name + '?v=' + encodeURIComponent(data.version)).then(response => {
+              if (!response.ok) throw new Error('POW data shard returned HTTP ' + response.status);
+              return response.json();
+            })
+          ));
+          candidates = shards.flat();
+          candidateCache.set(category, candidates);
+        }
+        draw({ rates: data.rates, candidates });
+        pageLoading.hidden = true;
+      };
+      materialSelect.addEventListener('change', () => drawSelected().catch(showError));
+      searchInput.addEventListener('input', () => {
+        const candidates = candidateCache.get(materialCategory(materialSelect.value)) || [];
+        draw({ rates: data.rates, candidates });
+      });
+      return drawSelected();
     })
     .catch(error => {
       pageLoading.hidden = true;

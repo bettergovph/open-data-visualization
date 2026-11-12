@@ -1,7 +1,7 @@
 # Database Dumps
 
 ## Overview
-Large source-only database files have been moved to the adjacent `nep` repository at `../nep/data_sources/odv-source-databases/`. They are not loaded by the Rust router or browser pages; the site uses generated static/API outputs. Use that directory as the source for offline restores and builders that consume the archived dump.
+Cold source-only databases and offline Parquet inputs have been moved to the adjacent `nep` repository at `../nep/data_sources/odv-source-databases/`. Live API inputs remain in ODV. Local symlinks preserve the original paths for offline builders. Use the archive directory for offline restores and analyses.
 
 ```bash
 export ODV_SOURCE_DB_DIR="../nep/data_sources/odv-source-databases"
@@ -150,3 +150,6 @@ The dynasty database now includes the Frasco political family:
   - Dynasty: Garcia-Frasco
 
 Family relationships are properly mapped in the `family_relationships` table.
+
+
+Cold Parquet extracts and duplicate static Parquet copies were also moved to the adjacent `nep/data_sources/odv-source-databases/` archive. Runtime-read budget, DPWH, road, PhilGEPS, merchant, contract-splitting and unified-location datasets remain in ODV. The per-file manifest is maintained at `nep/data_sources/odv-source-databases/MOVED_FILES.json`.
