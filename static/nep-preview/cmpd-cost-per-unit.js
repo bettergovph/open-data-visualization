@@ -51,6 +51,11 @@
     return /^Region I\b/i.test(value) ? 'Region I' : '';
   };
   const powUnit = unit => ({ 'cu.m': 'cum', 'sq.m': 'sqm', kg: 'kg', m: 'm', l: 'ltr' })[String(unit || '').toLowerCase()] || String(unit || '').toLowerCase();
+  const hasComparableRate = (item, rates) => {
+    const region = sourceRegion(item.region);
+    const unit = unitKey(powUnit(item.unit));
+    return rates.some(rate => rate.region === region && unitKey(rate.unit) === unit);
+  };
   const median = values => {
     const middle = Math.floor(values.length / 2);
     return values.length % 2 ? values[middle] : (values[middle - 1] + values[middle]) / 2;
@@ -154,10 +159,12 @@
       (!referenceUnits.size || referenceUnits.has(unitKey(item.unit))) &&
       (!search || normalized([item.project, item.description, item.office, item.region].join(' ')).includes(search))
     );
+    const comparablePow = found.filter(item => hasComparableRate(item, rates));
     const code = rates[0]?.code || '—';
     summary.textContent = name + ' · ' + (rates[0]?.unit || 'unit unavailable') + ' · ' +
-      found.length.toLocaleString('en-PH') + ' matched POW rows · material code ' + code;
-    drawBoxplot(found);
+      found.length.toLocaleString('en-PH') + ' text-matched POW rows · ' +
+      comparablePow.length.toLocaleString('en-PH') + ' with a regional/unit CMPD rate · material code ' + code;
+    drawBoxplot(comparablePow);
 
     rowsBody.innerHTML = found.map(item => {
       const region = sourceRegion(item.region);
