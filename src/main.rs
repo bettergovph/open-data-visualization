@@ -9,16 +9,51 @@ mod utils;
 mod project_documents;
 use utils::*;
 use serde::Deserialize;
-use std::path::Path;
+use std::path::{Component, Path};
+
+/// Reject a static request if any component beneath its mount is a symlink.
+/// This keeps the ODV checkout from serving files stored in the sibling `nep`
+/// repository through compatibility symlinks.
+fn static_path_has_no_symlinks(root: &Path, relative_path: &Path) -> bool {
+    let mut candidate = root.to_path_buf();
+
+    for component in relative_path.components() {
+        match component {
+            Component::Normal(segment) => candidate.push(segment),
+            _ => return false,
+        }
+
+        let Ok(metadata) = std::fs::symlink_metadata(&candidate) else {
+            return false;
+        };
+        if metadata.file_type().is_symlink() {
+            return false;
+        }
+    }
+
+    true
+}
+
+fn open_non_symlink_file(path: impl AsRef<Path>) -> std::io::Result<fs::NamedFile> {
+    let path = path.as_ref();
+    if !static_path_has_no_symlinks(Path::new("."), path) {
+        return Err(std::io::Error::new(
+            std::io::ErrorKind::PermissionDenied,
+            "symlink paths are not served",
+        ));
+    }
+
+    fs::NamedFile::open(path)
+}
 
 // Route handlers
 
 // BetterGovPH Homepage
 async fn favicon() -> Result<fs::NamedFile, ActixError> {
-    fs::NamedFile::open("static/favicon.ico").map_err(|e| actix_web::error::ErrorNotFound(e))
+    open_non_symlink_file("static/favicon.ico").map_err(|e| actix_web::error::ErrorNotFound(e))
 }
 async fn robots() -> Result<fs::NamedFile, ActixError> {
-    fs::NamedFile::open("static/robots.txt").map_err(|e| actix_web::error::ErrorNotFound(e))
+    open_non_symlink_file("static/robots.txt").map_err(|e| actix_web::error::ErrorNotFound(e))
 }
 async fn research_other_pages_redirect(req: HttpRequest) -> HttpResponse {
     let target = format!("https://visualizations.bettergov.ph{}", req.uri());
@@ -522,7 +557,8 @@ async fn integ2026(req: HttpRequest) -> Result<HttpResponse, ActixError> {
 
 // API: Integrated Matrix JSON
 async fn api_integrated_matrix() -> Result<fs::NamedFile, ActixError> {
-    fs::NamedFile::open("static/data/integrated_matrix.json").map_err(|e| actix_web::error::ErrorNotFound(e))
+    open_non_symlink_file("static/data/integrated_matrix.json")
+        .map_err(|e| actix_web::error::ErrorNotFound(e))
 }
 
 #[derive(Deserialize)]
@@ -606,7 +642,7 @@ async fn api_dynasty_congressman(query: web::Query<CongressmanQuery>) -> Result<
     let path = Path::new(&path_str);
     
     if path.exists() {
-         fs::NamedFile::open(path).map_err(|e| actix_web::error::ErrorNotFound(e))
+         open_non_symlink_file(path).map_err(|e| actix_web::error::ErrorNotFound(e))
     } else {
         Err(actix_web::error::ErrorNotFound(format!("Cache not found for {}", name)))
     }
@@ -715,7 +751,7 @@ async fn budget_trivia_entry(req: HttpRequest) -> Result<HttpResponse, ActixErro
             .append_header(("Location", "/budget-trivia-mobile"))
             .finish());
     }
-    let file = fs::NamedFile::open("static/nep-preview/budget-trivia.html")
+    let file = open_non_symlink_file("static/nep-preview/budget-trivia.html")
         .map_err(|e| actix_web::error::ErrorNotFound(e))?;
     Ok(file.into_response(&req))
 }
@@ -741,7 +777,7 @@ async fn budget_trivia_mobile(req: HttpRequest) -> Result<HttpResponse, ActixErr
             .append_header(("Location", "/static/nep-preview/budget-trivia.html"))
             .finish());
     }
-    let file = fs::NamedFile::open("templates/mobile/budget-trivia.html")
+    let file = open_non_symlink_file("templates/mobile/budget-trivia.html")
         .map_err(|e| actix_web::error::ErrorNotFound(e))?;
     Ok(file.into_response(&req))
 }
@@ -815,6 +851,9 @@ async fn main() -> std::io::Result<()> {
                     .service(web::resource("/static/nep-preview/index.html").to(nep_preview_index_entry))
                     .service(
                         fs::Files::new("/static/nep-preview", "./static/nep-preview/")
+                            .path_filter(|path, _| {
+                                static_path_has_no_symlinks(Path::new("./static/nep-preview"), path)
+                            })
                             .index_file("summary.html")
                             .redirect_to_slash_directory(),
                     )
@@ -832,10 +871,16 @@ async fn main() -> std::io::Result<()> {
             .service(web::resource("/budget-trivia-mobile").to(budget_trivia_mobile))
             .service(
                 fs::Files::new("/static/nep-preview", "./static/nep-preview/")
+                    .path_filter(|path, _| {
+                        static_path_has_no_symlinks(Path::new("./static/nep-preview"), path)
+                    })
                     .index_file("summary.html")
                     .redirect_to_slash_directory(),
             )
-            .service(fs::Files::new("/static", "./static/"))
+            .service(
+                fs::Files::new("/static", "./static/")
+                    .path_filter(|path, _| static_path_has_no_symlinks(Path::new("./static"), path)),
+            )
             .service(web::resource("/favicon.ico").route(web::get().to(favicon)))
             .service(web::resource("/robots.txt").route(web::get().to(robots)))
             .service(web::resource("/").to(home))
