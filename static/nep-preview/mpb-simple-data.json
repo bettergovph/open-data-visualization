@@ -1,5 +1,5 @@
 {
-  "generatedAtUtc": "2026-11-12T13:47:40.519285+00:00",
+  "generatedAtUtc": "2026-11-12T14:13:19.576165+00:00",
   "facilityRatios": {
     "mpbProjectRows": 79182,
     "mpbYearRange": "2015–2027",
@@ -189,51 +189,81 @@
     {
       "province": "zamboanga del norte",
       "povertyPct": 37.7,
+      "mpbProjectRows": 698,
+      "mpbAllocationPesos": 2405050000,
+      "mpbOfficialBarangays": 691,
       "mpbAllocationPerOfficialBarangayPesos": 3480535.455861071
     },
     {
       "province": "basilan",
       "povertyPct": 33.7,
+      "mpbProjectRows": 76,
+      "mpbAllocationPesos": 557500000,
+      "mpbOfficialBarangays": 210,
       "mpbAllocationPerOfficialBarangayPesos": 2654761.904761905
     },
     {
       "province": "tawi-tawi",
       "povertyPct": 32.3,
+      "mpbProjectRows": 90,
+      "mpbAllocationPesos": 830600000,
+      "mpbOfficialBarangays": 203,
       "mpbAllocationPerOfficialBarangayPesos": 4091625.615763547
     },
     {
       "province": "maguindanao",
       "povertyPct": 30.4,
+      "mpbProjectRows": null,
+      "mpbAllocationPesos": null,
+      "mpbOfficialBarangays": null,
       "mpbAllocationPerOfficialBarangayPesos": null
     },
     {
       "province": "davao oriental",
       "povertyPct": 29.1,
+      "mpbProjectRows": 378,
+      "mpbAllocationPesos": 1929159000,
+      "mpbOfficialBarangays": 183,
       "mpbAllocationPerOfficialBarangayPesos": 10541852.459016394
     },
     {
       "province": "sorsogon",
       "povertyPct": 28.4,
+      "mpbProjectRows": 712,
+      "mpbAllocationPesos": 7791956000,
+      "mpbOfficialBarangays": 541,
       "mpbAllocationPerOfficialBarangayPesos": 14402876.155268023
     },
     {
       "province": "sultan kudarat",
       "povertyPct": 26.4,
+      "mpbProjectRows": 805,
+      "mpbAllocationPesos": 3082950000,
+      "mpbOfficialBarangays": 249,
       "mpbAllocationPerOfficialBarangayPesos": 12381325.30120482
     },
     {
       "province": "lanao del norte",
       "povertyPct": 25.2,
+      "mpbProjectRows": 449,
+      "mpbAllocationPesos": 3052676000,
+      "mpbOfficialBarangays": 462,
       "mpbAllocationPerOfficialBarangayPesos": 6607523.80952381
     },
     {
       "province": "negros oriental",
       "povertyPct": 25.1,
+      "mpbProjectRows": 745,
+      "mpbAllocationPesos": 2562832000,
+      "mpbOfficialBarangays": 557,
       "mpbAllocationPerOfficialBarangayPesos": 4601134.649910233
     },
     {
       "province": "samar",
       "povertyPct": 24.9,
+      "mpbProjectRows": 369,
+      "mpbAllocationPesos": 2228329000,
+      "mpbOfficialBarangays": 951,
       "mpbAllocationPerOfficialBarangayPesos": 2343143.007360673
     }
   ],
@@ -241,402 +271,642 @@
     {
       "region": "Zamboanga Del Norte",
       "povertyPct": 37.7,
-      "allocationPerBarangayPesos": 3480535.455861071
+      "allocationPerBarangayPesos": 3480535.455861071,
+      "projectRows": 698,
+      "allocationPesos": 2405050000,
+      "officialBarangays": 691
     },
     {
       "region": "Basilan",
       "povertyPct": 33.7,
-      "allocationPerBarangayPesos": 2654761.904761905
+      "allocationPerBarangayPesos": 2654761.904761905,
+      "projectRows": 76,
+      "allocationPesos": 557500000,
+      "officialBarangays": 210
     },
     {
       "region": "Tawi-Tawi",
       "povertyPct": 32.3,
-      "allocationPerBarangayPesos": 4091625.615763547
+      "allocationPerBarangayPesos": 4091625.615763547,
+      "projectRows": 90,
+      "allocationPesos": 830600000,
+      "officialBarangays": 203
     },
     {
       "region": "Davao Oriental",
       "povertyPct": 29.1,
-      "allocationPerBarangayPesos": 10541852.459016394
+      "allocationPerBarangayPesos": 10541852.459016394,
+      "projectRows": 378,
+      "allocationPesos": 1929159000,
+      "officialBarangays": 183
     },
     {
       "region": "Sorsogon",
       "povertyPct": 28.4,
-      "allocationPerBarangayPesos": 14402876.155268023
+      "allocationPerBarangayPesos": 14402876.155268023,
+      "projectRows": 712,
+      "allocationPesos": 7791956000,
+      "officialBarangays": 541
     },
     {
       "region": "Sultan Kudarat",
       "povertyPct": 26.4,
-      "allocationPerBarangayPesos": 12381325.30120482
+      "allocationPerBarangayPesos": 12381325.30120482,
+      "projectRows": 805,
+      "allocationPesos": 3082950000,
+      "officialBarangays": 249
     },
     {
       "region": "Lanao Del Norte",
       "povertyPct": 25.2,
-      "allocationPerBarangayPesos": 6607523.80952381
+      "allocationPerBarangayPesos": 6607523.80952381,
+      "projectRows": 449,
+      "allocationPesos": 3052676000,
+      "officialBarangays": 462
     },
     {
       "region": "Negros Oriental",
       "povertyPct": 25.1,
-      "allocationPerBarangayPesos": 4601134.649910233
+      "allocationPerBarangayPesos": 4601134.649910233,
+      "projectRows": 745,
+      "allocationPesos": 2562832000,
+      "officialBarangays": 557
     },
     {
       "region": "Samar",
       "povertyPct": 24.9,
-      "allocationPerBarangayPesos": 2343143.007360673
+      "allocationPerBarangayPesos": 2343143.007360673,
+      "projectRows": 369,
+      "allocationPesos": 2228329000,
+      "officialBarangays": 951
     },
     {
       "region": "Eastern Samar",
       "povertyPct": 24.7,
-      "allocationPerBarangayPesos": 2612742.043551089
+      "allocationPerBarangayPesos": 2612742.043551089,
+      "projectRows": 342,
+      "allocationPesos": 1559807000,
+      "officialBarangays": 597
     },
     {
       "region": "Catanduanes",
       "povertyPct": 23.5,
-      "allocationPerBarangayPesos": 3798063.492063492
+      "allocationPerBarangayPesos": 3798063.492063492,
+      "projectRows": 244,
+      "allocationPesos": 1196390000,
+      "officialBarangays": 315
     },
     {
       "region": "Agusan Del Sur",
       "povertyPct": 23.4,
-      "allocationPerBarangayPesos": 5508439.49044586
+      "allocationPerBarangayPesos": 5508439.49044586,
+      "projectRows": 357,
+      "allocationPesos": 1729650000,
+      "officialBarangays": 314
     },
     {
       "region": "Dinagat Islands",
       "povertyPct": 23.1,
-      "allocationPerBarangayPesos": 12635000.0
+      "allocationPerBarangayPesos": 12635000.0,
+      "projectRows": 240,
+      "allocationPesos": 1263500000,
+      "officialBarangays": 100
     },
     {
       "region": "Sarangani",
       "povertyPct": 23.1,
-      "allocationPerBarangayPesos": 12443309.85915493
+      "allocationPerBarangayPesos": 12443309.85915493,
+      "projectRows": 282,
+      "allocationPesos": 1766950000,
+      "officialBarangays": 142
     },
     {
       "region": "Romblon",
       "povertyPct": 23.0,
-      "allocationPerBarangayPesos": 9975570.776255708
+      "allocationPerBarangayPesos": 9975570.776255708,
+      "projectRows": 325,
+      "allocationPesos": 2184650000,
+      "officialBarangays": 219
     },
     {
       "region": "Misamis Occidental",
       "povertyPct": 22.6,
-      "allocationPerBarangayPesos": 5900989.795918368
+      "allocationPerBarangayPesos": 5900989.795918368,
+      "projectRows": 505,
+      "allocationPesos": 2891485000,
+      "officialBarangays": 490
     },
     {
       "region": "Camarines Sur",
       "povertyPct": 22.4,
-      "allocationPerBarangayPesos": 8128277.516462841
+      "allocationPerBarangayPesos": 8128277.516462841,
+      "projectRows": 1249,
+      "allocationPesos": 8640359000,
+      "officialBarangays": 1063
     },
     {
       "region": "Negros Occidental",
       "povertyPct": 22.1,
-      "allocationPerBarangayPesos": 8324459.2346089855
+      "allocationPerBarangayPesos": 8324459.2346089855,
+      "projectRows": 1324,
+      "allocationPesos": 5003000000,
+      "officialBarangays": 601
     },
     {
       "region": "Northern Samar",
       "povertyPct": 21.8,
-      "allocationPerBarangayPesos": 3886516.695957821
+      "allocationPerBarangayPesos": 3886516.695957821,
+      "projectRows": 303,
+      "allocationPesos": 2211428000,
+      "officialBarangays": 569
     },
     {
       "region": "Leyte",
       "povertyPct": 20.6,
-      "allocationPerBarangayPesos": 3595700.2706359946
+      "allocationPerBarangayPesos": 3595700.2706359946,
+      "projectRows": 766,
+      "allocationPesos": 5314445000,
+      "officialBarangays": 1478
     },
     {
       "region": "Occidental Mindoro",
       "povertyPct": 20.6,
-      "allocationPerBarangayPesos": 5833335.365853659
+      "allocationPerBarangayPesos": 5833335.365853659,
+      "projectRows": 229,
+      "allocationPesos": 956667000,
+      "officialBarangays": 164
     },
     {
       "region": "Bukidnon",
       "povertyPct": 20.2,
-      "allocationPerBarangayPesos": 18123471.98275862
+      "allocationPerBarangayPesos": 18123471.98275862,
+      "projectRows": 1320,
+      "allocationPesos": 8409291000,
+      "officialBarangays": 464
     },
     {
       "region": "Zamboanga Del Sur",
       "povertyPct": 20.0,
-      "allocationPerBarangayPesos": 4623935.389133627
+      "allocationPerBarangayPesos": 4623935.389133627,
+      "projectRows": 484,
+      "allocationPesos": 3148900000,
+      "officialBarangays": 681
     },
     {
       "region": "Davao Occidental",
       "povertyPct": 19.8,
-      "allocationPerBarangayPesos": 20335142.85714286
+      "allocationPerBarangayPesos": 20335142.85714286,
+      "projectRows": 268,
+      "allocationPesos": 2135190000,
+      "officialBarangays": 105
     },
     {
       "region": "Albay",
       "povertyPct": 18.1,
-      "allocationPerBarangayPesos": 5277954.166666667
+      "allocationPerBarangayPesos": 5277954.166666667,
+      "projectRows": 621,
+      "allocationPesos": 3800127000,
+      "officialBarangays": 720
     },
     {
       "region": "Cotabato",
       "povertyPct": 18.0,
-      "allocationPerBarangayPesos": 6303654.166666667
+      "allocationPerBarangayPesos": 6303654.166666667,
+      "projectRows": 739,
+      "allocationPesos": 3025754000,
+      "officialBarangays": 480
     },
     {
       "region": "Zamboanga Sibugay",
       "povertyPct": 17.8,
-      "allocationPerBarangayPesos": 6507840.616966581
+      "allocationPerBarangayPesos": 6507840.616966581,
+      "projectRows": 635,
+      "allocationPesos": 2531550000,
+      "officialBarangays": 389
     },
     {
       "region": "Camarines Norte",
       "povertyPct": 17.7,
-      "allocationPerBarangayPesos": 6735666.666666667
+      "allocationPerBarangayPesos": 6735666.666666667,
+      "projectRows": 567,
+      "allocationPesos": 1899458000,
+      "officialBarangays": 282
     },
     {
       "region": "Palawan",
       "povertyPct": 15.8,
-      "allocationPerBarangayPesos": 6833643.051771117
+      "allocationPerBarangayPesos": 6833643.051771117,
+      "projectRows": 473,
+      "allocationPesos": 2507947000,
+      "officialBarangays": 367
     },
     {
       "region": "Bohol",
       "povertyPct": 14.8,
-      "allocationPerBarangayPesos": 5300491.433724076
+      "allocationPerBarangayPesos": 5300491.433724076,
+      "projectRows": 1296,
+      "allocationPesos": 5878245000,
+      "officialBarangays": 1109
     },
     {
       "region": "Agusan Del Norte",
       "povertyPct": 14.7,
-      "allocationPerBarangayPesos": 5469221.556886228
+      "allocationPerBarangayPesos": 5469221.556886228,
+      "projectRows": 185,
+      "allocationPesos": 913360000,
+      "officialBarangays": 167
     },
     {
       "region": "Oriental Mindoro",
       "povertyPct": 14.1,
-      "allocationPerBarangayPesos": 8200483.568075118
+      "allocationPerBarangayPesos": 8200483.568075118,
+      "projectRows": 699,
+      "allocationPesos": 3493406000,
+      "officialBarangays": 426
     },
     {
       "region": "Antique",
       "povertyPct": 13.8,
-      "allocationPerBarangayPesos": 6087118.644067797
+      "allocationPerBarangayPesos": 6087118.644067797,
+      "projectRows": 576,
+      "allocationPesos": 3591400000,
+      "officialBarangays": 590
     },
     {
       "region": "Sulu",
       "povertyPct": 13.0,
-      "allocationPerBarangayPesos": 2132926.8292682925
+      "allocationPerBarangayPesos": 2132926.8292682925,
+      "projectRows": 81,
+      "allocationPesos": 874500000,
+      "officialBarangays": 410
     },
     {
       "region": "Masbate",
       "povertyPct": 12.9,
-      "allocationPerBarangayPesos": 1327605.4545454546
+      "allocationPerBarangayPesos": 1327605.4545454546,
+      "projectRows": 158,
+      "allocationPesos": 730183000,
+      "officialBarangays": 550
     },
     {
       "region": "Lanao Del Sur",
       "povertyPct": 12.1,
-      "allocationPerBarangayPesos": 2144372.852233677
+      "allocationPerBarangayPesos": 2144372.852233677,
+      "projectRows": 404,
+      "allocationPesos": 2496050000,
+      "officialBarangays": 1164
     },
     {
       "region": "Misamis Oriental",
       "povertyPct": 12.0,
-      "allocationPerBarangayPesos": 10331941.03773585
+      "allocationPerBarangayPesos": 10331941.03773585,
+      "projectRows": 772,
+      "allocationPesos": 4380743000,
+      "officialBarangays": 424
     },
     {
       "region": "Zambales",
       "povertyPct": 11.8,
-      "allocationPerBarangayPesos": 35244843.47826087
+      "allocationPerBarangayPesos": 35244843.47826087,
+      "projectRows": 576,
+      "allocationPesos": 8106314000,
+      "officialBarangays": 230
     },
     {
       "region": "Cebu",
       "povertyPct": 11.7,
-      "allocationPerBarangayPesos": 9373958.724202627
+      "allocationPerBarangayPesos": 9373958.724202627,
+      "projectRows": 2256,
+      "allocationPesos": 9992640000,
+      "officialBarangays": 1066
     },
     {
       "region": "Pangasinan",
       "povertyPct": 11.4,
-      "allocationPerBarangayPesos": 6462866.568914956
+      "allocationPerBarangayPesos": 6462866.568914956,
+      "projectRows": 1614,
+      "allocationPesos": 8815350000,
+      "officialBarangays": 1364
     },
     {
       "region": "Iloilo",
       "povertyPct": 11.1,
-      "allocationPerBarangayPesos": 5006183.033120279
+      "allocationPerBarangayPesos": 5006183.033120279,
+      "projectRows": 1623,
+      "allocationPesos": 8615641000,
+      "officialBarangays": 1721
     },
     {
       "region": "Aurora",
       "povertyPct": 11.0,
-      "allocationPerBarangayPesos": 25618006.622516558
+      "allocationPerBarangayPesos": 25618006.622516558,
+      "projectRows": 427,
+      "allocationPesos": 3868319000,
+      "officialBarangays": 151
     },
     {
       "region": "Mountain Province",
       "povertyPct": 10.5,
-      "allocationPerBarangayPesos": 4692361.111111111
+      "allocationPerBarangayPesos": 4692361.111111111,
+      "projectRows": 168,
+      "allocationPesos": 675700000,
+      "officialBarangays": 144
     },
     {
       "region": "Surigao Del Sur",
       "povertyPct": 10.3,
-      "allocationPerBarangayPesos": 8122800.0
+      "allocationPerBarangayPesos": 8122800.0,
+      "projectRows": 701,
+      "allocationPesos": 2518068000,
+      "officialBarangays": 310
     },
     {
       "region": "South Cotabato",
       "povertyPct": 10.1,
-      "allocationPerBarangayPesos": 16976995.0
+      "allocationPerBarangayPesos": 16976995.0,
+      "projectRows": 930,
+      "allocationPesos": 3395399000,
+      "officialBarangays": 200
     },
     {
       "region": "Capiz",
       "povertyPct": 9.8,
-      "allocationPerBarangayPesos": 4938837.209302326
+      "allocationPerBarangayPesos": 4938837.209302326,
+      "projectRows": 403,
+      "allocationPesos": 2336070000,
+      "officialBarangays": 473
     },
     {
       "region": "Abra",
       "povertyPct": 9.4,
-      "allocationPerBarangayPesos": 7268976.897689769
+      "allocationPerBarangayPesos": 7268976.897689769,
+      "projectRows": 318,
+      "allocationPesos": 2202500000,
+      "officialBarangays": 303
     },
     {
       "region": "Camiguin",
       "povertyPct": 9.4,
-      "allocationPerBarangayPesos": 30935344.827586208
+      "allocationPerBarangayPesos": 30935344.827586208,
+      "projectRows": 213,
+      "allocationPesos": 1794250000,
+      "officialBarangays": 58
     },
     {
       "region": "Davao Del Sur",
       "povertyPct": 9.1,
-      "allocationPerBarangayPesos": 7730818.9655172415
+      "allocationPerBarangayPesos": 7730818.9655172415,
+      "projectRows": 310,
+      "allocationPesos": 1793550000,
+      "officialBarangays": 232
     },
     {
       "region": "Biliran",
       "povertyPct": 8.5,
-      "allocationPerBarangayPesos": 10683333.333333334
+      "allocationPerBarangayPesos": 10683333.333333334,
+      "projectRows": 233,
+      "allocationPesos": 1410200000,
+      "officialBarangays": 132
     },
     {
       "region": "Marinduque",
       "povertyPct": 8.5,
-      "allocationPerBarangayPesos": 12195412.844036696
+      "allocationPerBarangayPesos": 12195412.844036696,
+      "projectRows": 344,
+      "allocationPesos": 2658600000,
+      "officialBarangays": 218
     },
     {
       "region": "Isabela",
       "povertyPct": 8.4,
-      "allocationPerBarangayPesos": 11546192.417061612
+      "allocationPerBarangayPesos": 11546192.417061612,
+      "projectRows": 1782,
+      "allocationPesos": 12181233000,
+      "officialBarangays": 1055
     },
     {
       "region": "Davao Del Norte",
       "povertyPct": 7.3,
-      "allocationPerBarangayPesos": 12617264.573991032
+      "allocationPerBarangayPesos": 12617264.573991032,
+      "projectRows": 403,
+      "allocationPesos": 2813650000,
+      "officialBarangays": 223
     },
     {
       "region": "Nueva Vizcaya",
       "povertyPct": 7.3,
-      "allocationPerBarangayPesos": 7169756.363636363
+      "allocationPerBarangayPesos": 7169756.363636363,
+      "projectRows": 442,
+      "allocationPesos": 1971683000,
+      "officialBarangays": 275
     },
     {
       "region": "Southern Leyte",
       "povertyPct": 7.1,
-      "allocationPerBarangayPesos": 4101120.0
+      "allocationPerBarangayPesos": 4101120.0,
+      "projectRows": 428,
+      "allocationPesos": 2050560000,
+      "officialBarangays": 500
     },
     {
       "region": "Nueva Ecija",
       "povertyPct": 6.9,
-      "allocationPerBarangayPesos": 6219140.164899882
+      "allocationPerBarangayPesos": 6219140.164899882,
+      "projectRows": 1098,
+      "allocationPesos": 5280050000,
+      "officialBarangays": 849
     },
     {
       "region": "Quezon",
       "povertyPct": 6.9,
-      "allocationPerBarangayPesos": 5957124.069478909
+      "allocationPerBarangayPesos": 5957124.069478909,
+      "projectRows": 1375,
+      "allocationPesos": 7202163000,
+      "officialBarangays": 1209
     },
     {
       "region": "Surigao Del Norte",
       "povertyPct": 6.8,
-      "allocationPerBarangayPesos": 6886268.6567164175
+      "allocationPerBarangayPesos": 6886268.6567164175,
+      "projectRows": 531,
+      "allocationPesos": 2306900000,
+      "officialBarangays": 335
     },
     {
       "region": "Quirino",
       "povertyPct": 6.7,
-      "allocationPerBarangayPesos": 7157689.393939394
+      "allocationPerBarangayPesos": 7157689.393939394,
+      "projectRows": 204,
+      "allocationPesos": 944815000,
+      "officialBarangays": 132
     },
     {
       "region": "Tarlac",
       "povertyPct": 6.7,
-      "allocationPerBarangayPesos": 11945919.76516634
+      "allocationPerBarangayPesos": 11945919.76516634,
+      "projectRows": 694,
+      "allocationPesos": 6104365000,
+      "officialBarangays": 511
     },
     {
       "region": "Bataan",
       "povertyPct": 6.6,
-      "allocationPerBarangayPesos": 21052464.135021098
+      "allocationPerBarangayPesos": 21052464.135021098,
+      "projectRows": 520,
+      "allocationPesos": 4989434000,
+      "officialBarangays": 237
     },
     {
       "region": "La Union",
       "povertyPct": 6.3,
-      "allocationPerBarangayPesos": 7088107.638888889
+      "allocationPerBarangayPesos": 7088107.638888889,
+      "projectRows": 467,
+      "allocationPesos": 4082750000,
+      "officialBarangays": 576
     },
     {
       "region": "Bulacan",
       "povertyPct": 6.0,
-      "allocationPerBarangayPesos": 29209655.594405595
+      "allocationPerBarangayPesos": 29209655.594405595,
+      "projectRows": 1524,
+      "allocationPesos": 16707923000,
+      "officialBarangays": 572
     },
     {
       "region": "Cagayan",
       "povertyPct": 5.7,
-      "allocationPerBarangayPesos": 6005047.560975609
+      "allocationPerBarangayPesos": 6005047.560975609,
+      "projectRows": 952,
+      "allocationPesos": 4924139000,
+      "officialBarangays": 820
     },
     {
       "region": "Rizal",
       "povertyPct": 5.6,
-      "allocationPerBarangayPesos": 15447513.227513228
+      "allocationPerBarangayPesos": 15447513.227513228,
+      "projectRows": 353,
+      "allocationPesos": 2919580000,
+      "officialBarangays": 189
     },
     {
       "region": "Laguna",
       "povertyPct": 5.4,
-      "allocationPerBarangayPesos": 17787462.55506608
+      "allocationPerBarangayPesos": 17787462.55506608,
+      "projectRows": 1172,
+      "allocationPesos": 12113262000,
+      "officialBarangays": 681
     },
     {
       "region": "Ilocos Sur",
       "povertyPct": 5.2,
-      "allocationPerBarangayPesos": 2107119.7916666665
+      "allocationPerBarangayPesos": 2107119.7916666665,
+      "projectRows": 242,
+      "allocationPesos": 1618268000,
+      "officialBarangays": 768
     },
     {
       "region": "Batangas",
       "povertyPct": 4.9,
-      "allocationPerBarangayPesos": 20627475.39461467
+      "allocationPerBarangayPesos": 20627475.39461467,
+      "projectRows": 2657,
+      "allocationPesos": 22215791000,
+      "officialBarangays": 1077
     },
     {
       "region": "Ifugao",
       "povertyPct": 4.6,
-      "allocationPerBarangayPesos": 6576704.545454546
+      "allocationPerBarangayPesos": 6576704.545454546,
+      "projectRows": 262,
+      "allocationPesos": 1157500000,
+      "officialBarangays": 176
     },
     {
       "region": "Cavite",
       "povertyPct": 4.3,
-      "allocationPerBarangayPesos": 16962178.08219178
+      "allocationPerBarangayPesos": 16962178.08219178,
+      "projectRows": 1202,
+      "allocationPesos": 13620629000,
+      "officialBarangays": 803
     },
     {
       "region": "Apayao",
       "povertyPct": 4.0,
-      "allocationPerBarangayPesos": 6086812.030075188
+      "allocationPerBarangayPesos": 6086812.030075188,
+      "projectRows": 111,
+      "allocationPesos": 809546000,
+      "officialBarangays": 133
     },
     {
       "region": "Guimaras",
       "povertyPct": 3.8,
-      "allocationPerBarangayPesos": 15765469.387755102
+      "allocationPerBarangayPesos": 15765469.387755102,
+      "projectRows": 278,
+      "allocationPesos": 1545016000,
+      "officialBarangays": 98
     },
     {
       "region": "Siquijor",
       "povertyPct": 3.5,
-      "allocationPerBarangayPesos": 5640149.253731343
+      "allocationPerBarangayPesos": 5640149.253731343,
+      "projectRows": 241,
+      "allocationPesos": 755780000,
+      "officialBarangays": 134
     },
     {
       "region": "Batanes",
       "povertyPct": 3.3,
-      "allocationPerBarangayPesos": 42326896.551724136
+      "allocationPerBarangayPesos": 42326896.551724136,
+      "projectRows": 102,
+      "allocationPesos": 1227480000,
+      "officialBarangays": 29
     },
     {
       "region": "Aklan",
       "povertyPct": 3.1,
-      "allocationPerBarangayPesos": 7403929.663608563
+      "allocationPerBarangayPesos": 7403929.663608563,
+      "projectRows": 619,
+      "allocationPesos": 2421085000,
+      "officialBarangays": 327
     },
     {
       "region": "Kalinga",
       "povertyPct": 2.6,
-      "allocationPerBarangayPesos": 3677777.777777778
+      "allocationPerBarangayPesos": 3677777.777777778,
+      "projectRows": 150,
+      "allocationPesos": 562700000,
+      "officialBarangays": 153
     },
     {
       "region": "Benguet",
       "povertyPct": 2.5,
-      "allocationPerBarangayPesos": 16522914.285714285
+      "allocationPerBarangayPesos": 16522914.285714285,
+      "projectRows": 223,
+      "allocationPesos": 2313208000,
+      "officialBarangays": 140
     },
     {
       "region": "Pampanga",
       "povertyPct": 1.0,
-      "allocationPerBarangayPesos": 14906720.792079208
+      "allocationPerBarangayPesos": 14906720.792079208,
+      "projectRows": 990,
+      "allocationPesos": 7527894000,
+      "officialBarangays": 505
     },
     {
       "region": "Ilocos Norte",
       "povertyPct": 0.3,
-      "allocationPerBarangayPesos": 6237262.969588551
+      "allocationPerBarangayPesos": 6237262.969588551,
+      "projectRows": 787,
+      "allocationPesos": 3486630000,
+      "officialBarangays": 559
     }
   ],
   "poorestProvince2023AmongFamilies": {
     "province": "zamboanga del norte",
     "povertyPct": 37.7,
+    "mpbProjectRows": 698,
+    "mpbAllocationPesos": 2405050000,
+    "mpbOfficialBarangays": 691,
     "mpbAllocationPerOfficialBarangayPesos": 3480535.455861071
   },
   "provincePoverty2025Update": {
