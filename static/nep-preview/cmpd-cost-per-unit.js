@@ -234,7 +234,7 @@
       return response.json();
     })
     .then(data => {
-      const materials = [...new Set(data.rates.map(rate => materialLabel(rate.description))]
+      const materials = [...new Set(data.rates.map(rate => materialLabel(rate.description)))]
         .filter(name => data.candidates.some(item => termsFor(name).some(term => normalized(item.description).includes(term))))
         .sort((a, b) => a.localeCompare(b));
       if (!materials.length) throw new Error('No matching CMPD materials were found in the supplied data.');
