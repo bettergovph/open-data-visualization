@@ -139,7 +139,7 @@ body.bettergov-research main :is(.repeat-hero-breakdown>div,.unit-hero-stats>div
       <p id="load-error" class="cmpd-error" role="alert" hidden></p>
       <section id="boxplot-panel" class="cmpd-boxplot" aria-labelledby="boxplot-title" hidden>
         <h3 id="boxplot-title">POW unit-cost distribution · CMPD-referenced rows</h3>
-        <p class="cmpd-boxplot-intro">Includes POW rows with an exact regional CMPD rate or an estimated same-unit proxy where the region is absent. Each box shows the middle half of POW unit costs; the center line is the median. Whiskers extend to the most extreme values within 1.5× the interquartile range. Gold dots mark values outside that range; hover or focus a dot for its bill item, project, office, region, and source page. Each unit has its own peso scale.</p>
+        <p class="cmpd-boxplot-intro">Includes POW rows with an exact regional CMPD rate or an estimated same-unit proxy where the region is absent. Each box shows the middle half of POW unit costs; the center line is the median. Whiskers extend to the most extreme values within 1.5× the interquartile range. Gold dots mark values outside that range; hover or focus a dot for its bill item, project, office, region, and source page. Each unit uses its own logarithmic peso scale so extreme values do not collapse the other observations.</p>
         <div id="boxplot" aria-live="polite"></div>
       </section>
       <div class="cmpd-table-wrap">
@@ -155,6 +155,6 @@ body.bettergov-research main :is(.repeat-hero-breakdown>div,.unit-hero-stats>div
       <div class="cmpd-source-links"><span>Reference source: DPWH Construction Materials Price Data, 1st Semester CY 2026</span><span>Guidance: DPWH Department Order 043, s. 2026</span></div>
     </section>
   </main>
-  <script src="cmpd-cost-per-unit.js?v=e4d3867ebe99" defer></script>
+  <script src="cmpd-cost-per-unit.js?v=65bb478a0668" defer></script>
 <footer class="site-ai-credit"><p><strong>Sources:</strong> <a href="https://visualizations.bettergov.ph/sources" target="_blank" rel="noreferrer">Common source catalog</a>. Each page identifies the years and records used in that analysis.</p><p><a href="budget-trivia.html">Budget Trivia · play the game</a></p><p><strong>AI assistance:</strong> OpenAI Codex contributed to software implementation and data-processing workflows for this site. This credit does not represent independent verification of the underlying sources, calculations, or conclusions.</p></footer><script id="report-menu-exclusive-groups">(()=>{const groups=[...document.querySelectorAll('header .report-nav-group')];groups.forEach(group=>group.addEventListener('toggle',()=>{if(group.open)groups.forEach(other=>{if(other!==group)other.open=false})}))})();</script><script id="nep-hgab-comparison-script" src="nep-hgab-comparison-graphs.js?v=9f101e5cc121"></script><script id="report-table-readability-script" src="report-table-readability.js?v=dd28c073d68c"></script></body>
 </html>

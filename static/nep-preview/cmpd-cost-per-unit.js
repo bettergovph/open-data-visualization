@@ -109,7 +109,8 @@
       const high = inRange[inRange.length - 1].value;
       const outliers = records.filter(record => record.value < lowerFence || record.value > upperFence);
       const axisMax = Math.max(high, ...outliers.map(record => record.value), 1) * 1.04;
-      const x = value => 44 + (Math.max(0, value) / axisMax) * 620;
+      const logMax = Math.log1p(axisMax);
+      const x = value => 44 + (Math.log1p(Math.max(0, value)) / logMax) * 620;
       const boxX = x(q1);
       const boxWidth = Math.max(2, x(q3) - boxX);
       const shownOutliers = outliers.length > 100
@@ -129,7 +130,11 @@
           escapeHtml(tooltip) + '"><title>' + escapeHtml(tooltip) + '</title></circle>';
       }
       ).join('');
-      const ticks = [0, axisMax / 2, axisMax].map(value =>
+      const tickValues = [0];
+      for (let power = 10; power <= axisMax; power *= 10) tickValues.push(power);
+      const lastPower = tickValues[tickValues.length - 1];
+      if (axisMax / lastPower > 2) tickValues.push(axisMax);
+      const ticks = tickValues.map(value =>
         '<g><line class="cmpd-boxplot-axis" x1="' + x(value).toFixed(1) +
         '" y1="61" x2="' + x(value).toFixed(1) + '" y2="66"></line><text class="cmpd-boxplot-tick" x="' +
         x(value).toFixed(1) + '" y="82" text-anchor="middle">' +
@@ -162,6 +167,12 @@
     if (omitted > 0) {
       boxplot.insertAdjacentHTML('beforeend', '<p class="cmpd-boxplot-note">' +
         omitted.toLocaleString('en-PH') + ' outlier markers are omitted for readability; counts beside each unit include every value outside 1.5×IQR.</p>');
+    }
+    const usableCosts = rows.reduce((sum, [, group]) => sum + group.values.length, 0);
+    const omittedCosts = items.length - usableCosts;
+    if (omittedCosts > 0) {
+      boxplot.insertAdjacentHTML('beforeend', '<p class="cmpd-boxplot-note">' +
+        omittedCosts.toLocaleString('en-PH') + ' matched rows have zero or missing POW unit costs and are omitted from the logarithmic plot.</p>');
     }
     pageLoading.hidden = true;
   }
