@@ -7,6 +7,7 @@
   const errorBox = document.querySelector('#load-error');
   const boxplotPanel = document.querySelector('#boxplot-panel');
   const boxplot = document.querySelector('#boxplot');
+  const pageLoading = document.querySelector('#page-loading');
 
   const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, char => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
@@ -81,7 +82,7 @@
       if (!Number.isFinite(value) || value <= 0) return;
       const unit = unitKey(item.unit) || String(item.unit || 'Unit unavailable');
       if (!groups.has(unit)) groups.set(unit, { label: item.unit || unit, values: [] });
-      groups.get(unit).values.push(value);
+      groups.get(unit).values.push({ value, item });
     });
     const rows = [...groups.entries()].sort(([a], [b]) => a.localeCompare(b));
     boxplotPanel.hidden = items.length === 0;
@@ -95,27 +96,38 @@
     }
 
     boxplot.innerHTML = rows.map(([, group]) => {
-      const values = group.values.sort((a, b) => a - b);
+      const records = group.values.sort((a, b) => a.value - b.value);
+      const values = records.map(record => record.value);
       const q1 = quantile(values, 0.25);
       const q2 = median(values);
       const q3 = quantile(values, 0.75);
       const iqr = q3 - q1;
       const lowerFence = q1 - 1.5 * iqr;
       const upperFence = q3 + 1.5 * iqr;
-      const inRange = values.filter(value => value >= lowerFence && value <= upperFence);
-      const low = inRange[0];
-      const high = inRange[inRange.length - 1];
-      const outliers = values.filter(value => value < lowerFence || value > upperFence);
-      const axisMax = Math.max(high, ...outliers, 1) * 1.04;
+      const inRange = records.filter(record => record.value >= lowerFence && record.value <= upperFence);
+      const low = inRange[0].value;
+      const high = inRange[inRange.length - 1].value;
+      const outliers = records.filter(record => record.value < lowerFence || record.value > upperFence);
+      const axisMax = Math.max(high, ...outliers.map(record => record.value), 1) * 1.04;
       const x = value => 44 + (Math.max(0, value) / axisMax) * 620;
       const boxX = x(q1);
       const boxWidth = Math.max(2, x(q3) - boxX);
       const shownOutliers = outliers.length > 100
         ? outliers.filter((_, index) => index % Math.ceil(outliers.length / 100) === 0)
         : outliers;
-      const outlierDots = shownOutliers.map((value, index) =>
-        '<circle class="cmpd-boxplot-outlier" cx="' + x(value).toFixed(1) +
-        '" cy="' + (30 + (index % 5) * 5) + '" r="3"><title>' + formatCost(value) + '</title></circle>'
+      const outlierDots = shownOutliers.map((record, index) => {
+        const item = record.item;
+        const tooltip = [
+          formatCost(record.value) + ' per ' + (item.unit || group.label),
+          item.description,
+          item.project,
+          [item.office, item.region].filter(Boolean).join(' · '),
+          'POW p. ' + (item.page || 'unknown')
+        ].filter(Boolean).join(' | ');
+        return '<circle class="cmpd-boxplot-outlier" cx="' + x(record.value).toFixed(1) +
+          '" cy="' + (30 + (index % 5) * 5) + '" r="4" tabindex="0" aria-label="' +
+          escapeHtml(tooltip) + '"><title>' + escapeHtml(tooltip) + '</title></circle>';
+      }
       ).join('');
       const ticks = [0, axisMax / 2, axisMax].map(value =>
         '<g><line class="cmpd-boxplot-axis" x1="' + x(value).toFixed(1) +
@@ -140,7 +152,7 @@
         outlierDots + '</svg></div></div>';
     }).join('');
     const omitted = rows.reduce((sum, [, group]) => {
-      const sorted = group.values.sort((a, b) => a - b);
+      const sorted = group.values.map(record => record.value).sort((a, b) => a - b);
       const q1 = quantile(sorted, 0.25);
       const q3 = quantile(sorted, 0.75);
       const iqr = q3 - q1;
@@ -151,18 +163,16 @@
       boxplot.insertAdjacentHTML('beforeend', '<p class="cmpd-boxplot-note">' +
         omitted.toLocaleString('en-PH') + ' outlier markers are omitted for readability; counts beside each unit include every value outside 1.5×IQR.</p>');
     }
+    pageLoading.hidden = true;
   }
 
   function draw(data) {
     const name = materialSelect.value;
     const rates = data.rates.filter(rate => rate.description === name);
     const terms = termsFor(name);
-    const knownUnits = new Set(['m3', 'm2', 'kg', 'm', 'l', 'gal', 'bag', 'each']);
-    const referenceUnits = new Set(rates.map(rate => unitKey(rate.unit)).filter(unit => knownUnits.has(unit)));
     const search = normalized(searchInput.value);
     const found = data.candidates.filter(item =>
       terms.some(term => normalized(item.description).includes(term)) &&
-      (!referenceUnits.size || referenceUnits.has(unitKey(item.unit))) &&
       (!search || normalized([item.project, item.description, item.office, item.region].join(' ')).includes(search))
     );
     const matchedPow = found.map(item => ({ item, match: cmpdRateFor(item, rates) }))
@@ -217,8 +227,10 @@
       materialSelect.addEventListener('change', () => draw(data));
       searchInput.addEventListener('input', () => draw(data));
       draw(data);
+      pageLoading.hidden = true;
     })
     .catch(error => {
+      pageLoading.hidden = true;
       errorBox.hidden = false;
       errorBox.textContent = 'Data unavailable: ' + error.message;
       summary.textContent = 'The CMPD and POW comparison data could not be loaded.';
