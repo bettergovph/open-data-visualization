@@ -6753,14 +6753,26 @@ async def get_philgeps_v2_awards(
 ):
     """Search deduplicated award records from the local PhilGEPS v2 dataset."""
     import duckdb
+    import os
     from pathlib import Path
 
-    parquet = Path(__file__).parent / "data" / "philgeps-v2" / "philgeps-2000-2025-typed.parquet"
-    if not parquet.exists():
-        return JSONResponse({"success": False, "error": "PhilGEPS v2 dataset not found", "data": [], "total": 0})
+    configured_path = os.getenv("PHILGEPS_V2_TYPED_PARQUET", "").strip()
+    parquet = Path(configured_path).expanduser() if configured_path else (
+        Path(__file__).resolve().parent / "data" / "philgeps-v2" / "philgeps-2000-2025-typed.parquet"
+    )
+    if not parquet.is_file():
+        return JSONResponse({
+            "success": False,
+            "error": "PhilGEPS v2 award data is unavailable on this server. Restore the typed dataset using deployment/ensure_philgeps_v2_dataset.sh.",
+            "data": [],
+            "total": 0,
+        }, status_code=503)
     escaped = search.strip().replace("'", "''")
     path = str(parquet).replace("'", "''")
-    predicates = ["award_date IS NOT NULL", "awardee_organization_name IS NOT NULL",
+    # Some source exports contain non-date text in award_date. Exclude rows
+    # that cannot be safely parsed instead of letting one bad value fail the
+    # whole awards page when the selected minimum is cast below.
+    predicates = ["try_cast(award_date AS DATE) IS NOT NULL", "awardee_organization_name IS NOT NULL",
                   "(award_reference_no IS NOT NULL OR contract_no IS NOT NULL)"]
     if escaped:
         predicates.append(
@@ -6775,7 +6787,7 @@ async def get_philgeps_v2_awards(
         rows = con.execute(f"""
             SELECT coalesce(nullif(award_reference_no,''), contract_no) AS reference,
                    award_title AS title, awardee_organization_name AS awardee,
-                   max(contract_amount) AS amount, min(award_date)::DATE AS award_date,
+                   max(contract_amount) AS amount, min(try_cast(award_date AS DATE)) AS award_date,
                    any_value(procuring_entity_name) AS agency,
                    any_value(area_of_delivery) AS area_of_delivery,
                    count(*) AS source_line_rows,
