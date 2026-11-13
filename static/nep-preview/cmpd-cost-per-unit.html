@@ -67,7 +67,7 @@
     a{color:var(--cmpd-blue);text-underline-offset:2px}
     @media(max-width:680px){.cmpd-overview{grid-template-columns:1fr}.cmpd-period{justify-self:start}.cmpd-controls{grid-template-columns:1fr}th,td{min-width:125px}}
   </style>
-<meta name="cmpd-data-version" content="aa1a65cc7424"><link rel="stylesheet" href="report-disclaimer.css?v=20261029-disclaimer1"><style id="uniform-report-menu-style">
+<meta name="cmpd-data-version" content="ddf01292e955"><link rel="stylesheet" href="report-disclaimer.css?v=20261029-disclaimer1"><style id="uniform-report-menu-style">
 header{padding-left:clamp(16px,2vw,32px)!important;padding-right:clamp(16px,2vw,32px)!important}
 header .report-nav{box-sizing:border-box!important;display:flex!important;align-items:center!important;flex-wrap:wrap!important;gap:8px!important;width:100%!important;max-width:none!important;height:auto!important;min-height:0!important;margin:12px 0 0!important;padding:0!important;font:13px/1.3 system-ui,sans-serif!important;position:relative!important;z-index:20!important}
 header .report-nav-group{position:relative!important;min-width:130px!important;height:42px!important;margin:0!important;padding:0!important;border:1px solid #ffffff66!important;border-radius:9px!important;background:#0038A8!important}
@@ -126,9 +126,9 @@ body.bettergov-research main :is(.repeat-hero-breakdown>div,.unit-hero-stats>div
 
     <section class="cmpd-section" aria-labelledby="match-title">
       <h2 id="match-title">Review matching POW items</h2>
-      <p class="cmpd-section-intro">Choose a CMPD material to see matching POW bill rows. The table pairs a reference rate only when the available region and unit match.</p>
+      <p class="cmpd-section-intro">Choose a CMPD material to see matching POW bill rows and the regional CMPD reference. Comparisons require the same source region and unit.</p>
       <div class="cmpd-overview">
-        <div><strong>Source coverage is incomplete</strong><p>The supplied CMPD PDF includes NCR pages 4–10, CAR pages 12–17, and only pages 19–20 of Region I. Other regions are not present in this extract. Where a POW region has no CMPD rate, the table uses the highest available rate for the same unit as an estimate; this is not a local regional price. Rates are never compared across different units.</p></div>
+        <div><strong>17-region office-level extract</strong><p>The supplied CSV contains 63,040 material-office rows for 320 materials, 197 implementing offices, and 17 listed regions; it has no BARMM entries. The reference table preserves each office price, price category, and source label. POW comparisons use the source region’s regional average and the same unit, never a single DEO price. Where no matching regional average is available, the highest available same-material, same-unit regional average is shown as an estimate. 438 rows have no office price (status NU); blank values are not treated as zero.</p></div>
         <span class="cmpd-period">1st semester · CY 2026</span>
       </div>
       <div class="cmpd-controls">
@@ -149,12 +149,12 @@ body.bettergov-research main :is(.repeat-hero-breakdown>div,.unit-hero-stats>div
         </table>
       </div>
       <details class="cmpd-rates" open>
-        <summary>Reference rates in the supplied CMPD extract</summary>
-        <div class="cmpd-rates-body"><div class="cmpd-table-wrap"><table><thead><tr><th>Code</th><th>Material</th><th>Unit</th><th>Region</th><th>Average rate</th><th>Source</th></tr></thead><tbody id="rates"><tr><td class="cmpd-empty" colspan="6">Loading rates…</td></tr></tbody></table></div></div>
+        <summary>Office prices and regional averages in the supplied CMPD extract</summary>
+        <div class="cmpd-rates-body"><div class="cmpd-table-wrap"><table><thead><tr><th>Code</th><th>Material</th><th>Unit</th><th>Region</th><th>Implementing office</th><th>Office price</th><th>Regional average</th><th>Price category and source</th></tr></thead><tbody id="rates"><tr><td class="cmpd-empty" colspan="8">Loading office prices…</td></tr></tbody></table></div></div>
       </details>
       <div class="cmpd-source-links"><span>Reference source: DPWH Construction Materials Price Data, 1st Semester CY 2026</span><span>Guidance: DPWH Department Order 043, s. 2026</span></div>
     </section>
   </main>
-  <script src="cmpd-cost-per-unit.js?v=2ca132e51254" defer></script>
+  <script src="cmpd-cost-per-unit.js?v=5d6a813cfeee" defer></script>
 <footer class="site-ai-credit"><p><strong>Sources:</strong> <a href="https://visualizations.bettergov.ph/sources" target="_blank" rel="noreferrer">Common source catalog</a>. Each page identifies the years and records used in that analysis.</p><p><a href="budget-trivia.html">Budget Trivia · play the game</a></p><p><strong>AI assistance:</strong> OpenAI Codex contributed to software implementation and data-processing workflows for this site. This credit does not represent independent verification of the underlying sources, calculations, or conclusions.</p></footer><script id="report-menu-exclusive-groups">(()=>{const groups=[...document.querySelectorAll('header .report-nav-group')];groups.forEach(group=>group.addEventListener('toggle',()=>{if(group.open)groups.forEach(other=>{if(other!==group)other.open=false})}))})();</script><script id="nep-hgab-comparison-script" src="nep-hgab-comparison-graphs.js?v=9f101e5cc121"></script><script id="report-table-readability-script" src="report-table-readability.js?v=dd28c073d68c"></script></body>
 </html>

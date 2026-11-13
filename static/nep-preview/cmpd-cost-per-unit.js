@@ -41,21 +41,54 @@
     ? '—'
     : '₱' + Number(value).toLocaleString('en-PH', { maximumFractionDigits: 2 });
   const sourceRegion = region => {
-    const value = String(region || '');
-    if (value === 'NCR' || value === 'CAR') return value;
-    return /^Region I\b/i.test(value) ? 'Region I' : '';
+    const value = normalized(region);
+    const aliases = [
+      ['NIR', ['negros island region', 'nir']],
+      ['IV-A', ['calabarzon', 'region iv a', 'region 4 a', 'iv a']],
+      ['IV-B', ['mimaropa', 'region iv b', 'region 4 b', 'iv b']],
+      ['XIII', ['region xiii', 'region 13', 'caraga', 'region xiii']],
+      ['VIII', ['region viii', 'region 8', 'eastern visayas']],
+      ['VII', ['region vii', 'region 7', 'central visayas']],
+      ['VI', ['region vi', 'region 6', 'western visayas']],
+      ['III', ['region iii', 'region 3', 'central luzon']],
+      ['II', ['region ii', 'region 2', 'cagayan valley']],
+      ['XII', ['region xii', 'region 12', 'soccsksargen']],
+      ['XI', ['region xi', 'region 11', 'davao region']],
+      ['X', ['region x', 'region 10', 'northern mindanao']],
+      ['IX', ['region ix', 'region 9', 'zamboanga peninsula']],
+      ['CAR', ['cordillera administrative region', 'car']],
+      ['NCR', ['national capital region', 'metro manila', 'ncr']],
+      ['XIII', ['caraga']],
+      ['V', ['region v', 'region 5', 'bicol region']],
+      ['IV-A', ['calabarzon']],
+      ['I', ['region i', 'region 1', 'ilocos region']],
+      ['IV-B', ['mimaropa']],
+      ['VI', ['western visayas']],
+      ['VII', ['central visayas']],
+      ['VIII', ['eastern visayas']],
+      ['IX', ['zamboanga peninsula']],
+      ['X', ['northern mindanao']],
+      ['XI', ['davao region']],
+      ['XII', ['soccsksargen']]
+    ];
+    for (const [code, names] of aliases) {
+      if (names.some(name => value === normalized(name) || value.includes(normalized(name)))) return code;
+    }
+    return '';
   };
   const powUnit = unit => ({ 'cu.m': 'cum', 'sq.m': 'sqm', kg: 'kg', m: 'm', l: 'ltr' })[String(unit || '').toLowerCase()] || String(unit || '').toLowerCase();
   const cmpdRateFor = (item, rates) => {
     const region = sourceRegion(item.region);
     const unit = unitKey(powUnit(item.unit));
     const sameUnit = rates.filter(rate =>
-      unitKey(rate.unit) === unit && rate.average != null && Number.isFinite(Number(rate.average))
+      unitKey(rate.unit) === unit && rate.regionalAverage != null && Number.isFinite(Number(rate.regionalAverage))
     );
     const regional = sameUnit.find(rate => rate.region === region);
-    if (regional) return { rate: regional, estimated: false };
-    const highestAvailable = sameUnit.sort((a, b) => Number(b.average) - Number(a.average))[0];
-    return highestAvailable ? { rate: highestAvailable, estimated: true } : null;
+    if (regional) return { rate: regional, referencePrice: Number(regional.regionalAverage), estimated: false };
+    const highestAvailable = [...sameUnit].sort((a, b) => Number(b.regionalAverage) - Number(a.regionalAverage))[0];
+    return highestAvailable
+      ? { rate: highestAvailable, referencePrice: Number(highestAvailable.regionalAverage), estimated: true }
+      : null;
   };
   const median = values => {
     const middle = Math.floor(values.length / 2);
@@ -171,13 +204,10 @@
     pageLoading.hidden = true;
   }
 
-  function draw(data) {
-    const name = materialSelect.value;
-    const rates = data.rates.filter(rate => isChbMaterial(name)
-      ? isChbMaterial(rate.description)
-      : rate.description === name);
+  function draw({ rates, candidates, material }) {
+    const name = material.description;
     const search = normalized(searchInput.value);
-    const found = data.candidates.filter(item =>
+    const found = candidates.filter(item =>
       normalized(item.material) === materialCategory(name) &&
       (!search || normalized([item.project, item.description, item.office, item.region].join(' ')).includes(search))
     );
@@ -194,11 +224,11 @@
     rowsBody.innerHTML = found.map(item => {
       const match = cmpdRateFor(item, rates);
       const cmpdPrice = match
-        ? peso(match.rate.average) + (match.estimated
+      ? peso(match.referencePrice) + (match.estimated
           ? '<small><strong>Estimate only</strong> · highest available same-unit rate (' +
-            escapeHtml(match.rate.region) + ' · CMPD p. ' + escapeHtml(match.rate.page) +
+            escapeHtml(match.rate.regionName) + ' regional average · CMPD source row ' + escapeHtml(match.rate.sourceRow) +
             '). No CMPD rate for ' + escapeHtml(item.region || 'this region') + '.</small>'
-          : '<small>' + escapeHtml(match.rate.region) + ' · CMPD p. ' + escapeHtml(match.rate.page) + '</small>')
+          : '<small>' + escapeHtml(match.rate.regionName) + ' regional average</small>')
         : 'No same-unit CMPD rate available<small>No published reference for this unit in the supplied extract.</small>';
       const powUrl = escapeHtml(item.powUrl);
       const source = item.powUrl
@@ -210,11 +240,19 @@
         escapeHtml(item.region) + ' · ' + source + '</small></td></tr>';
     }).join('') || '<tr><td class="cmpd-empty" colspan="5">No matching POW rows for this material and search.</td></tr>';
 
-    ratesBody.innerHTML = rates.map(rate => '<tr><td>' + escapeHtml(rate.code) + '</td><td>' +
-      escapeHtml(rate.description) + '</td><td>' + escapeHtml(rate.unit) + '</td><td>' +
-      escapeHtml(rate.region) + '</td><td>' + (rate.average == null ? 'OCR review needed' : peso(rate.average)) +
-      '</td><td>CMPD p. ' + escapeHtml(rate.page) + '</td></tr>').join('') ||
-      '<tr><td class="cmpd-empty" colspan="6">No reference rates are available for this material.</td></tr>';
+    ratesBody.innerHTML = rates.map(rate => {
+      const officePrice = rate.average == null
+        ? 'Not listed' + (rate.priceStatus ? '<small>Status: ' + escapeHtml(rate.priceStatus) + '</small>' : '')
+        : peso(rate.average);
+      const categorySource = [rate.priceCategory, rate.priceSource].filter(Boolean).map(escapeHtml).join(' · ') || '—';
+      const notes = rate.notes ? '<small>' + escapeHtml(rate.notes) + '</small>' : '';
+      return '<tr><td>' + escapeHtml(rate.code) + '</td><td>' + escapeHtml(rate.description) +
+        '</td><td>' + escapeHtml(rate.unit) + '</td><td>' + escapeHtml(rate.regionName) +
+        '</td><td>' + escapeHtml(rate.office) + '</td><td>' + officePrice +
+        '</td><td>' + peso(rate.regionalAverage) + '</td><td>' + categorySource + notes +
+        '<small>Source row ' + escapeHtml(rate.sourceRow) + '</small></td></tr>';
+    }).join('') ||
+      '<tr><td class="cmpd-empty" colspan="8">No office rates are available for this material.</td></tr>';
   }
 
   const dataVersion = document.querySelector('meta[name="cmpd-data-version"]')?.content || '';
@@ -225,14 +263,15 @@
     })
     .then(data => {
       const candidateCategories = new Set(Object.keys(data.candidateShards || {}));
-      const materials = [...new Set(data.rates.map(rate => materialLabel(rate.description)))]
-        .filter(name => candidateCategories.has(materialCategory(name)))
-        .sort((a, b) => a.localeCompare(b));
+      const materials = data.materials.filter(material =>
+        candidateCategories.has(materialCategory(materialLabel(material.description)))
+      );
       if (!materials.length) throw new Error('No matching CMPD materials were found in the supplied data.');
-      materialSelect.innerHTML = materials.map(name =>
-        '<option value="' + escapeHtml(name) + '">' + escapeHtml(name) + '</option>'
+      materialSelect.innerHTML = materials.map(material =>
+        '<option value="' + escapeHtml(material.code) + '">' + escapeHtml(material.description) + '</option>'
       ).join('');
       const candidateCache = new Map();
+      const rateCache = new Map();
       const showError = error => {
         pageLoading.hidden = true;
         errorBox.hidden = false;
@@ -241,31 +280,46 @@
         boxplotPanel.hidden = true;
         boxplot.innerHTML = '';
         rowsBody.innerHTML = '<tr><td class="cmpd-empty" colspan="5">Data unavailable.</td></tr>';
-        ratesBody.innerHTML = '<tr><td class="cmpd-empty" colspan="6">Data unavailable.</td></tr>';
+        ratesBody.innerHTML = '<tr><td class="cmpd-empty" colspan="8">Data unavailable.</td></tr>';
       };
       const drawSelected = async () => {
-        const category = materialCategory(materialSelect.value);
+        const material = data.materials.find(entry => entry.code === materialSelect.value);
+        if (!material) throw new Error('Selected CMPD material was not found.');
+        const category = materialCategory(materialLabel(material.description));
+        let rates = rateCache.get(material.code);
         let candidates = candidateCache.get(category);
-        if (!candidates) {
+        if (!rates || !candidates) {
           pageLoading.hidden = false;
-          summary.textContent = 'Loading ' + materialSelect.value + ' POW matches…';
-          const shardNames = data.candidateShards[category] || [];
-          const shards = await Promise.all(shardNames.map(name =>
+          summary.textContent = 'Loading ' + material.description + ' CMPD rates and POW matches…';
+          const requests = [];
+          if (!rates) {
+            const name = data.rateShards[material.code];
+            if (!name) throw new Error('CMPD office-rate shard is missing.');
+            requests.push(fetch(name + '?v=' + encodeURIComponent(data.version)).then(response => {
+              if (!response.ok) throw new Error('CMPD office rates returned HTTP ' + response.status);
+              return response.json();
+            }).then(value => { rates = value; rateCache.set(material.code, value); }));
+          }
+          if (!candidates) {
+            const shardNames = data.candidateShards[category] || [];
+            requests.push(Promise.all(shardNames.map(name =>
             fetch(name + '?v=' + encodeURIComponent(data.version)).then(response => {
               if (!response.ok) throw new Error('POW data shard returned HTTP ' + response.status);
               return response.json();
             })
-          ));
-          candidates = shards.flat();
-          candidateCache.set(category, candidates);
+            )).then(shards => { candidates = shards.flat(); candidateCache.set(category, candidates); }));
+          }
+          await Promise.all(requests);
         }
-        draw({ rates: data.rates, candidates });
+        draw({ rates, candidates, material });
         pageLoading.hidden = true;
       };
       materialSelect.addEventListener('change', () => drawSelected().catch(showError));
       searchInput.addEventListener('input', () => {
-        const candidates = candidateCache.get(materialCategory(materialSelect.value)) || [];
-        draw({ rates: data.rates, candidates });
+        const material = data.materials.find(entry => entry.code === materialSelect.value);
+        const candidates = candidateCache.get(material ? materialCategory(materialLabel(material.description)) : '') || [];
+        const rates = material ? rateCache.get(material.code) || [] : [];
+        if (material) draw({ rates, candidates, material });
       });
       return drawSelected();
     })
@@ -277,6 +331,6 @@
       boxplotPanel.hidden = true;
       boxplot.innerHTML = '';
       rowsBody.innerHTML = '<tr><td class="cmpd-empty" colspan="5">Data unavailable.</td></tr>';
-      ratesBody.innerHTML = '<tr><td class="cmpd-empty" colspan="6">Data unavailable.</td></tr>';
+      ratesBody.innerHTML = '<tr><td class="cmpd-empty" colspan="8">Data unavailable.</td></tr>';
     });
 })();
