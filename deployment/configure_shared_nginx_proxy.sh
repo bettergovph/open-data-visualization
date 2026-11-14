@@ -19,8 +19,8 @@ if ! sudo -n test -f "$SHARED_CONFIG"; then
   exit 2
 fi
 
-sudo -n cp -p "$SHARED_CONFIG" "$shared_backup"
-sudo -n cp -p "$SHARED_CONFIG" "$shared_candidate"
+sudo -n cp "$SHARED_CONFIG" "$shared_backup"
+sudo -n cp "$SHARED_CONFIG" "$shared_candidate"
 python3 - "$shared_candidate" <<'PY'
 import pathlib
 import re
@@ -48,15 +48,15 @@ if ! sudo -n cmp -s "$shared_candidate" "$SHARED_CONFIG"; then
 fi
 
 if sudo -n test -f "$REDUNDANT_CONFIG"; then
-  sudo -n cp -p "$REDUNDANT_CONFIG" "$redundant_backup"
+  sudo -n cp "$REDUNDANT_CONFIG" "$redundant_backup"
   sudo -n rm -f "$REDUNDANT_CONFIG"
   redundant_existed=true
 fi
 
 restore_configs() {
-  sudo -n cp -p "$shared_backup" "$SHARED_CONFIG"
+  sudo -n install -m 644 "$shared_backup" "$SHARED_CONFIG"
   if [[ "$redundant_existed" == true ]]; then
-    sudo -n cp -p "$redundant_backup" "$REDUNDANT_CONFIG"
+    sudo -n install -m 644 "$redundant_backup" "$REDUNDANT_CONFIG"
   fi
 }
 
