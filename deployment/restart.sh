@@ -101,52 +101,17 @@ log "🐍 Step 4: Installing Python dependencies..."
 pip install -r requirements.txt
 log "✅ Python dependencies installed"
 
-# Step 5: Install loopback-only service and proxy configuration
-log "🔒 Step 5: Installing localhost-only service and Nginx configuration..."
+# Step 5: Install loopback-only service units and update the shared Nginx proxy
+log "🔒 Step 5: Installing localhost-only service units..."
 if ! sudo install -m 644 deployment/visualization.service /etc/systemd/system/visualization.service || \
    ! sudo install -m 644 deployment/visualization_api.service /etc/systemd/system/visualization_api.service; then
     error "Could not install the systemd service files"
     exit 1
 fi
 
-NGINX_CONFIG=/etc/nginx/conf.d/visualizations_nginx.conf
-NGINX_BACKUP="${NGINX_CONFIG}.deploy-backup.$$"
-if [ -f "$NGINX_CONFIG" ]; then
-    if ! sudo cp "$NGINX_CONFIG" "$NGINX_BACKUP"; then
-        error "Could not back up the existing Nginx configuration"
-        exit 1
-    fi
-    NGINX_HAD_CONFIG=true
-else
-    NGINX_HAD_CONFIG=false
-fi
-if ! sudo install -m 644 deployment/visualizations_nginx.conf "$NGINX_CONFIG"; then
-    error "Could not install the Nginx configuration"
+if ! bash deployment/configure_shared_nginx_proxy.sh; then
+    error "Failed to update the existing shared Nginx proxy"
     exit 1
-fi
-if sudo nginx -t; then
-    if sudo systemctl reload nginx; then
-        log "✅ Nginx configuration validated and reloaded"
-    else
-        error "Nginx configuration is valid, but Nginx reload failed"
-        if [ "$NGINX_HAD_CONFIG" = true ]; then
-            sudo mv "$NGINX_BACKUP" "$NGINX_CONFIG"
-        else
-            sudo rm -f "$NGINX_CONFIG"
-        fi
-        exit 1
-    fi
-else
-    error "Nginx configuration validation failed; restoring the previous configuration"
-    if [ "$NGINX_HAD_CONFIG" = true ]; then
-        sudo mv "$NGINX_BACKUP" "$NGINX_CONFIG"
-    else
-        sudo rm -f "$NGINX_CONFIG"
-    fi
-    exit 1
-fi
-if [ "$NGINX_HAD_CONFIG" = true ]; then
-    sudo rm -f "$NGINX_BACKUP"
 fi
 
 # Reload systemd daemon so it picks up the installed unit files

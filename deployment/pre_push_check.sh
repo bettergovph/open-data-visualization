@@ -91,13 +91,13 @@ if [ ! -f "deployment/visualization.service" ] || [ ! -f "deployment/visualizati
 fi
 log "✅ Systemd service files present"
 
-# Check 6: Verify nginx configuration exists
-log "🌐 Checking nginx configuration..."
-if [ ! -f "deployment/visualizations_nginx.conf" ]; then
-    error "Nginx configuration file missing in deployment/ directory"
+# Check 6: Verify shared nginx proxy updater exists
+log "🌐 Checking shared Nginx proxy updater..."
+if [ ! -f "deployment/configure_shared_nginx_proxy.sh" ]; then
+    error "Shared Nginx proxy updater missing in deployment/ directory"
     exit 1
 fi
-log "✅ Nginx configuration present"
+log "✅ Shared Nginx proxy updater present"
 
 # Check 7: Verify .env.example exists (but not .env)
 log "🔐 Checking environment configuration..."

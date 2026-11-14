@@ -11,7 +11,7 @@ The application consists of two services:
 1. **visualization.service** - Rust ActixWeb frontend (`127.0.0.1:8888`)
 2. **visualization_api.service** - Python FastAPI backend (`127.0.0.1:8001`)
 
-Nginx is the public entry point and proxies to these loopback-only services. `deployment/restart.sh` installs the service and Nginx configs, validates and reloads Nginx, explicitly restarts both services with `systemctl restart`, and checks FastAPI on `127.0.0.1:8001`. It prints the FastAPI service PID and active-since timestamp. A failed restart or health check exits with an error.
+Nginx is the public entry point and proxies to these loopback-only services. The existing shared Nginx vhost handles both `visualizations.bettergov.ph` and `research.bettergov.ph`; deployment updates its upstreams in place and removes the redundant ODV-only vhost. `deployment/restart.sh` installs the service units, validates/reloads Nginx only when its shared config changes, explicitly restarts both services, and checks FastAPI on `127.0.0.1:8001`.
 
 ### Installation
 
