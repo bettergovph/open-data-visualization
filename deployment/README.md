@@ -8,8 +8,10 @@ BetterGovPH Open Data Visualizations is an independent data visualization platfo
 
 The application consists of two services:
 
-1. **visualization.service** - Rust ActixWeb frontend (port 8888)
-2. **visualization_api.service** - Python FastAPI backend (172.30.147.217:8001)
+1. **visualization.service** - Rust ActixWeb frontend (`127.0.0.1:8888`)
+2. **visualization_api.service** - Python FastAPI backend (`127.0.0.1:8001`)
+
+Nginx is the public entry point and proxies to these loopback-only services. `deployment/restart.sh` installs the service and Nginx configs, validates and reloads Nginx, explicitly restarts both services with `systemctl restart`, and checks FastAPI on `127.0.0.1:8001`. It prints the FastAPI service PID and active-since timestamp. A failed restart or health check exits with an error.
 
 ### Installation
 
@@ -324,5 +326,5 @@ Successfully installed alabaster-0.7.16 arrow-1.3.0 babel-2.17.0 bibtexparser-1.
 
 ## Ports Used
 
-- **Frontend**: 8889 (Rust/ActixWeb)
-- **Backend**: 172.30.147.217:8001 (Python/FastAPI)
+- **Frontend**: 127.0.0.1:8888 (Rust/ActixWeb)
+- **Backend**: FastAPI service configured on the server

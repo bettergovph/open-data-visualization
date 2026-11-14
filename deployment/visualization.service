@@ -6,7 +6,7 @@ After=network.target
 Type=simple
 User=joebert
 WorkingDirectory=/home/joebert/open-data-visualization
-ExecStart=/home/joebert/open-data-visualization/target/release/open-data-visualization
+ExecStart=/usr/bin/env SERVER_HOST=127.0.0.1 /home/joebert/open-data-visualization/target/release/open-data-visualization
 EnvironmentFile=/home/joebert/open-data-visualization/.env
 Restart=always
 RestartSec=10
