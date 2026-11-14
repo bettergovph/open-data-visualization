@@ -6767,22 +6767,30 @@ async def get_philgeps_v2_awards(
             "data": [],
             "total": 0,
         }, status_code=503)
-    escaped = search.strip().replace("'", "''")
+    search = search.strip()
+    if not search:
+        return JSONResponse({"success": True, "data": [], "page": page,
+                             "page_size": page_size, "has_more": False,
+                             "search_required": True,
+                             "message": "Enter at least 3 characters to search the PhilGEPS award dataset."})
+    if len(search) < 3:
+        return JSONResponse({"success": False,
+                             "error": "Enter at least 3 characters to search the PhilGEPS award dataset.",
+                             "data": [], "has_more": False}, status_code=400)
+    escaped = search[:128].replace("'", "''")
     path = str(parquet).replace("'", "''")
-    # Some source exports contain non-date text in award_date. Exclude rows
-    # that cannot be safely parsed instead of letting one bad value fail the
-    # whole awards page when the selected minimum is cast below.
+    # Restrict the projection and search before grouping. Avoid an unfiltered
+    # full-dataset award count on page load; return one extra row to indicate
+    # whether another page is available.
     predicates = ["try_cast(award_date AS DATE) IS NOT NULL", "awardee_organization_name IS NOT NULL",
                   "(award_reference_no IS NOT NULL OR contract_no IS NOT NULL)"]
-    if escaped:
-        predicates.append(
-            f"(awardee_organization_name ILIKE '%{escaped}%' OR award_title ILIKE '%{escaped}%' "
-            f"OR notice_title ILIKE '%{escaped}%' OR award_reference_no ILIKE '%{escaped}%')")
+    predicates.append(
+        f"(awardee_organization_name ILIKE '%{escaped}%' OR award_title ILIKE '%{escaped}%' "
+        f"OR notice_title ILIKE '%{escaped}%' OR award_reference_no ILIKE '%{escaped}%')")
     where = " AND ".join(predicates)
     con = duckdb.connect()
     try:
         base = f"FROM read_parquet('{path}') WHERE {where}"
-        total = con.execute(f"SELECT count(*) FROM (SELECT coalesce(nullif(award_reference_no,''),contract_no) award_id, awardee_organization_name, award_title {base} GROUP BY ALL)").fetchone()[0]
         offset = (page - 1) * page_size
         rows = con.execute(f"""
             SELECT coalesce(nullif(award_reference_no,''), contract_no) AS reference,
@@ -6795,19 +6803,20 @@ async def get_philgeps_v2_awards(
             {base}
             GROUP BY reference, title, awardee
             ORDER BY award_date DESC NULLS LAST, awardee, title
-            LIMIT {page_size} OFFSET {offset}
+            LIMIT {page_size + 1} OFFSET {offset}
         """).fetchall()
         columns = ["reference", "title", "awardee", "amount", "award_date", "agency", "area_of_delivery", "source_line_rows", "items"]
+        has_more = len(rows) > page_size
         payload = []
-        for row in rows:
+        for row in rows[:page_size]:
             item = dict(zip(columns, row))
             item["amount"] = float(item["amount"]) if item["amount"] is not None else None
             item["award_date"] = item["award_date"].isoformat() if item["award_date"] else None
             item["source_line_rows"] = int(item["source_line_rows"] or 0)
             payload.append(item)
         return JSONResponse({"success": True, "data": payload,
-                             "total": total, "page": page, "page_size": page_size,
-                             "total_pages": (total + page_size - 1) // page_size,
+                             "page": page, "page_size": page_size,
+                             "has_more": has_more,
                              "source": "PhilGEPS v2 typed layer"})
     finally:
         con.close()

@@ -172,14 +172,14 @@
             <h2 style="margin:0 0 6px;color:#123b75;">PhilGEPS v2 awarded contracts · 2000–2025</h2>
             <p style="margin:0 0 12px;color:#334155;">Award records searched from the v2 typed dataset. Amounts are reported once per award even when an award spans several line items. Repeated source exports remain separately represented when their award details differ.</p>
             <form id="philgeps-v2-search" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
-                <input id="philgeps-v2-query" type="search" placeholder="Search awardee, title, or reference" style="flex:1;min-width:240px;padding:9px;border:1px solid #94a3b8;border-radius:7px;">
+                <input id="philgeps-v2-query" type="search" minlength="3" maxlength="128" placeholder="Search awardee, title, or reference (3+ characters)" style="flex:1;min-width:240px;padding:9px;border:1px solid #94a3b8;border-radius:7px;">
                 <button style="padding:9px 14px;border:0;border-radius:7px;background:#1d4ed8;color:white;">Search v2 awards</button>
             </form>
-            <p id="philgeps-v2-status" role="status" style="font-size:13px;color:#475569;">Loading PhilGEPS v2 awards…</p>
+            <p id="philgeps-v2-status" role="status" style="font-size:13px;color:#475569;">Search the award dataset when you need it. Enter at least 3 characters.</p>
             <div style="overflow:auto;max-height:480px;">
                 <table style="width:100%;border-collapse:collapse;font-size:13px;">
                     <thead><tr style="text-align:left;background:#dbeafe;"><th style="padding:8px;">Award date</th><th style="padding:8px;">Awardee</th><th style="padding:8px;">Award / items</th><th style="padding:8px;">Amount</th><th style="padding:8px;">Reference</th><th style="padding:8px;">Agency · area</th></tr></thead>
-                    <tbody id="philgeps-v2-rows"><tr><td colspan="6" style="padding:10px;">Loading…</td></tr></tbody>
+                    <tbody id="philgeps-v2-rows"><tr><td colspan="6" style="padding:10px;">Enter an awardee, title, or reference to search.</td></tr></tbody>
                 </table>
             </div>
             <div style="display:flex;align-items:center;gap:12px;margin-top:12px;"><button id="philgeps-v2-prev" type="button">Previous</button><span id="philgeps-v2-page"></span><button id="philgeps-v2-next" type="button">Next</button></div>
@@ -3253,6 +3253,15 @@
             const next = document.getElementById('philgeps-v2-next');
             const money = value => value == null ? '—' : '₱' + Number(value).toLocaleString('en-PH', {maximumFractionDigits: 2});
             async function load() {
+                if (query.value.trim().length < 3) {
+                    status.textContent = 'Enter at least 3 characters to search.';
+                    body.replaceChildren();
+                    const tr = document.createElement('tr'); const td = document.createElement('td');
+                    td.colSpan = 6; td.style.padding = '10px'; td.textContent = 'Enter an awardee, title, or reference to search.';
+                    tr.appendChild(td); body.appendChild(tr);
+                    previous.disabled = true; next.disabled = true; pageLabel.textContent = '';
+                    return;
+                }
                 status.textContent = 'Loading PhilGEPS v2 awards…';
                 body.replaceChildren();
                 try {
@@ -3268,9 +3277,12 @@
                         body.appendChild(tr);
                     }
                     if (!data.data.length) { const tr = document.createElement('tr'); const td = document.createElement('td'); td.colSpan = 6; td.textContent = 'No matching awards.'; td.style.padding = '10px'; tr.appendChild(td); body.appendChild(tr); }
-                    status.textContent = `${Number(data.total).toLocaleString()} award records · PhilGEPS v2`;
-                    pageLabel.textContent = `Page ${data.page} of ${data.total_pages}`;
-                    previous.disabled = page <= 1; next.disabled = page >= data.total_pages;
+                    status.textContent = data.data.length
+                        ? `${data.data.length} matching award records shown · PhilGEPS v2`
+                        : 'No matching awards · PhilGEPS v2';
+                    pageLabel.textContent = `Page ${data.page}`;
+                    previous.disabled = page <= 1;
+                    next.disabled = !data.has_more;
                 } catch (error) {
                     status.textContent = error.message;
                     const tr = document.createElement('tr'); const td = document.createElement('td'); td.colSpan = 6; td.textContent = error.message; td.style.padding = '10px'; tr.appendChild(td); body.appendChild(tr);
@@ -3279,7 +3291,8 @@
             form.addEventListener('submit', event => { event.preventDefault(); page = 1; load(); });
             previous.addEventListener('click', () => { if (page > 1) { page--; load(); } });
             next.addEventListener('click', () => { page++; load(); });
-            load();
+            previous.disabled = true;
+            next.disabled = true;
         })();
     </script>
 
