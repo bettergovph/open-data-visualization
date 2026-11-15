@@ -9,7 +9,7 @@
         { title: 'Three views of MPB records across barangays', note: 'Combines the unified page’s top upgrade, Tech Tree score, and total allocation rankings. The chart shows the top 10 barangays in each ranking; open the full tables for filters and project rows.', href: 'https://research.bettergov.ph/static/nep-preview/mpb-barangay.html', link: 'Open the unified barangay tables', chart: (d) => unifiedBarangayChart(d.unifiedBarangayRankings) },
         { title: 'Historical records across all official barangays', note: 'Each bar counts barangays with exactly that many distinct MPB title matches from FY2015–FY2026. No mapped match does not establish that a barangay has no building or received no funding.', href: `${researchBase}mpb-regional-province.html`, link: 'Explore historical distribution', chart: (d) => historicalMultiplicityChart(d.historicalMultiplicity) },
         { title: 'Poverty and allocation per barangay', note: 'Each dot is a province. The line is a descriptive linear fit; it does not show that poverty determines allocations.', href: `${researchBase}mpb-regional-province.html`, link: 'Review the poverty comparison and methods', chart: (d) => scatter(d.provincePovertyPoints) },
-        { title: 'Top, middle and bottom provinces by poverty incidence', note: 'Ranked by 2023 poverty incidence among families. Allocation per official barangay is shown beside poverty on a consistent province-wide scale; row counts and total mapped allocations remain context.', href: `${researchBase}mpb-regional-province.html`, link: 'Explore all province rankings and methods', chart: (d) => provinceRankings(d.provincePovertyPoints) },
+        { title: 'Top, middle and bottom provinces by poverty incidence', note: 'This combines the top five, middle five, and bottom five provinces by 2023 poverty incidence into one chart. Poverty and allocation per official barangay use separate vertical scales. Zamboanga del Norte and Ilocos Norte are highlighted; allocations are not spending.', href: `${researchBase}mpb-regional-province.html`, link: 'Explore all province rankings and methods', chart: (d) => provinceRankings(d.provincePovertyPoints) },
         { title: 'MPB records and public schools by region', note: 'Each tile shows public-school records relative to MPB project rows in that region. These are regional totals, not matched projects and schools.', href: `${researchBase}education-health.html#data-coverage`, link: 'Review school coverage and counts', chart: (d) => regionalTiles(d.educationRows,'depedPublicSchoolCount','schools per 100 MPB rows') },
         { title: 'MPB project rows outnumber joined government hospital beds', note: 'This compares aggregate records, not equivalent assets: MPB project rows are not buildings, and they are not matched to any hospital or bed.', href: `${researchBase}education-health.html#data-coverage`, link: 'Review hospital and bed coverage', chart: (d) => hospitalComparison(d.facilityRatios) }
     ];
@@ -96,34 +96,35 @@
     }
 
     function provinceRankings(points) {
-        const rows = points.filter((p) => p.povertyPct != null && Number.isFinite(Number(p.povertyPct)))
-            .sort((a, b) => Number(b.povertyPct) - Number(a.povertyPct));
+        const rows = points.filter((p) => p.povertyPct != null && p.allocationPerBarangayPesos != null && Number.isFinite(Number(p.povertyPct)) && Number.isFinite(Number(p.allocationPerBarangayPesos)))
+            .sort((a,b) => Number(b.povertyPct)-Number(a.povertyPct));
         if (rows.length < 15) return '<p>Province ranking data is unavailable.</p>';
-        const middleStart = Math.floor((rows.length - 5) / 2);
-        const maxPoverty = Math.max(...rows.map((p) => Number(p.povertyPct)), 1);
-        const densityRows = rows.filter((p) => p.allocationPerBarangayPesos != null && Number.isFinite(Number(p.allocationPerBarangayPesos)));
-        const maxDensity = Math.max(...densityRows.map((p) => Number(p.allocationPerBarangayPesos)), 1);
-        const densityLabel = (value) => value >= 1000000 ? `₱${(value / 1000000).toFixed(1)}M` : `₱${(value / 1000).toFixed(0)}k`;
-        const groups = [
-            { title: 'Top 5', detail: 'Ranks 1–5 · highest poverty incidence', rows: rows.slice(0, 5) },
-            { title: 'Middle 5', detail: `Ranks ${middleStart + 1}–${middleStart + 5} · centered on the median`, rows: rows.slice(middleStart, middleStart + 5) },
-            { title: 'Bottom 5', detail: `Ranks ${rows.length - 4}–${rows.length} · lowest poverty incidence`, rows: rows.slice(-5) }
-        ];
-        const groupMarkup = groups.map((group) => {
-            const firstRank = rows.indexOf(group.rows[0]) + 1;
-            return `<section class="province-group"><div class="province-group-heading"><h5>${esc(group.title)}</h5><span>${esc(group.detail)}</span></div><div class="province-pair-head"><span>Province</span><span>Poverty incidence · 0–${maxPoverty.toFixed(1)}%</span><span>Allocation per barangay · 0–${densityLabel(maxDensity)}</span></div>${group.rows.map((p, i) => {
-                const poverty = Number(p.povertyPct);
-                const allocation = p.allocationPesos == null ? null : Number(p.allocationPesos);
-                const compact = allocation == null ? 'Allocation unavailable' : allocation >= 1e9 ? `₱${(allocation / 1e9).toFixed(2)}B` : `₱${(allocation / 1e6).toFixed(0)}M`;
-                const projectRows = p.projectRows == null ? 'Rows unavailable' : `${fmt(p.projectRows)} project rows`;
-                const density = p.allocationPerBarangayPesos == null ? null : Number(p.allocationPerBarangayPesos);
-                const focusProvince = /zamboanga del norte|ilocos norte/i.test(p.region);
-                return `<div class="province-rank-row${focusProvince ? ' focus-province' : ''}"><div class="province-place"><strong>${firstRank + i}. ${esc(p.region)}</strong><small>${projectRows} · ${compact} total mapped allocation</small></div><div class="province-measure" role="img" aria-label="${esc(p.region)}: ${poverty.toFixed(1)} percent poverty incidence among families"><strong>${poverty.toFixed(1)}%</strong><span class="bar-track"><i class="bar-fill" style="width:${100 * poverty / maxPoverty}%"></i></span></div><div class="province-measure" role="img" aria-label="${esc(p.region)}: ${density == null ? 'allocation density unavailable' : `${peso(density)} per official barangay`}"><strong>${density == null ? '—' : densityLabel(density)}</strong><span class="bar-track"><i class="bar-fill gold" style="width:${density == null ? 0 : 100 * density / maxDensity}%"></i></span></div></div>`;
-            }).join('')}</section>`;
-        }).join('');
-        const focus = ['Zamboanga Del Norte', 'Ilocos Norte'].map((name) => rows.find((p) => p.region.toLowerCase() === name.toLowerCase())).filter(Boolean);
-        const focusMarkup = focus.length === 2 ? `<div class="province-focus"><strong>Provinces in the infographic · 2023 poverty incidence among families</strong><div>${focus.map((p) => `<span><b>${esc(p.region)} · ${Number(p.povertyPct).toFixed(1)}%</b><small>${p.projectRows == null ? 'Rows unavailable' : `${fmt(p.projectRows)} rows`} · ${p.allocationPesos == null ? 'Allocation unavailable' : peso(p.allocationPesos)}</small></span>`).join('')}</div></div>` : '';
-        return `<div class="province-groups">${groupMarkup}</div>${focusMarkup}<p class="chart-note">Both bar columns use one shared scale across all 79 provinces within that measure: poverty incidence among families, and mapped MPB allocation per official barangay. Provinces are ranked by poverty incidence; allocation density is a separate comparison. Allocation spans GAA FY2015–FY2026 and proposed FY2027 House Bill, not verified spending.</p>`;
+        const middleStart=Math.floor((rows.length-5)/2), selected=[...rows.slice(0,5),...rows.slice(middleStart,middleStart+5),...rows.slice(-5)].sort((a,b)=>Number(b.povertyPct)-Number(a.povertyPct));
+        const maxPoverty=Math.max(...selected.map(p=>Number(p.povertyPct)),1),povertyScale=Math.ceil(maxPoverty/10)*10;
+        const maxDensity=Math.max(...selected.map(p=>Number(p.allocationPerBarangayPesos)),1),densityScale=Math.ceil(maxDensity/5000000)*5000000;
+        const densityLabel=value=>Number(value)===0?'₱0':value>=1000000?`₱${(value/1000000).toFixed(value>=10000000?0:1)}M`:`₱${(value/1000).toFixed(0)}k`;
+        const W=1000,H=480,L=82,R=116,T=54,B=164,plotW=W-L-R,plotH=H-T-B,base=T+plotH,step=plotW/selected.length,barW=14,gap=5;
+        let content='';
+        for(let i=0;i<=4;i++){
+            const f=i/4,y=base-f*plotH;
+            if(i>0)content+=`<line x1="${L}" y1="${y}" x2="${W-R}" y2="${y}" stroke="#E0E6DF"/>`;
+            content+=`<text x="${L-8}" y="${y+4}" text-anchor="end" fill="#B58600" font-size="10" font-weight="700">${(povertyScale*f).toFixed(0)}%</text><text x="${W-R+8}" y="${y+4}" fill="#0038A8" font-size="10" font-weight="700">${esc(densityLabel(densityScale*f))}</text>`;
+        }
+        content+=`<line x1="${L}" y1="${T}" x2="${L}" y2="${base}" stroke="#B58600" stroke-width="1.5"/><line x1="${W-R}" y1="${T}" x2="${W-R}" y2="${base}" stroke="#0038A8" stroke-width="1.5"/><line x1="${L}" y1="${base}" x2="${W-R}" y2="${base}" stroke="#89968D"/>`;
+        [5,10].forEach((cut,index)=>{const x=L+step*cut;content+=`<line x1="${x}" y1="${T}" x2="${x}" y2="${base}" stroke="#94A3B8" stroke-dasharray="3 4"/><text x="${L+step*(index*5+2.5)}" y="39" text-anchor="middle" fill="#647268" font-size="9" font-weight="700">${['Top 5','Middle 5'][index]}</text>`;});
+        content+=`<text x="${L+step*12.5}" y="39" text-anchor="middle" fill="#647268" font-size="9" font-weight="700">Bottom 5</text>`;
+        selected.forEach((p,i)=>{
+            const center=L+i*step+step/2,poverty=Number(p.povertyPct),density=Number(p.allocationPerBarangayPesos),focus=/zamboanga del norte|ilocos norte/i.test(p.region),stroke=focus?'#C2410C':'none',strokeWidth=focus?2:0;
+            const ph=plotH*poverty/povertyScale,dh=plotH*density/densityScale,px=center-gap/2-barW,dx=center+gap/2;
+            const rowEvidence=`${p.projectRows==null?'':` · ${fmt(p.projectRows)} MPB rows`}${p.allocationPesos==null?'':` · ${peso(p.allocationPesos)} total listed allocation`}`,tooltip=`${p.region} · poverty incidence ${poverty.toFixed(1)}% · allocation ${peso(density)} per official barangay${rowEvidence} · poverty rank ${rows.indexOf(p)+1}`;
+            content+=`<rect x="${px}" y="${base-ph}" width="${barW}" height="${ph}" rx="2" fill="#B58600" stroke="${stroke}" stroke-width="${strokeWidth}"><title>${esc(tooltip)}</title></rect><rect x="${dx}" y="${base-dh}" width="${barW}" height="${dh}" rx="2" fill="#0038A8" stroke="${stroke}" stroke-width="${strokeWidth}"><title>${esc(tooltip)}</title></rect>`;
+            const label=p.region.length>22?`${p.region.slice(0,21)}…`:p.region;
+            content+=`<text transform="translate(${center-2} ${base+8}) rotate(90)" text-anchor="start" fill="${focus?'#9A3412':'#46564C'}" font-size="9" font-weight="${focus?800:500}"><title>${esc(p.region)}</title>${esc(label)}</text>`;
+        });
+        content+=`<text x="${L}" y="18" fill="#B58600" font-size="10" font-weight="750">2023 poverty incidence · left axis</text><text x="${W-R}" y="18" text-anchor="end" fill="#0038A8" font-size="10" font-weight="750">Listed allocation per official barangay · right axis</text>`;
+        const chart=svgWrap(content,'One grouped vertical bar chart comparing poverty incidence and MPB allocation per official barangay across top, middle, and bottom provinces by poverty incidence.',`0 0 ${W} ${H}`);
+        const legend=`<div class="chart-legend"><span><i class="legend-dot gold"></i>Poverty incidence · 0–${povertyScale}%</span><span><i class="legend-dot" style="background:#0038A8"></i>Allocation per official barangay · ₱0–${esc(densityLabel(densityScale))}</span><span><i style="display:inline-block;width:10px;height:10px;border:2px solid #C2410C;border-radius:2px"></i>Zamboanga del Norte and Ilocos Norte</span><span>Top 5 · middle 5 · bottom 5 provinces combined, ranked by poverty</span></div>`;
+        return chart+legend;
     }
 
     function ratioChart(a, b, labelA, labelB, type) {
@@ -151,7 +152,7 @@
             return rankOf(a)-rankOf(b) || a.row.barangay.localeCompare(b.row.barangay);
         });
         const maxima = Object.fromEntries(specs.map(s => [s.key,Math.max(1,...places.map(p=>p.values[s.key]?.value||0))]));
-        const W=720,H=430,L=150,R=10,T=50,B=150,plotW=W-L-R,plotH=H-T-B,base=T+plotH,step=plotW/places.length,barW=Math.min(6,step*.23),gap=1.5;
+        const W=1000,H=430,L=160,R=15,T=50,B=150,plotW=W-L-R,plotH=H-T-B,base=T+plotH,step=plotW/places.length,barW=Math.min(8,step*.23),gap=1.5;
         const axes=specs.map((s,i)=>({ ...s, x:L-103+i*48, max:maxima[s.key] }));
         let content='';
         [0,.5,1].forEach(f=>{
@@ -179,7 +180,8 @@
     }
 
     function detailCard(plan, index) {
-        return `<article class="story-card"><div class="story-head"><span class="story-number">${String(index + 1).padStart(2, '0')}</span><h3 class="story-title">MPB infographic</h3></div><div class="visual-pair"><section class="visual-cell"><p class="cell-label">The simple picture</p><div class="source-infographic" data-infographic="${index}"></div></section><section class="visual-cell"><p class="cell-label">Explore the detail</p><h4 class="detail-title">${esc(plan.title)}</h4><div class="detail-chart">${plan.chart(window.mpbHomeData)}</div><p class="chart-note">${esc(plan.note)}</p><a class="detail-link" href="${plan.href}" target="_blank" rel="noopener noreferrer">${esc(plan.link)} →</a></section></div></article>`;
+        const wideDetail = [2, 5].includes(index) ? ' story-card-wide-detail' : '';
+        return `<article class="story-card${wideDetail}"><div class="story-head"><span class="story-number">${String(index + 1).padStart(2, '0')}</span><h3 class="story-title">MPB infographic</h3></div><div class="visual-pair"><section class="visual-cell"><p class="cell-label">The simple picture</p><div class="source-infographic" data-infographic="${index}"></div></section><section class="visual-cell"><p class="cell-label">Explore the detail</p><h4 class="detail-title">${esc(plan.title)}</h4><div class="detail-chart">${plan.chart(window.mpbHomeData)}</div><p class="chart-note">${esc(plan.note)}</p><a class="detail-link" href="${plan.href}" target="_blank" rel="noopener noreferrer">${esc(plan.link)} →</a></section></div></article>`;
     }
 
     function mountInfographics(sourceHtml) {
