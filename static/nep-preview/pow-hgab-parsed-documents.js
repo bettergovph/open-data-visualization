@@ -77,6 +77,8 @@
     }).filter(Boolean).sort((a,b)=>(Number(b.project.amountPesos)||0)-(Number(a.project.amountPesos)||0)||String(a.project.hgabId).localeCompare(String(b.project.hgabId)));
     const adjusted=Math.max(0,complete.length-tokenProjects.length);
     const denominator=(coverage.projects||[]).length;
+    const completePct=denominator?(100*complete.length/denominator).toFixed(2):'0.00';
+    const adjustedPct=denominator?(100*adjusted/denominator).toFixed(2):'0.00';
     const metric=(value,caption)=>`<div class="metric"><strong>${esc(value)}</strong><span>${esc(caption)}</span></div>`;
     document.getElementById('token-pow-metrics').innerHTML=[
       metric(`${fmt(noBill.length)} / ${fmt(documents.length)}`,'parsed POW files with zero recovered bill rows'),
@@ -84,7 +86,7 @@
       metric(`${fmt(tokenProjects.length)} / ${fmt(complete.length)}`,`${fmt(tokenProjects.reduce((n,row)=>n+row.tokenFiles.length,0))} no-detail POW files across 5/5 projects`),
       metric(`${fmt(adjusted)} / ${fmt(denominator)}`,'5/5 rows remaining after the no-detail POW check'),
     ].join('');
-    document.getElementById('token-pow-note').textContent=`The Undocumented HGAB page reports ${fmt(complete.length)} of ${fmt(denominator)} HGAB-only rows at 5/5 (${denominator?((100*complete.length/denominator).toFixed(2)):'0.00'}%). ${fmt(tokenProjects.length)} of those rows have no bill rows in any accepted-title parsed POW. Counting these as potential POW-content deficiencies leaves ${fmt(adjusted)} of ${fmt(denominator)} rows (${denominator?((100*adjusted/denominator).toFixed(2)):'0.00%')}) at 5/5. Among their ${fmt(tokenProjects.reduce((n,row)=>n+row.tokenFiles.length,0))} files, ${fmt(tokenProjects.reduce((n,row)=>n+row.summaryFiles.length,0))} have category-summary rows and ${fmt(tokenProjects.reduce((n,row)=>n+row.emptyFiles.length,0))} have none. These are parser-based review flags, not source-PDF confirmation: category totals without item rows may be a token/summary-only POW or a parser failure. Search the listed file codes in the parsed POW inventory to review each record.`;
+    document.getElementById('token-pow-note').textContent=`The Undocumented HGAB page reports ${fmt(complete.length)} of ${fmt(denominator)} HGAB-only rows at 5/5 (${completePct}%). ${fmt(tokenProjects.length)} of those rows have no bill rows in any accepted-title parsed POW. Counting these as potential POW-content deficiencies leaves ${fmt(adjusted)} of ${fmt(denominator)} rows (${adjustedPct}%) at 5/5. Among their ${fmt(tokenProjects.reduce((n,row)=>n+row.tokenFiles.length,0))} files, ${fmt(tokenProjects.reduce((n,row)=>n+row.summaryFiles.length,0))} have category-summary rows and ${fmt(tokenProjects.reduce((n,row)=>n+row.emptyFiles.length,0))} have none. These are parser-based review flags, not source-PDF confirmation: category totals without item rows may be a token/summary-only POW or a parser failure. Search the listed file codes in the parsed POW inventory to review each record.`;
     tokenPage=0;
     renderTokenRows();
   };
@@ -107,7 +109,7 @@
       return `<tr><td>${esc(row.code||'—')}</td><td>${title}</td><td>${esc(label(row.matchStatus))}</td><td>${esc(label(row.status))}</td><td>${fmt(row.rowCount)}</td><td>${fmt(row.categorySummaryRowCount)}</td><td>${fmt(row.pageCount)}</td><td>${esc(row.proposalCode||'—')}</td></tr>`;
     }).join('')||'<tr><td colspan="8">No parsed Senate HGAB POW files match this filter.</td></tr>';
   };
-  fetchJson('pow-hgab-parsed-documents.json').then(data=>{
+  const parsedPromise=fetchJson('pow-hgab-parsed-documents.json').then(data=>{
     rows=data.documents||[];
     const summary=data.summary||{};
     const counts=[
@@ -127,12 +129,17 @@
       setTimeout(()=>URL.revokeObjectURL(link.href),1000);
     });
     render();
-    fetchJson('hgab-only-document-coverage.json').then(coverage=>renderTokenReview(data,coverage)).catch(showTokenLoadError);
-  }).catch(error=>{
+    return data;
+  });
+  const coveragePromise=fetchJson('hgab-only-document-coverage.json');
+  parsedPromise.catch(error=>{
     document.getElementById('hgab-pow-summary').innerHTML=`<p class="caution">Could not load parsed Senate HGAB POW records: ${esc(error.message)}</p>`;
     tbody.innerHTML='<tr><td colspan="8">Parsed Senate HGAB POW records are unavailable.</td></tr>';
     showTokenLoadError(error);
   });
+  Promise.all([parsedPromise,coveragePromise])
+    .then(([data,coverage])=>renderTokenReview(data,coverage))
+    .catch(showTokenLoadError);
   query.addEventListener('input',()=>{page=0;render()});
   match.addEventListener('change',()=>{page=0;render()});
   document.getElementById('hgab-pow-prev').addEventListener('click',()=>{page--;render()});

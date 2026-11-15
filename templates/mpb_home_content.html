@@ -14,8 +14,9 @@
         #mpb-home .brand img { display:block; width:155px; height:auto; }
         #mpb-home .navlinks { display:flex; gap:8px; align-items:center; }
         #mpb-home .navlinks a { text-decoration:none; border-radius:7px; padding:9px 14px; font-size:14px; font-weight:700; }
-        #mpb-home .navlinks a:first-child { color:var(--green-dark); }
-        #mpb-home .navlinks a:last-child { color:#fff; background:var(--green-dark); }
+        #mpb-home .navlinks a.nav-current { color:var(--green-dark); }
+        #mpb-home .navlinks a.nav-research { color:#fff; background:var(--green-dark); }
+        #mpb-home .navlinks a.nav-secondary { color:#405148; }
         #mpb-home .hero { background:var(--green-dark); color:#fff; padding:64px 28px 54px; }
         #mpb-home .hero-inner { max-width:1184px; margin:auto; }
         #mpb-home .eyebrow { margin:0 0 14px; color:var(--gold); font-size:12px; text-transform:uppercase; letter-spacing:.13em; font-weight:800; }
@@ -83,6 +84,12 @@
             #mpb-home .home-footer { display:block; }
             #mpb-home .home-footer p { margin:8px 0; }
         }
+        @media(max-width:420px) {
+            #mpb-home .topbar-inner { padding:0 10px; gap:4px; }
+            #mpb-home .brand img { width:96px; }
+            #mpb-home .navlinks { gap:0; }
+            #mpb-home .navlinks a { padding:6px 5px; font-size:11px; }
+        }
         @media(prefers-reduced-motion:no-preference) {
             #mpb-home .story-card { transition:box-shadow .2s ease, transform .2s ease; }
             #mpb-home .story-card:hover { transform:translateY(-2px); box-shadow:0 12px 32px #15291c13; }
@@ -95,8 +102,10 @@
                 <img src="https://assets.bettergov.ph/logos/webp/horizontal-black.webp" alt="BetterGov.ph">
             </a>
             <nav class="navlinks" aria-label="Main navigation">
-                <a href="#mpb-story" aria-current="page">MPB</a>
-                <a href="/archive">Archive</a>
+                <a class="nav-current" href="#mpb-story" aria-current="page">MPB</a>
+                <a class="nav-research" href="https://research.bettergov.ph/static/nep-preview/">Research</a>
+                <a class="nav-secondary" href="/archive">Archive</a>
+                <a class="nav-secondary" href="/sources">Sources</a>
             </nav>
         </div>
     </header>
