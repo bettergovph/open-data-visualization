@@ -1,0 +1,18 @@
+/* Minimal Tailwind utility output for the standalone topic pages. */
+.block{display:block}.w-full{width:100%}.mx-auto{margin-left:auto;margin-right:auto}.flex{display:flex}.flex-wrap{flex-wrap:wrap}
+.m-0{margin:0}.mb-0{margin-bottom:0}.mb-\[13px\]{margin-bottom:13px}.mt-\[18px\]{margin-top:18px}.mt-\[22px\]{margin-top:22px}
+.max-w-\[1224px\]{max-width:1224px}.max-w-\[970px\]{max-width:970px}.max-w-\[850px\]{max-width:850px}
+.gap-2{gap:.5rem}.px-7{padding-left:1.75rem;padding-right:1.75rem}.px-\[10px\]{padding-left:10px;padding-right:10px}.py-\[6px\]{padding-top:6px;padding-bottom:6px}
+.pt-\[58px\]{padding-top:58px}.pb-\[46px\]{padding-bottom:46px}.rounded-full{border-radius:9999px}.border{border-width:1px}.border-b-\[3px\]{border-bottom-width:3px}
+.border-\[\#ffffff55\]{border-color:#ffffff55}.border-b-\[\#FCD116\]{border-bottom-color:#FCD116}.bg-topic-hero{background-image:linear-gradient(115deg,#00246A 0%,#0038A8 100%)}
+.text-white{color:#fff}.text-\[\#FCD116\]{color:#FCD116}.text-\[\#EAF0FF\]{color:#EAF0FF}.text-\[12px\]{font-size:12px}.text-\[19px\]{font-size:19px}.font-topic{font-family:Inter,system-ui,sans-serif}.leading-topic{line-height:1.55}
+.text-\[clamp\(38px\,6vw\,68px\)\]{font-size:clamp(38px,6vw,68px)}.font-bold{font-weight:700}.font-extrabold{font-weight:800}.uppercase{text-transform:uppercase}
+.leading-\[1\.04\]{line-height:1.04}.leading-\[1\.25\]{line-height:1.25}.leading-\[1\.3\]{line-height:1.3}.leading-\[1\.5\]{line-height:1.5}
+.tracking-\[\.14em\]{letter-spacing:.14em}.tracking-\[-\.05em\]{letter-spacing:-.05em}
+@media(max-width:800px){
+ .max-\[800px\]\:px-\[19px\]{padding-left:19px;padding-right:19px}.max-\[800px\]\:pt-\[42px\]{padding-top:42px}.max-\[800px\]\:pb-\[34px\]{padding-bottom:34px}
+ .max-\[800px\]\:text-\[16px\]{font-size:16px}.max-\[800px\]\:text-\[clamp\(36px\,8vw\,56px\)\]{font-size:clamp(36px,8vw,56px)}
+}
+@media(max-width:470px){
+ .max-\[470px\]\:px-\[14px\]{padding-left:14px;padding-right:14px}.max-\[470px\]\:pt-9{padding-top:2.25rem}.max-\[470px\]\:pb-\[30px\]{padding-bottom:30px}.max-\[470px\]\:text-\[15px\]{font-size:15px}
+}

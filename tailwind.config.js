@@ -55,6 +55,15 @@ module.exports = {
   ],
   theme: {
     extend: {
+      backgroundImage: {
+        'topic-hero': 'linear-gradient(115deg, #00246A 0%, #0038A8 100%)',
+      },
+      fontFamily: {
+        topic: ['Inter', 'system-ui', 'sans-serif'],
+      },
+      lineHeight: {
+        topic: '1.55',
+      },
       colors: {
         bettergov: {
           blue: '#0038A8',
