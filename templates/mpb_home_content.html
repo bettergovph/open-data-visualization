@@ -4,8 +4,8 @@
         body:has(#mpb-home) > footer.footer,
         body:has(#mpb-home) > header.visualizations-mobile-header,
         body:has(#mpb-home) > footer.visualizations-mobile-footer { display: none !important; }
-        body:has(#mpb-home), body:has(#mpb-home) main { margin: 0 !important; padding: 0 !important; max-width: none !important; background: #f6f7f4 !important; }
-        #mpb-home { --ink:#17251f; --muted:#5c6c63; --green:#176b4b; --green-dark:#0c5037; --gold:#efc84a; --line:#dfe5df; --paper:#fff; color:var(--ink); background:#f6f7f4; font:16px/1.55 Inter,system-ui,sans-serif; min-height:100vh; }
+        body:has(#mpb-home), body:has(#mpb-home) main { margin: 0 !important; padding: 0 !important; max-width: none !important; background: #FAFAFA !important; }
+        #mpb-home { --ink:#212121; --muted:#616161; --blue:#0038A8; --blue-dark:#00246A; --gold:#FCD116; --line:#E0E0E0; --paper:#fff; color:var(--ink); background:#FAFAFA; font:16px/1.55 Inter,system-ui,sans-serif; min-height:100vh; }
         #mpb-home * { box-sizing:border-box; }
         #mpb-home a { color:inherit; }
         #mpb-home .topbar { position:sticky; top:0; z-index:50; background:#fff; border-bottom:1px solid var(--line); }
@@ -14,59 +14,59 @@
         #mpb-home .brand img { display:block; width:155px; height:auto; }
         #mpb-home .navlinks { display:flex; gap:8px; align-items:center; }
         #mpb-home .navlinks a { text-decoration:none; border-radius:7px; padding:9px 14px; font-size:14px; font-weight:700; }
-        #mpb-home .navlinks a.nav-current { color:var(--green-dark); }
-        #mpb-home .navlinks a.nav-research { color:#fff; background:var(--green-dark); }
-        #mpb-home .navlinks a.nav-secondary { color:#405148; }
-        #mpb-home .hero { background:var(--green-dark); color:#fff; padding:64px 28px 54px; }
+        #mpb-home .navlinks a.nav-current { color:var(--blue-dark); }
+        #mpb-home .navlinks a.nav-research { color:#fff; background:var(--blue); }
+        #mpb-home .navlinks a.nav-secondary { color:var(--muted); }
+        #mpb-home .hero { background:linear-gradient(115deg,#00246A 0%,#0038A8 100%); border-bottom:3px solid var(--gold); color:#fff; padding:64px 28px 54px; }
         #mpb-home .hero-inner { max-width:1184px; margin:auto; }
         #mpb-home .eyebrow { margin:0 0 14px; color:var(--gold); font-size:12px; text-transform:uppercase; letter-spacing:.13em; font-weight:800; }
         #mpb-home h1 { max-width:900px; margin:0; font-size:clamp(38px,6.4vw,72px); line-height:1.02; letter-spacing:-.055em; }
-        #mpb-home .hero-deck { max-width:760px; margin:22px 0 0; color:#e2eee7; font-size:clamp(18px,2.1vw,22px); line-height:1.5; }
+        #mpb-home .hero-deck { max-width:760px; margin:22px 0 0; color:#EAF0FF; font-size:clamp(18px,2.1vw,22px); line-height:1.5; }
         #mpb-home .hero-meta { display:flex; flex-wrap:wrap; gap:10px; margin-top:27px; }
-        #mpb-home .hero-meta span { border:1px solid #ffffff45; border-radius:999px; padding:6px 12px; color:#f4f6ed; font-size:12px; font-weight:650; }
+        #mpb-home .hero-meta span { border:1px solid #ffffff66; border-radius:999px; padding:6px 12px; color:#fff; font-size:12px; font-weight:650; }
         #mpb-home .page-content { max-width:1184px; margin:auto; padding:36px 28px 64px; }
         #mpb-home .intro-row { display:flex; justify-content:space-between; align-items:end; gap:24px; margin:0 0 24px; }
         #mpb-home .intro-row h2 { max-width:690px; margin:0; font-size:clamp(25px,3.4vw,38px); line-height:1.15; letter-spacing:-.035em; }
         #mpb-home .intro-row p { max-width:400px; margin:0; color:var(--muted); font-size:14px; }
         #mpb-home .story-list { display:grid; gap:22px; }
-        #mpb-home .story-card { overflow:hidden; background:var(--paper); border:1px solid var(--line); border-radius:16px; box-shadow:0 6px 24px #15291c08; }
+        #mpb-home .story-card { overflow:hidden; background:var(--paper); border:1px solid var(--line); border-radius:16px; box-shadow:0 6px 24px #00246A0A; }
         #mpb-home .story-head { display:flex; align-items:flex-start; gap:16px; padding:20px 24px 14px; }
-        #mpb-home .story-number { flex:0 0 38px; height:38px; display:grid; place-items:center; border-radius:50%; background:#e8f1eb; color:var(--green-dark); font-size:13px; font-weight:850; }
+        #mpb-home .story-number { flex:0 0 38px; height:38px; display:grid; place-items:center; border-radius:50%; background:#EAF0FF; color:var(--blue-dark); font-size:13px; font-weight:850; }
         #mpb-home .story-head h3 { margin:3px 0 0; font-size:clamp(18px,2.5vw,24px); line-height:1.25; letter-spacing:-.02em; }
         #mpb-home .visual-pair { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); border-top:1px solid var(--line); }
         #mpb-home .visual-cell { min-width:0; padding:22px 24px 24px; }
-        #mpb-home .visual-cell + .visual-cell { border-left:1px solid var(--line); background:#fbfcfa; }
-        #mpb-home .cell-label { margin:0 0 12px; color:var(--green); font-size:11px; text-transform:uppercase; letter-spacing:.11em; font-weight:850; }
+        #mpb-home .visual-cell + .visual-cell { border-left:1px solid var(--line); background:#FAFAFA; }
+        #mpb-home .cell-label { margin:0 0 12px; color:var(--blue); font-size:11px; text-transform:uppercase; letter-spacing:.11em; font-weight:850; }
         #mpb-home .detail-title { margin:0 0 10px; font-size:17px; line-height:1.3; }
         #mpb-home .chart-note { min-height:42px; margin:12px 0 0; color:var(--muted); font-size:13px; line-height:1.5; }
-        #mpb-home .detail-link { display:inline-flex; margin-top:14px; color:var(--green-dark); font-size:13px; font-weight:800; text-decoration-thickness:1px; text-underline-offset:3px; }
+        #mpb-home .detail-link { display:inline-flex; margin-top:14px; color:var(--blue); font-size:13px; font-weight:800; text-decoration-thickness:1px; text-underline-offset:3px; }
         #mpb-home .source-infographic { min-height:180px; }
-        #mpb-home .source-infographic:empty::before { content:'Loading the infographic…'; display:block; padding:24px; border-radius:10px; background:#f4f6f3; color:var(--muted); font-size:14px; }
+        #mpb-home .source-infographic:empty::before { content:'Loading the infographic…'; display:block; padding:24px; border-radius:10px; background:#F5F7FA; color:var(--muted); font-size:14px; }
         #mpb-home .source-infographic iframe { display:block; width:100%; border:0; }
         #mpb-home .detail-chart { width:100%; min-height:185px; }
         #mpb-home .detail-chart svg { display:block; width:100%; height:auto; overflow:visible; }
         #mpb-home .chart-legend { display:flex; flex-wrap:wrap; gap:8px 16px; margin-top:10px; color:var(--muted); font-size:12px; }
-        #mpb-home .legend-dot { display:inline-block; width:9px; height:9px; margin-right:6px; border-radius:50%; background:var(--green); }
-        #mpb-home .legend-dot.gold { background:#d89b18; }
+        #mpb-home .legend-dot { display:inline-block; width:9px; height:9px; margin-right:6px; border-radius:50%; background:var(--blue); }
+        #mpb-home .legend-dot.gold { background:#B58600; }
         #mpb-home .chart-bars { display:grid; gap:12px; padding:8px 0; }
         #mpb-home .bar-row { display:grid; grid-template-columns:minmax(110px,170px) 1fr minmax(70px,auto); align-items:center; gap:10px; font-size:12px; }
-        #mpb-home .bar-label { color:#3c4d43; font-weight:700; }
-        #mpb-home .bar-track { display:flex; overflow:hidden; height:18px; border-radius:99px; background:#edf0ec; }
-        #mpb-home .bar-fill { height:100%; min-width:2px; background:var(--green); }
-        #mpb-home .bar-fill.gold { background:#d89b18; }
-        #mpb-home .bar-value { text-align:right; color:#43534a; font-variant-numeric:tabular-nums; }
+        #mpb-home .bar-label { color:#212121; font-weight:700; }
+        #mpb-home .bar-track { display:flex; overflow:hidden; height:18px; border-radius:99px; background:#EAF0FF; }
+        #mpb-home .bar-fill { height:100%; min-width:2px; background:var(--blue); }
+        #mpb-home .bar-fill.gold { background:var(--gold); }
+        #mpb-home .bar-value { text-align:right; color:#212121; font-variant-numeric:tabular-nums; }
         #mpb-home .callout-stat { display:flex; align-items:baseline; gap:10px; margin:4px 0 12px; }
-        #mpb-home .callout-stat strong { color:var(--green-dark); font-size:38px; line-height:1; letter-spacing:-.04em; }
+        #mpb-home .callout-stat strong { color:var(--blue-dark); font-size:38px; line-height:1; letter-spacing:-.04em; }
         #mpb-home .callout-stat span { color:var(--muted); font-size:13px; }
         #mpb-home .pair-stats { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:10px 0 0; }
         #mpb-home .pair-stat { padding:12px; border:1px solid var(--line); border-radius:10px; background:#fff; }
-        #mpb-home .pair-stat b { display:block; color:var(--green-dark); font-size:21px; line-height:1.2; }
+        #mpb-home .pair-stat b { display:block; color:var(--blue-dark); font-size:21px; line-height:1.2; }
         #mpb-home .pair-stat span { display:block; margin-top:4px; color:var(--muted); font-size:11px; }
-        #mpb-home .method-note { margin:32px 0 0; padding:20px 22px; border-left:4px solid var(--gold); border-radius:5px 12px 12px 5px; background:#fff; color:#526158; font-size:13px; }
+        #mpb-home .method-note { margin:32px 0 0; padding:20px 22px; border-left:4px solid var(--blue); border-radius:5px 12px 12px 5px; background:#fff; color:#616161; font-size:13px; }
         #mpb-home .method-note strong { color:var(--ink); }
         #mpb-home .home-footer { display:flex; justify-content:space-between; gap:20px; margin-top:36px; padding-top:20px; border-top:1px solid var(--line); color:var(--muted); font-size:13px; }
-        #mpb-home .home-footer a { color:var(--green-dark); font-weight:750; }
-        #mpb-home .load-error { padding:16px; border:1px solid #ead7a4; border-radius:10px; background:#fff9e9; color:#55461f; }
+        #mpb-home .home-footer a { color:var(--blue); font-weight:750; }
+        #mpb-home .load-error { padding:16px; border:1px solid #FCD116; border-radius:10px; background:#FFF9D9; color:#212121; }
         @media(max-width:760px) {
             #mpb-home .topbar-inner { min-height:58px; padding:0 16px; }
             #mpb-home .brand img { width:125px; }
@@ -132,4 +132,4 @@
         </footer>
     </main>
 </div>
-<script src="/static/js/mpb-home.js" defer></script>
+<script src="/static/js/mpb-home.js?v=8b4a2f6b6c74" defer></script>

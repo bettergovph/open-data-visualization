@@ -1,6 +1,7 @@
 (() => {
     const list = document.getElementById('mpb-story-list');
     if (!list) return;
+    const researchBase = 'https://research.bettergov.ph/static/nep-preview/';
 
     const chartPlans = [
         { title: 'First-time and returning recipient barangays', note: 'FY2027 recipient barangays, classified by whether an earlier MPB record was found.', href: '/static/nep-preview/mpb.html#fy2027-mpb-history', link: 'Review FY2027 recipient history', chart: (d) => bars([
@@ -55,11 +56,11 @@
             content += `<line x1="${L}" y1="${y}" x2="${W - R}" y2="${y}" stroke="#e0e6df"/><text x="${L - 8}" y="${y + 4}" text-anchor="end" fill="#647268" font-size="11">₱${(val / 1000000).toFixed(0)}m</text>`;
         }
         content += `<line x1="${L}" y1="${T}" x2="${L}" y2="${H - B}" stroke="#89968d"/><line x1="${L}" y1="${H - B}" x2="${W - R}" y2="${H - B}" stroke="#89968d"/>`;
-        content += `<line x1="${X(0)}" y1="${Y(line(0))}" x2="${X(xMax)}" y2="${Y(line(xMax))}" stroke="#d49a20" stroke-width="2" stroke-dasharray="6 5"/>`;
+        content += `<line x1="${X(0)}" y1="${Y(line(0))}" x2="${X(xMax)}" y2="${Y(line(xMax))}" stroke="#B58600" stroke-width="2" stroke-dasharray="6 5"/>`;
         for (let i = 0; i <= 4; i++) { const x = xMax * i / 4; content += `<text x="${X(x)}" y="${H - B + 20}" text-anchor="middle" fill="#647268" font-size="11">${x}%</text>`; }
         content += rows.map((p) => {
             const highlighted = /zamboanga del norte|ilocos norte/i.test(p.region);
-            return `<circle cx="${X(p.povertyPct)}" cy="${Y(p.allocationPerBarangayPesos)}" r="${highlighted ? 5 : 3.5}" fill="${highlighted ? '#176b4b' : '#668877'}" fill-opacity="${highlighted ? '.95' : '.68'}"><title>${esc(p.region)} · ${Number(p.povertyPct).toFixed(1)}% poverty · ${peso(p.allocationPerBarangayPesos)} per barangay</title></circle>`;
+            return `<circle cx="${X(p.povertyPct)}" cy="${Y(p.allocationPerBarangayPesos)}" r="${highlighted ? 5 : 3.5}" fill="${highlighted ? '#0038A8' : '#6B8FCC'}" fill-opacity="${highlighted ? '.95' : '.72'}"><title>${esc(p.region)} · ${Number(p.povertyPct).toFixed(1)}% poverty · ${peso(p.allocationPerBarangayPesos)} per barangay</title></circle>`;
         }).join('');
         content += `<text x="${(L + W - R) / 2}" y="${H - 10}" text-anchor="middle" fill="#46564c" font-size="12">2023 poverty incidence among families</text><text transform="translate(17 ${(T + H - B) / 2}) rotate(-90)" text-anchor="middle" fill="#46564c" font-size="12">Allocation per official barangay</text>`;
         return svgWrap(content, 'Scatterplot of province poverty incidence and MPB allocation per official barangay', `0 0 ${W} ${H}`) + '<div class="chart-legend"><span><i class="legend-dot"></i>Province · hover over a point for details</span><span><i class="legend-dot gold"></i>Descriptive linear fit</span></div>';
@@ -116,14 +117,18 @@
         const controller = new AbortController();
         const timer = setTimeout(() => controller.abort(), 12000);
         try {
-            const response = await fetch('/api/home/mpb', { signal: controller.signal, headers: { Accept: 'application/json' } });
-            if (!response.ok) throw new Error(`The MPB research source returned ${response.status}.`);
-            const payload = await response.json();
-            if (!payload || !payload.sourceHtml || !payload.data) throw new Error('The MPB research source is incomplete.');
-            window.mpbHomeData = payload.data;
-            if (!Array.isArray(payload.data.provincePovertyPoints)) throw new Error('The MPB chart data is incomplete.');
+            const [sourceResponse, dataResponse] = await Promise.all([
+                fetch(`${researchBase}mpb-simple.html`, { signal: controller.signal, headers: { Accept: 'text/html' } }),
+                fetch(`${researchBase}mpb-simple-data.json`, { signal: controller.signal, headers: { Accept: 'application/json' } })
+            ]);
+            if (!sourceResponse.ok) throw new Error(`The MPB infographic page returned ${sourceResponse.status}.`);
+            if (!dataResponse.ok) throw new Error(`The MPB chart data returned ${dataResponse.status}.`);
+            const [sourceHtml, data] = await Promise.all([sourceResponse.text(), dataResponse.json()]);
+            if (!sourceHtml || !data) throw new Error('The MPB research source is incomplete.');
+            window.mpbHomeData = data;
+            if (!Array.isArray(data.provincePovertyPoints)) throw new Error('The MPB chart data is incomplete.');
             list.innerHTML = chartPlans.map(detailCard).join('');
-            mountInfographics(payload.sourceHtml);
+            mountInfographics(sourceHtml);
         } catch (error) {
             const message = error.name === 'AbortError' ? 'The MPB research files did not load within 12 seconds.' : error.message;
             list.innerHTML = `<div class="load-error" role="alert"><strong>MPB charts could not load.</strong> ${esc(message)} <a href="https://research.bettergov.ph/static/nep-preview/mpb-simple.html">Open the MPB infographic page</a>.</div>`;
