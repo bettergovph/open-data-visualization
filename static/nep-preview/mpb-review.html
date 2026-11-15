@@ -46,13 +46,18 @@
   <main>
     <header>
       <h1>MPB program of work · manual review</h1>
-      <p>Review scanned program-of-work rows for the listed MPB projects. Add key/value annotations for later analysis. Saved annotations stay in the local, Git-ignored review database.</p>
+      <p>Review the existing raw parse of each MPB program of work. Rows retain their source page and parser fields. Add key/value annotations for later analysis; saved annotations stay in the local, Git-ignored review database.</p>
     </header>
     <p id="access-message" role="status">Checking admin access…</p>
     <section id="workspace" hidden>
       <section id="project-index">
         <h2>MPB POWs</h2>
         <p id="project-count"></p>
+        <div class="toolbar">
+          <button id="project-prev" class="secondary" type="button">Previous 10</button>
+          <span id="project-page"></span>
+          <button id="project-next" type="button">Next 10</button>
+        </div>
         <div class="project-list">
           <table>
             <thead><tr><th>Project</th><th>Allocation</th><th>Office</th><th>PDF pages</th><th>Extracted rows</th><th>POW status</th><th></th></tr></thead>
@@ -76,6 +81,6 @@
       </section>
     </section>
   </main>
-  <script src="mpb-review.js?v=5"></script>
+  <script src="mpb-review.js?v=6"></script>
 </body>
 </html>

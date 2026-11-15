@@ -12,6 +12,8 @@
   const projects = [];
   let current = null;
   let currentPdfPage = null;
+  let projectPage = 0;
+  const projectPageSize = 10;
   const apiBase = location.hostname === 'research.bettergov.ph' ? 'https://visualizations.bettergov.ph' : '';
   const allocationFormat = new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP', maximumFractionDigits: 0 });
 
@@ -50,7 +52,10 @@
   function renderProjectList() {
     projectRows.replaceChildren();
     projects.sort((a, b) => (Number(b.allocationPesos) || 0) - (Number(a.allocationPesos) || 0) || a.code.localeCompare(b.code));
-    for (const project of projects) {
+    const pageCount = Math.max(1, Math.ceil(projects.length / projectPageSize));
+    projectPage = Math.min(projectPage, pageCount - 1);
+    const visibleProjects = projects.slice(projectPage * projectPageSize, (projectPage + 1) * projectPageSize);
+    for (const project of visibleProjects) {
       const tr = document.createElement('tr');
       addText(tr, 'td', project.name, 'project-name');
       addText(tr, 'td', project.allocationPesos == null ? '—' : allocationFormat.format(project.allocationPesos));
@@ -65,7 +70,10 @@
       tr.append(action);
       projectRows.append(tr);
     }
-    document.getElementById('project-count').textContent = `${projects.length} scanned MPB POWs available.`;
+    document.getElementById('project-count').textContent = `${projects.length.toLocaleString()} parsed MPB POW records.`;
+    document.getElementById('project-page').textContent = `Page ${projectPage + 1} of ${pageCount} · showing ${visibleProjects.length}`;
+    document.getElementById('project-prev').disabled = projectPage === 0;
+    document.getElementById('project-next').disabled = projectPage + 1 >= pageCount;
   }
 
   function renderProject(project, desiredPage = null) {
@@ -96,11 +104,8 @@
       card.className = `row-card${annotationPairs(row).length ? ' annotated' : ''}`;
       const heading = document.createElement('div');
       heading.className = 'row-head';
-      addText(heading, 'span', `PDF page ${row.page} · extracted table ${row.table} · row ${row.row}`);
-      const sourceLink = addText(heading, 'a', 'Open scanned POW page ↗');
-      sourceLink.href = `${project.powUrl}${project.powUrl.includes('#') ? '&' : '#'}page=${row.page}`;
-      sourceLink.target = '_blank';
-      sourceLink.rel = 'noopener noreferrer';
+      addText(heading, 'span', `POW source page ${row.page} · parsed row ${row.row}`);
+      addText(heading, 'span', `HGAB file ${project.code}`);
       card.append(heading);
       addText(card, 'pre', row.rawText);
       const pairList = document.createElement('div');
@@ -204,6 +209,8 @@
   }
 
   document.getElementById('back-to-projects').addEventListener('click', () => setPage('index'));
+  document.getElementById('project-prev').addEventListener('click', () => { projectPage -= 1; renderProjectList(); });
+  document.getElementById('project-next').addEventListener('click', () => { projectPage += 1; renderProjectList(); });
   document.getElementById('previous-page').addEventListener('click', () => {
     const previous = [...new Set(current?.rows.map(row => row.page) || [])].sort((a, b) => a - b).filter(page => page < currentPdfPage).pop();
     if (previous != null) renderProject(current, previous);
@@ -225,7 +232,7 @@
     const output = {
       project: { code: current.code, name: current.name, office: current.office, powUrl: current.powUrl },
       exportedAt: new Date().toISOString(),
-      rows: current.rows.map(row => ({ rowId: row.rowId, page: row.page, table: row.table, row: row.row, scannedText: row.rawText, annotations: row.keyValues || {} })),
+      rows: current.rows.map(row => ({ rowId: row.rowId, page: row.page, table: row.table, row: row.row, parsedText: row.rawText, sourceRow: row.sourceRow, annotations: row.keyValues || {} })),
     };
     const blob = new Blob([JSON.stringify(output, null, 2)], { type: 'application/json' });
     const href = URL.createObjectURL(blob);

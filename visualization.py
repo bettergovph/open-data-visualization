@@ -589,11 +589,7 @@ async def save_connectivity_annotations(request: Request, hash: str = Query(defa
 
 # MPB POW review uses the same admin hash markers as connectivity review.
 MPB_REVIEW_ANNOTATIONS_FILE = Path(".mpb-review-annotations.json")
-MPB_REVIEW_CACHE_ROOT = Path(os.environ.get(
-    "DPWH_DOCUMENT_CACHE",
-    str(Path(__file__).resolve().parent / "analysis" / "data_sources" / "dpwh_project_documents" / "on_demand"),
-)).resolve()
-MPB_REVIEW_PROJECT_PREFIX = "2027DPWH-Proposal-"
+MPB_REVIEW_SOURCE_ROOT = Path(__file__).resolve().parent / "static" / "nep-preview"
 MPB_REVIEW_ANNOTATION_LOCK = threading.Lock()
 
 
@@ -610,149 +606,112 @@ def _read_mpb_review_annotations() -> Dict[str, Any]:
 
 
 def _valid_mpb_project_code(code: str) -> bool:
-    return bool(re.fullmatch(r"2027DPWH-Proposal-\d{5}", code or ""))
+    return bool(re.fullmatch(r"2027DPWH-HGAB-\d{5}", code or ""))
 
 
 def _is_mpb_project(metadata: Dict[str, Any]) -> bool:
-    fields = [metadata.get(key) for key in ("projectName", "pap1", "pap2", "pap3")]
-    for field in fields:
-        if not isinstance(field, str):
-            continue
-        text = field.lower()
-        if any(term in text for term in (
-            "multi-purpose building", "multipurpose building", "multi purpose building",
-            "multi-purpose buildings", "multipurpose buildings",
-        )) or "mpb" in re.split(r"[^a-z0-9]+", text):
-            return True
-    return False
+    text = str(metadata.get("hgabTitle") or "").lower()
+    return any(term in text for term in (
+        "multi-purpose building", "multipurpose building", "multi purpose building",
+        "multi-purpose buildings", "multipurpose buildings",
+    )) or "mpb" in re.split(r"[^a-z0-9]+", text)
 
 
-def _mpb_allocation_pesos(metadata: Dict[str, Any]) -> Optional[float]:
-    def number(value: Any) -> Optional[float]:
-        if isinstance(value, (int, float)):
-            return float(value)
-        if isinstance(value, str):
-            try:
-                return float(value.replace(",", ""))
-            except ValueError:
-                return None
-        return None
+@lru_cache(maxsize=1)
+def _mpb_review_source_records() -> Dict[str, Dict[str, Any]]:
+    index_path = MPB_REVIEW_SOURCE_ROOT / "dpwh-in-depth-data.json"
+    metadata_path = MPB_REVIEW_SOURCE_ROOT / "expectation-vs-reality-data.json"
+    try:
+        index = json.loads(index_path.read_text(encoding="utf-8"))
+        comparisons = json.loads(metadata_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise HTTPException(status_code=503, detail="Parsed MPB POW records are unavailable") from exc
 
-    direct = number(metadata.get("nepAllocationPesos"))
-    if direct is None:
-        direct = number(metadata.get("allocationPesos"))
-    amount = number(metadata.get("amount"))
-    return direct if direct is not None else amount * 1000 if amount is not None else None
-
-
-def _mpb_cell_text(value: Any) -> Optional[str]:
-    if isinstance(value, bool):
-        return "true" if value else "false"
-    if isinstance(value, (str, int, float)):
-        return str(value)
-    return None
+    project_metadata = {
+        record.get("hgabId"): record
+        for record in comparisons.get("projects", [])
+        if isinstance(record, dict) and record.get("hgabId")
+    }
+    records: Dict[str, Dict[str, Any]] = {}
+    for shard in index.get("arrayShards", {}).get("hgabPowResults", []):
+        shard_path = MPB_REVIEW_SOURCE_ROOT / shard.get("path", "")
+        try:
+            parsed_rows = json.loads(shard_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            raise HTTPException(status_code=503, detail="A parsed MPB POW shard is unavailable") from exc
+        for record in parsed_rows:
+            if not isinstance(record, dict) or not _is_mpb_project(record):
+                continue
+            code = str(record.get("code") or "")
+            if not _valid_mpb_project_code(code):
+                continue
+            match = project_metadata.get(record.get("hgabId"), {})
+            allocation = match.get("allocationPesos")
+            if allocation is None:
+                allocation = record.get("allocationPesos")
+            records[code] = {
+                "code": code,
+                "name": str(record.get("hgabTitle") or ""),
+                "hgabId": str(record.get("hgabId") or ""),
+                "allocationPesos": allocation,
+                "office": str(match.get("office") or ""),
+                "region": str(match.get("region") or ""),
+                "powStatus": str(record.get("status") or "unknown"),
+                "matchStatus": str(record.get("matchStatus") or "unknown"),
+                "pageCount": int(record.get("pageCount") or 0),
+                "rows": record.get("rows") if isinstance(record.get("rows"), list) else [],
+            }
+    return records
 
 
 def _mpb_load_project(code: str, saved_annotations: Optional[Dict[str, Any]] = None) -> Optional[Dict[str, Any]]:
     if not _valid_mpb_project_code(code):
         return None
-    project_dir = MPB_REVIEW_CACHE_ROOT / code
-
-    def read_json(path: Path) -> Optional[Any]:
-        try:
-            return json.loads(path.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError):
-            return None
-
-    metadata = read_json(project_dir / "metadata.json")
-    if not isinstance(metadata, dict) or not _is_mpb_project(metadata):
+    record = _mpb_review_source_records().get(code)
+    if record is None:
         return None
-    result = read_json(project_dir / "result.json")
-    if not isinstance(result, dict):
-        return None
-    documents = result.get("documents")
-    pow_document = next((doc for doc in documents if isinstance(doc, dict) and doc.get("kind") == "pow"), None) if isinstance(documents, list) else None
-    if not isinstance(pow_document, dict):
-        return None
-    pow_data = pow_document.get("pow")
-    if not isinstance(pow_data, dict):
-        return None
-
-    asset = pow_document.get("pdfAsset")
-    if not isinstance(asset, str) or not asset:
-        return None
-    relative = Path(asset)
-    if relative.is_absolute() or any(part in (".", "..") for part in relative.parts):
-        return None
-    assets_root = (project_dir / "assets").resolve()
-    pdf_path = (assets_root / relative).resolve()
-    try:
-        pdf_path.relative_to(assets_root)
-    except ValueError:
-        return None
-    tables = read_json(pdf_path.parent / "pow-native-tables.json")
-    if not isinstance(tables, list):
-        return None
-
     if saved_annotations is None:
         saved_annotations = _read_mpb_review_annotations().get("annotations", {})
-    rows: List[Dict[str, Any]] = []
-    sha = str(pow_data.get("pdfSha256") or "unknown")
-    for table_index, table in enumerate(tables):
-        if not isinstance(table, dict) or not isinstance(table.get("cells"), list):
-            continue
-        page = table.get("page") if isinstance(table.get("page"), int) else 0
-        for row_index, cells in enumerate(table["cells"]):
-            values = [_mpb_cell_text(cell) for cell in cells] if isinstance(cells, list) else []
-            raw_text = " | ".join(value.strip() for value in values if value and value.strip())
-            if not raw_text:
-                continue
-            row_id = f"{code}:{sha}:{page}:{table_index}:{row_index}"
-            saved = saved_annotations.get(row_id, {})
-            key_values = saved.get("keyValues") if isinstance(saved, dict) else None
-            if not isinstance(key_values, dict) and isinstance(saved, dict) and isinstance(saved.get("note"), str):
-                key_values = {"note": saved["note"]}
-            rows.append({
-                "rowId": row_id,
-                "page": page,
-                "table": table_index + 1,
-                "row": row_index + 1,
-                "rawText": raw_text,
-                "keyValues": key_values if isinstance(key_values, dict) else {},
-            })
 
-    document_metadata = pow_document.get("metadata") if isinstance(pow_document.get("metadata"), dict) else {}
-    return {
-        "code": code,
-        "name": str(metadata.get("projectName") or ""),
-        "allocationPesos": _mpb_allocation_pesos(metadata),
-        "office": str(metadata.get("office") or ""),
-        "region": str(metadata.get("region") or ""),
-        "pap3": str(metadata.get("pap3") or ""),
-        "powUrl": str(document_metadata.get("url") or ""),
-        "powStatus": str(pow_data.get("status") or "unknown"),
-        "pageCount": int(pow_data.get("pageCount") or 0),
-        "rows": rows,
-    }
+    source_rows = record["rows"]
+    digest = __import__("hashlib").sha256(
+        json.dumps(source_rows, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    ).hexdigest()[:16]
+    rows = []
+    for index, source_row in enumerate(source_rows):
+        if not isinstance(source_row, dict):
+            continue
+        page = source_row.get("sourcePage") if isinstance(source_row.get("sourcePage"), int) else 0
+        row_id = f"{code}:{digest}:{page}:{index}"
+        saved = saved_annotations.get(row_id, {})
+        key_values = saved.get("keyValues") if isinstance(saved, dict) else None
+        if not isinstance(key_values, dict) and isinstance(saved, dict) and isinstance(saved.get("note"), str):
+            key_values = {"note": saved["note"]}
+        raw_text = " | ".join(
+            f"{key}: {value}" for key, value in source_row.items() if value is not None
+        )
+        rows.append({
+            "rowId": row_id,
+            "page": page,
+            "table": 1,
+            "row": index + 1,
+            "rawText": raw_text,
+            "sourceRow": source_row,
+            "keyValues": key_values if isinstance(key_values, dict) else {},
+        })
+    return {**record, "rows": rows, "powUrl": ""}
 
 
 @app.get("/api/mpb-review/projects")
 async def list_mpb_review_projects(hash: str = Query(default="")) -> JSONResponse:
     _require_connectivity_annotation_access(hash)
-    if not MPB_REVIEW_CACHE_ROOT.is_dir():
-        raise HTTPException(status_code=503, detail="POW document cache is unavailable")
     saved = _read_mpb_review_annotations().get("annotations", {})
     projects = []
-    for project_dir in MPB_REVIEW_CACHE_ROOT.iterdir():
-        code = project_dir.name
-        if not _valid_mpb_project_code(code):
-            continue
-        project = _mpb_load_project(code, saved)
-        if project is None:
-            continue
+    for project in _mpb_review_source_records().values():
+        code = project["code"]
         projects.append({
             key: project[key]
-            for key in ("code", "name", "allocationPesos", "office", "region", "pageCount", "powStatus")
+            for key in ("code", "name", "hgabId", "allocationPesos", "office", "region", "pageCount", "powStatus")
         } | {"rowCount": len(project["rows"])})
     projects.sort(key=lambda project: (-(project["allocationPesos"] or 0), project["code"]))
     return JSONResponse(content={"projects": projects}, headers={"Cache-Control": "no-store"})
