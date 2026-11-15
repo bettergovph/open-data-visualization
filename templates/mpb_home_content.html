@@ -37,16 +37,8 @@
         #mpb-home .detail-title { margin:0 0 10px; font-size:17px; line-height:1.3; }
         #mpb-home .chart-note { min-height:42px; margin:12px 0 0; color:var(--muted); font-size:13px; line-height:1.5; }
         #mpb-home .detail-link { display:inline-flex; margin-top:14px; color:var(--blue); font-size:13px; font-weight:800; text-decoration-thickness:1px; text-underline-offset:3px; }
-        #mpb-home .unified-rankings-chart { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:9px; }
-        #mpb-home .unified-ranking { min-width:0; padding:10px 8px; border:1px solid #D7E0E4; border-radius:9px; background:#fff; }
-        #mpb-home .unified-ranking h5 { min-height:34px; margin:0 0 8px; color:var(--blue-dark); font-size:11px; line-height:1.3; }
-        #mpb-home .unified-ranking-row { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:3px 5px; margin:7px 0; font-size:10px; }
-        #mpb-home .unified-ranking-place { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#344054; }
-        #mpb-home .unified-ranking-place b { display:inline-grid; width:16px; height:16px; margin-right:3px; place-items:center; border-radius:50%; background:#EAF0FF; color:var(--blue-dark); font-size:9px; }
-        #mpb-home .unified-ranking-place small { display:block; overflow:hidden; padding-left:19px; color:var(--muted); font-size:9px; text-overflow:ellipsis; }
-        #mpb-home .unified-ranking-value { color:var(--blue-dark); font-size:9px; font-weight:800; white-space:nowrap; }
-        #mpb-home .unified-ranking-track { grid-column:1/-1; display:block; height:5px; overflow:hidden; margin-left:19px; border-radius:9px; background:#E7EEF5; }
-        #mpb-home .unified-ranking-track i { display:block; height:100%; border-radius:inherit; }
+        #mpb-home .unified-multi-axis-chart { width:100%; }
+        #mpb-home .unified-chart-legend i { display:inline-block; width:10px; height:10px; flex:0 0 10px; border-radius:2px; }
         #mpb-home .source-infographic { min-height:180px; }
         #mpb-home .source-infographic:not(.loaded):empty::before { content:'Loading the infographic…'; display:block; padding:24px; border-radius:10px; background:#F5F7FA; color:var(--muted); font-size:14px; }
         #mpb-home .source-infographic iframe { display:block; width:100%; border:0; }
@@ -143,8 +135,6 @@
             #mpb-home .province-pair-head span:first-child { display:none; }
             #mpb-home .province-rank-row { grid-template-columns:1fr 1fr; gap:6px 9px; }
             #mpb-home .province-place { grid-column:1/-1; }
-            #mpb-home .unified-rankings-chart { grid-template-columns:1fr; }
-            #mpb-home .unified-ranking-row { grid-template-columns:minmax(0,1fr) auto; }
             #mpb-home .home-footer { display:block; }
             #mpb-home .home-footer p { margin:8px 0; }
         }
@@ -200,4 +190,4 @@
         </footer>
     </main>
 </div>
-<script src="/static/js/mpb-home.js?v=three-unified-barangay-rankings-20261115" defer></script>
+<script src="/static/js/mpb-home.js?v=story-03-multiaxis-chart-20261115" defer></script>

@@ -4,14 +4,14 @@
     const researchBase = 'https://research.bettergov.ph/static/nep-preview/';
 
     const chartPlans = [
-        { title: 'First-time and returning recipient barangays', note: 'FY2027 recipient barangays, classified by whether an earlier MPB record was found.', href: '/static/nep-preview/mpb.html#fy2027-mpb-history', link: 'Review FY2027 recipient history', chart: (d) => waffle(d.recipientBarangays2027, [['Returning','#0038A8'],['First-time','#FCD116']]) },
-        { title: 'How many FY2027 rows meet the document threshold?', note: 'Distribution by matched document types. Complete means at least four of five named types were matched to the project row.', href: '/static/nep-preview/mpb.html#fy2027-mpb-documents', link: 'Review document coverage', chart: (d) => documentDistribution(d.documents2027) },
+        { title: 'First-time and returning recipient barangays', note: 'FY2027 recipient barangays, classified by whether an earlier MPB record was found.', href: `${researchBase}mpb.html#fy2027-mpb-history`, link: 'Review FY2027 recipient history', chart: (d) => waffle(d.recipientBarangays2027, [['Returning','#0038A8'],['First-time','#FCD116']]) },
+        { title: 'How many FY2027 rows meet the document threshold?', note: 'Distribution by matched document types. Complete means at least four of five named types were matched to the project row.', href: `${researchBase}mpb.html#fy2027-mpb-documents`, link: 'Review document coverage', chart: (d) => documentDistribution(d.documents2027) },
         { title: 'Three views of MPB records across barangays', note: 'Combines the unified page’s top upgrade, Tech Tree score, and total allocation rankings. The chart shows the top 10 barangays in each ranking; open the full tables for filters and project rows.', href: 'https://research.bettergov.ph/static/nep-preview/mpb-barangay.html', link: 'Open the unified barangay tables', chart: (d) => unifiedBarangayChart(d.unifiedBarangayRankings) },
-        { title: 'Historical records across all official barangays', note: 'Each bar counts barangays with exactly that many distinct MPB title matches from FY2015–FY2026. No mapped match does not establish that a barangay has no building or received no funding.', href: '/static/nep-preview/mpb-regional-province.html', link: 'Explore historical distribution', chart: (d) => historicalMultiplicityChart(d.historicalMultiplicity) },
-        { title: 'Poverty and allocation per barangay', note: 'Each dot is a province. The line is a descriptive linear fit; it does not show that poverty determines allocations.', href: '/static/nep-preview/mpb-regional-province.html', link: 'Review the poverty comparison and methods', chart: (d) => scatter(d.provincePovertyPoints) },
-        { title: 'Top, middle and bottom provinces by poverty incidence', note: 'Ranked by 2023 poverty incidence among families. Allocation per official barangay is shown beside poverty on a consistent province-wide scale; row counts and total mapped allocations remain context.', href: '/static/nep-preview/mpb-regional-province.html', link: 'Explore all province rankings and methods', chart: (d) => provinceRankings(d.provincePovertyPoints) },
-        { title: 'MPB records and public schools by region', note: 'Each tile shows public-school records relative to MPB project rows in that region. These are regional totals, not matched projects and schools.', href: '/static/nep-preview/education-health.html#data-coverage', link: 'Review school coverage and counts', chart: (d) => regionalTiles(d.educationRows,'depedPublicSchoolCount','schools per 100 MPB rows') },
-        { title: 'MPB project rows outnumber joined government hospital beds', note: 'This compares aggregate records, not equivalent assets: MPB project rows are not buildings, and they are not matched to any hospital or bed.', href: '/static/nep-preview/education-health.html#data-coverage', link: 'Review hospital and bed coverage', chart: (d) => hospitalComparison(d.facilityRatios) }
+        { title: 'Historical records across all official barangays', note: 'Each bar counts barangays with exactly that many distinct MPB title matches from FY2015–FY2026. No mapped match does not establish that a barangay has no building or received no funding.', href: `${researchBase}mpb-regional-province.html`, link: 'Explore historical distribution', chart: (d) => historicalMultiplicityChart(d.historicalMultiplicity) },
+        { title: 'Poverty and allocation per barangay', note: 'Each dot is a province. The line is a descriptive linear fit; it does not show that poverty determines allocations.', href: `${researchBase}mpb-regional-province.html`, link: 'Review the poverty comparison and methods', chart: (d) => scatter(d.provincePovertyPoints) },
+        { title: 'Top, middle and bottom provinces by poverty incidence', note: 'Ranked by 2023 poverty incidence among families. Allocation per official barangay is shown beside poverty on a consistent province-wide scale; row counts and total mapped allocations remain context.', href: `${researchBase}mpb-regional-province.html`, link: 'Explore all province rankings and methods', chart: (d) => provinceRankings(d.provincePovertyPoints) },
+        { title: 'MPB records and public schools by region', note: 'Each tile shows public-school records relative to MPB project rows in that region. These are regional totals, not matched projects and schools.', href: `${researchBase}education-health.html#data-coverage`, link: 'Review school coverage and counts', chart: (d) => regionalTiles(d.educationRows,'depedPublicSchoolCount','schools per 100 MPB rows') },
+        { title: 'MPB project rows outnumber joined government hospital beds', note: 'This compares aggregate records, not equivalent assets: MPB project rows are not buildings, and they are not matched to any hospital or bed.', href: `${researchBase}education-health.html#data-coverage`, link: 'Review hospital and bed coverage', chart: (d) => hospitalComparison(d.facilityRatios) }
     ];
 
     const fmt = (n) => Number(n || 0).toLocaleString('en-PH');
@@ -134,19 +134,48 @@
 
     function unifiedBarangayChart(data) {
         if (!data?.tables) return '<p class="prompt">Unified barangay rankings are unavailable.</p>';
+        const compactPeso = (value) => value >= 1e9 ? `₱${(value/1e9).toFixed(1)}B` : value >= 1e6 ? `₱${(value/1e6).toFixed(1)}M` : value >= 1e3 ? `₱${(value/1e3).toFixed(0)}k` : peso(value);
         const specs = [
-            ['upgrades', 'Highest level', '#0038A8', v => `Level ${fmt(v)}`],
-            ['techTree', 'Tech Tree score', '#087A61', v => fmt(v)],
-            ['economy', 'Listed allocation', '#B58600', v => peso(v)]
+            { key:'upgrades', metric:'highestLevel', label:'Highest level', color:'#0038A8', format:v=>`Level ${fmt(v)}`, axis:v=>fmt(v) },
+            { key:'techTree', metric:'techTreeScore', label:'Tech Tree score', color:'#087A61', format:v=>fmt(v), axis:v=>fmt(v) },
+            { key:'economy', metric:'allocationPesos', label:'Listed allocation', color:'#B58600', format:v=>compactPeso(v), axis:v=>compactPeso(v) }
         ];
-        return `<div class="unified-rankings-chart">${specs.map(([key, heading, color, format]) => {
-            const rows = data.tables[key]?.rows || [], max = Math.max(1, ...rows.map(row => Number(row[key === 'upgrades' ? 'highestLevel' : key === 'techTree' ? 'techTreeScore' : 'allocationPesos'] || 0)));
-            const metric = key === 'upgrades' ? 'highestLevel' : key === 'techTree' ? 'techTreeScore' : 'allocationPesos';
-            return `<section class="unified-ranking"><h5>${esc(heading)}</h5>${rows.map((row, index) => {
-                const value = Number(row[metric] || 0), place = `${row.barangay} · ${row.municipality}, ${row.province}`;
-                return `<div class="unified-ranking-row" title="${esc(place)}"><span class="unified-ranking-place"><b>${index + 1}</b>${esc(row.barangay)}<small>${esc(row.municipality)}, ${esc(row.province)}</small></span><span class="unified-ranking-value">${format(value)}</span><span class="unified-ranking-track"><i style="width:${Math.max(2, 100 * value / max)}%;background:${color}"></i></span></div>`;
-            }).join('')}</section>`;
-        }).join('')}</div><p class="chart-note">Three rankings · through FY${fmt(data.throughFiscalYear)} · top 10 each</p>`;
+        const ranked = new Map();
+        specs.forEach(spec => (data.tables[spec.key]?.rows || []).forEach((row, index) => {
+            const id = `${row.province}|${row.municipality}|${row.barangay}`.toLocaleLowerCase();
+            if (!ranked.has(id)) ranked.set(id, { row, values:{} });
+            ranked.get(id).values[spec.key] = { value:Number(row[spec.metric] || 0), rank:index + 1 };
+        }));
+        const places = [...ranked.values()].sort((a,b) => {
+            const rankOf = x => Math.min(...specs.map(s => x.values[s.key]?.rank ?? Infinity));
+            return rankOf(a)-rankOf(b) || a.row.barangay.localeCompare(b.row.barangay);
+        });
+        const maxima = Object.fromEntries(specs.map(s => [s.key,Math.max(1,...places.map(p=>p.values[s.key]?.value||0))]));
+        const W=720,H=430,L=150,R=10,T=50,B=150,plotW=W-L-R,plotH=H-T-B,base=T+plotH,step=plotW/places.length,barW=Math.min(6,step*.23),gap=1.5;
+        const axes=specs.map((s,i)=>({ ...s, x:L-103+i*48, max:maxima[s.key] }));
+        let content='';
+        [0,.5,1].forEach(f=>{
+            const y=base-f*plotH;
+            if(f>0)content+=`<line x1="${L}" y1="${y}" x2="${W-R}" y2="${y}" stroke="#E0E6DF"/>`;
+            axes.forEach(a=>content+=`<text x="${a.x-4}" y="${y+3}" text-anchor="end" fill="${a.color}" font-size="8" font-weight="700">${a.axis(a.max*f)}</text>`);
+        });
+        axes.forEach(a=>content+=`<line x1="${a.x}" y1="${T}" x2="${a.x}" y2="${base}" stroke="${a.color}" stroke-width="1.5"/><line x1="${a.x-3}" y1="${T}" x2="${a.x+3}" y2="${T}" stroke="${a.color}"/><line x1="${a.x-3}" y1="${base}" x2="${a.x+3}" y2="${base}" stroke="${a.color}"/>`);
+        content+=`<line x1="${L}" y1="${base}" x2="${W-R}" y2="${base}" stroke="#89968D"/>`;
+        places.forEach((place,i)=>{
+            const center=L+i*step+step/2;
+            specs.forEach((s,j)=>{
+                const entry=place.values[s.key];
+                if(!entry)return;
+                const height=Math.max(1,plotH*entry.value/maxima[s.key]),x=center+(j-1)*(barW+gap)-barW/2,y=base-height;
+                const title=`${place.row.barangay} · ${place.row.municipality}, ${place.row.province} · ${s.label}: ${s.format(entry.value)} · rank ${entry.rank} of 10`;
+                content+=`<rect x="${x}" y="${y}" width="${barW}" height="${height}" rx="1.5" fill="${s.color}"><title>${esc(title)}</title></rect>`;
+            });
+            const label=place.row.barangay.length>20?`${place.row.barangay.slice(0,19)}…`:place.row.barangay;
+            content+=`<text transform="translate(${center-2} ${base+8}) rotate(90)" text-anchor="start" fill="#46564c" font-size="8"><title>${esc(`${place.row.barangay} · ${place.row.municipality}, ${place.row.province}`)}</title>${esc(label)}</text>`;
+        });
+        content+=`<text x="${L}" y="18" fill="#46564c" font-size="10" font-weight="700">Barangay</text><text x="${L}" y="34" fill="#647268" font-size="9">Each colored axis has its own scale · through FY${fmt(data.throughFiscalYear)}</text>`;
+        const legend=`<div class="chart-legend unified-chart-legend">${axes.map(a=>`<span><i style="background:${a.color}"></i>${esc(a.label)} · 0–${esc(a.axis(a.max))}</span>`).join('')}<span>Each barangay appears only in rankings where it is in that measure’s top 10.</span></div>`;
+        return `<div class="unified-multi-axis-chart">${svgWrap(content,'Top barangays compared in one grouped vertical bar chart. Each measure has an independent vertical axis and scale.',`0 0 ${W} ${H}`)}</div>${legend}<p class="chart-note">Grouped columns share one barangay axis. The three colored y-axes scale highest level, Tech Tree score, and listed allocation independently; hover a bar for its exact value and rank.</p>`;
     }
 
     function detailCard(plan, index) {
