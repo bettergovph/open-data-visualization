@@ -1,0 +1,38 @@
+<style>
+    .topic-nav { position:sticky; top:0; z-index:50; background:#fff; border-bottom:1px solid #E0E0E0; }
+    .topic-nav-inner { max-width:1280px; min-height:68px; margin:0 auto; padding:0 28px; display:flex; align-items:center; justify-content:space-between; gap:20px; }
+    .topic-nav-brand { display:flex; flex:0 0 auto; align-items:center; }
+    .topic-nav-brand img { display:block; width:155px; height:auto; }
+    .topic-nav-links { display:flex; align-items:center; gap:8px; }
+    .topic-nav-links a { border-radius:7px; padding:9px 13px; color:#616161; font-size:14px; font-weight:700; text-decoration:none; white-space:nowrap; }
+    .topic-nav-links a:hover,.topic-nav-links a[aria-current="page"] { background:#EAF0FF; color:#00246A; }
+    .topic-nav-links a.topic-nav-research { background:#0038A8; color:#fff; }
+    .topic-nav-links a.topic-nav-research:hover { background:#00246A; }
+    .topic-nav a:focus-visible { outline:3px solid #FCD116; outline-offset:3px; }
+    @media(max-width:800px) {
+        .topic-nav-inner { min-height:58px; padding:0 12px; gap:4px; }
+        .topic-nav-brand img { width:105px; }
+        .topic-nav-links { gap:0; }
+        .topic-nav-links a { padding:7px 6px; font-size:11px; }
+    }
+    @media(max-width:470px) {
+        .topic-nav-inner { padding:0 6px; gap:3px; }
+        .topic-nav-brand img { width:82px; }
+        .topic-nav-links a { padding:6px 4px; font-size:10px; }
+    }
+</style>
+<header class="topic-nav">
+    <div class="topic-nav-inner">
+        <a class="topic-nav-brand" href="/" aria-label="BetterGovPH visualizations home">
+            <img src="https://assets.bettergov.ph/logos/webp/horizontal-black.webp" alt="BetterGov.ph">
+        </a>
+        <nav class="topic-nav-links" aria-label="Main navigation">
+            <a href="/"{% if topic_nav_active == "mpb" %} aria-current="page"{% endif %}>MPB</a>
+            <a href="/roads-bridges"{% if topic_nav_active == "roads-bridges" %} aria-current="page"{% endif %}>Roads &amp; Bridges</a>
+            <a href="/connectivity"{% if topic_nav_active == "connectivity" %} aria-current="page"{% endif %}>Connectivity</a>
+            <a class="topic-nav-research" href="https://research.bettergov.ph/static/nep-preview/">Research</a>
+            <a href="/archive"{% if topic_nav_active == "archive" %} aria-current="page"{% endif %}>Archive</a>
+            <a href="/sources"{% if topic_nav_active == "sources" %} aria-current="page"{% endif %}>Sources</a>
+        </nav>
+    </div>
+</header>

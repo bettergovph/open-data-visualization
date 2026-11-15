@@ -8,15 +8,6 @@
         #mpb-home { --ink:#212121; --muted:#616161; --blue:#0038A8; --blue-dark:#00246A; --gold:#FCD116; --line:#E0E0E0; --paper:#fff; color:var(--ink); background:#FAFAFA; font:16px/1.55 Inter,system-ui,sans-serif; min-height:100vh; }
         #mpb-home * { box-sizing:border-box; }
         #mpb-home a { color:inherit; }
-        #mpb-home .topbar { position:sticky; top:0; z-index:50; background:#fff; border-bottom:1px solid var(--line); }
-        #mpb-home .topbar-inner { min-height:68px; max-width:1280px; margin:auto; padding:0 28px; display:flex; align-items:center; justify-content:space-between; gap:24px; }
-        #mpb-home .brand { display:flex; align-items:center; gap:12px; color:var(--ink); text-decoration:none; font-weight:750; letter-spacing:-.02em; }
-        #mpb-home .brand img { display:block; width:155px; height:auto; }
-        #mpb-home .navlinks { display:flex; gap:8px; align-items:center; }
-        #mpb-home .navlinks a { text-decoration:none; border-radius:7px; padding:9px 14px; font-size:14px; font-weight:700; }
-        #mpb-home .navlinks a.nav-current { color:var(--blue-dark); }
-        #mpb-home .navlinks a.nav-research { color:#fff; background:var(--blue); }
-        #mpb-home .navlinks a.nav-secondary { color:var(--muted); }
         #mpb-home .mpb-hero { display:block; position:relative; z-index:2; height:auto; min-height:0; overflow:visible; background:linear-gradient(115deg,#00246A 0%,#0038A8 100%); border-bottom:3px solid var(--gold); color:#fff; padding:64px 28px 54px; }
         #mpb-home .hero-inner { max-width:1224px; margin:auto; }
         #mpb-home .eyebrow { margin:0 0 14px; color:var(--gold); font-size:12px; text-transform:uppercase; letter-spacing:.13em; font-weight:800; }
@@ -119,10 +110,6 @@
         #mpb-home .home-footer a { color:var(--blue); font-weight:750; }
         #mpb-home .load-error { padding:16px; border:1px solid #FCD116; border-radius:10px; background:#FFF9D9; color:#212121; }
         @media(max-width:760px) {
-            #mpb-home .topbar-inner { min-height:58px; padding:0 16px; }
-            #mpb-home .brand img { width:125px; }
-            #mpb-home .navlinks { gap:2px; }
-            #mpb-home .navlinks a { padding:8px 10px; font-size:13px; }
             #mpb-home .mpb-hero { padding:48px 20px 38px; }
             #mpb-home .page-content { padding:28px 16px 46px !important; }
             #mpb-home .visual-pair { grid-template-columns:1fr; }
@@ -139,10 +126,6 @@
             #mpb-home .home-footer p { margin:8px 0; }
         }
         @media(max-width:420px) {
-            #mpb-home .topbar-inner { padding:0 10px; gap:4px; }
-            #mpb-home .brand img { width:96px; }
-            #mpb-home .navlinks { gap:0; }
-            #mpb-home .navlinks a { padding:6px 5px; font-size:11px; }
         }
         @media(max-width:520px) {
             #mpb-home .coverage-row-heading { align-items:flex-start; flex-direction:column; gap:2px; }
@@ -156,21 +139,8 @@
         }
     </style>
 
-    <header class="topbar">
-        <div class="topbar-inner">
-            <a class="brand" href="/" aria-label="BetterGovPH visualizations home">
-                <img src="https://assets.bettergov.ph/logos/webp/horizontal-black.webp" alt="BetterGov.ph">
-            </a>
-            <nav class="navlinks" aria-label="Main navigation">
-                <a class="nav-current" href="#mpb-story" aria-current="page">MPB</a>
-                <a class="nav-secondary" href="/roads-bridges">Roads &amp; Bridges</a>
-                <a class="nav-secondary" href="/connectivity">Connectivity</a>
-                <a class="nav-research" href="https://research.bettergov.ph/static/nep-preview/">Research</a>
-                <a class="nav-secondary" href="/archive">Archive</a>
-                <a class="nav-secondary" href="/sources">Sources</a>
-            </nav>
-        </div>
-    </header>
+    {% set topic_nav_active = "mpb" %}
+    {% include "visualizations_topic_nav.html" %}
 
     <section class="mpb-hero" aria-labelledby="mpb-home-title">
         <div class="hero-inner">
