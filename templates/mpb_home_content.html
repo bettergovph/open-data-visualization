@@ -61,9 +61,10 @@
         #mpb-home .coverage-chart-footnote { margin:14px 0 0; }
         #mpb-home .hospital-region-tile { display:flex; min-width:0; aspect-ratio:1 / 1; flex-direction:column; justify-content:space-between; padding:7px; border:1px solid #E1E7F0; border-radius:6px; background:#F8FAFD; color:var(--ink); }
         #mpb-home .hospital-region-tile > b { overflow:hidden; color:var(--blue-dark); font-size:10px; text-overflow:ellipsis; white-space:nowrap; }
-        #mpb-home .hospital-tile-measure { display:grid; grid-template-columns:1fr auto; align-items:center; gap:1px 3px; }
-        #mpb-home .hospital-tile-measure span { color:var(--muted); font-size:8px; }
-        #mpb-home .hospital-tile-measure strong { color:var(--ink); font-size:11px; font-variant-numeric:tabular-nums; }
+        #mpb-home .hospital-tile-measure { display:grid; grid-template-columns:1fr; align-items:center; gap:2px; }
+        #mpb-home .hospital-tile-measure strong { font-size:12px; font-variant-numeric:tabular-nums; }
+        #mpb-home .hospital-tile-measure .bed-ratio-value { color:#8A6500; }
+        #mpb-home .hospital-tile-measure .hospital-ratio-value { color:#087A61; }
         #mpb-home .hospital-tile-measure i { grid-column:1 / -1; display:block; height:4px; overflow:hidden; border-radius:4px; background:#E5EAF1; }
         #mpb-home .hospital-tile-measure em { display:block; height:100%; border-radius:4px; }
         #mpb-home .hospital-tile-measure .bed-ratio { background:#B58600; }
@@ -109,8 +110,8 @@
     <section class="topic-hero" aria-labelledby="mpb-home-title">
         <div class="topic-hero-inner">
             <p class="topic-hero-kicker">BetterGovPH · Public budget research</p>
-            <h1 id="mpb-home-title">Who benefits from another MPB allocation?</h1>
-            <p class="topic-hero-deck">Eight pictures show where multi-purpose building budget rows go, what records accompany them, and how they compare with local indicators. Open each detailed chart to explore the underlying records.</p>
+            <h1 id="mpb-home-title">Who benefits from MPBs?</h1>
+            <p class="topic-hero-deck">Explore MPB allocations, repeat records, and how they compare with local indicators.</p>
             <div class="topic-hero-meta"><span>MPB = multi-purpose building</span><span>GAA FY2015–FY2026</span><span>FY2027 House Bill</span></div>
         </div>
     </section>
@@ -124,4 +125,4 @@
         </footer>
     </main>
 </div>
-<script src="/static/js/mpb-home.js?v=story-08-regional-hospital-ratios-20261115" defer></script>
+<script src="/static/js/mpb-home.js?v=story-08-regional-hospital-compact-20261115" defer></script>
