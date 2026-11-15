@@ -7,9 +7,9 @@
         { title: 'First-time and returning recipient barangays', note: 'FY2027 recipient barangays, classified by whether an earlier MPB record was found.', href: '/static/nep-preview/mpb.html#fy2027-mpb-history', link: 'Review FY2027 recipient history', chart: (d) => waffle(d.recipientBarangays2027, [['Returning','#0038A8'],['First-time','#FCD116']]) },
         { title: 'How many FY2027 rows meet the document threshold?', note: 'Distribution by matched document types. Complete means at least four of five named types were matched to the project row.', href: '/static/nep-preview/mpb.html#fy2027-mpb-documents', link: 'Review document coverage', chart: (d) => documentDistribution(d.documents2027) },
         { title: 'How many 2027 recipient barangays have multiple project titles?', note: 'The title match count is a record comparison; multiple titles do not necessarily mean multiple completed buildings.', href: '/static/nep-preview/mpb-barangay.html', link: 'Explore barangay records', chart: (d) => donut(d.coverage2027.barangaysWithOneTitle,d.coverage2027.barangaysWithMultipleTitles,'one title','multiple titles') },
-        { title: 'Historical records across all official barangays', note: 'Mapped MPB record counts from FY2015–FY2026; records do not establish building completion.', href: '/static/nep-preview/mpb-regional-province.html', link: 'Explore historical distribution', chart: (d) => historyMosaic(d.history2015To2026) },
+        { title: 'Historical records across all official barangays', note: 'Each bar counts barangays with exactly that many distinct MPB title matches from FY2015–FY2026. No mapped match does not establish that a barangay has no building or received no funding.', href: '/static/nep-preview/mpb-regional-province.html', link: 'Explore historical distribution', chart: (d) => historicalMultiplicityChart(d.historicalMultiplicity) },
         { title: 'Poverty and allocation per barangay', note: 'Each dot is a province. The line is a descriptive linear fit; it does not show that poverty determines allocations.', href: '/static/nep-preview/mpb-regional-province.html', link: 'Review the poverty comparison and methods', chart: (d) => scatter(d.provincePovertyPoints) },
-        { title: 'Top, middle and bottom provinces by poverty incidence', note: 'Ranked by 2023 poverty incidence among families. MPB project rows and total mapped allocations are shown alongside; FY2027 proposed funding is included and is not verified spending.', href: '/static/nep-preview/mpb-regional-province.html', link: 'Explore all province rankings and methods', chart: (d) => provinceRankings(d.provincePovertyPoints) },
+        { title: 'Top, middle and bottom provinces by poverty incidence', note: 'Ranked by 2023 poverty incidence among families. Allocation per official barangay is shown beside poverty on a consistent province-wide scale; row counts and total mapped allocations remain context.', href: '/static/nep-preview/mpb-regional-province.html', link: 'Explore all province rankings and methods', chart: (d) => provinceRankings(d.provincePovertyPoints) },
         { title: 'MPB records and public schools by region', note: 'Each tile shows public-school records relative to MPB project rows in that region. These are regional totals, not matched projects and schools.', href: '/static/nep-preview/education-health.html#data-coverage', link: 'Review school coverage and counts', chart: (d) => regionalTiles(d.educationRows,'depedPublicSchoolCount','schools per 100 MPB rows') },
         { title: 'Reported hospital beds relative to MPB records', note: 'Each dot is a region; the vertical position compares reported government hospital beds with MPB project rows. This does not match projects to hospitals or beds.', href: '/static/nep-preview/education-health.html#data-coverage', link: 'Review hospital and bed coverage', chart: (d) => regionScatter(d.educationRows,'philhealthGovernmentHospitalBeds','Reported hospital beds') }
     ];
@@ -42,10 +42,19 @@
         const total=Number(a)+Number(b)||1, pct=Number(a)/total, r=58,c=2*Math.PI*r, dash=c*pct;
         return `<div class="donut-wrap">${svgWrap(`<circle cx="100" cy="100" r="${r}" fill="none" stroke="#FCD116" stroke-width="22"/><circle cx="100" cy="100" r="${r}" fill="none" stroke="#0038A8" stroke-width="22" stroke-dasharray="${dash} ${c-dash}" transform="rotate(-90 100 100)"/><text x="100" y="96" text-anchor="middle" fill="#0038A8" font-size="22" font-weight="700">${fmt(total)}</text><text x="100" y="116" text-anchor="middle" fill="#647268" font-size="11">recipient</text>`,'One-title and multiple-title barangays','0 0 200 200')}${svgWrap(`<text x="0" y="22" fill="#0038A8" font-size="13" font-weight="700">${fmt(a)} · ${labelA}</text><text x="0" y="52" fill="#647268" font-size="12">${(pct*100).toFixed(1)}% of recipients</text><text x="0" y="104" fill="#8b6800" font-size="13" font-weight="700">${fmt(b)} · ${labelB}</text><text x="0" y="134" fill="#647268" font-size="12">${((1-pct)*100).toFixed(1)}% of recipients</text>`,'Title multiplicity labels','0 0 210 160')}</div>`;
     }
-    function historyMosaic(d) {
-        const total=d.officialBarangays||1, arr=[['No mapped record',d.none,'#FCD116'],['1–3 project rows',d.oneToThree,'#6B8FCC'],['4+ project rows',d.fourOrMore,'#0038A8']]; let x=0;
-        const rects=arr.map(([l,n,color])=>{const w=200*n/total, out=`<rect x="${x}" y="25" width="${w}" height="70" fill="${color}"><title>${l}: ${fmt(n)} (${(100*n/total).toFixed(1)}%)</title></rect>`;x+=w;return out}).join('');
-        return `${svgWrap(rects,'Historical MPB record coverage across all official barangays','0 0 200 120')}<div class="chart-legend">${arr.map(([l,n,color])=>`<span><i class="legend-dot" style="background:${color}"></i>${l}: ${fmt(n)} · ${(100*n/total).toFixed(1)}%</span>`).join('')}<span>${fmt(total)} official barangays</span></div>`;
+    function historicalMultiplicityChart(d) {
+        if (!d || !d.counts) return '<p>Exact historical repeat counts are unavailable.</p>';
+        const W=680,H=260,L=58,R=12,T=24,B=48, total=Number(d.officialBarangays)||1;
+        const bins=['0','1','2','3','4','5','6','7','8','9+'];
+        const vals=bins.map(k=>Number(d.counts[k]||0));
+        const max=Math.max(...vals,1), scale=v=>Math.log1p(v)/Math.log1p(max);
+        const step=(W-L-R)/bins.length, bw=step*.56, base=H-B, plotH=H-T-B;
+        let content='';
+        [1,10,100,1000,10000].forEach(v=>{const y=base-scale(v)*plotH;if(y>=T-1)content+=`<line x1="${L}" y1="${y}" x2="${W-R}" y2="${y}" stroke="#E0E6DF"/><text x="${L-8}" y="${y+3}" text-anchor="end" fill="#647268" font-size="10">${v.toLocaleString('en-PH')}</text>`;});
+        content+=`<line x1="${L}" y1="${T}" x2="${L}" y2="${base}" stroke="#89968D"/><line x1="${L}" y1="${base}" x2="${W-R}" y2="${base}" stroke="#89968D"/>`;
+        bins.forEach((bin,i)=>{const value=vals[i],height=scale(value)*plotH,x=L+i*step+(step-bw)/2,y=base-height,color=bin==='0'?'#AAB6C8':bin==='9+'?'#B58600':'#0038A8';content+=`<rect x="${x}" y="${y}" width="${bw}" height="${height}" rx="3" fill="${color}"><title>${bin} matches: ${fmt(value)} barangays</title></rect><text x="${x+bw/2}" y="${Math.max(T-7,y-5)}" text-anchor="middle" fill="#344054" font-size="9">${fmt(value)}</text><text x="${x+bw/2}" y="${base+18}" text-anchor="middle" fill="#46564C" font-size="11">${bin}</text>`;});
+        content+=`<text x="${(L+W-R)/2}" y="${H-8}" text-anchor="middle" fill="#46564c" font-size="11">Distinct historical title matches per barangay · ${esc(d.period)}</text>`;
+        return svgWrap(content,'Number of barangays by exact count of historical MPB title matches; vertical axis is logarithmic',`0 0 ${W} ${H}`)+`<div class="chart-legend"><span>Log scale · exact counts shown above bars</span><span>9+ is the only overflow category</span><span>${fmt(total)} official barangays</span></div>`;
     }
     function regionalTiles(rows,key,caption) {
         const data=(rows||[]).filter(x=>x.level==='region'&&Number(x.mpbRows)>0).map(x=>({...x,rate:100*Number(x[key]||0)/Number(x.mpbRows)})).sort((a,b)=>b.rate-a.rate), max=Math.max(...data.map(x=>x.rate),1);
@@ -91,6 +100,9 @@
         if (rows.length < 15) return '<p>Province ranking data is unavailable.</p>';
         const middleStart = Math.floor((rows.length - 5) / 2);
         const maxPoverty = Math.max(...rows.map((p) => Number(p.povertyPct)), 1);
+        const densityRows = rows.filter((p) => p.allocationPerBarangayPesos != null && Number.isFinite(Number(p.allocationPerBarangayPesos)));
+        const maxDensity = Math.max(...densityRows.map((p) => Number(p.allocationPerBarangayPesos)), 1);
+        const densityLabel = (value) => value >= 1000000 ? `₱${(value / 1000000).toFixed(1)}M` : `₱${(value / 1000).toFixed(0)}k`;
         const groups = [
             { title: 'Top 5', detail: 'Ranks 1–5 · highest poverty incidence', rows: rows.slice(0, 5) },
             { title: 'Middle 5', detail: `Ranks ${middleStart + 1}–${middleStart + 5} · centered on the median`, rows: rows.slice(middleStart, middleStart + 5) },
@@ -98,18 +110,19 @@
         ];
         const groupMarkup = groups.map((group) => {
             const firstRank = rows.indexOf(group.rows[0]) + 1;
-            return `<section class="province-group"><div class="province-group-heading"><h5>${esc(group.title)}</h5><span>${esc(group.detail)}</span></div>${group.rows.map((p, i) => {
+            return `<section class="province-group"><div class="province-group-heading"><h5>${esc(group.title)}</h5><span>${esc(group.detail)}</span></div><div class="province-pair-head"><span>Province</span><span>Poverty incidence · 0–${maxPoverty.toFixed(1)}%</span><span>Allocation per barangay · 0–${densityLabel(maxDensity)}</span></div>${group.rows.map((p, i) => {
                 const poverty = Number(p.povertyPct);
                 const allocation = p.allocationPesos == null ? null : Number(p.allocationPesos);
                 const compact = allocation == null ? 'Allocation unavailable' : allocation >= 1e9 ? `₱${(allocation / 1e9).toFixed(2)}B` : `₱${(allocation / 1e6).toFixed(0)}M`;
                 const projectRows = p.projectRows == null ? 'Rows unavailable' : `${fmt(p.projectRows)} project rows`;
+                const density = p.allocationPerBarangayPesos == null ? null : Number(p.allocationPerBarangayPesos);
                 const focusProvince = /zamboanga del norte|ilocos norte/i.test(p.region);
-                return `<div class="province-rank-row${focusProvince ? ' focus-province' : ''}"><div class="province-place"><strong>${firstRank + i}. ${esc(p.region)}</strong><small>${projectRows} · ${compact}</small></div><span class="bar-track" role="img" aria-label="${esc(p.region)}: ${poverty.toFixed(1)} percent poverty incidence among families"><i class="bar-fill" style="width:${100 * poverty / maxPoverty}%"></i></span><strong class="province-total">${poverty.toFixed(1)}%</strong></div>`;
+                return `<div class="province-rank-row${focusProvince ? ' focus-province' : ''}"><div class="province-place"><strong>${firstRank + i}. ${esc(p.region)}</strong><small>${projectRows} · ${compact} total mapped allocation</small></div><div class="province-measure" role="img" aria-label="${esc(p.region)}: ${poverty.toFixed(1)} percent poverty incidence among families"><strong>${poverty.toFixed(1)}%</strong><span class="bar-track"><i class="bar-fill" style="width:${100 * poverty / maxPoverty}%"></i></span></div><div class="province-measure" role="img" aria-label="${esc(p.region)}: ${density == null ? 'allocation density unavailable' : `${peso(density)} per official barangay`}"><strong>${density == null ? '—' : densityLabel(density)}</strong><span class="bar-track"><i class="bar-fill gold" style="width:${density == null ? 0 : 100 * density / maxDensity}%"></i></span></div></div>`;
             }).join('')}</section>`;
         }).join('');
         const focus = ['Zamboanga Del Norte', 'Ilocos Norte'].map((name) => rows.find((p) => p.region.toLowerCase() === name.toLowerCase())).filter(Boolean);
         const focusMarkup = focus.length === 2 ? `<div class="province-focus"><strong>Provinces in the infographic · 2023 poverty incidence among families</strong><div>${focus.map((p) => `<span><b>${esc(p.region)} · ${Number(p.povertyPct).toFixed(1)}%</b><small>${p.projectRows == null ? 'Rows unavailable' : `${fmt(p.projectRows)} rows`} · ${p.allocationPesos == null ? 'Allocation unavailable' : peso(p.allocationPesos)}</small></span>`).join('')}</div></div>` : '';
-        return `<div class="province-groups">${groupMarkup}</div>${focusMarkup}<p class="chart-note">The bars rank 2023 poverty incidence among families. MPB row counts and allocations are context, not the ranking measure. Allocation totals span GAA FY2015–FY2026 and the proposed FY2027 House Bill; they are not verified spending.</p>`;
+        return `<div class="province-groups">${groupMarkup}</div>${focusMarkup}<p class="chart-note">Both bar columns use one shared scale across all 79 provinces within that measure: poverty incidence among families, and mapped MPB allocation per official barangay. Provinces are ranked by poverty incidence; allocation density is a separate comparison. Allocation spans GAA FY2015–FY2026 and proposed FY2027 House Bill, not verified spending.</p>`;
     }
 
     function ratioChart(a, b, labelA, labelB, type) {
@@ -151,18 +164,21 @@
         const controller = new AbortController();
         const timer = setTimeout(() => controller.abort(), 12000);
         try {
-            const [sourceResponse, dataResponse, educationResponse] = await Promise.all([
+            const [sourceResponse, dataResponse, educationResponse, historyResponse] = await Promise.all([
                 fetch(`${researchBase}mpb-simple.html`, { signal: controller.signal, headers: { Accept: 'text/html' } }),
                 fetch(`${researchBase}mpb-simple-data.json`, { signal: controller.signal, headers: { Accept: 'application/json' } }),
-                fetch(`${researchBase}education-health-data.json`, { signal: controller.signal, headers: { Accept: 'application/json' } })
+                fetch(`${researchBase}education-health-data.json`, { signal: controller.signal, headers: { Accept: 'application/json' } }),
+                fetch('/static/data/mpb-historical-multiplicity.json', { signal: controller.signal, headers: { Accept: 'application/json' } })
             ]);
             if (!sourceResponse.ok) throw new Error(`The MPB infographic page returned ${sourceResponse.status}.`);
             if (!dataResponse.ok) throw new Error(`The MPB chart data returned ${dataResponse.status}.`);
             if (!educationResponse.ok) throw new Error(`The regional facility data returned ${educationResponse.status}.`);
-            const [sourceHtml, data, education] = await Promise.all([sourceResponse.text(), dataResponse.json(), educationResponse.json()]);
+            if (!historyResponse.ok) throw new Error(`The exact historical counts returned ${historyResponse.status}.`);
+            const [sourceHtml, data, education, historicalMultiplicity] = await Promise.all([sourceResponse.text(), dataResponse.json(), educationResponse.json(), historyResponse.json()]);
             if (!sourceHtml || !data) throw new Error('The MPB research source is incomplete.');
             window.mpbHomeData = data;
             data.educationRows = education.geographyRows;
+            data.historicalMultiplicity = historicalMultiplicity;
             if (!Array.isArray(data.provincePovertyPoints)) throw new Error('The MPB chart data is incomplete.');
             list.innerHTML = chartPlans.map(detailCard).join('');
             mountInfographics(sourceHtml);

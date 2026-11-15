@@ -70,12 +70,15 @@
         #mpb-home .province-group-heading { display:flex; align-items:baseline; justify-content:space-between; gap:8px; margin-bottom:7px; }
         #mpb-home .province-group-heading h5 { margin:0; color:var(--blue-dark); font-size:14px; }
         #mpb-home .province-group-heading span { color:var(--muted); font-size:11px; text-align:right; }
-        #mpb-home .province-rank-row { display:grid; grid-template-columns:minmax(130px,180px) minmax(55px,1fr) 70px; align-items:center; gap:9px; padding:6px 0; border-top:1px solid #E0E0E0; }
+        #mpb-home .province-pair-head, #mpb-home .province-rank-row { display:grid; grid-template-columns:minmax(120px,.85fr) minmax(100px,1fr) minmax(112px,1fr); align-items:center; gap:9px; }
+        #mpb-home .province-pair-head { padding:4px 0 7px; color:var(--muted); font-size:10px; line-height:1.25; }
+        #mpb-home .province-rank-row { padding:7px 0; border-top:1px solid #E0E0E0; }
         #mpb-home .province-place { min-width:0; }
         #mpb-home .province-place strong { display:block; overflow-wrap:anywhere; color:var(--ink); font-size:12px; line-height:1.3; }
         #mpb-home .province-place small { display:block; margin-top:2px; color:var(--muted); font-size:10px; }
-        #mpb-home .province-rank-row .bar-track { height:12px; }
-        #mpb-home .province-total { color:var(--blue-dark); font-size:11px; text-align:right; font-variant-numeric:tabular-nums; }
+        #mpb-home .province-measure { display:grid; grid-template-rows:auto 8px; gap:4px; min-width:0; }
+        #mpb-home .province-measure strong { color:var(--blue-dark); font-size:11px; font-variant-numeric:tabular-nums; }
+        #mpb-home .province-measure .bar-track { height:8px; }
         #mpb-home .province-focus { margin-top:12px; padding:12px; border-left:3px solid var(--gold); border-radius:6px; background:#FFF9D9; }
         #mpb-home .province-focus>strong { color:var(--blue-dark); font-size:12px; }
         #mpb-home .province-focus>div { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:8px; }
@@ -101,10 +104,10 @@
             #mpb-home .story-head { padding:17px 17px 12px; }
             #mpb-home .visual-cell { padding:18px 17px 20px; }
             #mpb-home .bar-row { grid-template-columns:minmax(88px,115px) 1fr 62px; gap:7px; font-size:11px; }
-            #mpb-home .province-rank-row { grid-template-columns:minmax(0,1fr) auto; gap:5px 8px; }
-            #mpb-home .province-rank-row .bar-track { grid-column:1/-1; grid-row:2; }
-            #mpb-home .province-total { grid-column:2; grid-row:1; }
-            #mpb-home .province-place { grid-column:1; grid-row:1; }
+            #mpb-home .province-pair-head { grid-template-columns:1fr 1fr; gap:8px; }
+            #mpb-home .province-pair-head span:first-child { display:none; }
+            #mpb-home .province-rank-row { grid-template-columns:1fr 1fr; gap:6px 9px; }
+            #mpb-home .province-place { grid-column:1/-1; }
             #mpb-home .home-footer { display:block; }
             #mpb-home .home-footer p { margin:8px 0; }
         }
@@ -153,4 +156,4 @@
         </footer>
     </main>
 </div>
-<script src="/static/js/mpb-home.js?v=a5c95890c2ba" defer></script>
+<script src="/static/js/mpb-home.js?v=0ade79befd7e" defer></script>
