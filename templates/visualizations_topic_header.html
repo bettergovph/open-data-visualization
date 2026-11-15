@@ -1,0 +1,18 @@
+{# Shared by the MPB, Roads and Bridges, Connectivity, and Sources pages. #}
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap">
+<link rel="stylesheet" href="/static/css/topic-layout.css?v=shared-header-20261115">
+{% include "visualizations_topic_nav.html" %}
+<section class="topic-hero" aria-labelledby="{{ topic_title_id }}">
+    <div class="topic-hero-inner">
+        <p class="topic-hero-kicker">{{ topic_kicker }}</p>
+        <h1 id="{{ topic_title_id }}">{{ topic_title }}</h1>
+        <p class="topic-hero-deck">{{ topic_deck }}</p>
+        {% if topic_badges | length > 0 %}
+        <div class="topic-hero-meta">
+            {% for badge in topic_badges %}
+            <span{% if loop.index0 == topic_snapshot_index %} id="rb-snapshot"{% endif %}>{{ badge }}</span>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</section>
