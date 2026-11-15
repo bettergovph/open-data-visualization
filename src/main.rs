@@ -7,6 +7,7 @@ use tera::{Tera, Context};
 
 mod utils;
 mod project_documents;
+mod mpb_review;
 use utils::*;
 use serde::Deserialize;
 use std::path::{Component, Path};
@@ -806,6 +807,21 @@ async fn connectivity_entry() -> Result<HttpResponse, ActixError> {
         .body(page))
 }
 
+async fn mpb_review_entry(req: HttpRequest) -> Result<HttpResponse, ActixError> {
+    let page = open_non_symlink_file("static/nep-preview/mpb-review.html")
+        .map_err(actix_web::error::ErrorNotFound)?;
+    let mut response = page.into_response(&req);
+    response.headers_mut().insert(
+        actix_web::http::header::CACHE_CONTROL,
+        actix_web::http::header::HeaderValue::from_static("no-store"),
+    );
+    response.headers_mut().insert(
+        actix_web::http::header::REFERRER_POLICY,
+        actix_web::http::header::HeaderValue::from_static("no-referrer"),
+    );
+    Ok(response)
+}
+
 // DPWH 2026 Page
 async fn dpwh2026(req: HttpRequest) -> Result<HttpResponse, ActixError> {
     let tera = Tera::new("templates/**/*").map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
@@ -861,7 +877,12 @@ async fn main() -> std::io::Result<()> {
                     .service(web::resource("/static/nep-preview/ignorant.html").to(ignorant_entry))
                     .service(web::resource("/static/nep-preview/budget-trivia.html").to(budget_trivia_entry))
                     .service(web::resource("/static/nep-preview/connectivity.html").to(connectivity_entry))
+                    .service(web::resource("/static/nep-preview/mpb-review.html").to(mpb_review_entry))
                     .service(web::resource("/static/nep-preview/index.html").to(nep_preview_index_entry))
+                    .service(
+                        web::scope("/api/mpb-review")
+                            .configure(mpb_review::configure),
+                    )
                     .service(
                         fs::Files::new("/static/nep-preview", "./static/nep-preview/")
                             .path_filter(|path, _| {
@@ -880,6 +901,7 @@ async fn main() -> std::io::Result<()> {
             .service(web::resource("/static/nep-preview/ignorant.html").to(ignorant_entry))
             .service(web::resource("/static/nep-preview/budget-trivia.html").to(budget_trivia_entry))
             .service(web::resource("/static/nep-preview/connectivity.html").to(connectivity_entry))
+            .service(web::resource("/static/nep-preview/mpb-review.html").to(mpb_review_entry))
             .service(web::resource("/static/nep-preview/index.html").to(nep_preview_index_entry))
             .service(web::resource("/budget-trivia-mobile").to(budget_trivia_mobile))
             .service(

@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>MPB POW Manual Review · BetterGovPH Research</title>
+  <link rel="stylesheet" href="../css/tailwind.css">
+  <style>
+    :root { color-scheme: light; }
+    body { margin: 0; background: #f1f5f9; color: #0f172a; font: 16px/1.5 system-ui, sans-serif; }
+    main { max-width: 1180px; margin: auto; padding: 24px 16px 64px; }
+    header, .controls, .row-card, .project-list { background: white; border: 1px solid #dbe3ee; border-radius: 14px; }
+    header { padding: 22px; background: #0f172a; color: white; }
+    h1 { margin: 0 0 8px; font-size: clamp(1.6rem, 4vw, 2.2rem); }
+    header p { margin: 0; color: #dbeafe; }
+    .controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; margin: 18px 0; padding: 16px; }
+    label { display: grid; gap: 5px; color: #334155; font-size: .9rem; font-weight: 650; }
+    select, input, textarea, button { font: inherit; }
+    select, input, textarea { width: 100%; box-sizing: border-box; border: 1px solid #94a3b8; border-radius: 8px; padding: 9px 10px; background: white; color: #0f172a; }
+    button { border: 0; border-radius: 8px; padding: 10px 14px; background: #1d4ed8; color: white; font-weight: 700; cursor: pointer; }
+    button:disabled { opacity: .55; cursor: wait; }
+    .secondary { background: #334155; }
+    #project-meta, #status, #access-message { color: #475569; }
+    #rows { display: grid; gap: 14px; }
+    .row-card { padding: 16px; }
+    .row-card.annotated { background: #dcfce7; border-color: #86efac; }
+    .row-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; margin-bottom: 10px; color: #334155; font-size: .9rem; font-weight: 700; }
+    pre { overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; margin: 0 0 12px; padding: 12px; border-radius: 8px; background: #f8fafc; border: 1px solid #e2e8f0; font: 14px/1.45 ui-monospace, monospace; }
+    textarea { min-height: 86px; resize: vertical; }
+    .row-actions { display: flex; align-items: center; gap: 12px; margin-top: 9px; }
+    .pair { display: grid; grid-template-columns: minmax(140px, .8fr) minmax(180px, 1.2fr) auto; gap: 8px; margin: 8px 0; }
+    .project-list { overflow-x: auto; margin-top: 18px; }
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th, td { padding: 12px; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
+    th { background: #f8fafc; white-space: nowrap; }
+    .project-name { min-width: 270px; }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 16px 0; }
+    .save-status { color: #166534; font-size: .9rem; }
+    .error { color: #b91c1c !important; }
+    [hidden] { display: none !important; }
+    @media (max-width: 680px) { .pair { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>MPB program of work · manual review</h1>
+      <p>Review scanned program-of-work rows for the listed MPB projects. Add key/value annotations for later analysis. Saved annotations stay in the local, Git-ignored review database.</p>
+    </header>
+    <p id="access-message" role="status">Checking admin access…</p>
+    <section id="workspace" hidden>
+      <section id="project-index">
+        <h2>MPB POWs</h2>
+        <p id="project-count"></p>
+        <div class="project-list">
+          <table>
+            <thead><tr><th>Project</th><th>Allocation</th><th>Office</th><th>PDF pages</th><th>Extracted rows</th><th>POW status</th><th></th></tr></thead>
+            <tbody id="project-rows"></tbody>
+          </table>
+        </div>
+      </section>
+      <section id="project-review" hidden>
+        <div class="toolbar">
+          <button id="back-to-projects" class="secondary" type="button">Back to MPB list</button>
+          <button id="previous-page" class="secondary" type="button">Previous scan page</button>
+          <span id="scan-page-label"></span>
+          <button id="next-page" type="button">Next scan page</button>
+          <button id="previous-project" class="secondary" type="button">Previous project</button>
+          <button id="next-project" type="button">Next project</button>
+          <button id="export-project" class="secondary" type="button">Export annotations JSON</button>
+        </div>
+        <div id="project-meta"></div>
+        <p id="status" role="status"></p>
+        <div id="rows"></div>
+      </section>
+    </section>
+  </main>
+  <script src="mpb-review.js?v=4"></script>
+</body>
+</html>
