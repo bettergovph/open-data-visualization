@@ -23,6 +23,13 @@
   const tokenSignal=document.getElementById('token-pow-signal');
   const tokenPageSize=20;
   let tokenProjects=[],tokenPage=0;
+  const showTokenLoadError=error=>{
+    const metrics=document.getElementById('token-pow-metrics');
+    const note=document.getElementById('token-pow-note');
+    if(metrics)metrics.innerHTML=`<p class="caution">Could not compare POW parser results with 5/5 project records: ${esc(error.message)}</p>`;
+    if(note)note.textContent='The no-detail comparison could not be loaded.';
+    if(tokenBody)tokenBody.innerHTML='<tr><td colspan="4">5/5 comparison data is unavailable.</td></tr>';
+  };
   const renderTokenRows=()=>{
     if(!tokenBody)return;
     const needle=(tokenQuery?.value||'').trim().toLocaleLowerCase();
@@ -120,14 +127,11 @@
       setTimeout(()=>URL.revokeObjectURL(link.href),1000);
     });
     render();
-    fetchJson('hgab-only-document-coverage.json').then(coverage=>renderTokenReview(data,coverage)).catch(error=>{
-      document.getElementById('token-pow-metrics').innerHTML=`<p class="caution">Could not compare POW parser results with 5/5 project records: ${esc(error.message)}</p>`;
-      document.getElementById('token-pow-note').textContent='The no-detail comparison could not be loaded.';
-      tokenBody.innerHTML='<tr><td colspan="4">5/5 comparison data is unavailable.</td></tr>';
-    });
+    fetchJson('hgab-only-document-coverage.json').then(coverage=>renderTokenReview(data,coverage)).catch(showTokenLoadError);
   }).catch(error=>{
     document.getElementById('hgab-pow-summary').innerHTML=`<p class="caution">Could not load parsed Senate HGAB POW records: ${esc(error.message)}</p>`;
     tbody.innerHTML='<tr><td colspan="8">Parsed Senate HGAB POW records are unavailable.</td></tr>';
+    showTokenLoadError(error);
   });
   query.addEventListener('input',()=>{page=0;render()});
   match.addEventListener('change',()=>{page=0;render()});
