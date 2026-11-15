@@ -6,7 +6,7 @@
     const chartPlans = [
         { title: 'First-time and returning recipient barangays', note: 'FY2027 recipient barangays, classified by whether an earlier MPB record was found.', href: '/static/nep-preview/mpb.html#fy2027-mpb-history', link: 'Review FY2027 recipient history', chart: (d) => waffle(d.recipientBarangays2027, [['Returning','#0038A8'],['First-time','#FCD116']]) },
         { title: 'How many FY2027 rows meet the document threshold?', note: 'Distribution by matched document types. Complete means at least four of five named types were matched to the project row.', href: '/static/nep-preview/mpb.html#fy2027-mpb-documents', link: 'Review document coverage', chart: (d) => documentDistribution(d.documents2027) },
-        { title: 'How many 2027 recipient barangays have multiple project titles?', note: 'The title match count is a record comparison; multiple titles do not necessarily mean multiple completed buildings.', href: '/static/nep-preview/mpb-barangay.html', link: 'Explore barangay records', chart: (d) => donut(d.coverage2027.barangaysWithOneTitle,d.coverage2027.barangaysWithMultipleTitles,'one title','multiple titles') },
+        { title: 'FY2027 project-title matches across all official barangays', note: 'Uses all official barangays as the denominator. “Multiple titles” means distinct normalized FY2027 title matches; it does not establish multiple completed buildings or duplicate scope.', href: '/static/nep-preview/mpb-barangay.html', link: 'Explore barangay records', chart: (d) => fy2027BarangayCoverage(d.coverage2027) },
         { title: 'Historical records across all official barangays', note: 'Each bar counts barangays with exactly that many distinct MPB title matches from FY2015–FY2026. No mapped match does not establish that a barangay has no building or received no funding.', href: '/static/nep-preview/mpb-regional-province.html', link: 'Explore historical distribution', chart: (d) => historicalMultiplicityChart(d.historicalMultiplicity) },
         { title: 'Poverty and allocation per barangay', note: 'Each dot is a province. The line is a descriptive linear fit; it does not show that poverty determines allocations.', href: '/static/nep-preview/mpb-regional-province.html', link: 'Review the poverty comparison and methods', chart: (d) => scatter(d.provincePovertyPoints) },
         { title: 'Top, middle and bottom provinces by poverty incidence', note: 'Ranked by 2023 poverty incidence among families. Allocation per official barangay is shown beside poverty on a consistent province-wide scale; row counts and total mapped allocations remain context.', href: '/static/nep-preview/mpb-regional-province.html', link: 'Explore all province rankings and methods', chart: (d) => provinceRankings(d.provincePovertyPoints) },
@@ -38,9 +38,20 @@
         const W=500,H=210,L=38,B=38,T=12, step=(W-L-12)/Math.max(rows.length,1), bars=rows.map((x,i)=>{const n=vals[i],h=(H-T-B)*n/max, label=x.matchedTypeCount??x.count??i;return `<rect x="${L+i*step+8}" y="${H-B-h}" width="${step-16}" height="${h}" rx="4" fill="${Number(label)>=4?'#0038A8':'#FCD116'}"><title>${label} matched types: ${fmt(n)} rows</title></rect><text x="${L+i*step+step/2}" y="${H-B+17}" text-anchor="middle" fill="#46564c" font-size="12">${label}</text>`}).join('');
         return `<div class="chart-legend"><span>Rows by number of the 5 document types matched</span><span>Threshold: 4 or 5 types</span></div>${svgWrap(`<line x1="${L}" y1="${H-B}" x2="${W}" y2="${H-B}" stroke="#89968d"/>${bars}`,'Distribution of FY2027 rows by number of matched document types',`0 0 ${W} ${H}`)}<div class="chart-legend"><span>${fmt(d.completeDocumentProjectRows)} rows meet threshold · ${Number(d.completeDocumentProjectRowsPct).toFixed(1)}%</span><span>${fmt(d.denominatorProjectRows)} rows assessed</span></div>`;
     }
-    function donut(a,b,labelA,labelB) {
-        const total=Number(a)+Number(b)||1, pct=Number(a)/total, r=58,c=2*Math.PI*r, dash=c*pct;
-        return `<div class="donut-wrap">${svgWrap(`<circle cx="100" cy="100" r="${r}" fill="none" stroke="#FCD116" stroke-width="22"/><circle cx="100" cy="100" r="${r}" fill="none" stroke="#0038A8" stroke-width="22" stroke-dasharray="${dash} ${c-dash}" transform="rotate(-90 100 100)"/><text x="100" y="96" text-anchor="middle" fill="#0038A8" font-size="22" font-weight="700">${fmt(total)}</text><text x="100" y="116" text-anchor="middle" fill="#647268" font-size="11">recipient</text>`,'One-title and multiple-title barangays','0 0 200 200')}${svgWrap(`<text x="0" y="22" fill="#0038A8" font-size="13" font-weight="700">${fmt(a)} · ${labelA}</text><text x="0" y="52" fill="#647268" font-size="12">${(pct*100).toFixed(1)}% of recipients</text><text x="0" y="104" fill="#8b6800" font-size="13" font-weight="700">${fmt(b)} · ${labelB}</text><text x="0" y="134" fill="#647268" font-size="12">${((1-pct)*100).toFixed(1)}% of recipients</text>`,'Title multiplicity labels','0 0 210 160')}</div>`;
+    function fy2027BarangayCoverage(data) {
+        const total = Number(data.officialBarangays) || 1;
+        const groups = [
+            { label: 'One FY2027 project title', value: Number(data.barangaysWithOneTitle || 0), color: '#91B0E0' },
+            { label: 'Multiple FY2027 project titles', value: Number(data.barangaysWithMultipleTitles || 0), color: '#0038A8' },
+            { label: 'Earlier records only · FY2015–FY2026', value: Number(data.earlierOnlyBarangays || 0), color: '#BA8900' },
+            { label: 'No mapped record · FY2015–FY2027', value: Number(data.noMappedRecordAnyPeriod || 0), color: '#AAB3C2' }
+        ];
+        const max = Math.max(...groups.map(group => group.value), 1);
+        const rows = groups.map(group => {
+            const pct = 100 * group.value / total;
+            return `<div class="coverage-row"><div class="coverage-row-heading"><strong>${esc(group.label)}</strong><span>${fmt(group.value)} · ${pct.toFixed(2)}%</span></div><div class="coverage-row-track" role="img" aria-label="${esc(group.label)}: ${fmt(group.value)} of ${fmt(total)} official barangays, ${pct.toFixed(2)} percent"><i style="width:${100 * group.value / max}%;background:${group.color}"></i></div></div>`;
+        }).join('');
+        return `<div class="coverage-chart-summary"><strong>${fmt(data.recipientBarangays)} barangays</strong><span>have a mapped FY2027 title match · ${fmt(data.titleBarangayMatches)} title-to-barangay matches</span></div><div class="coverage-chart-rows">${rows}</div><p class="coverage-chart-footnote">The four groups are mutually exclusive and sum to ${fmt(total)} official barangays. Repeated identical titles are grouped before counting.</p>`;
     }
     function historicalMultiplicityChart(d) {
         if (!d || !d.counts) return '<p>Exact historical repeat counts are unavailable.</p>';
@@ -143,6 +154,7 @@
         if (panels.length < chartPlans.length) throw new Error('The MPB simple page did not contain all eight infographic panels.');
         panels.slice(0, chartPlans.length).forEach((panel, index) => {
             const host = list.querySelector(`[data-infographic="${index}"]`);
+            host.classList.add('loaded');
             const shadow = host.attachShadow({ mode: 'open' });
             const panelCopy = panel.cloneNode(true);
             const sourceHeading = panelCopy.querySelector('h2');

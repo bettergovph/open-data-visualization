@@ -38,7 +38,7 @@
         #mpb-home .chart-note { min-height:42px; margin:12px 0 0; color:var(--muted); font-size:13px; line-height:1.5; }
         #mpb-home .detail-link { display:inline-flex; margin-top:14px; color:var(--blue); font-size:13px; font-weight:800; text-decoration-thickness:1px; text-underline-offset:3px; }
         #mpb-home .source-infographic { min-height:180px; }
-        #mpb-home .source-infographic:empty::before { content:'Loading the infographic…'; display:block; padding:24px; border-radius:10px; background:#F5F7FA; color:var(--muted); font-size:14px; }
+        #mpb-home .source-infographic:not(.loaded):empty::before { content:'Loading the infographic…'; display:block; padding:24px; border-radius:10px; background:#F5F7FA; color:var(--muted); font-size:14px; }
         #mpb-home .source-infographic iframe { display:block; width:100%; border:0; }
         #mpb-home .detail-chart { width:100%; min-height:185px; }
         #mpb-home .detail-chart svg { display:block; width:100%; height:auto; overflow:visible; }
@@ -58,6 +58,16 @@
         #mpb-home .bar-fill { height:100%; min-width:2px; background:var(--blue); }
         #mpb-home .bar-fill.gold { background:var(--gold); }
         #mpb-home .bar-value { text-align:right; color:#212121; font-variant-numeric:tabular-nums; }
+        #mpb-home .coverage-chart-summary { display:grid; gap:2px; margin:4px 0 16px; padding:12px 14px; border-left:4px solid var(--blue); border-radius:7px; background:#EAF0FF; }
+        #mpb-home .coverage-chart-summary strong { color:var(--blue-dark); font-size:22px; line-height:1.2; }
+        #mpb-home .coverage-chart-summary span, #mpb-home .coverage-chart-footnote { color:var(--muted); font-size:12px; line-height:1.45; }
+        #mpb-home .coverage-chart-rows { display:grid; gap:13px; }
+        #mpb-home .coverage-row-heading { display:flex; justify-content:space-between; align-items:baseline; gap:12px; margin-bottom:5px; font-size:12px; }
+        #mpb-home .coverage-row-heading strong { font-weight:750; }
+        #mpb-home .coverage-row-heading span { white-space:nowrap; font-variant-numeric:tabular-nums; }
+        #mpb-home .coverage-row-track { height:13px; overflow:hidden; border-radius:99px; background:#EAF0FF; }
+        #mpb-home .coverage-row-track i { display:block; height:100%; min-width:2px; border-radius:99px; }
+        #mpb-home .coverage-chart-footnote { margin:14px 0 0; }
         #mpb-home .callout-stat { display:flex; align-items:baseline; gap:10px; margin:4px 0 12px; }
         #mpb-home .callout-stat strong { color:var(--blue-dark); font-size:38px; line-height:1; letter-spacing:-.04em; }
         #mpb-home .callout-stat span { color:var(--muted); font-size:13px; }
@@ -117,6 +127,10 @@
             #mpb-home .navlinks { gap:0; }
             #mpb-home .navlinks a { padding:6px 5px; font-size:11px; }
         }
+        @media(max-width:520px) {
+            #mpb-home .coverage-row-heading { align-items:flex-start; flex-direction:column; gap:2px; }
+            #mpb-home .coverage-row-heading span { white-space:normal; }
+        }
         @media(prefers-reduced-motion:no-preference) {
             #mpb-home .story-card { transition:box-shadow .2s ease, transform .2s ease; }
             #mpb-home .story-card:hover { transform:translateY(-2px); box-shadow:0 12px 32px #15291c13; }
@@ -156,4 +170,4 @@
         </footer>
     </main>
 </div>
-<script src="/static/js/mpb-home.js?v=0ade79befd7e" defer></script>
+<script src="/static/js/mpb-home.js?v=coverage-groups-loading-fix-20261115" defer></script>
