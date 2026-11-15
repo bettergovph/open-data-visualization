@@ -17,7 +17,7 @@
         #mpb-home .navlinks a.nav-current { color:var(--blue-dark); }
         #mpb-home .navlinks a.nav-research { color:#fff; background:var(--blue); }
         #mpb-home .navlinks a.nav-secondary { color:var(--muted); }
-        #mpb-home .hero { background:linear-gradient(115deg,#00246A 0%,#0038A8 100%); border-bottom:3px solid var(--gold); color:#fff; padding:64px 28px 54px; }
+        #mpb-home .mpb-hero { display:block; position:relative; z-index:2; height:auto; min-height:0; overflow:visible; background:linear-gradient(115deg,#00246A 0%,#0038A8 100%); border-bottom:3px solid var(--gold); color:#fff; padding:64px 28px 54px; }
         #mpb-home .hero-inner { max-width:1184px; margin:auto; }
         #mpb-home .eyebrow { margin:0 0 14px; color:var(--gold); font-size:12px; text-transform:uppercase; letter-spacing:.13em; font-weight:800; }
         #mpb-home h1 { max-width:900px; margin:0; font-size:clamp(38px,6.4vw,72px); line-height:1.02; letter-spacing:-.055em; }
@@ -25,9 +25,6 @@
         #mpb-home .hero-meta { display:flex; flex-wrap:wrap; gap:10px; margin-top:27px; }
         #mpb-home .hero-meta span { border:1px solid #ffffff66; border-radius:999px; padding:6px 12px; color:#fff; font-size:12px; font-weight:650; }
         #mpb-home .page-content { max-width:1184px; margin:auto; padding:36px 28px 64px; }
-        #mpb-home .intro-row { display:flex; justify-content:space-between; align-items:end; gap:24px; margin:0 0 24px; }
-        #mpb-home .intro-row h2 { max-width:690px; margin:0; font-size:clamp(25px,3.4vw,38px); line-height:1.15; letter-spacing:-.035em; }
-        #mpb-home .intro-row p { max-width:400px; margin:0; color:var(--muted); font-size:14px; }
         #mpb-home .story-list { display:grid; gap:22px; }
         #mpb-home .story-card { overflow:hidden; background:var(--paper); border:1px solid var(--line); border-radius:16px; box-shadow:0 6px 24px #00246A0A; }
         #mpb-home .story-head { display:flex; align-items:flex-start; gap:16px; padding:20px 24px 14px; }
@@ -90,10 +87,8 @@
             #mpb-home .brand img { width:125px; }
             #mpb-home .navlinks { gap:2px; }
             #mpb-home .navlinks a { padding:8px 10px; font-size:13px; }
-            #mpb-home .hero { padding:48px 20px 38px; }
+            #mpb-home .mpb-hero { padding:48px 20px 38px; }
             #mpb-home .page-content { padding:28px 16px 46px; }
-            #mpb-home .intro-row { display:block; }
-            #mpb-home .intro-row p { margin-top:10px; }
             #mpb-home .visual-pair { grid-template-columns:1fr; }
             #mpb-home .visual-cell + .visual-cell { border-left:0; border-top:1px solid var(--line); }
             #mpb-home .story-head { padding:17px 17px 12px; }
@@ -132,7 +127,7 @@
         </div>
     </header>
 
-    <section class="hero" aria-labelledby="mpb-home-title">
+    <section class="mpb-hero" aria-labelledby="mpb-home-title">
         <div class="hero-inner">
             <p class="eyebrow">BetterGovPH · Public budget research</p>
             <h1 id="mpb-home-title">Who benefits from another MPB allocation?</h1>
@@ -150,4 +145,4 @@
         </footer>
     </main>
 </div>
-<script src="/static/js/mpb-home.js?v=7e25b2ef5544" defer></script>
+<script src="/static/js/mpb-home.js?v=d487bf61c78a" defer></script>
