@@ -1,0 +1,138 @@
+{% extends "mobile/base_visualizations.html" %}
+
+{% block head %}
+<!-- Google Fonts - Inter -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+
+<!-- Custom styling - Override ALL base styles -->
+<style>
+    /* Reset and override base.html styles */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Inter', sans-serif !important;
+        background-color: white !important;
+        color: black !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+</style>
+
+<!-- BetterGovPH Metadata Overrides -->
+<meta name="description" content="BetterGovPH - Promoting Data Transparency and Open Government">
+<meta name="keywords"
+    content="government data, transparency, Philippines, budget analysis, flood control, public data, open government">
+<meta name="author" content="BetterGovPH">
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://visualizations.bettergov.ph/">
+<meta property="og:title" content="BetterGovPH">
+<meta property="og:description" content="Promoting Data Transparency and Open Government in the Philippines">
+<meta property="og:image" content="http://assets.bettergov.ph/logos/webp/horizontal-black.webp">
+
+<!-- Twitter -->
+<meta property="twitter:card" content="summary_large_image">
+<meta property="twitter:url" content="https://visualizations.bettergov.ph/">
+<meta property="twitter:title" content="BetterGovPH">
+<meta property="twitter:description" content="Promoting Data Transparency and Open Government in the Philippines">
+<meta property="twitter:image" content="http://assets.bettergov.ph/logos/webp/horizontal-black.webp">
+{% endblock %}
+
+{% block content %}
+<div style="padding:10px 12px;background:#eaf2ec;color:#1b4d36;text-align:center;font:600 12px/1.4 Inter,system-ui,sans-serif;">
+    Archived visualization directory · <a href="/" style="color:#1b4d36;">Return to the MPB front page →</a>
+</div>
+<!-- Logo Header -->
+<div class="text-center py-4 mb-4">
+    <img src="http://assets.bettergov.ph/logos/webp/horizontal-black.webp" alt="BetterGovPH" class="mx-auto"
+        style="max-width: 200px; height: auto;">
+</div>
+
+
+
+<!-- Feature Cards -->
+<div class="grid grid-cols-2 gap-2 px-2">
+    <!-- OLD NEP Card -->
+    <div class="bg-white rounded-lg shadow-sm p-2 border border-gray-100 flex flex-col h-full">
+        <h3 class="text-sm font-semibold text-black mb-1">🏛️ Old NEP</h3>
+        <p class="text-gray-600 text-xs mb-2 flex-grow">Original National Expenditure Program analysis.</p>
+        <a href="/nep" class="block bg-black text-white py-1.5 rounded text-xs text-center w-full mt-auto">Explore Old NEP</a>
+    </div>
+
+    <!-- Research Card -->
+    <div class="bg-white rounded-lg shadow-sm p-2 border border-gray-100 flex flex-col h-full">
+        <h3 class="text-sm font-semibold text-black mb-1">📊 Research</h3>
+        <p class="text-gray-600 text-xs mb-2 flex-grow">Explore research across budgets, procurement, infrastructure, elections, and more.</p>
+        <a href="/static/nep-preview/" class="block bg-black text-white py-1.5 rounded text-xs text-center w-full mt-auto">Explore Research</a>
+    </div>
+
+    <!-- Budget Card -->
+    <div class="bg-white rounded-lg shadow-sm p-2 border border-gray-100 flex flex-col h-full">
+        <h3 class="text-sm font-semibold text-black mb-1">💰 Old Budget</h3>
+        <p class="text-gray-600 text-xs mb-2 flex-grow">AI-powered GAA data analysis.</p>
+        <a href="/budget"
+            class="block bg-black text-white py-1.5 rounded text-xs text-center w-full mt-auto">Explore Old Budget Data</a>
+    </div>
+
+    <!-- Flood Control Card -->
+    <div class="bg-white rounded-lg shadow-sm p-2 border border-gray-100 flex flex-col h-full">
+        <h3 class="text-sm font-semibold text-black mb-1">🌊 Flood</h3>
+        <p class="text-gray-600 text-xs mb-2 flex-grow">Track DPWH flood control projects.</p>
+        <a href="/flood" class="block bg-black text-white py-1.5 rounded text-xs text-center w-full mt-auto">View</a>
+    </div>
+
+    <!-- DIME Card -->
+    <div class="bg-white rounded-lg shadow-sm p-2 border border-gray-100 flex flex-col h-full">
+        <h3 class="text-sm font-semibold text-black mb-1">🏗️ DIME</h3>
+        <p class="text-gray-600 text-xs mb-2 flex-grow">Infrastructure Master Plan tracking.</p>
+        <a href="/dime" class="block bg-black text-white py-1.5 rounded text-xs text-center w-full mt-auto">Explore</a>
+    </div>
+
+    <!-- Map Card -->
+    <div class="bg-white rounded-lg shadow-sm p-2 border border-gray-100 flex flex-col h-full">
+        <h3 class="text-sm font-semibold text-black mb-1">🗺️ Map</h3>
+        <p class="text-gray-600 text-xs mb-2 flex-grow">Geographic project exploration.</p>
+        <a href="/map" class="block bg-black text-white py-1.5 rounded text-xs text-center w-full mt-auto">View Map</a>
+    </div>
+
+    <!-- PhilGEPS Card -->
+    <div class="bg-white rounded-lg shadow-sm p-2 border border-gray-100 flex flex-col h-full">
+        <h3 class="text-sm font-semibold text-black mb-1">📋 PhilGEPS</h3>
+        <p class="text-gray-600 text-xs mb-2 flex-grow">Government procurement data 2013-2025.</p>
+        <a href="/philgeps" class="block bg-black text-white py-1.5 rounded text-xs text-center w-full mt-auto">View</a>
+    </div>
+
+    <!-- Dynasty Card (spans 2 columns) -->
+    <div class="bg-white rounded-lg shadow-sm p-2 border border-gray-100 flex flex-col h-full col-span-2">
+        <h3 class="text-sm font-semibold text-black mb-1">👑 Political Dynasties</h3>
+        <p class="text-gray-600 text-xs mb-2">Interactive analysis of political dynasty patterns across 82 provinces.
+        </p>
+        <a href="/dynasty" class="block bg-black text-white py-1.5 rounded text-xs text-center w-full">Explore
+            Dynasties</a>
+    </div>
+
+    <!-- Integrated Card -->
+    <div class="bg-white rounded-lg shadow-sm p-2 border border-gray-100 flex flex-col h-full"
+        style="display: none !important;">
+        <h3 class="text-sm font-semibold text-black mb-1">🎯 Integrated</h3>
+        <p class="text-gray-600 text-xs mb-2 flex-grow">Combined multi-source analysis.</p>
+        <a href="/integrated"
+            class="block bg-black text-white py-1.5 rounded text-xs text-center w-full mt-auto">Explore</a>
+    </div>
+
+    <!-- Sources Card -->
+    <div class="bg-white rounded-lg shadow-sm p-2 border border-gray-100 flex flex-col h-full">
+        <h3 class="text-sm font-semibold text-black mb-1">📚 Sources</h3>
+        <p class="text-gray-600 text-xs mb-2 flex-grow">Data sources and methodology.</p>
+        <a href="/sources" class="block bg-black text-white py-1.5 rounded text-xs text-center w-full mt-auto">View</a>
+    </div>
+</div>
+</section>
+
+{% endblock %}

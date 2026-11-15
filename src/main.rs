@@ -83,8 +83,7 @@ async fn home(req: HttpRequest) -> Result<HttpResponse, ActixError> {
     
     add_frontend_env_to_context(&mut context, &req);
     
-    let (site_name, _) = get_site_branding(&req);
-    context.insert("title", &site_name);
+    context.insert("title", "Multi-purpose buildings in the Philippines · BetterGovPH");
     context.insert("company_name", "BetterGovPH");
     context.insert("platform", "BetterGovPH");
     
@@ -96,6 +95,46 @@ async fn home(req: HttpRequest) -> Result<HttpResponse, ActixError> {
     
     let rendered = tera.render(template_name, &context).map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
     Ok(HttpResponse::Ok().content_type("text/html").body(rendered))
+}
+
+async fn archived_home(req: HttpRequest) -> Result<HttpResponse, ActixError> {
+    let tera = Tera::new("templates/**/*").map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
+    let mut context = Context::new();
+    add_frontend_env_to_context(&mut context, &req);
+
+    let (site_name, _) = get_site_branding(&req);
+    context.insert("title", &format!("{site_name} · Archive"));
+    context.insert("company_name", "BetterGovPH");
+    context.insert("platform", "BetterGovPH");
+
+    let template_name = if is_mobile(&req) {
+        "mobile/archive.html"
+    } else {
+        "archive.html"
+    };
+    let rendered = tera.render(template_name, &context).map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
+    Ok(HttpResponse::Ok().content_type("text/html").body(rendered))
+}
+
+async fn mpb_home_payload() -> Result<HttpResponse, ActixError> {
+    let source_path = Path::new("static/nep-preview/mpb-simple.html");
+    let data_path = Path::new("static/nep-preview/mpb-simple-data.json");
+    if !static_path_has_no_symlinks(Path::new("."), source_path)
+        || !static_path_has_no_symlinks(Path::new("."), data_path)
+    {
+        return Err(actix_web::error::ErrorNotFound("MPB research source not found"));
+    }
+
+    let source_html = std::fs::read_to_string(source_path)
+        .map_err(actix_web::error::ErrorInternalServerError)?;
+    let data_text = std::fs::read_to_string(data_path)
+        .map_err(actix_web::error::ErrorInternalServerError)?;
+    let data: serde_json::Value = serde_json::from_str(&data_text)
+        .map_err(actix_web::error::ErrorInternalServerError)?;
+
+    Ok(HttpResponse::Ok()
+        .insert_header(("Cache-Control", "public, max-age=300"))
+        .json(serde_json::json!({ "sourceHtml": source_html, "data": data })))
 }
 
 // Budget Analysis Page
@@ -913,6 +952,8 @@ async fn main() -> std::io::Result<()> {
             )
             .service(web::resource("/favicon.ico").route(web::get().to(favicon)))
             .service(web::resource("/robots.txt").route(web::get().to(robots)))
+            .service(web::resource("/api/home/mpb").route(web::get().to(mpb_home_payload)))
+            .service(web::resource("/archive").to(archived_home))
             .service(web::resource("/").to(home))
             .service(web::resource("/budget").to(budget))
             .service(web::resource("/flood").to(flood))
