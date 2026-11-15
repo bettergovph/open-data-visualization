@@ -2,6 +2,18 @@
   const fmt=n=>Number(n||0).toLocaleString();
   const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const label=value=>String(value||'unknown').replaceAll('_',' ');
+  const fetchJson=async url=>{
+    const controller=new AbortController();
+    const timeout=setTimeout(()=>controller.abort(),15000);
+    try{
+      const response=await fetch(url,{signal:controller.signal});
+      if(!response.ok)throw Error(`HTTP ${response.status}`);
+      return await response.json();
+    }catch(error){
+      if(error.name==='AbortError')throw Error(`Request timed out while loading ${url}`);
+      throw error;
+    }finally{clearTimeout(timeout)}
+  };
   const query=document.getElementById('hgab-pow-query');
   const match=document.getElementById('hgab-pow-match');
   const tbody=document.querySelector('#hgab-pow-table tbody');
@@ -88,10 +100,7 @@
       return `<tr><td>${esc(row.code||'—')}</td><td>${title}</td><td>${esc(label(row.matchStatus))}</td><td>${esc(label(row.status))}</td><td>${fmt(row.rowCount)}</td><td>${fmt(row.categorySummaryRowCount)}</td><td>${fmt(row.pageCount)}</td><td>${esc(row.proposalCode||'—')}</td></tr>`;
     }).join('')||'<tr><td colspan="8">No parsed Senate HGAB POW files match this filter.</td></tr>';
   };
-  fetch('pow-hgab-parsed-documents.json').then(response=>{
-    if(!response.ok)throw Error(`HTTP ${response.status}`);
-    return response.json();
-  }).then(data=>{
+  fetchJson('pow-hgab-parsed-documents.json').then(data=>{
     rows=data.documents||[];
     const summary=data.summary||{};
     const counts=[
@@ -111,10 +120,7 @@
       setTimeout(()=>URL.revokeObjectURL(link.href),1000);
     });
     render();
-    fetch('hgab-only-document-coverage.json').then(response=>{
-      if(!response.ok)throw Error(`HTTP ${response.status}`);
-      return response.json();
-    }).then(coverage=>renderTokenReview(data,coverage)).catch(error=>{
+    fetchJson('hgab-only-document-coverage.json').then(coverage=>renderTokenReview(data,coverage)).catch(error=>{
       document.getElementById('token-pow-metrics').innerHTML=`<p class="caution">Could not compare POW parser results with 5/5 project records: ${esc(error.message)}</p>`;
       document.getElementById('token-pow-note').textContent='The no-detail comparison could not be loaded.';
       tokenBody.innerHTML='<tr><td colspan="4">5/5 comparison data is unavailable.</td></tr>';
