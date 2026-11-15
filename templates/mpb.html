@@ -9,6 +9,7 @@
     <!-- Google Fonts - Inter -->
     <!-- Tailwind CSS -->
     <link rel="stylesheet" href="/static/css/tailwind.css?v=2173d9cc1d14">
+    <link rel="stylesheet" href="/static/css/topic-hero-utilities.css?v=tailwind-hero-connectivity-20261115">
     <!-- Tailwind CSS (Production) -->
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -302,14 +303,17 @@
 </head>
 
 <body>
-    {% include "navbar.html" %}
+    {% set topic_nav_active = "mpb" %}
+    {% include "visualizations_topic_nav.html" %}
+    <section class="topic-hero block w-full border-b-[3px] border-b-[#FCD116] bg-topic-hero font-topic leading-topic text-white" aria-labelledby="mpb-page-title">
+        <div class="topic-hero-inner mx-auto w-full max-w-[1224px] px-7 pt-[58px] pb-[46px] max-[800px]:px-[19px] max-[800px]:pt-[42px] max-[800px]:pb-[34px] max-[470px]:px-[14px] max-[470px]:pt-9 max-[470px]:pb-[30px]">
+            <p class="topic-hero-kicker mb-[13px] text-[12px] font-extrabold uppercase leading-[1.3] tracking-[.14em] text-[#FCD116]">BetterGovPH · Public infrastructure</p>
+            <h1 id="mpb-page-title" class="m-0 max-w-[970px] text-[clamp(38px,6vw,68px)] font-bold leading-[1.04] tracking-[-.05em] text-white max-[800px]:text-[clamp(36px,8vw,56px)]">Multi-purpose buildings</h1>
+            <p class="topic-hero-deck mt-[18px] mb-0 max-w-[850px] text-[19px] leading-[1.5] text-[#EAF0FF] max-[800px]:text-[16px] max-[470px]:text-[15px]">Explore 2026 DPWH multi-purpose building allocations and their historical Transparency Procurement System matches.</p>
+        </div>
+    </section>
 
     <main class="max-w-7xl mx-auto px-6 py-8">
-        <div class="mb-6">
-            <h1 class="text-2xl font-bold text-slate-900">🏢 Multi-Purpose Buildings</h1>
-            <p class="text-sm text-slate-500">Most Expensive Buildings with Transparency Procurement Matches</p>
-        </div>
-
         <div class="info-box" style="max-width:980px;">
             <p class="info-box-text">
                 <strong>About this list:</strong> The top multi-purpose building (MPB) projects from the 2026 DPWH budget, ordered by budget amount. Each building is cross-referenced against historical DPWH projects in the Transparency Procurement System to identify matches with similar scopes and locations. Buildings with transparency matches indicate potential recurring or related procurement activity across budget cycles.
