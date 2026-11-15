@@ -43,6 +43,12 @@
         #mpb-home .detail-chart { width:100%; min-height:185px; }
         #mpb-home .detail-chart svg { display:block; width:100%; height:auto; overflow:visible; }
         #mpb-home .chart-legend { display:flex; flex-wrap:wrap; gap:8px 16px; margin-top:10px; color:var(--muted); font-size:12px; }
+        #mpb-home .donut-wrap { display:flex; align-items:center; justify-content:center; gap:12px; min-height:180px; }
+        #mpb-home .donut-wrap svg { width:48%; }
+        #mpb-home .tile-grid { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:5px; margin:10px 0; }
+        #mpb-home .region-tile { display:flex; min-height:50px; flex-direction:column; justify-content:space-between; padding:6px; border-radius:5px; background:rgba(0,56,168,var(--tile)); color:#fff; font-size:9px; }
+        #mpb-home .region-tile b { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        #mpb-home .region-tile strong { font-size:14px; }
         #mpb-home .legend-dot { display:inline-block; width:9px; height:9px; margin-right:6px; border-radius:50%; background:var(--blue); }
         #mpb-home .legend-dot.gold { background:#B58600; }
         #mpb-home .chart-bars { display:grid; gap:12px; padding:8px 0; }
@@ -91,6 +97,7 @@
             #mpb-home .page-content { padding:28px 16px 46px; }
             #mpb-home .visual-pair { grid-template-columns:1fr; }
             #mpb-home .visual-cell + .visual-cell { border-left:0; border-top:1px solid var(--line); }
+            #mpb-home .tile-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
             #mpb-home .story-head { padding:17px 17px 12px; }
             #mpb-home .visual-cell { padding:18px 17px 20px; }
             #mpb-home .bar-row { grid-template-columns:minmax(88px,115px) 1fr 62px; gap:7px; font-size:11px; }
@@ -145,4 +152,4 @@
         </footer>
     </main>
 </div>
-<script src="/static/js/mpb-home.js?v=d487bf61c78a" defer></script>
+<script src="/static/js/mpb-home.js?v=a5c95890c2ba" defer></script>

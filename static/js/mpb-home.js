@@ -4,23 +4,14 @@
     const researchBase = 'https://research.bettergov.ph/static/nep-preview/';
 
     const chartPlans = [
-        { title: 'First-time and returning recipient barangays', note: 'FY2027 recipient barangays, classified by whether an earlier MPB record was found.', href: '/static/nep-preview/mpb.html#fy2027-mpb-history', link: 'Review FY2027 recipient history', chart: (d) => bars([
-            ['Returning', d.recipientBarangays2027.returning], ['First-time', d.recipientBarangays2027.firstTime]
-        ], d.recipientBarangays2027.total) },
-        { title: 'How many FY2027 rows meet the document threshold?', note: 'Complete means at least four of five named document types were matched to the project row.', href: '/static/nep-preview/mpb.html#fy2027-mpb-documents', link: 'Review document coverage', chart: (d) => stacked([
-            ['Complete', d.documents2027.completeDocumentProjectRows, ''],
-            ['Incomplete', d.documents2027.incompleteDocumentProjectRows, 'gold']
-        ], d.documents2027.denominatorProjectRows) },
-        { title: 'How many 2027 recipient barangays have multiple project titles?', note: 'The title match count is a record comparison; multiple titles do not necessarily mean multiple completed buildings.', href: '/static/nep-preview/mpb-barangay.html', link: 'Explore barangay records', chart: (d) => bars([
-            ['One title', d.coverage2027.barangaysWithOneTitle], ['Multiple titles', d.coverage2027.barangaysWithMultipleTitles, 'gold']
-        ], d.coverage2027.recipientBarangays) },
-        { title: 'Historical records across all official barangays', note: 'Counts summarize mapped MPB records from FY2015–FY2026; they do not establish building completion.', href: '/static/nep-preview/mpb-regional-province.html', link: 'Explore historical distribution', chart: (d) => bars([
-            ['No mapped record', d.history2015To2026.none], ['1–3 project rows', d.history2015To2026.oneToThree], ['4+ project rows', d.history2015To2026.fourOrMore, 'gold']
-        ], d.history2015To2026.officialBarangays) },
+        { title: 'First-time and returning recipient barangays', note: 'FY2027 recipient barangays, classified by whether an earlier MPB record was found.', href: '/static/nep-preview/mpb.html#fy2027-mpb-history', link: 'Review FY2027 recipient history', chart: (d) => waffle(d.recipientBarangays2027, [['Returning','#0038A8'],['First-time','#FCD116']]) },
+        { title: 'How many FY2027 rows meet the document threshold?', note: 'Distribution by matched document types. Complete means at least four of five named types were matched to the project row.', href: '/static/nep-preview/mpb.html#fy2027-mpb-documents', link: 'Review document coverage', chart: (d) => documentDistribution(d.documents2027) },
+        { title: 'How many 2027 recipient barangays have multiple project titles?', note: 'The title match count is a record comparison; multiple titles do not necessarily mean multiple completed buildings.', href: '/static/nep-preview/mpb-barangay.html', link: 'Explore barangay records', chart: (d) => donut(d.coverage2027.barangaysWithOneTitle,d.coverage2027.barangaysWithMultipleTitles,'one title','multiple titles') },
+        { title: 'Historical records across all official barangays', note: 'Mapped MPB record counts from FY2015–FY2026; records do not establish building completion.', href: '/static/nep-preview/mpb-regional-province.html', link: 'Explore historical distribution', chart: (d) => historyMosaic(d.history2015To2026) },
         { title: 'Poverty and allocation per barangay', note: 'Each dot is a province. The line is a descriptive linear fit; it does not show that poverty determines allocations.', href: '/static/nep-preview/mpb-regional-province.html', link: 'Review the poverty comparison and methods', chart: (d) => scatter(d.provincePovertyPoints) },
         { title: 'Top, middle and bottom provinces by poverty incidence', note: 'Ranked by 2023 poverty incidence among families. MPB project rows and total mapped allocations are shown alongside; FY2027 proposed funding is included and is not verified spending.', href: '/static/nep-preview/mpb-regional-province.html', link: 'Explore all province rankings and methods', chart: (d) => provinceRankings(d.provincePovertyPoints) },
-        { title: 'MPB project rows and joined public schools', note: 'Aggregate record totals only. The data does not match MPB projects to the schools shown.', href: '/static/nep-preview/education-health.html#data-coverage', link: 'Review school coverage and counts', chart: (d) => ratioChart(d.facilityRatios.mpbProjectRows, d.facilityRatios.schoolRecords, 'MPB project rows', 'Joined school records', 'school') },
-        { title: 'MPB project rows and reported hospital beds', note: 'Aggregate record totals only. The data does not match MPB projects to hospitals or beds.', href: '/static/nep-preview/education-health.html#data-coverage', link: 'Review hospital and bed coverage', chart: (d) => ratioChart(d.facilityRatios.mpbProjectRows, d.facilityRatios.hospitalBeds, 'MPB project rows', 'Reported beds', 'bed') }
+        { title: 'MPB records and public schools by region', note: 'Each tile shows public-school records relative to MPB project rows in that region. These are regional totals, not matched projects and schools.', href: '/static/nep-preview/education-health.html#data-coverage', link: 'Review school coverage and counts', chart: (d) => regionalTiles(d.educationRows,'depedPublicSchoolCount','schools per 100 MPB rows') },
+        { title: 'Reported hospital beds relative to MPB records', note: 'Each dot is a region; the vertical position compares reported government hospital beds with MPB project rows. This does not match projects to hospitals or beds.', href: '/static/nep-preview/education-health.html#data-coverage', link: 'Review hospital and bed coverage', chart: (d) => regionScatter(d.educationRows,'philhealthGovernmentHospitalBeds','Reported hospital beds') }
     ];
 
     const fmt = (n) => Number(n || 0).toLocaleString('en-PH');
@@ -36,6 +27,34 @@
     function stacked(rows, total) {
         const pct = rows.map((r) => 100 * Number(r[1] || 0) / total);
         return `<div class="callout-stat"><strong>${pct[0].toFixed(1)}%</strong><span>of FY2027 project rows meet the document threshold</span></div><div class="bar-track" role="img" aria-label="${fmt(rows[0][1])} complete and ${fmt(rows[1][1])} incomplete of ${fmt(total)} project rows"><i class="bar-fill" style="width:${pct[0]}%"></i><i class="bar-fill gold" style="width:${pct[1]}%"></i></div><div class="chart-legend"><span><i class="legend-dot"></i>${esc(rows[0][0])}: ${fmt(rows[0][1])} (${pct[0].toFixed(1)}%)</span><span><i class="legend-dot gold"></i>${esc(rows[1][0])}: ${fmt(rows[1][1])} (${pct[1].toFixed(1)}%)</span><span>Total: ${fmt(total)}</span></div>`;
+    }
+
+    function waffle(data, groups) {
+        const total=Number(data.total)||1, first=Math.round(100*Number(data.returning)/total), cells=Array.from({length:100},(_,i)=>`<rect x="${(i%10)*19}" y="${Math.floor(i/10)*19}" width="15" height="15" rx="3" fill="${i<first?groups[0][1]:groups[1][1]}"/>`).join('');
+        return `<div class="callout-stat"><strong>${(100*data.returning/total).toFixed(1)}%</strong><span>of recipient barangays had an earlier MPB record</span></div>${svgWrap(cells,'100 squares showing the share of returning and first-time recipient barangays','0 0 205 190')}<div class="chart-legend"><span><i class="legend-dot"></i>Returning ${fmt(data.returning)}</span><span><i class="legend-dot gold"></i>First-time ${fmt(data.firstTime)}</span><span>Total ${fmt(data.total)}</span></div>`;
+    }
+    function documentDistribution(d) {
+        const rows=d.countsByMatchedTypeCount||[], max=Math.max(...rows.map(x=>Number(x.projectRows||x.rows||x.count||0)),1), vals=rows.map(x=>Number(x.projectRows||x.rows||x.count||0));
+        const W=500,H=210,L=38,B=38,T=12, step=(W-L-12)/Math.max(rows.length,1), bars=rows.map((x,i)=>{const n=vals[i],h=(H-T-B)*n/max, label=x.matchedTypeCount??x.count??i;return `<rect x="${L+i*step+8}" y="${H-B-h}" width="${step-16}" height="${h}" rx="4" fill="${Number(label)>=4?'#0038A8':'#FCD116'}"><title>${label} matched types: ${fmt(n)} rows</title></rect><text x="${L+i*step+step/2}" y="${H-B+17}" text-anchor="middle" fill="#46564c" font-size="12">${label}</text>`}).join('');
+        return `<div class="chart-legend"><span>Rows by number of the 5 document types matched</span><span>Threshold: 4 or 5 types</span></div>${svgWrap(`<line x1="${L}" y1="${H-B}" x2="${W}" y2="${H-B}" stroke="#89968d"/>${bars}`,'Distribution of FY2027 rows by number of matched document types',`0 0 ${W} ${H}`)}<div class="chart-legend"><span>${fmt(d.completeDocumentProjectRows)} rows meet threshold · ${Number(d.completeDocumentProjectRowsPct).toFixed(1)}%</span><span>${fmt(d.denominatorProjectRows)} rows assessed</span></div>`;
+    }
+    function donut(a,b,labelA,labelB) {
+        const total=Number(a)+Number(b)||1, pct=Number(a)/total, r=58,c=2*Math.PI*r, dash=c*pct;
+        return `<div class="donut-wrap">${svgWrap(`<circle cx="100" cy="100" r="${r}" fill="none" stroke="#FCD116" stroke-width="22"/><circle cx="100" cy="100" r="${r}" fill="none" stroke="#0038A8" stroke-width="22" stroke-dasharray="${dash} ${c-dash}" transform="rotate(-90 100 100)"/><text x="100" y="96" text-anchor="middle" fill="#0038A8" font-size="22" font-weight="700">${fmt(total)}</text><text x="100" y="116" text-anchor="middle" fill="#647268" font-size="11">recipient</text>`,'One-title and multiple-title barangays','0 0 200 200')}${svgWrap(`<text x="0" y="22" fill="#0038A8" font-size="13" font-weight="700">${fmt(a)} · ${labelA}</text><text x="0" y="52" fill="#647268" font-size="12">${(pct*100).toFixed(1)}% of recipients</text><text x="0" y="104" fill="#8b6800" font-size="13" font-weight="700">${fmt(b)} · ${labelB}</text><text x="0" y="134" fill="#647268" font-size="12">${((1-pct)*100).toFixed(1)}% of recipients</text>`,'Title multiplicity labels','0 0 210 160')}</div>`;
+    }
+    function historyMosaic(d) {
+        const total=d.officialBarangays||1, arr=[['No mapped record',d.none,'#FCD116'],['1–3 project rows',d.oneToThree,'#6B8FCC'],['4+ project rows',d.fourOrMore,'#0038A8']]; let x=0;
+        const rects=arr.map(([l,n,color])=>{const w=200*n/total, out=`<rect x="${x}" y="25" width="${w}" height="70" fill="${color}"><title>${l}: ${fmt(n)} (${(100*n/total).toFixed(1)}%)</title></rect>`;x+=w;return out}).join('');
+        return `${svgWrap(rects,'Historical MPB record coverage across all official barangays','0 0 200 120')}<div class="chart-legend">${arr.map(([l,n,color])=>`<span><i class="legend-dot" style="background:${color}"></i>${l}: ${fmt(n)} · ${(100*n/total).toFixed(1)}%</span>`).join('')}<span>${fmt(total)} official barangays</span></div>`;
+    }
+    function regionalTiles(rows,key,caption) {
+        const data=(rows||[]).filter(x=>x.level==='region'&&Number(x.mpbRows)>0).map(x=>({...x,rate:100*Number(x[key]||0)/Number(x.mpbRows)})).sort((a,b)=>b.rate-a.rate), max=Math.max(...data.map(x=>x.rate),1);
+        return `<div class="tile-grid">${data.map(x=>`<div class="region-tile" style="--tile:${(0.15+.85*x.rate/max).toFixed(2)}" title="${esc(x.name)}: ${x.rate.toFixed(1)} schools per 100 MPB rows"><b>${esc(x.region.replace(/ Region|Administrative Region| Region \(.*\)/g,''))}</b><strong>${x.rate.toFixed(1)}</strong></div>`).join('')}</div><div class="chart-legend"><span>${caption}</span><span>Color intensity scales to the highest regional rate</span></div>`;
+    }
+    function regionScatter(rows,key,label) {
+        const data=(rows||[]).filter(x=>x.level==='region'&&Number(x.mpbRows)>0&&Number(x[key])>0), xmax=Math.max(...data.map(x=>x.mpbRows),1),ymax=Math.max(...data.map(x=>x[key]),1), W=500,H=240,L=48,R=14,T=14,B=40;
+        const pts=data.map(x=>{const cx=L+x.mpbRows/xmax*(W-L-R),cy=T+(1-x[key]/ymax)*(H-T-B);return `<circle cx="${cx}" cy="${cy}" r="4"><title>${esc(x.region)} · ${fmt(x.mpbRows)} MPB rows · ${fmt(x[key])} ${label.toLowerCase()}</title></circle>`}).join('');
+        return svgWrap(`<line x1="${L}" y1="${H-B}" x2="${W-R}" y2="${H-B}" stroke="#89968d"/><line x1="${L}" y1="${T}" x2="${L}" y2="${H-B}" stroke="#89968d"/>${pts}<text x="${W/2}" y="${H-8}" text-anchor="middle" fill="#46564c" font-size="12">MPB project rows</text><text transform="translate(14 ${H/2}) rotate(-90)" text-anchor="middle" fill="#46564c" font-size="12">${esc(label)}</text>`,'Regional MPB project rows compared with reported hospital beds',`0 0 ${W} ${H}`);
     }
 
     function scatter(points) {
@@ -132,15 +151,18 @@
         const controller = new AbortController();
         const timer = setTimeout(() => controller.abort(), 12000);
         try {
-            const [sourceResponse, dataResponse] = await Promise.all([
+            const [sourceResponse, dataResponse, educationResponse] = await Promise.all([
                 fetch(`${researchBase}mpb-simple.html`, { signal: controller.signal, headers: { Accept: 'text/html' } }),
-                fetch(`${researchBase}mpb-simple-data.json`, { signal: controller.signal, headers: { Accept: 'application/json' } })
+                fetch(`${researchBase}mpb-simple-data.json`, { signal: controller.signal, headers: { Accept: 'application/json' } }),
+                fetch(`${researchBase}education-health-data.json`, { signal: controller.signal, headers: { Accept: 'application/json' } })
             ]);
             if (!sourceResponse.ok) throw new Error(`The MPB infographic page returned ${sourceResponse.status}.`);
             if (!dataResponse.ok) throw new Error(`The MPB chart data returned ${dataResponse.status}.`);
-            const [sourceHtml, data] = await Promise.all([sourceResponse.text(), dataResponse.json()]);
+            if (!educationResponse.ok) throw new Error(`The regional facility data returned ${educationResponse.status}.`);
+            const [sourceHtml, data, education] = await Promise.all([sourceResponse.text(), dataResponse.json(), educationResponse.json()]);
             if (!sourceHtml || !data) throw new Error('The MPB research source is incomplete.');
             window.mpbHomeData = data;
+            data.educationRows = education.geographyRows;
             if (!Array.isArray(data.provincePovertyPoints)) throw new Error('The MPB chart data is incomplete.');
             list.innerHTML = chartPlans.map(detailCard).join('');
             mountInfographics(sourceHtml);
