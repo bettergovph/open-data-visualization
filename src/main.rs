@@ -94,7 +94,7 @@ async fn home(req: HttpRequest) -> Result<HttpResponse, ActixError> {
     };
     
     let rendered = tera.render(template_name, &context).map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
-    Ok(HttpResponse::Ok().insert_header(("Cache-Control", "no-cache, no-store, must-revalidate")).content_type("text/html").body(rendered))
+    Ok(HttpResponse::Ok().content_type("text/html").body(rendered))
 }
 
 async fn archived_home(req: HttpRequest) -> Result<HttpResponse, ActixError> {
@@ -419,7 +419,7 @@ async fn sources(req: HttpRequest) -> Result<HttpResponse, ActixError> {
     };
 
     let rendered = tera.render(template_name, &context).map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
-    Ok(HttpResponse::Ok().insert_header(("Cache-Control", "no-cache, no-store, must-revalidate")).content_type("text/html").body(rendered))
+    Ok(HttpResponse::Ok().content_type("text/html").body(rendered))
 }
 
 async fn connectivity_home(req: HttpRequest) -> Result<HttpResponse, ActixError> {
@@ -430,7 +430,7 @@ async fn connectivity_home(req: HttpRequest) -> Result<HttpResponse, ActixError>
     context.insert("company_name", "BetterGovPH");
     context.insert("platform", "BetterGovPH");
     let rendered = tera.render("connectivity_home.html", &context).map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
-    Ok(HttpResponse::Ok().insert_header(("Cache-Control", "no-cache, no-store, must-revalidate")).content_type("text/html").body(rendered))
+    Ok(HttpResponse::Ok().content_type("text/html").body(rendered))
 }
 
 async fn roads_bridges_home(req: HttpRequest) -> Result<HttpResponse, ActixError> {
@@ -441,7 +441,7 @@ async fn roads_bridges_home(req: HttpRequest) -> Result<HttpResponse, ActixError
     context.insert("company_name", "BetterGovPH");
     context.insert("platform", "BetterGovPH");
     let rendered = tera.render("roads_bridges_home.html", &context).map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
-    Ok(HttpResponse::Ok().insert_header(("Cache-Control", "no-cache, no-store, must-revalidate")).content_type("text/html").body(rendered))
+    Ok(HttpResponse::Ok().content_type("text/html").body(rendered))
 }
 
 // Catalog of public draft pages that are intentionally kept out of the main navigation.
