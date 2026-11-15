@@ -11,7 +11,7 @@
         { title: 'Poverty and allocation per barangay', note: 'Each dot is a province. The line is a descriptive linear fit; it does not show that poverty determines allocations.', href: `${researchBase}mpb-regional-province.html`, link: 'Review the poverty comparison and methods', chart: (d) => scatter(d.provincePovertyPoints) },
         { title: 'Top, middle and bottom provinces by poverty incidence', note: 'This combines the top five, middle five, and bottom five provinces by 2023 poverty incidence into one chart. Poverty and allocation per official barangay use separate vertical scales. Zamboanga del Norte and Ilocos Norte are highlighted; allocations are not spending.', href: `${researchBase}mpb-regional-province.html`, link: 'Explore all province rankings and methods', chart: (d) => provinceRankings(d.provincePovertyPoints) },
         { title: 'MPB records and public schools by region', note: 'Each tile shows public-school records relative to MPB project rows in that region. These are regional totals, not matched projects and schools.', href: `${researchBase}education-health.html#data-coverage`, link: 'Review school coverage and counts', chart: (d) => regionalTiles(d.educationRows,'depedPublicSchoolCount','schools per 100 MPB rows') },
-        { title: 'MPB project rows outnumber joined government hospital beds', note: 'This compares aggregate records, not equivalent assets: MPB project rows are not buildings, and they are not matched to any hospital or bed.', href: `${researchBase}education-health.html#data-coverage`, link: 'Review hospital and bed coverage', chart: (d) => hospitalComparison(d.facilityRatios) }
+        { title: 'MPB project rows outnumber joined government hospital beds', note: 'Each square compares regional totals: MPB project rows per reported government hospital bed and per joined hospital record. MPB rows are not buildings and are not matched to individual facilities or beds.', href: `${researchBase}education-health.html#data-coverage`, link: 'Review hospital and bed coverage', chart: (d) => hospitalRegionalTiles(d.educationRows) }
     ];
 
     const fmt = (n) => Number(n || 0).toLocaleString('en-PH');
@@ -56,15 +56,16 @@
         const data=(rows||[]).filter(x=>x.level==='region'&&Number(x.mpbRows)>0).map(x=>({...x,rate:100*Number(x[key]||0)/Number(x.mpbRows)})).sort((a,b)=>b.rate-a.rate), max=Math.max(...data.map(x=>x.rate),1);
         return `<div class="tile-grid">${data.map(x=>`<div class="region-tile" style="--tile:${(0.15+.85*x.rate/max).toFixed(2)}" title="${esc(x.name)}: ${x.rate.toFixed(1)} schools per 100 MPB rows"><b>${esc(x.region.replace(/ Region|Administrative Region| Region \(.*\)/g,''))}</b><strong>${x.rate.toFixed(1)}</strong></div>`).join('')}</div><div class="chart-legend"><span>${caption}</span><span>Color intensity scales to the highest regional rate</span></div>`;
     }
-    function hospitalComparison(data) {
-        const mpbRows = Number(data.mpbProjectRows) || 0;
-        const beds = Number(data.hospitalBeds) || 0;
-        const hospitals = Number(data.hospitalRecords) || 0;
-        const max = Math.max(mpbRows, beds, 1);
-        const difference = mpbRows - beds;
-        const rowsPerBed = beds ? mpbRows / beds : 0;
-        const rowsPerHospital = hospitals ? mpbRows / hospitals : 0;
-        return `<div class="hospital-ratio-hero"><strong>${rowsPerBed.toFixed(2)}×</strong><span>MPB project rows for every reported government hospital bed</span></div><div class="hospital-comparison-bars"><div class="hospital-comparison-row"><div class="hospital-comparison-label"><strong>MPB project rows</strong><b>${fmt(mpbRows)}</b></div><div class="hospital-comparison-track"><i class="mpb" style="width:${100 * mpbRows / max}%"></i></div></div><div class="hospital-comparison-row"><div class="hospital-comparison-label"><strong>Reported beds</strong><b>${fmt(beds)}</b></div><div class="hospital-comparison-track"><i class="beds" style="width:${100 * beds / max}%"></i></div></div></div><p class="hospital-difference">${fmt(difference)} more MPB project rows than joined government hospital beds</p><div class="hospital-scale-callout"><strong>About ${fmt(Math.round(rowsPerHospital))}:1</strong><span>MPB project rows per joined government hospital / infirmary record</span></div><p class="hospital-data-note">${fmt(data.hospitalRecords)} of ${fmt(data.hospitalRecordsTotal)} government hospitals / infirmaries joined to the facility list; ${fmt(beds)} reported beds in those joined records. MPB rows span ${esc(data.mpbYearRange)}.</p>`;
+    function hospitalRegionalTiles(rows) {
+        const data=(rows||[]).filter(x=>x.level==='region'&&Number(x.mpbRows)>0).map(x=>{
+            const beds=Number(x.philhealthGovernmentHospitalBeds)||0;
+            const hospitals=Number(x.philhealthHealthCounts?.hospitals)||0;
+            return {...x,beds,hospitals,perBed:beds?Number(x.mpbRows)/beds:null,perHospital:hospitals?Number(x.mpbRows)/hospitals:null};
+        });
+        const maxBed=Math.max(1,...data.map(x=>x.perBed||0)),maxHospital=Math.max(1,...data.map(x=>x.perHospital||0));
+        const shortName=name=>name.replace(/^Bangsamoro Autonomous Region In Muslim Mindanao \(BARMM\)$/,'BARMM').replace(/^Cordillera Administrative Region$/,'CAR').replace(/^National Capital Region$/,'NCR').replace(/^Negros Island Region$/,'NIR').replace(/ Region.*$/,'').replace(/ Region$/,'');
+        const scale=(value,max)=>Math.max(3,100*value/max);
+        return `<div class="tile-grid hospital-tile-grid">${data.map(x=>`<div class="hospital-region-tile" title="${esc(x.name)} · ${fmt(x.mpbRows)} MPB rows · ${fmt(x.beds)} reported beds · ${fmt(x.hospitals)} joined hospital records"><b>${esc(shortName(x.region))}</b><div class="hospital-tile-measure"><span>Beds</span><strong>${x.perBed===null?'—':`${x.perBed.toFixed(1)}×`}</strong><i><em class="bed-ratio" style="width:${x.perBed===null?0:scale(x.perBed,maxBed)}%"></em></i></div><div class="hospital-tile-measure"><span>Hospitals</span><strong>${x.perHospital===null?'—':`${x.perHospital.toFixed(1)}×`}</strong><i><em class="hospital-ratio" style="width:${x.perHospital===null?0:scale(x.perHospital,maxHospital)}%"></em></i></div></div>`).join('')}</div><div class="chart-legend"><span><i class="legend-dot gold"></i>MPB rows per reported government hospital bed · scale max ${maxBed.toFixed(1)}×</span><span><i class="legend-dot" style="background:#087A61"></i>MPB rows per joined hospital record · scale max ${maxHospital.toFixed(1)}×</span></div>`;
     }
 
     function scatter(points) {
