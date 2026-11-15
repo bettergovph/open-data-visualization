@@ -11,7 +11,7 @@
         { title: 'Poverty and allocation per barangay', note: 'Each dot is a province. The line is a descriptive linear fit; it does not show that poverty determines allocations.', href: '/static/nep-preview/mpb-regional-province.html', link: 'Review the poverty comparison and methods', chart: (d) => scatter(d.provincePovertyPoints) },
         { title: 'Top, middle and bottom provinces by poverty incidence', note: 'Ranked by 2023 poverty incidence among families. Allocation per official barangay is shown beside poverty on a consistent province-wide scale; row counts and total mapped allocations remain context.', href: '/static/nep-preview/mpb-regional-province.html', link: 'Explore all province rankings and methods', chart: (d) => provinceRankings(d.provincePovertyPoints) },
         { title: 'MPB records and public schools by region', note: 'Each tile shows public-school records relative to MPB project rows in that region. These are regional totals, not matched projects and schools.', href: '/static/nep-preview/education-health.html#data-coverage', link: 'Review school coverage and counts', chart: (d) => regionalTiles(d.educationRows,'depedPublicSchoolCount','schools per 100 MPB rows') },
-        { title: 'Reported hospital beds relative to MPB records', note: 'Each dot is a region; the vertical position compares reported government hospital beds with MPB project rows. This does not match projects to hospitals or beds.', href: '/static/nep-preview/education-health.html#data-coverage', link: 'Review hospital and bed coverage', chart: (d) => regionScatter(d.educationRows,'philhealthGovernmentHospitalBeds','Reported hospital beds') }
+        { title: 'MPB project rows outnumber joined government hospital beds', note: 'This compares aggregate records, not equivalent assets: MPB project rows are not buildings, and they are not matched to any hospital or bed.', href: '/static/nep-preview/education-health.html#data-coverage', link: 'Review hospital and bed coverage', chart: (d) => hospitalComparison(d.facilityRatios) }
     ];
 
     const fmt = (n) => Number(n || 0).toLocaleString('en-PH');
@@ -71,10 +71,15 @@
         const data=(rows||[]).filter(x=>x.level==='region'&&Number(x.mpbRows)>0).map(x=>({...x,rate:100*Number(x[key]||0)/Number(x.mpbRows)})).sort((a,b)=>b.rate-a.rate), max=Math.max(...data.map(x=>x.rate),1);
         return `<div class="tile-grid">${data.map(x=>`<div class="region-tile" style="--tile:${(0.15+.85*x.rate/max).toFixed(2)}" title="${esc(x.name)}: ${x.rate.toFixed(1)} schools per 100 MPB rows"><b>${esc(x.region.replace(/ Region|Administrative Region| Region \(.*\)/g,''))}</b><strong>${x.rate.toFixed(1)}</strong></div>`).join('')}</div><div class="chart-legend"><span>${caption}</span><span>Color intensity scales to the highest regional rate</span></div>`;
     }
-    function regionScatter(rows,key,label) {
-        const data=(rows||[]).filter(x=>x.level==='region'&&Number(x.mpbRows)>0&&Number(x[key])>0), xmax=Math.max(...data.map(x=>x.mpbRows),1),ymax=Math.max(...data.map(x=>x[key]),1), W=500,H=240,L=48,R=14,T=14,B=40;
-        const pts=data.map(x=>{const cx=L+x.mpbRows/xmax*(W-L-R),cy=T+(1-x[key]/ymax)*(H-T-B);return `<circle cx="${cx}" cy="${cy}" r="4"><title>${esc(x.region)} · ${fmt(x.mpbRows)} MPB rows · ${fmt(x[key])} ${label.toLowerCase()}</title></circle>`}).join('');
-        return svgWrap(`<line x1="${L}" y1="${H-B}" x2="${W-R}" y2="${H-B}" stroke="#89968d"/><line x1="${L}" y1="${T}" x2="${L}" y2="${H-B}" stroke="#89968d"/>${pts}<text x="${W/2}" y="${H-8}" text-anchor="middle" fill="#46564c" font-size="12">MPB project rows</text><text transform="translate(14 ${H/2}) rotate(-90)" text-anchor="middle" fill="#46564c" font-size="12">${esc(label)}</text>`,'Regional MPB project rows compared with reported hospital beds',`0 0 ${W} ${H}`);
+    function hospitalComparison(data) {
+        const mpbRows = Number(data.mpbProjectRows) || 0;
+        const beds = Number(data.hospitalBeds) || 0;
+        const hospitals = Number(data.hospitalRecords) || 0;
+        const max = Math.max(mpbRows, beds, 1);
+        const difference = mpbRows - beds;
+        const rowsPerBed = beds ? mpbRows / beds : 0;
+        const rowsPerHospital = hospitals ? mpbRows / hospitals : 0;
+        return `<div class="hospital-ratio-hero"><strong>${rowsPerBed.toFixed(2)}×</strong><span>MPB project rows for every reported government hospital bed</span></div><div class="hospital-comparison-bars"><div class="hospital-comparison-row"><div class="hospital-comparison-label"><strong>MPB project rows</strong><b>${fmt(mpbRows)}</b></div><div class="hospital-comparison-track"><i class="mpb" style="width:${100 * mpbRows / max}%"></i></div></div><div class="hospital-comparison-row"><div class="hospital-comparison-label"><strong>Reported beds</strong><b>${fmt(beds)}</b></div><div class="hospital-comparison-track"><i class="beds" style="width:${100 * beds / max}%"></i></div></div></div><p class="hospital-difference">${fmt(difference)} more MPB project rows than joined government hospital beds</p><div class="hospital-scale-callout"><strong>About ${fmt(Math.round(rowsPerHospital))}:1</strong><span>MPB project rows per joined government hospital / infirmary record</span></div><p class="hospital-data-note">${fmt(data.hospitalRecords)} of ${fmt(data.hospitalRecordsTotal)} government hospitals / infirmaries joined to the facility list; ${fmt(beds)} reported beds in those joined records. MPB rows span ${esc(data.mpbYearRange)}.</p>`;
     }
 
     function scatter(points) {

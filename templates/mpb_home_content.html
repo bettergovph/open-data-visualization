@@ -68,6 +68,21 @@
         #mpb-home .coverage-row-track { height:13px; overflow:hidden; border-radius:99px; background:#EAF0FF; }
         #mpb-home .coverage-row-track i { display:block; height:100%; min-width:2px; border-radius:99px; }
         #mpb-home .coverage-chart-footnote { margin:14px 0 0; }
+        #mpb-home .hospital-ratio-hero { display:flex; align-items:center; gap:14px; margin:2px 0 18px; padding:16px; border-radius:12px; background:linear-gradient(110deg,#00246A,#0038A8); color:#fff; }
+        #mpb-home .hospital-ratio-hero strong { color:#FCD116; font-size:clamp(38px,5vw,54px); line-height:1; letter-spacing:-.05em; white-space:nowrap; }
+        #mpb-home .hospital-ratio-hero span { max-width:260px; font-size:14px; font-weight:700; line-height:1.35; }
+        #mpb-home .hospital-comparison-bars { display:grid; gap:15px; margin-top:18px; }
+        #mpb-home .hospital-comparison-label { display:flex; justify-content:space-between; gap:10px; margin-bottom:5px; font-size:13px; }
+        #mpb-home .hospital-comparison-label b { font-variant-numeric:tabular-nums; }
+        #mpb-home .hospital-comparison-track { height:22px; overflow:hidden; border-radius:99px; background:#EAF0FF; }
+        #mpb-home .hospital-comparison-track i { display:block; height:100%; min-width:2px; border-radius:99px; }
+        #mpb-home .hospital-comparison-track .mpb { background:#0038A8; }
+        #mpb-home .hospital-comparison-track .beds { background:#BA8900; }
+        #mpb-home .hospital-difference { margin:16px 0; padding:11px 13px; border-left:4px solid #FCD116; border-radius:6px; background:#FFF9D9; color:#463800; font-size:13px; font-weight:750; }
+        #mpb-home .hospital-scale-callout { display:flex; align-items:baseline; gap:10px; padding-top:12px; border-top:1px solid var(--line); }
+        #mpb-home .hospital-scale-callout strong { color:var(--blue-dark); font-size:25px; white-space:nowrap; }
+        #mpb-home .hospital-scale-callout span, #mpb-home .hospital-data-note { color:var(--muted); font-size:12px; line-height:1.45; }
+        #mpb-home .hospital-data-note { margin:9px 0 0; }
         #mpb-home .callout-stat { display:flex; align-items:baseline; gap:10px; margin:4px 0 12px; }
         #mpb-home .callout-stat strong { color:var(--blue-dark); font-size:38px; line-height:1; letter-spacing:-.04em; }
         #mpb-home .callout-stat span { color:var(--muted); font-size:13px; }
@@ -130,6 +145,8 @@
         @media(max-width:520px) {
             #mpb-home .coverage-row-heading { align-items:flex-start; flex-direction:column; gap:2px; }
             #mpb-home .coverage-row-heading span { white-space:normal; }
+            #mpb-home .hospital-ratio-hero { align-items:flex-start; flex-direction:column; gap:7px; }
+            #mpb-home .hospital-scale-callout { align-items:flex-start; flex-direction:column; gap:3px; }
         }
         @media(prefers-reduced-motion:no-preference) {
             #mpb-home .story-card { transition:box-shadow .2s ease, transform .2s ease; }
@@ -170,4 +187,4 @@
         </footer>
     </main>
 </div>
-<script src="/static/js/mpb-home.js?v=coverage-groups-loading-fix-20261115" defer></script>
+<script src="/static/js/mpb-home.js?v=hospital-beds-emphasis-20261115" defer></script>
