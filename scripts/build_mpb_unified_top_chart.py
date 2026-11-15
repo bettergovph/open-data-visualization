@@ -23,7 +23,7 @@ def main():
             'municipality': row[2],
             'province': row[3],
             'highestLevel': int(cumulative[5] or 0),
-            'techTreeScore': int(cumulative[6] or 0),
+            'namedMPBs': int(cumulative[4] or 0),
             'allocationPesos': sum(float(stat[1] or 0) for stat in stats),
         })
 
@@ -37,7 +37,7 @@ def main():
         'officialBarangays': data.get('summary', {}).get('officialBarangays'),
         'tables': {
             'upgrades': {'label': 'Highest upgrade level', 'unit': 'level', 'rows': top('highestLevel')},
-            'techTree': {'label': 'Tech Tree score', 'unit': 'score', 'rows': top('techTreeScore')},
+            'techTree': {'label': 'MPBs in barangay', 'unit': 'named MPB title matches', 'rows': top('namedMPBs')},
             'economy': {'label': 'Listed allocation · all years', 'unit': 'pesos', 'rows': top('allocationPesos')},
         },
     }
