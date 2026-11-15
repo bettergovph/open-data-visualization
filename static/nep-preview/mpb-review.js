@@ -12,15 +12,16 @@
   const projects = [];
   let current = null;
   let currentPdfPage = null;
+  const apiBase = location.hostname === 'research.bettergov.ph' ? 'https://visualizations.bettergov.ph' : '';
   const allocationFormat = new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP', maximumFractionDigits: 0 });
 
   const api = async (path, options = {}) => {
-    const response = await fetch(`/api/mpb-review/${path}?hash=${encodeURIComponent(hash)}`, {
+    const response = await fetch(`${apiBase}/api/mpb-review/${path}?hash=${encodeURIComponent(hash)}`, {
       cache: 'no-store',
       ...options,
     });
     const payload = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(payload.error || `HTTP ${response.status}`);
+    if (!response.ok) throw new Error(payload.error || payload.detail || `HTTP ${response.status}`);
     return payload;
   };
   const addText = (parent, tag, text, className = '') => {

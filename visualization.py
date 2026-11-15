@@ -9,6 +9,7 @@ import csv
 import re
 import unicodedata
 import time
+import threading
 from functools import lru_cache
 from datetime import datetime, timezone
 from pathlib import Path
@@ -584,6 +585,235 @@ async def save_connectivity_annotations(request: Request, hash: str = Query(defa
         json.dumps(document, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
     return JSONResponse(content=document, headers={"Cache-Control": "no-store"})
+
+
+# MPB POW review uses the same admin hash markers as connectivity review.
+MPB_REVIEW_ANNOTATIONS_FILE = Path(".mpb-review-annotations.json")
+MPB_REVIEW_CACHE_ROOT = Path(os.environ.get(
+    "DPWH_DOCUMENT_CACHE",
+    str(Path(__file__).resolve().parent / "analysis" / "data_sources" / "dpwh_project_documents" / "on_demand"),
+)).resolve()
+MPB_REVIEW_PROJECT_PREFIX = "2027DPWH-Proposal-"
+MPB_REVIEW_ANNOTATION_LOCK = threading.Lock()
+
+
+def _read_mpb_review_annotations() -> Dict[str, Any]:
+    try:
+        value = json.loads(MPB_REVIEW_ANNOTATIONS_FILE.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        return {"schemaVersion": 1, "annotations": {}}
+    except (OSError, json.JSONDecodeError) as exc:
+        raise HTTPException(status_code=500, detail="MPB review database is unreadable") from exc
+    if not isinstance(value, dict) or not isinstance(value.get("annotations"), dict):
+        raise HTTPException(status_code=500, detail="MPB review database has an invalid structure")
+    return value
+
+
+def _valid_mpb_project_code(code: str) -> bool:
+    return bool(re.fullmatch(r"2027DPWH-Proposal-\d{5}", code or ""))
+
+
+def _is_mpb_project(metadata: Dict[str, Any]) -> bool:
+    fields = [metadata.get(key) for key in ("projectName", "pap1", "pap2", "pap3")]
+    for field in fields:
+        if not isinstance(field, str):
+            continue
+        text = field.lower()
+        if any(term in text for term in (
+            "multi-purpose building", "multipurpose building", "multi purpose building",
+            "multi-purpose buildings", "multipurpose buildings",
+        )) or "mpb" in re.split(r"[^a-z0-9]+", text):
+            return True
+    return False
+
+
+def _mpb_allocation_pesos(metadata: Dict[str, Any]) -> Optional[float]:
+    def number(value: Any) -> Optional[float]:
+        if isinstance(value, (int, float)):
+            return float(value)
+        if isinstance(value, str):
+            try:
+                return float(value.replace(",", ""))
+            except ValueError:
+                return None
+        return None
+
+    direct = number(metadata.get("nepAllocationPesos"))
+    if direct is None:
+        direct = number(metadata.get("allocationPesos"))
+    amount = number(metadata.get("amount"))
+    return direct if direct is not None else amount * 1000 if amount is not None else None
+
+
+def _mpb_cell_text(value: Any) -> Optional[str]:
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    if isinstance(value, (str, int, float)):
+        return str(value)
+    return None
+
+
+def _mpb_load_project(code: str, saved_annotations: Optional[Dict[str, Any]] = None) -> Optional[Dict[str, Any]]:
+    if not _valid_mpb_project_code(code):
+        return None
+    project_dir = MPB_REVIEW_CACHE_ROOT / code
+
+    def read_json(path: Path) -> Optional[Any]:
+        try:
+            return json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            return None
+
+    metadata = read_json(project_dir / "metadata.json")
+    if not isinstance(metadata, dict) or not _is_mpb_project(metadata):
+        return None
+    result = read_json(project_dir / "result.json")
+    if not isinstance(result, dict):
+        return None
+    documents = result.get("documents")
+    pow_document = next((doc for doc in documents if isinstance(doc, dict) and doc.get("kind") == "pow"), None) if isinstance(documents, list) else None
+    if not isinstance(pow_document, dict):
+        return None
+    pow_data = pow_document.get("pow")
+    if not isinstance(pow_data, dict):
+        return None
+
+    asset = pow_document.get("pdfAsset")
+    if not isinstance(asset, str) or not asset:
+        return None
+    relative = Path(asset)
+    if relative.is_absolute() or any(part in (".", "..") for part in relative.parts):
+        return None
+    assets_root = (project_dir / "assets").resolve()
+    pdf_path = (assets_root / relative).resolve()
+    try:
+        pdf_path.relative_to(assets_root)
+    except ValueError:
+        return None
+    tables = read_json(pdf_path.parent / "pow-native-tables.json")
+    if not isinstance(tables, list):
+        return None
+
+    if saved_annotations is None:
+        saved_annotations = _read_mpb_review_annotations().get("annotations", {})
+    rows: List[Dict[str, Any]] = []
+    sha = str(pow_data.get("pdfSha256") or "unknown")
+    for table_index, table in enumerate(tables):
+        if not isinstance(table, dict) or not isinstance(table.get("cells"), list):
+            continue
+        page = table.get("page") if isinstance(table.get("page"), int) else 0
+        for row_index, cells in enumerate(table["cells"]):
+            values = [_mpb_cell_text(cell) for cell in cells] if isinstance(cells, list) else []
+            raw_text = " | ".join(value.strip() for value in values if value and value.strip())
+            if not raw_text:
+                continue
+            row_id = f"{code}:{sha}:{page}:{table_index}:{row_index}"
+            saved = saved_annotations.get(row_id, {})
+            key_values = saved.get("keyValues") if isinstance(saved, dict) else None
+            if not isinstance(key_values, dict) and isinstance(saved, dict) and isinstance(saved.get("note"), str):
+                key_values = {"note": saved["note"]}
+            rows.append({
+                "rowId": row_id,
+                "page": page,
+                "table": table_index + 1,
+                "row": row_index + 1,
+                "rawText": raw_text,
+                "keyValues": key_values if isinstance(key_values, dict) else {},
+            })
+
+    document_metadata = pow_document.get("metadata") if isinstance(pow_document.get("metadata"), dict) else {}
+    return {
+        "code": code,
+        "name": str(metadata.get("projectName") or ""),
+        "allocationPesos": _mpb_allocation_pesos(metadata),
+        "office": str(metadata.get("office") or ""),
+        "region": str(metadata.get("region") or ""),
+        "pap3": str(metadata.get("pap3") or ""),
+        "powUrl": str(document_metadata.get("url") or ""),
+        "powStatus": str(pow_data.get("status") or "unknown"),
+        "pageCount": int(pow_data.get("pageCount") or 0),
+        "rows": rows,
+    }
+
+
+@app.get("/api/mpb-review/projects")
+async def list_mpb_review_projects(hash: str = Query(default="")) -> JSONResponse:
+    _require_connectivity_annotation_access(hash)
+    if not MPB_REVIEW_CACHE_ROOT.is_dir():
+        raise HTTPException(status_code=503, detail="POW document cache is unavailable")
+    saved = _read_mpb_review_annotations().get("annotations", {})
+    projects = []
+    for project_dir in MPB_REVIEW_CACHE_ROOT.iterdir():
+        code = project_dir.name
+        if not _valid_mpb_project_code(code):
+            continue
+        project = _mpb_load_project(code, saved)
+        if project is None:
+            continue
+        projects.append({
+            key: project[key]
+            for key in ("code", "name", "allocationPesos", "office", "region", "pageCount", "powStatus")
+        } | {"rowCount": len(project["rows"])})
+    projects.sort(key=lambda project: (-(project["allocationPesos"] or 0), project["code"]))
+    return JSONResponse(content={"projects": projects}, headers={"Cache-Control": "no-store"})
+
+
+@app.get("/api/mpb-review/projects/{code}")
+async def get_mpb_review_project(code: str, hash: str = Query(default="")) -> JSONResponse:
+    _require_connectivity_annotation_access(hash)
+    project = _mpb_load_project(code)
+    if project is None:
+        raise HTTPException(status_code=404, detail="Scanned MPB POW not found")
+    return JSONResponse(content=project, headers={"Cache-Control": "no-store"})
+
+
+@app.post("/api/mpb-review/annotations")
+async def save_mpb_review_annotation(request: Request, hash: str = Query(default="")) -> JSONResponse:
+    _require_connectivity_annotation_access(hash)
+    try:
+        body = await request.json()
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail="Invalid JSON body") from exc
+    if not isinstance(body, dict):
+        raise HTTPException(status_code=400, detail="Expected a JSON object")
+    code, row_id, key_values = body.get("project_code"), body.get("row_id"), body.get("key_values")
+    if (
+        not isinstance(code, str) or not _valid_mpb_project_code(code)
+        or not isinstance(row_id, str) or len(row_id) > 300
+        or not isinstance(key_values, dict) or len(key_values) > 100
+        or any(not isinstance(key, str) or not key.strip() or len(key) > 200
+               or not isinstance(value, str) or len(value) > 20_000
+               for key, value in key_values.items())
+    ):
+        raise HTTPException(status_code=400, detail="Invalid annotation fields")
+
+    saved = _read_mpb_review_annotations()
+    project = _mpb_load_project(code, saved.get("annotations", {}))
+    if project is None:
+        raise HTTPException(status_code=404, detail="Scanned MPB POW not found")
+    row = next((item for item in project["rows"] if item["rowId"] == row_id), None)
+    if row is None:
+        raise HTTPException(status_code=404, detail="Scanned row not found")
+
+    with MPB_REVIEW_ANNOTATION_LOCK:
+        saved = _read_mpb_review_annotations()
+        annotations = saved["annotations"]
+        if not key_values:
+            annotations.pop(row_id, None)
+        else:
+            annotations[row_id] = {
+                "projectCode": code,
+                "rawText": row["rawText"],
+                "keyValues": {key.strip(): value.strip() for key, value in key_values.items()},
+                "updatedAtEpochSeconds": int(time.time()),
+            }
+        saved["schemaVersion"] = 1
+        temporary = MPB_REVIEW_ANNOTATIONS_FILE.with_name(MPB_REVIEW_ANNOTATIONS_FILE.name + ".tmp")
+        temporary.write_text(json.dumps(saved, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        if not MPB_REVIEW_ANNOTATIONS_FILE.exists():
+            temporary.chmod(0o600)
+        os.replace(temporary, MPB_REVIEW_ANNOTATIONS_FILE)
+    return JSONResponse(content={"saved": True, "rowId": row_id}, headers={"Cache-Control": "no-store"})
 
 
 @app.get("/api/integrated/coverage")

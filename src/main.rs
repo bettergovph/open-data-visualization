@@ -7,7 +7,6 @@ use tera::{Tera, Context};
 
 mod utils;
 mod project_documents;
-mod mpb_review;
 use utils::*;
 use serde::Deserialize;
 use std::path::{Component, Path};
@@ -879,10 +878,6 @@ async fn main() -> std::io::Result<()> {
                     .service(web::resource("/static/nep-preview/connectivity.html").to(connectivity_entry))
                     .service(web::resource("/static/nep-preview/mpb-review.html").to(mpb_review_entry))
                     .service(web::resource("/static/nep-preview/index.html").to(nep_preview_index_entry))
-                    .service(
-                        web::scope("/api/mpb-review")
-                            .configure(mpb_review::configure),
-                    )
                     .service(
                         fs::Files::new("/static/nep-preview", "./static/nep-preview/")
                             .path_filter(|path, _| {
