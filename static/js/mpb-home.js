@@ -18,7 +18,7 @@
             ['No mapped record', d.history2015To2026.none], ['1–3 project rows', d.history2015To2026.oneToThree], ['4+ project rows', d.history2015To2026.fourOrMore, 'gold']
         ], d.history2015To2026.officialBarangays) },
         { title: 'Poverty and allocation per barangay', note: 'Each dot is a province. The line is a descriptive linear fit; it does not show that poverty determines allocations.', href: '/static/nep-preview/mpb-regional-province.html', link: 'Review the poverty comparison and methods', chart: (d) => scatter(d.provincePovertyPoints) },
-        { title: 'Two provinces, two allocation measures', note: 'These are mapped project-row counts and total allocations across FY2015–FY2027, including proposed FY2027 funding.', href: '/static/nep-preview/mpb-regional-province.html', link: 'Explore province rankings', chart: (d) => provincePair(d.provincePovertyPoints) },
+        { title: 'Top, middle and bottom provinces by MPB allocation', note: 'Ranked by total mapped allocation. Project-row counts are shown alongside each province. FY2027 House Bill proposals are included; these figures are not verified spending.', href: '/static/nep-preview/mpb-regional-province.html', link: 'Explore all province rankings and methods', chart: (d) => provinceRankings(d.provincePovertyPoints) },
         { title: 'MPB project rows and joined public schools', note: 'Aggregate record totals only. The data does not match MPB projects to the schools shown.', href: '/static/nep-preview/education-health.html#data-coverage', link: 'Review school coverage and counts', chart: (d) => ratioChart(d.facilityRatios.mpbProjectRows, d.facilityRatios.schoolRecords, 'MPB project rows', 'Joined school records', 'school') },
         { title: 'MPB project rows and reported hospital beds', note: 'Aggregate record totals only. The data does not match MPB projects to hospitals or beds.', href: '/static/nep-preview/education-health.html#data-coverage', link: 'Review hospital and bed coverage', chart: (d) => ratioChart(d.facilityRatios.mpbProjectRows, d.facilityRatios.hospitalBeds, 'MPB project rows', 'Reported beds', 'bed') }
     ];
@@ -66,16 +66,28 @@
         return svgWrap(content, 'Scatterplot of province poverty incidence and MPB allocation per official barangay', `0 0 ${W} ${H}`) + '<div class="chart-legend"><span><i class="legend-dot"></i>Province · hover over a point for details</span><span><i class="legend-dot gold"></i>Descriptive linear fit</span></div>';
     }
 
-    function provincePair(points) {
-        const z = points.find((p) => /zamboanga del norte/i.test(p.region));
-        const i = points.find((p) => /ilocos norte/i.test(p.region));
-        if (!z || !i) return '<p>Province comparison data is unavailable.</p>';
-        const rows = [['Project rows', z.projectRows, i.projectRows], ['Total allocation', z.allocationPesos, i.allocationPesos]];
-        return rows.map(([label, a, b]) => {
-            const max = Math.max(Number(a), Number(b));
-            const money = label === 'Total allocation';
-            return `<div class="pair-metric"><p class="bar-label">${label}</p><div class="bar-row"><span class="bar-label">Zamboanga del Norte</span><span class="bar-track"><i class="bar-fill" style="width:${100 * Number(a) / max}%"></i></span><span class="bar-value">${money ? peso(a) : fmt(a)}</span></div><div class="bar-row"><span class="bar-label">Ilocos Norte</span><span class="bar-track"><i class="bar-fill gold" style="width:${100 * Number(b) / max}%"></i></span><span class="bar-value">${money ? peso(b) : fmt(b)}</span></div></div>`;
+    function provinceRankings(points) {
+        const rows = points.filter((p) => p.allocationPesos != null && p.projectRows != null)
+            .sort((a, b) => Number(b.allocationPesos) - Number(a.allocationPesos));
+        if (rows.length < 15) return '<p>Province ranking data is unavailable.</p>';
+        const middleStart = Math.floor((rows.length - 5) / 2);
+        const groups = [
+            { title: 'Top 5', detail: 'Ranks 1–5 · largest totals', rows: rows.slice(0, 5) },
+            { title: 'Middle 5', detail: `Ranks ${middleStart + 1}–${middleStart + 5} · centered on the median`, rows: rows.slice(middleStart, middleStart + 5) },
+            { title: 'Bottom 5', detail: `Ranks ${rows.length - 4}–${rows.length} · smallest totals`, rows: rows.slice(-5) }
+        ];
+        const groupMarkup = groups.map((group) => {
+            const max = Math.max(...group.rows.map((p) => Number(p.allocationPesos)), 1);
+            const firstRank = rows.indexOf(group.rows[0]) + 1;
+            return `<section class="province-group"><div class="province-group-heading"><h5>${esc(group.title)}</h5><span>${esc(group.detail)}</span></div>${group.rows.map((p, i) => {
+                const allocation = Number(p.allocationPesos);
+                const compact = allocation >= 1e9 ? `₱${(allocation / 1e9).toFixed(2)}B` : `₱${(allocation / 1e6).toFixed(0)}M`;
+                return `<div class="province-rank-row"><div class="province-place"><strong>${firstRank + i}. ${esc(p.region)}</strong><small>${fmt(p.projectRows)} project rows</small></div><span class="bar-track" role="img" aria-label="${esc(p.region)}: ${peso(allocation)} total mapped allocation"><i class="bar-fill" style="width:${100 * allocation / max}%"></i></span><strong class="province-total" title="${peso(allocation)}">${compact}</strong></div>`;
+            }).join('')}</section>`;
         }).join('');
+        const focus = ['Zamboanga Del Norte', 'Ilocos Norte'].map((name) => rows.find((p) => p.region.toLowerCase() === name.toLowerCase())).filter(Boolean);
+        const focusMarkup = focus.length === 2 ? `<div class="province-focus"><strong>Provinces in the infographic</strong><div>${focus.map((p) => `<span><b>${esc(p.region)}</b><small>${fmt(p.projectRows)} rows · ${peso(p.allocationPesos)}</small></span>`).join('')}</div></div>` : '';
+        return `<div class="province-groups">${groupMarkup}</div>${focusMarkup}<p class="chart-note">Allocation totals are mapped budget amounts across GAA FY2015–FY2026 and the proposed FY2027 House Bill. They are not verified spending.</p>`;
     }
 
     function ratioChart(a, b, labelA, labelB, type) {
