@@ -10,7 +10,7 @@
   <style>
     :root{--ink:#212121;--muted:#616161;--blue:#0038A8;--navy:#00246A;--gold:#FCD116;--line:#E0E0E0;--paper:#FAFAFA}
     *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 Inter,system-ui,sans-serif}
-    .content{max-width:1224px;margin:auto;padding:30px 28px 64px}.story-list{display:grid;gap:22px}.story-card{overflow:hidden;border:1px solid var(--line);border-radius:14px;background:#fff;box-shadow:0 6px 24px #00246A0A}.story-card>header{display:flex;align-items:flex-start;gap:16px;padding:20px 24px 14px;background:#fff}.story-number{flex:0 0 38px;height:38px;display:grid;place-items:center;border-radius:50%;background:#EAF0FF;color:var(--navy);font-size:13px;font-weight:850}.story-card>header h2{margin:3px 0 0;color:var(--ink);font-size:clamp(18px,2.5vw,24px);line-height:1.25}.story-pair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);border-top:1px solid var(--line)}.story-pair>section{min-width:0;padding:22px 24px 24px}.story-pair>.detail{border-left:1px solid var(--line);background:#FAFAFA}.label{margin:0 0 12px;color:var(--blue);font-size:11px;text-transform:uppercase;letter-spacing:.11em;font-weight:800}.infographic{display:block;width:100%;height:auto;min-height:210px}.takeaway{margin:10px 0 18px;color:var(--navy);font-size:clamp(25px,3vw,36px);font-weight:800;line-height:1.12;letter-spacing:-.03em}.explore{display:inline-flex;margin-top:12px;color:var(--blue);font-size:13px;font-weight:800;text-decoration-thickness:1px;text-underline-offset:3px}.chart-card h2{margin:0 0 8px;color:var(--navy);font-size:19px}.chart-card p{margin:0 0 18px;color:var(--muted)}.chart-wrap{height:min(48vh,420px);min-height:300px}.chart-note{margin-top:18px!important;font-size:13px}.status{padding:36px;text-align:center;color:var(--muted)}
+    .content{max-width:1224px;margin:auto;padding:30px 28px 64px}.story-list{display:grid;gap:22px}.story-card{overflow:hidden;border:1px solid var(--line);border-radius:14px;background:#fff;box-shadow:0 6px 24px #00246A0A}.story-card>header{display:flex;align-items:flex-start;gap:16px;padding:20px 24px 14px;background:#fff}.story-number{flex:0 0 38px;height:38px;display:grid;place-items:center;border-radius:50%;background:#EAF0FF;color:var(--navy);font-size:13px;font-weight:850}.story-card>header h2{margin:3px 0 0;color:var(--ink);font-size:clamp(18px,2.5vw,24px);line-height:1.25}.story-pair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);border-top:1px solid var(--line)}.story-pair>section{min-width:0;padding:22px 24px 24px}.story-pair>.detail{border-left:1px solid var(--line);background:#FAFAFA}.label{margin:0 0 12px;color:var(--blue);font-size:11px;text-transform:uppercase;letter-spacing:.11em;font-weight:800}.infographic{display:block;width:100%;height:auto;min-height:210px}.takeaway{margin:10px 0 18px;color:var(--navy);font-size:clamp(25px,3vw,36px);font-weight:800;line-height:1.12;letter-spacing:-.03em}.explore{display:inline-flex;margin-top:12px;color:var(--blue);font-size:13px;font-weight:800;text-decoration-thickness:1px;text-underline-offset:3px}.story-pair>.detail h3{margin:0 0 14px;color:var(--ink);font-size:17px;line-height:1.35}.chart-card p{margin:0 0 18px;color:var(--muted)}.chart-wrap{height:min(48vh,420px);min-height:300px}.chart-note{margin-top:18px!important;font-size:13px}.status{padding:36px;text-align:center;color:var(--muted)}
     @media(max-width:800px){.content{padding:24px 12px 44px}.story-pair{grid-template-columns:1fr}.story-pair>.detail{border-left:0;border-top:1px solid var(--line)}.story-pair>section{padding:18px 17px 20px}.chart-wrap{height:400px;min-height:300px}}
   </style>
 </head>
@@ -25,21 +25,21 @@
 {% include "visualizations_topic_header.html" %}
 <main class="content"><div class="story-list">
   <article class="story-card" aria-labelledby="contractor-story-title">
-    <header><span class="story-number">01</span><h2 id="contractor-story-title">A few contractors get the majority of projects</h2></header>
+    <header><span class="story-number">01</span><h2 id="contractor-story-title">Flood control infographic</h2></header>
     <div class="story-pair">
-      <section aria-labelledby="distribution-infographic-label"><p class="label" id="distribution-infographic-label">The pattern at a glance</p>
+      <section aria-labelledby="distribution-infographic-label"><p class="label" id="distribution-infographic-label">The simple picture</p>
         <svg id="contractor-infographic" class="infographic" viewBox="0 0 720 300" role="img" aria-labelledby="infographic-title infographic-desc"><title id="infographic-title">The top ten percent of contractors receive about half of projects</title><desc id="infographic-desc">One hundred contractor figures are shown. The ten highlighted figures represent the top ten percent, with colors matching those contractors in the scatter plot.</desc><text x="360" y="135" text-anchor="middle" fill="#616161" font-size="16">Loading contractor distribution…</text></svg>
         <p id="takeaway-stat" class="takeaway">Loading distribution…</p>
         <div id="infographic-legend" class="chart-note" aria-label="Contractor share by scatter plot color"></div>
         <p class="chart-note">Each icon represents 1% of total project allocation. Colors match the contractor bands in the scatter plot.</p>
-        <a class="explore" href="#contractor-chart-title">Explore the detail ↓</a>
       </section>
-      <section class="detail" aria-labelledby="contractor-chart-title"><p class="label">Explore individual contractors</p>
-        <h2 id="contractor-chart-title">Contractor Project Distribution <span style="font-size:15px;font-weight:500;color:#616161">(Scatter Plot Analysis)</span></h2>
+      <section class="detail" aria-labelledby="contractor-chart-title"><p class="label">Explore the detail</p>
+        <h3 id="contractor-chart-title">A few contractors get the majority of projects</h3>
         <p>Each point represents one contractor. Vertical position shows project count; circle size represents total contract cost. Colors flag unusually high project counts.</p>
         <div class="chart-wrap"><canvas id="contractorScatterChart" aria-label="Scatter plot of contractor project counts and contract costs"></canvas></div>
         <p class="chart-note">Outlier colors use standard deviations from the mean and are screening signals, not evidence of misconduct.</p>
         <div id="chart-status" class="status" role="status">Loading contractor data…</div>
+        <a class="explore" href="/flood">Review flood control history →</a>
       </section>
     </div>
   </article>
