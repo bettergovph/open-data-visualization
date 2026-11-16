@@ -1744,10 +1744,12 @@
                 'Suspended': '#6c757d'       // Gray
             };
 
-            if (statusData && Array.isArray(statusData)) {
-                // Sort by count descending and take top statuses
-                const sortedData = statusData.sort((a, b) => b.count - a.count);
-
+            if (statusData && Array.isArray(statusData.labels) && Array.isArray(statusData.data)) {
+                labels = statusData.labels;
+                data = statusData.data;
+                backgroundColors = labels.map(status => statusColors[status] || '#999999');
+            } else if (Array.isArray(statusData)) {
+                const sortedData = [...statusData].sort((a, b) => b.count - a.count);
                 sortedData.forEach(item => {
                     labels.push(item.status);
                     data.push(item.count);
