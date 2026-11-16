@@ -4,7 +4,7 @@
     const researchBase = 'https://research.bettergov.ph/static/nep-preview/';
 
     const chartPlans = [
-        { title: 'First-time and returning recipient barangays', note: 'FY2027 recipient barangays, classified by whether an earlier MPB record was found.', href: `${researchBase}mpb.html#fy2027-mpb-history`, link: 'Review FY2027 recipient history', chart: (d) => waffle(d.recipientBarangays2027, [['Returning','#0038A8'],['First-time','#FCD116']]) },
+        { title: 'Among returning recipients, which FY2027 titles repeat?', note: 'Focuses on the 3,225 FY2027 recipient barangays (75.1%) with earlier MPB records. Each bar counts a distinct FY2027 title/barangay match: an earlier title match or a new title in a returning barangay.', href: `${researchBase}mpb.html#fy2027-mpb-history`, link: 'Review FY2027 recipient history', chart: (d) => returningTitleHistory(d.returningRecipientTitleHistory2027) },
         { title: 'How many FY2027 rows have 5 of 5 document types matched?', note: 'Distribution by matched document types. Five of five means a file match for all named types, including POW; it does not verify that the POW contains bill rows.', href: `${researchBase}mpb.html#fy2027-mpb-documents`, link: 'Review document coverage', chart: (d) => documentDistribution(d.documents2027) },
         { title: 'Three views of MPB records across barangays', note: 'Combines the unified page’s top upgrade, Tech Tree score, and total allocation rankings. The chart shows the top 10 barangays in each ranking; open the full tables for filters and project rows.', href: 'https://research.bettergov.ph/static/nep-preview/mpb-barangay.html', link: 'Open the unified barangay tables', chart: (d) => unifiedBarangayChart(d.unifiedBarangayRankings) },
         { title: 'Historical records across all official barangays', note: 'Each bar counts barangays with exactly that many distinct MPB title matches from FY2015–FY2026. No mapped match does not establish that a barangay has no building or received no funding.', href: `${researchBase}mpb-regional-province.html`, link: 'Explore historical distribution', chart: (d) => historicalMultiplicityChart(d.historicalMultiplicity) },
@@ -32,6 +32,12 @@
     function waffle(data, groups) {
         const total=Number(data.total)||1, first=Math.round(100*Number(data.returning)/total), cells=Array.from({length:100},(_,i)=>`<rect x="${(i%10)*19}" y="${Math.floor(i/10)*19}" width="15" height="15" rx="3" fill="${i<first?groups[0][1]:groups[1][1]}"/>`).join('');
         return `<div class="callout-stat"><strong>${(100*data.returning/total).toFixed(1)}%</strong><span>of recipient barangays had an earlier MPB record</span></div>${svgWrap(cells,'100 squares showing the share of returning and first-time recipient barangays','0 0 205 190')}<div class="chart-legend"><span><i class="legend-dot"></i>Returning ${fmt(data.returning)}</span><span><i class="legend-dot gold"></i>First-time ${fmt(data.firstTime)}</span><span>Total ${fmt(data.total)}</span></div>`;
+    }
+    function returningTitleHistory(data) {
+        if (!data) return '<p>Returning recipient title history is unavailable.</p>';
+        const total=Number(data.totalTitleMatches)||1, repeat=Number(data.repeatTitleMatches)||0, fresh=Number(data.newTitleMatches)||0;
+        const rows=[['Repeat an earlier title',repeat,''],['New title in a returning barangay',fresh,'gold']];
+        return `<div class="chart-legend"><span>${fmt(data.returningBarangays)} returning FY2027 recipient barangays · ${fmt(data.totalTitleMatches)} distinct title/barangay matches</span></div>${bars(rows.map(([label,value,color])=>[label,value,color]),total)}<div class="chart-legend"><span>${(100*repeat/total).toFixed(1)}% repeat an earlier title</span><span>${(100*fresh/total).toFixed(1)}% are new titles in barangays with earlier MPB records</span></div><p class="chart-note">A repeated title match identifies the same normalized title in the same barangay across years; it does not establish duplicate scope, construction, or spending.</p>`;
     }
     function documentDistribution(d) {
         const rows=d.countsByMatchedTypeCount||[], max=Math.max(...rows.map(x=>Number(x.projectRows||x.rows||x.count||0)),1), vals=rows.map(x=>Number(x.projectRows||x.rows||x.count||0));
