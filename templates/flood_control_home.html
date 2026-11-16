@@ -10,7 +10,7 @@
   <style>
     :root{--ink:#212121;--muted:#616161;--blue:#0038A8;--navy:#00246A;--gold:#FCD116;--line:#E0E0E0;--paper:#FAFAFA}
     *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 Inter,system-ui,sans-serif}
-    .content{max-width:1224px;margin:auto;padding:30px 28px 64px}.story-list{display:grid;gap:22px}.story-card{overflow:hidden;border:1px solid var(--line);border-radius:14px;background:#fff;box-shadow:0 6px 24px #00246A0A}.story-card>header{display:flex;align-items:flex-start;gap:16px;padding:20px 24px 14px;background:#fff}.story-number{flex:0 0 38px;height:38px;display:grid;place-items:center;border-radius:50%;background:#EAF0FF;color:var(--navy);font-size:13px;font-weight:850}.story-card>header h2{margin:3px 0 0;color:var(--ink);font-size:clamp(18px,2.5vw,24px);line-height:1.25}.story-pair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);border-top:1px solid var(--line)}.story-pair>section{min-width:0;padding:22px 24px 24px}.story-pair>.detail{border-left:1px solid var(--line);background:#FAFAFA}.label{margin:0 0 12px;color:var(--blue);font-size:11px;text-transform:uppercase;letter-spacing:.11em;font-weight:800}.infographic{display:block;width:100%;height:auto;min-height:210px}.takeaway{margin:10px 0 18px;color:var(--navy);font-size:clamp(25px,3vw,36px);font-weight:800;line-height:1.12;letter-spacing:-.03em}.explore{display:inline-flex;margin-top:12px;color:var(--blue);font-size:13px;font-weight:800;text-decoration-thickness:1px;text-underline-offset:3px}.story-pair>.detail h3{margin:0 0 14px;color:var(--ink);font-size:17px;line-height:1.35}.chart-card p{margin:0 0 18px;color:var(--muted)}.chart-wrap{height:min(48vh,420px);min-height:300px}.chart-note{margin-top:18px!important;font-size:13px}.status{padding:36px;text-align:center;color:var(--muted)}
+    .content{max-width:1224px;margin:auto;padding:30px 28px 64px}.story-list{display:grid;gap:22px}.story-card{overflow:hidden;border:1px solid var(--line);border-radius:14px;background:#fff;box-shadow:0 6px 24px #00246A0A}.story-card>header{display:flex;align-items:flex-start;gap:16px;padding:20px 24px 14px;background:#fff}.story-number{flex:0 0 38px;height:38px;display:grid;place-items:center;border-radius:50%;background:#EAF0FF;color:var(--navy);font-size:13px;font-weight:850}.story-card>header h2{margin:3px 0 0;color:var(--ink);font-size:clamp(18px,2.5vw,24px);line-height:1.25}.story-pair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);border-top:1px solid var(--line)}.story-pair>section{min-width:0;padding:22px 24px 24px}.story-pair>.detail{border-left:1px solid var(--line);background:#FAFAFA}.label{margin:0 0 12px;color:var(--blue);font-size:11px;text-transform:uppercase;letter-spacing:.11em;font-weight:800}.infographic{display:block;width:100%;height:auto;min-height:210px}.takeaway{margin:10px 0 18px;color:var(--navy);font-size:clamp(25px,3vw,36px);font-weight:800;line-height:1.12;letter-spacing:-.03em}.explore{display:inline-flex;margin-top:12px;color:var(--blue);font-size:13px;font-weight:800;text-decoration-thickness:1px;text-underline-offset:3px}.story-pair>.detail h3{margin:0 0 14px;color:var(--ink);font-size:17px;line-height:1.35}.chart-card p{margin:0 0 18px;color:var(--muted)}.chart-wrap{height:min(48vh,420px);min-height:300px}.chart-note{margin-top:18px!important;font-size:13px}.split-candidate-bars{display:flex;width:min(100%,480px);height:105px;align-items:flex-end;justify-content:center;gap:6px;border-bottom:1px solid #94a3b8}.split-candidate-bars i{display:block;width:12px;min-height:3px;border-radius:3px 3px 0 0;background:#dc3545}.split-chart{min-height:280px;overflow:auto;border:1px solid var(--line);border-radius:10px;background:#fff}.split-chart svg{display:block;width:100%;min-width:540px;height:auto}.status{padding:36px;text-align:center;color:var(--muted)}
     @media(max-width:800px){.content{padding:24px 12px 44px}.story-pair{grid-template-columns:1fr}.story-pair>.detail{border-left:0;border-top:1px solid var(--line)}.story-pair>section{padding:18px 17px 20px}.chart-wrap{height:400px;min-height:300px}}
   </style>
 </head>
@@ -43,8 +43,44 @@
       </section>
     </div>
   </article>
+  <article class="story-card" aria-labelledby="split-story-title">
+    <header><span class="story-number">02</span><h2 id="split-story-title">Contract splitting · MATCH candidates</h2></header>
+    <div class="story-pair">
+      <section><p class="label">The simple picture</p>
+        <div class="infographic" role="img" aria-label="Count of contract splitting candidate clusters">
+          <strong id="split-candidate-count" class="takeaway">—</strong>
+          <p class="chart-note">MATCH candidate clusters in the DPWH contract-splitting screen</p>
+          <div id="split-candidate-bars" class="split-candidate-bars" aria-hidden="true"></div>
+        </div>
+      </section>
+      <section class="detail"><p class="label">Explore the detail</p>
+        <h3>Contract splitting candidates marked MATCH</h3>
+        <p>Candidate clusters are grouped by project count. These are screening matches for review, not findings of wrongdoing.</p>
+        <div id="split-candidate-chart" class="split-chart" role="img" aria-label="Project count distribution among MATCH candidate clusters"><p class="status">Loading contract-splitting candidates…</p></div>
+        <a class="explore" href="/budget#split">Review contract splitting analysis →</a>
+      </section>
+    </div>
+  </article>
 </div></main>
 <script>
+(async function(){
+ const chart=document.getElementById('split-candidate-chart');
+ try {
+  const response=await fetch('/api/dpwh/contract-splitting');
+  if(!response.ok)throw new Error('Contract-splitting data request failed ('+response.status+')');
+  const payload=await response.json();
+  if(!payload.success)throw new Error(payload.error||'Candidate clusters are unavailable');
+  const matches=(payload.clusters||[]).filter(cluster=>cluster.is_candidate===true);
+  document.getElementById('split-candidate-count').textContent=matches.length.toLocaleString();
+  const counts=new Map();
+  matches.forEach(cluster=>{const n=Number(cluster.project_count)||0;counts.set(n,(counts.get(n)||0)+1)});
+  const rows=[...counts].sort((a,b)=>a[0]-b[0]),max=Math.max(...rows.map(row=>row[1]),1);
+  document.getElementById('split-candidate-bars').innerHTML=rows.map(([n,count])=>'<i style="height:'+Math.max(3,count/max*96)+'%" title="'+count+' MATCH clusters with '+n+' projects"></i>').join('');
+  const width=760,height=280,left=54,top=20,bottom=46,right=14,plotH=height-top-bottom,plotW=width-left-right,step=plotW/Math.max(rows.length,1),barW=Math.min(26,step*.68);
+  const bars=rows.map(([n,count],i)=>{const h=count/max*plotH,x=left+i*step+(step-barW)/2,y=top+plotH-h;return '<g><rect x="'+x+'" y="'+y+'" width="'+barW+'" height="'+h+'" rx="3" fill="#dc3545"><title>'+count+' MATCH clusters · '+n+' projects per cluster</title></rect><text x="'+(x+barW/2)+'" y="'+(top+plotH+18)+'" text-anchor="middle" fill="#616161" font-size="10">'+n+'</text></g>'}).join('');
+  chart.innerHTML=rows.length?'<svg viewBox="0 0 '+width+' '+height+'" role="img" aria-label="MATCH candidate clusters by projects per cluster"><line x1="'+left+'" y1="'+(top+plotH)+'" x2="'+(width-right)+'" y2="'+(top+plotH)+'" stroke="#94a3b8"/><text x="'+(width/2)+'" y="'+(height-4)+'" text-anchor="middle" fill="#616161" font-size="11">Projects in candidate cluster</text>'+bars+'</svg>':'<p class="status">No MATCH candidate clusters were returned.</p>';
+ }catch(error){console.error('Contract-splitting candidates failed',error);chart.innerHTML='<p class="status" role="alert">Candidate data could not be loaded: '+String(error.message||error).replace(/[<>]/g,'')+'</p>'}
+})();
 (async function(){
  const status=document.getElementById('chart-status');
  try {
