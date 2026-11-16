@@ -961,6 +961,27 @@ async def get_contract_splitting() -> JSONResponse:
     Groups projects by 'cluster_id' and cross-references with candidates.
     """
     import pandas as pd
+    import math
+    from datetime import date, datetime
+
+    def json_safe(value):
+        """Convert pandas/numpy values and non-finite floats to strict JSON values."""
+        if value is None or value is pd.NA or value is pd.NaT:
+            return None
+        if isinstance(value, (datetime, date)):
+            return value.isoformat()
+        if hasattr(value, "item"):
+            try:
+                value = value.item()
+            except (ValueError, TypeError):
+                pass
+        if isinstance(value, float):
+            return value if math.isfinite(value) else None
+        if isinstance(value, dict):
+            return {str(key): json_safe(item) for key, item in value.items()}
+        if isinstance(value, (list, tuple)):
+            return [json_safe(item) for item in value]
+        return value
     
     # Define paths
     base_dir = "/home/joebert/open-data-visualization/database/dpwh/contract splitting"
@@ -1006,7 +1027,7 @@ async def get_contract_splitting() -> JSONResponse:
         
         for cluster_id, group in grouped:
             # Aggregate stats
-            total_amount = group['abc'].sum() if 'abc' in group.columns else 0
+            total_amount = pd.to_numeric(group['abc'], errors='coerce').sum() if 'abc' in group.columns else 0
             # Get common attributes (mode) or just take the first one
             primary_contractor = group['contractor'].iloc[0] if 'contractor' in group.columns else "Unknown"
             region = group['region'].iloc[0] if 'region' in group.columns else ""
@@ -1018,22 +1039,22 @@ async def get_contract_splitting() -> JSONResponse:
             
             # Convert group rows to list of dicts
             # Nan handling for json serialization
-            projects_list = group.where(pd.notnull(group), None).to_dict(orient='records')
+            projects_list = group.astype(object).where(pd.notnull(group), None).to_dict(orient='records')
             
             clusters_data.append({
                 "cluster_id": int(cluster_id),
                 "contractor": primary_contractor,
                 "project_count": len(group),
-                "total_amount": float(total_amount),
+                "total_amount": float(total_amount) if math.isfinite(float(total_amount)) else 0.0,
                 "region": region,
                 "is_candidate": is_candidate,
-                "projects": projects_list
+                "projects": json_safe(projects_list)
             })
             
         # Sort by total amount desc
         clusters_data.sort(key=lambda x: x['total_amount'], reverse=True)
         
-        return JSONResponse(content={"success": True, "clusters": clusters_data})
+        return JSONResponse(content=json_safe({"success": True, "clusters": clusters_data}))
         
     except Exception as e:
         import traceback
