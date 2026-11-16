@@ -35,12 +35,11 @@
         <a class="explore" href="#contractor-chart-title">Explore the detail ↓</a>
       </section>
       <section class="detail" aria-labelledby="contractor-chart-title"><p class="label">Explore individual contractors</p>
-        <div class="chart-card"><h2 id="contractor-chart-title">Contractor Project Distribution <span style="font-size:15px;font-weight:500;color:#616161">(Scatter Plot Analysis)</span></h2>
-          <p>Each point represents one contractor. Vertical position shows project count; circle size represents total contract cost. Colors flag unusually high project counts.</p>
-          <div class="chart-wrap"><canvas id="contractorScatterChart" aria-label="Scatter plot of contractor project counts and contract costs"></canvas></div>
-          <p class="chart-note">Outlier colors use standard deviations from the mean and are screening signals, not evidence of misconduct.</p>
-          <div id="chart-status" class="status" role="status">Loading contractor data…</div>
-        </div>
+        <h2 id="contractor-chart-title">Contractor Project Distribution <span style="font-size:15px;font-weight:500;color:#616161">(Scatter Plot Analysis)</span></h2>
+        <p>Each point represents one contractor. Vertical position shows project count; circle size represents total contract cost. Colors flag unusually high project counts.</p>
+        <div class="chart-wrap"><canvas id="contractorScatterChart" aria-label="Scatter plot of contractor project counts and contract costs"></canvas></div>
+        <p class="chart-note">Outlier colors use standard deviations from the mean and are screening signals, not evidence of misconduct.</p>
+        <div id="chart-status" class="status" role="status">Loading contractor data…</div>
       </section>
     </div>
   </article>
@@ -64,9 +63,8 @@
   const radius=points.map(p=>p.cost>0&&high>low?3+17*(p.cost-low)/(high-low):4);
   const color=points.map(p=>{const z=sd?Math.abs(p.y-mean)/sd:0;return z>3?'#e83e8c':z>2.5?'#6f42c1':z>2?'#dc3545':z>1.5?'#fd7e14':z>1?'#ffc107':'#28a745'});
   const svg=document.getElementById('contractor-infographic');
-  const topContractors=Math.ceil(points.length*0.1), projectShare=points.slice(0,topContractors).reduce((sum,p)=>sum+p.y,0)/points.reduce((sum,p)=>sum+p.y,0);
+  const topContractors=Math.ceil(points.length*0.1), allocationTotal=points.reduce((sum,p)=>sum+p.cost,0), topAllocation=points.slice(0,topContractors).reduce((sum,p)=>sum+p.cost,0), allocationShare=allocationTotal?topAllocation/allocationTotal:0;
   const bands=[{label:'Green',color:'#28a745',test:z=>z<=1},{label:'Yellow',color:'#ffc107',test:z=>z>1&&z<=1.5},{label:'Orange',color:'#fd7e14',test:z=>z>1.5&&z<=2},{label:'Red',color:'#dc3545',test:z=>z>2&&z<=2.5},{label:'Purple',color:'#6f42c1',test:z=>z>2.5&&z<=3},{label:'Pink',color:'#e83e8c',test:z=>z>3}];
-  const allocationTotal=points.reduce((sum,p)=>sum+p.cost,0);
   const bandAllocations=bands.map(b=>points.filter(p=>b.test(sd?Math.abs(p.y-mean)/sd:0)).reduce((sum,p)=>sum+p.cost,0));
   const rawShares=bandAllocations.map(n=>allocationTotal?n/allocationTotal*100:0),iconCounts=rawShares.map(Math.floor);
   const assigned=iconCounts.reduce((a,b)=>a+b,0);
@@ -75,7 +73,7 @@
   const floodIcon='<path d="M-9 -5 L-4 -9 L1 -5 L6 -9 L10 -5 L10 1 L-9 1 Z"/><path d="M-9 5 Q-6 2 -3 5 T3 5 T9 5 M-9 9 Q-6 6 -3 9 T3 9 T9 9" fill="none" stroke="currentColor" stroke-width="2"/>';
   svg.innerHTML=ordered.map((fill,i)=>{const x=28+(i%10)*70,y=30+Math.floor(i/10)*25;return '<g fill="'+fill+'" stroke="#fff" stroke-width=".7" transform="translate('+x+' '+y+')">'+floodIcon+'<title>'+rawShares[bands.findIndex(b=>b.color===fill)].toFixed(1)+'% allocation band: '+bands.find(b=>b.color===fill).label+'</title></g>'}).join('');
   document.getElementById('infographic-legend').innerHTML=bands.map((b,i)=>'<span style="display:inline-flex;align-items:center;gap:5px;margin:0 12px 5px 0"><i style="width:10px;height:10px;border-radius:50%;background:'+b.color+'"></i>'+b.label+': '+rawShares[i].toFixed(1)+'% allocation</span>').join('');
-  document.getElementById('takeaway-stat').textContent=(projectShare*100).toFixed(0)+'% of projects';
+  document.getElementById('takeaway-stat').textContent=(allocationShare*100).toFixed(0)+'% of allocation';
   new Chart(document.getElementById('contractorScatterChart'),{type:'scatter',data:{datasets:[{label:'Contractors',data:points,parsing:{xAxisKey:'x',yAxisKey:'y'},backgroundColor:color,borderColor:color,borderWidth:1,pointRadius:radius,pointHoverRadius:radius.map(r=>Math.min(r*1.5,25))}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},title:{display:true,text:points.length.toLocaleString()+' contractors · Mean '+mean.toFixed(1)+' projects · SD '+sd.toFixed(1),color:'#666'},tooltip:{callbacks:{title(items){return points[items[0].dataIndex].name||'Contractor #'+items[0].parsed.x},label(item){const p=points[item.dataIndex];return ['Projects: '+p.y,'Z-score: '+(sd?((p.y-mean)/sd).toFixed(1):'—'),'Total cost: ₱'+p.cost.toLocaleString('en-PH',{maximumFractionDigits:0})]}}}},scales:{x:{type:'linear',title:{display:true,text:'Contractor rank'},ticks:{callback:v=>Math.round(v)}},y:{beginAtZero:true,title:{display:true,text:'Number of projects'},ticks:{callback:v=>Math.round(v)}}}}});
   status.remove();
  }catch(error){console.error('Flood Control contractor chart failed',error);status.textContent='Chart data could not be loaded: '+error.message}
