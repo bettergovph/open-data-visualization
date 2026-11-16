@@ -67,7 +67,8 @@
 (async function(){
  const chart=document.getElementById('split-candidate-chart');
  try {
-  const response=await fetch('/api/dpwh/contract-splitting');
+  let response=await fetch('/static/data/contract_splitting_summary.json');
+  if(!response.ok)response=await fetch('/api/dpwh/contract-splitting');
   if(!response.ok)throw new Error('Contract-splitting data request failed ('+response.status+')');
   const payload=await response.json();
   if(!payload.success)throw new Error(payload.error||'Candidate clusters are unavailable');
@@ -78,11 +79,11 @@
   const sizes=[...new Set(matches.map(cluster=>Number(cluster.project_count)))].sort((a,b)=>a-b);
   const colorPalette=['#6f42c1','#fd7e14','#dc3545','#e0a800','#28a745','#007bff','#17a2b8','#e83e8c','#795548','#607d8b'];
   const sizeColors=new Map(sizes.map((n,i)=>[n,colorPalette[i%colorPalette.length]]));
-  const columns=7,cellW=100,cellH=46,iconStartY=22,iconHeight=Math.max(95,iconStartY+Math.ceil(matches.length/columns)*cellH+8);
+  const columns=7,cellW=96,cellH=64,iconStartY=30,iconHeight=Math.max(95,iconStartY+Math.ceil(matches.length/columns)*cellH+8);
   iconSvg.setAttribute('viewBox','0 0 720 '+iconHeight);
   const clusterIcons=matches.slice().sort((a,b)=>Number(a.project_count)-Number(b.project_count)).map((cluster,i)=>{
-   const n=Number(cluster.project_count),x=24+(i%columns)*cellW,y=iconStartY+Math.floor(i/columns)*cellH;
-   const icons=Array.from({length:n},(_,j)=>'<g transform="translate('+(-j*2)+' '+(j*1.8)+') scale(1.25)" fill="'+sizeColors.get(n)+'" stroke="white" stroke-width=".7">'+projectIcon+'</g>').join('');
+   const n=Number(cluster.project_count),x=48+(i%columns)*cellW,y=iconStartY+Math.floor(i/columns)*cellH;
+   const icons=Array.from({length:n},(_,j)=>'<g transform="translate('+(-j*2.2)+' '+(j*2.1)+') scale(1.5)" fill="'+sizeColors.get(n)+'" stroke="white" stroke-width=".7">'+projectIcon+'</g>').join('');
    const contractor=String(cluster.contractor||'Unknown contractor').replace(/[&<>"']/g,'');
    return '<g class="cluster-stack" transform="translate('+x+' '+y+')" aria-label="'+n+' projects in cluster"><title>'+contractor+' · '+n+' projects in cluster</title>'+icons+'</g>';
   }).join('');

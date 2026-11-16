@@ -1053,6 +1053,32 @@ async def get_contract_splitting() -> JSONResponse:
             
         # Sort by total amount desc
         clusters_data.sort(key=lambda x: x['total_amount'], reverse=True)
+
+        # Keep a lightweight static payload for the Flood Control infographic.
+        # The full API response includes every project record, while the page
+        # only needs the candidate contractor and cluster-size fields.
+        summary_cache = {
+            "success": True,
+            "clusters": [
+                {
+                    "cluster_id": cluster["cluster_id"],
+                    "contractor": cluster["contractor"],
+                    "project_count": cluster["project_count"],
+                    "is_candidate": True,
+                }
+                for cluster in clusters_data
+                if cluster["is_candidate"]
+            ],
+        }
+        try:
+            cache_path = DATA_ROOT / "contract_splitting_summary.json"
+            cache_path.parent.mkdir(parents=True, exist_ok=True)
+            temp_cache_path = cache_path.with_suffix(".json.tmp")
+            with temp_cache_path.open("w", encoding="utf-8") as cache_file:
+                json.dump(json_safe(summary_cache), cache_file, ensure_ascii=False, separators=(",", ":"))
+            os.replace(temp_cache_path, cache_path)
+        except OSError as cache_error:
+            print(f"Warning: Could not update contract-splitting summary cache: {cache_error}")
         
         return JSONResponse(content=json_safe({"success": True, "clusters": clusters_data}))
         
