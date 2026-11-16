@@ -4,7 +4,7 @@
     const researchBase = 'https://research.bettergov.ph/static/nep-preview/';
 
     const chartPlans = [
-        { title: 'Among returning recipients, which FY2027 titles repeat?', note: 'Focuses on the 3,225 FY2027 recipient barangays (75.1%) with earlier MPB records. Each bar counts a distinct FY2027 title/barangay match: an earlier title match or a new title in a returning barangay.', href: `${researchBase}mpb.html#fy2027-mpb-history`, link: 'Review FY2027 recipient history', chart: (d) => returningTitleHistory(d.returningRecipientTitleHistory2027) },
+        { title: 'Which regions have the most returning MPB recipients?', note: 'FY2027 recipient barangays are grouped by region and split by whether earlier MPB records were found.', href: `${researchBase}mpb.html#fy2027-mpb-history`, link: 'Review FY2027 recipient history', chart: (d) => regionalReturningRecipients(d.recipientBarangaysByRegion2027) },
         { title: 'How many FY2027 rows have 5 of 5 document types matched?', note: 'Distribution by matched document types. Five of five means a file match for all named types, including POW; it does not verify that the POW contains bill rows.', href: `${researchBase}mpb.html#fy2027-mpb-documents`, link: 'Review document coverage', chart: (d) => documentDistribution(d.documents2027) },
         { title: 'Three views of MPB records across barangays', note: 'Combines the unified page’s top upgrade, Tech Tree score, and total allocation rankings. The chart shows the top 10 barangays in each ranking; open the full tables for filters and project rows.', href: 'https://research.bettergov.ph/static/nep-preview/mpb-barangay.html', link: 'Open the unified barangay tables', chart: (d) => unifiedBarangayChart(d.unifiedBarangayRankings) },
         { title: 'Historical records across all official barangays', note: 'Each bar counts barangays with exactly that many distinct MPB title matches from FY2015–FY2026. No mapped match does not establish that a barangay has no building or received no funding.', href: `${researchBase}mpb-regional-province.html`, link: 'Explore historical distribution', chart: (d) => historicalMultiplicityChart(d.historicalMultiplicity) },
@@ -29,15 +29,16 @@
         return `<div class="callout-stat"><strong>${pct[0].toFixed(1)}%</strong><span>of FY2027 project rows meet the document threshold</span></div><div class="bar-track" role="img" aria-label="${fmt(rows[0][1])} complete and ${fmt(rows[1][1])} incomplete of ${fmt(total)} project rows"><i class="bar-fill" style="width:${pct[0]}%"></i><i class="bar-fill gold" style="width:${pct[1]}%"></i></div><div class="chart-legend"><span><i class="legend-dot"></i>${esc(rows[0][0])}: ${fmt(rows[0][1])} (${pct[0].toFixed(1)}%)</span><span><i class="legend-dot gold"></i>${esc(rows[1][0])}: ${fmt(rows[1][1])} (${pct[1].toFixed(1)}%)</span><span>Total: ${fmt(total)}</span></div>`;
     }
 
-    function waffle(data, groups) {
-        const total=Number(data.total)||1, first=Math.round(100*Number(data.returning)/total), cells=Array.from({length:100},(_,i)=>`<rect x="${(i%10)*19}" y="${Math.floor(i/10)*19}" width="15" height="15" rx="3" fill="${i<first?groups[0][1]:groups[1][1]}"/>`).join('');
-        return `<div class="callout-stat"><strong>${(100*data.returning/total).toFixed(1)}%</strong><span>of recipient barangays had an earlier MPB record</span></div>${svgWrap(cells,'100 squares showing the share of returning and first-time recipient barangays','0 0 205 190')}<div class="chart-legend"><span><i class="legend-dot"></i>Returning ${fmt(data.returning)}</span><span><i class="legend-dot gold"></i>First-time ${fmt(data.firstTime)}</span><span>Total ${fmt(data.total)}</span></div>`;
-    }
-    function returningTitleHistory(data) {
-        if (!data) return '<p>Returning recipient title history is unavailable.</p>';
-        const total=Number(data.totalTitleMatches)||1, repeat=Number(data.repeatTitleMatches)||0, fresh=Number(data.newTitleMatches)||0;
-        const repeatSquares=Math.round(40*repeat/total), squares=Array.from({length:40},(_,i)=>`<rect x="${(i%10)*30}" y="${Math.floor(i/10)*30}" width="23" height="23" rx="4" fill="${i<repeatSquares?'#0038A8':'#FCD116'}"/>`).join('');
-        return `<div class="chart-legend"><span>${fmt(data.returningBarangays)} returning FY2027 recipient barangays · ${fmt(data.totalTitleMatches)} distinct title/barangay matches</span></div><div class="callout-stat"><strong>${(100*repeat/total).toFixed(1)}%</strong><span>repeat an earlier title</span></div>${svgWrap(squares,'40 squares: 9 blue squares for repeat title matches and 31 yellow squares for new titles in returning barangays','0 0 300 120')}<div class="chart-legend"><span><i class="legend-dot" style="background:#FCD116"></i>New title in a returning barangay · ${fmt(fresh)} (${(100*fresh/total).toFixed(1)}%)</span><span><i class="legend-dot" style="background:#0038A8"></i>Repeat an earlier title · ${fmt(repeat)} (${(100*repeat/total).toFixed(1)}%)</span><span>Total: ${fmt(data.totalTitleMatches)}</span></div><p class="chart-note">A repeated title match identifies the same normalized title in the same barangay across years; it does not establish duplicate scope, construction, or spending.</p>`;
+    function regionalReturningRecipients(rows) {
+        if (!Array.isArray(rows) || !rows.length) return '<p>Regional recipient data is unavailable.</p>';
+        const max=Math.max(...rows.map(row=>Number(row.returning||0)+Number(row.firstTime||0)),1);
+        const bars=rows.map(row=>{
+            const returning=Number(row.returning)||0,firstTime=Number(row.firstTime)||0,total=returning+firstTime;
+            const a=100*returning/max,b=100*firstTime/max;
+            return `<div class="region-recipient-row"><strong>${esc(row.region)}</strong><span class="region-recipient-track" role="img" aria-label="${esc(row.region)}: ${fmt(returning)} returning, ${fmt(firstTime)} first-time recipient barangays"><i style="width:${a}%"></i><i class="first-time" style="width:${b}%"></i></span><span class="region-recipient-values">${fmt(returning)} returning · ${fmt(firstTime)} new</span></div>`;
+        }).join('');
+        const returningTotal=rows.reduce((n,row)=>n+Number(row.returning||0),0),firstTotal=rows.reduce((n,row)=>n+Number(row.firstTime||0),0);
+        return `<div class="region-recipient-chart">${bars}</div><div class="chart-legend"><span><i class="legend-dot"></i>Earlier MPB record · ${fmt(returningTotal)} barangays</span><span><i class="legend-dot gold"></i>First mapped record in FY2027 · ${fmt(firstTotal)} barangays</span></div><p class="chart-note">Bars are ranked by returning recipient count. “Unspecified region” reflects source records without a region label.</p>`;
     }
     function documentDistribution(d) {
         const rows=d.countsByMatchedTypeCount||[], max=Math.max(...rows.map(x=>Number(x.projectRows||x.rows||x.count||0)),1), vals=rows.map(x=>Number(x.projectRows||x.rows||x.count||0));
@@ -225,8 +226,8 @@
         const timer = setTimeout(() => controller.abort(), 12000);
         try {
             const [sourceResponse, dataResponse, educationResponse, historyResponse, rankingsResponse] = await Promise.all([
-                fetch(`${researchBase}mpb-simple.html?v=mpb-token-pow-20261116`, { signal: controller.signal, headers: { Accept: 'text/html' } }),
-                fetch(`${researchBase}mpb-simple-data.json?v=mpb-token-pow-20261116`, { signal: controller.signal, headers: { Accept: 'application/json' } }),
+                fetch(`${researchBase}mpb-simple.html?v=mpb-region-recipients-20261116`, { signal: controller.signal, headers: { Accept: 'text/html' } }),
+                fetch(`${researchBase}mpb-simple-data.json?v=mpb-region-recipients-20261116`, { signal: controller.signal, headers: { Accept: 'application/json' } }),
                 fetch(`${researchBase}education-health-data.json`, { signal: controller.signal, headers: { Accept: 'application/json' } }),
                 fetch('/static/data/mpb-historical-multiplicity.json', { signal: controller.signal, headers: { Accept: 'application/json' } }),
                 fetch('/static/data/mpb-unified-top-chart.json', { signal: controller.signal, headers: { Accept: 'application/json' } })

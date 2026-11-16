@@ -51,6 +51,13 @@
         #mpb-home .bar-fill { height:100%; min-width:2px; background:var(--blue); }
         #mpb-home .bar-fill.gold { background:var(--gold); }
         #mpb-home .bar-value { text-align:right; color:#212121; font-variant-numeric:tabular-nums; }
+        #mpb-home .region-recipient-chart { display:grid; gap:8px; margin:12px 0; }
+        #mpb-home .region-recipient-row { display:grid; grid-template-columns:minmax(96px,132px) minmax(90px,1fr) minmax(145px,185px); align-items:center; gap:10px; font-size:11px; }
+        #mpb-home .region-recipient-row > strong { overflow:hidden; color:#212121; text-overflow:ellipsis; white-space:nowrap; }
+        #mpb-home .region-recipient-track { display:flex; height:13px; overflow:hidden; border-radius:99px; background:#EAF0FF; }
+        #mpb-home .region-recipient-track i { display:block; height:100%; background:#0038A8; }
+        #mpb-home .region-recipient-track i.first-time { background:#FCD116; }
+        #mpb-home .region-recipient-values { text-align:right; color:#212121; font-variant-numeric:tabular-nums; white-space:nowrap; }
         #mpb-home .coverage-chart-summary { display:grid; gap:2px; margin:4px 0 16px; padding:12px 14px; border-left:4px solid var(--blue); border-radius:7px; background:#EAF0FF; }
         #mpb-home .coverage-chart-summary strong { color:var(--blue-dark); font-size:22px; line-height:1.2; }
         #mpb-home .coverage-chart-summary span, #mpb-home .coverage-chart-footnote { color:var(--muted); font-size:12px; line-height:1.45; }
@@ -90,6 +97,7 @@
             #mpb-home .story-head { padding:17px 17px 12px; }
             #mpb-home .visual-cell { padding:18px 17px 20px; }
             #mpb-home .bar-row { grid-template-columns:minmax(88px,115px) 1fr 62px; gap:7px; font-size:11px; }
+            #mpb-home .region-recipient-row { grid-template-columns:minmax(78px,92px) minmax(55px,1fr) minmax(126px,140px); gap:6px; font-size:10px; }
             #mpb-home .home-footer { display:block; }
             #mpb-home .home-footer p { margin:8px 0; }
         }
@@ -126,4 +134,4 @@
         </footer>
     </main>
 </div>
-<script src="/static/js/mpb-home.js?v=story-08-document-colors-token-pow-20261116" defer></script>
+<script src="/static/js/mpb-home.js?v=story-09-region-mpb-recipients-20261116" defer></script>
