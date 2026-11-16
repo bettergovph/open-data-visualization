@@ -28,8 +28,9 @@
     <header><h2 id="contractor-story-title">Contractor Project Distribution</h2></header>
     <div class="story-pair">
       <section aria-labelledby="distribution-infographic-label"><p class="label" id="distribution-infographic-label">The pattern at a glance</p>
-        <svg id="contractor-infographic" class="infographic" viewBox="0 0 720 300" role="img" aria-labelledby="infographic-title infographic-desc"><title id="infographic-title">Contractor projects form a long tail</title><desc id="infographic-desc">The top ten contractors have many more projects than the typical contractor.</desc><text x="360" y="135" text-anchor="middle" fill="#616161" font-size="16">Loading contractor distribution…</text></svg>
-        <p class="chart-note">Projects are ranked by contractor. Bar height shows each contractor’s project count; the dashed line marks the average.</p>
+        <svg id="contractor-infographic" class="infographic" viewBox="0 0 720 300" role="img" aria-labelledby="infographic-title infographic-desc"><title id="infographic-title">A hundred flood icons show contractor outlier shares</title><desc id="infographic-desc">Each icon represents one percent of contractors. Colors classify project counts by standard deviation from the mean.</desc><text x="360" y="135" text-anchor="middle" fill="#616161" font-size="16">Loading contractor distribution…</text></svg>
+        <div id="infographic-legend" class="chart-note"></div>
+        <p class="chart-note">Each of the 100 flood icons represents 1% of contractors. Colors show project-count bands by distance from the mean; they flag unusual concentration for follow-up, not wrongdoing.</p>
       </section>
       <section class="detail" aria-labelledby="contractor-chart-title"><p class="label">Explore individual contractors</p>
         <div class="chart-card"><h2 id="contractor-chart-title">Contractor Project Distribution <span style="font-size:15px;font-weight:500;color:#616161">(Scatter Plot Analysis)</span></h2>
@@ -60,11 +61,15 @@
   const low=Math.min(...positiveCosts),high=Math.max(...positiveCosts);
   const radius=points.map(p=>p.cost>0&&high>low?3+17*(p.cost-low)/(high-low):4);
   const color=points.map(p=>{const z=sd?Math.abs(p.y-mean)/sd:0;return z>3?'#e83e8c':z>2.5?'#6f42c1':z>2?'#dc3545':z>1.5?'#fd7e14':z>1?'#ffc107':'#28a745'});
-  const svg=document.getElementById('contractor-infographic'), chartW=660, chartH=190, left=42, top=20;
-  const topPoints=points.slice(0,10), maxCount=Math.max(...topPoints.map(p=>p.y),1), base=top+chartH;
-  const bars=topPoints.map((p,i)=>{const x=left+i*61,h=p.y/maxCount*chartH;return '<g><rect x="'+x+'" y="'+(base-h)+'" width="38" height="'+h+'" rx="4" fill="'+color[i]+'"><title>'+(p.name||'Contractor '+(i+1))+': '+p.y+' projects</title></rect><text x="'+(x+19)+'" y="'+(base+19)+'" text-anchor="middle" fill="#616161" font-size="10">#'+(i+1)+'</text></g>'}).join('');
-  const meanY=base-Math.min(mean/maxCount,1)*chartH;
-  svg.innerHTML='<text x="'+left+'" y="16" fill="#616161" font-size="11">Projects</text><line x1="'+left+'" y1="'+meanY+'" x2="690" y2="'+meanY+'" stroke="#0038A8" stroke-dasharray="5 5"/><text x="688" y="'+(meanY-5)+'" text-anchor="end" fill="#0038A8" font-size="11">Average '+mean.toFixed(1)+'</text>'+bars+'<text x="365" y="260" text-anchor="middle" fill="#616161" font-size="12">Top 10 contractors, ranked by project count</text>';
+  const svg=document.getElementById('contractor-infographic');
+  const bands=[{label:'Within 1 SD',color:'#28a745',test:z=>z<=1},{label:'1–1.5 SD',color:'#ffc107',test:z=>z>1&&z<=1.5},{label:'1.5–2 SD',color:'#fd7e14',test:z=>z>1.5&&z<=2},{label:'2–2.5 SD',color:'#dc3545',test:z=>z>2&&z<=2.5},{label:'2.5–3 SD',color:'#6f42c1',test:z=>z>2.5&&z<=3},{label:'Above 3 SD',color:'#e83e8c',test:z=>z>3}];
+  const countsByBand=bands.map(b=>points.filter(p=>b.test(sd?Math.abs(p.y-mean)/sd:0)).length);
+  const icons=bands.flatMap((band,bi)=>Array.from({length:Math.round(countsByBand[bi]/points.length*100)},()=>band.color));
+  while(icons.length<100) icons.push(bands[0].color);
+  const ordered=icons.slice(0,100);
+  const path='M0 -12 C-2 -8 -9 -1 -9 5 A9 9 0 1 0 9 5 C9 -1 2 -8 0 -12 Z';
+  svg.innerHTML=ordered.map((fill,i)=>{const x=28+(i%10)*70,y=30+Math.floor(i/10)*25;return '<path d="'+path+'" transform="translate('+x+' '+y+') scale(0.72)" fill="'+fill+'" stroke="#fff" stroke-width="1.5"><title>Contractor share icon '+(i+1)+' of 100</title></path>'}).join('');
+  document.getElementById('infographic-legend').innerHTML=bands.map((b,i)=>'<span style="display:inline-flex;align-items:center;gap:5px;margin:0 12px 5px 0"><i style="width:10px;height:10px;border-radius:50%;background:'+b.color+'"></i>'+b.label+': '+(countsByBand[i]/points.length*100).toFixed(1)+'%</span>').join('');
   new Chart(document.getElementById('contractorScatterChart'),{type:'scatter',data:{datasets:[{label:'Contractors',data:points,parsing:{xAxisKey:'x',yAxisKey:'y'},backgroundColor:color,borderColor:color,borderWidth:1,pointRadius:radius,pointHoverRadius:radius.map(r=>Math.min(r*1.5,25))}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},title:{display:true,text:points.length.toLocaleString()+' contractors · Mean '+mean.toFixed(1)+' projects · SD '+sd.toFixed(1),color:'#666'},tooltip:{callbacks:{title(items){return points[items[0].dataIndex].name||'Contractor #'+items[0].parsed.x},label(item){const p=points[item.dataIndex];return ['Projects: '+p.y,'Z-score: '+(sd?((p.y-mean)/sd).toFixed(1):'—'),'Total cost: ₱'+p.cost.toLocaleString('en-PH',{maximumFractionDigits:0})]}}}},scales:{x:{type:'linear',title:{display:true,text:'Contractor rank'},ticks:{callback:v=>Math.round(v)}},y:{beginAtZero:true,title:{display:true,text:'Number of projects'},ticks:{callback:v=>Math.round(v)}}}}});
   status.remove();
  }catch(error){console.error('Flood Control contractor chart failed',error);status.textContent='Chart data could not be loaded: '+error.message}
