@@ -49,8 +49,9 @@
       <section><p class="label">The simple picture</p>
         <div class="infographic" role="img" aria-label="Project icons grouped into contract splitting candidate clusters">
           <strong id="split-candidate-count" class="takeaway">—</strong>
-          <p class="chart-note">Each stack represents one cluster. Rows group clusters by projects per cluster.</p>
-          <svg id="split-candidate-icons" class="split-cluster-icons" viewBox="0 0 720 190" role="img" aria-label="Candidate cluster stacks grouped by the number of projects in each cluster"><text x="360" y="95" text-anchor="middle" fill="#616161" font-size="14">Loading candidate projects…</text></svg>
+          <p class="chart-note">Each stack represents one cluster; its color shows the number of projects in that cluster.</p>
+          <svg id="split-candidate-icons" class="split-cluster-icons" viewBox="0 0 720 260" role="img" aria-label="One grid of candidate clusters, with icon stacks colored by projects per cluster"><text x="360" y="130" text-anchor="middle" fill="#616161" font-size="14">Loading candidate projects…</text></svg>
+          <div id="split-candidate-legend" class="split-legend" aria-label="Icon colors by projects per cluster"></div>
         </div>
       </section>
     </div>
@@ -70,33 +71,27 @@
   if(!response.ok)throw new Error('Contract-splitting data request failed ('+response.status+')');
   const payload=await response.json();
   if(!payload.success)throw new Error(payload.error||'Candidate clusters are unavailable');
-  const matches=(payload.clusters||[]).filter(cluster=>cluster.is_candidate===true);
+  const matches=(payload.clusters||[]).filter(cluster=>cluster.is_candidate===true&&Number(cluster.project_count)>=2);
   document.getElementById('split-candidate-count').textContent=matches.length.toLocaleString();
   const projectIcon='<path d="M-7 -9h10l4 4v13H-7z"/><path d="M3 -9v5h4M-4 0h8M-4 4h8" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>';
   const iconSvg=document.getElementById('split-candidate-icons');
-  const clustersBySize=new Map();
-  matches.forEach(cluster=>{const n=Math.max(1,Number(cluster.project_count)||1);if(!clustersBySize.has(n))clustersBySize.set(n,[]);clustersBySize.get(n).push(cluster)});
-  const sizes=[...clustersBySize.keys()].sort((a,b)=>a-b),columnsPerLine=18,groupGap=20;
-  let iconY=18;
-  const clusterIcons=sizes.map(n=>{
-   const clusters=clustersBySize.get(n),lines=Math.ceil(clusters.length/columnsPerLine),lineHeight=Math.max(38,26+n*1.5),sectionHeight=24+lines*lineHeight;
-   let row='<text x="4" y="'+(iconY+12)+'" fill="#212121" font-size="12" font-weight="700">'+n+' projects / cluster</text><text x="4" y="'+(iconY+27)+'" fill="#616161" font-size="10">'+clusters.length+' cluster'+(clusters.length===1?'':'s')+'</text>';
-   row+=clusters.map((cluster,i)=>{
-    const x=202+(i%columnsPerLine)*28,y=iconY+10+Math.floor(i/columnsPerLine)*lineHeight;
-    const icons=Array.from({length:n},(_,j)=>'<g transform="translate('+(-j*1.6)+' '+(j*1.5)+')" fill="#177e89" stroke="white" stroke-width=".7">'+projectIcon+'</g>').join('');
-    const contractor=String(cluster.contractor||'Unknown contractor').replace(/[&<>"']/g,'');
-    return '<g class="cluster-stack" transform="translate('+x+' '+y+')" aria-label="'+n+' projects in cluster"><title>'+contractor+' · '+n+' projects in cluster</title>'+icons+'</g>';
-   }).join('');
-   iconY+=sectionHeight+groupGap;
-   return row;
-  }).join('');
-  const iconHeight=Math.max(190,iconY);
+  const sizes=[...new Set(matches.map(cluster=>Number(cluster.project_count)))].sort((a,b)=>a-b);
+  const colorPalette=['#6f42c1','#fd7e14','#dc3545','#e0a800','#28a745','#007bff','#17a2b8','#e83e8c','#795548','#607d8b'];
+  const sizeColors=new Map(sizes.map((n,i)=>[n,colorPalette[i%colorPalette.length]]));
+  const columns=7,cellW=100,cellH=46,iconStartY=22,iconHeight=Math.max(95,iconStartY+Math.ceil(matches.length/columns)*cellH+8);
   iconSvg.setAttribute('viewBox','0 0 720 '+iconHeight);
-  iconSvg.innerHTML=clusterIcons||'<text x="360" y="95" text-anchor="middle" fill="#616161" font-size="14">No MATCH clusters returned.</text>';
+  const clusterIcons=matches.slice().sort((a,b)=>Number(a.project_count)-Number(b.project_count)).map((cluster,i)=>{
+   const n=Number(cluster.project_count),x=24+(i%columns)*cellW,y=iconStartY+Math.floor(i/columns)*cellH;
+   const icons=Array.from({length:n},(_,j)=>'<g transform="translate('+(-j*1.6)+' '+(j*1.5)+')" fill="'+sizeColors.get(n)+'" stroke="white" stroke-width=".7">'+projectIcon+'</g>').join('');
+   const contractor=String(cluster.contractor||'Unknown contractor').replace(/[&<>"']/g,'');
+   return '<g class="cluster-stack" transform="translate('+x+' '+y+')" aria-label="'+n+' projects in cluster"><title>'+contractor+' · '+n+' projects in cluster</title>'+icons+'</g>';
+  }).join('');
+  iconSvg.innerHTML=clusterIcons||'<text x="360" y="130" text-anchor="middle" fill="#616161" font-size="14">No MATCH clusters returned.</text>';
+  document.getElementById('split-candidate-legend').innerHTML=sizes.map(n=>'<span><i style="background:'+sizeColors.get(n)+'"></i>'+n+' projects per cluster · '+matches.filter(cluster=>Number(cluster.project_count)===n).length+' clusters</span>').join('');
   const contractorMap=new Map();
-  matches.forEach(cluster=>{const name=String(cluster.contractor||'Unknown contractor').trim()||'Unknown contractor';const item=contractorMap.get(name)||{name,clusters:0,sizes:{}};const count=Math.max(1,Number(cluster.project_count)||1);item.clusters++;const bin=count>=5?'5+':String(count);item.sizes[bin]=(item.sizes[bin]||0)+1;contractorMap.set(name,item)});
+  matches.forEach(cluster=>{const name=String(cluster.contractor||'Unknown contractor').trim()||'Unknown contractor';const item=contractorMap.get(name)||{name,clusters:0,sizes:{}};const count=Number(cluster.project_count);item.clusters++;item.sizes[count]=(item.sizes[count]||0)+1;contractorMap.set(name,item)});
   const rows=[...contractorMap.values()].sort((a,b)=>b.clusters-a.clusters||a.name.localeCompare(b.name));
-  const sizeBins=['1','2','3','4','5+'],colors=['#64748b','#6f42c1','#fd7e14','#dc3545','#e0a800'];
+  const sizeBins=sizes.map(String),colors=sizes.map(n=>sizeColors.get(n));
   const width=1200,left=270,countX=280,barX=380,barW=785,top=50,rowH=42,height=top+rows.length*rowH+12,maxClusters=Math.max(...rows.map(r=>r.clusters),1);
   const escapeXml=value=>String(value).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[ch]));
   const wrapName=name=>{const words=name.split(/\s+/),lines=[];let line='';words.forEach(word=>{if((line+' '+word).trim().length>38&&line){lines.push(line);line=word}else line=(line+' '+word).trim()});if(line)lines.push(line);return lines.slice(0,2)};
