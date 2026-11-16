@@ -456,6 +456,18 @@ async fn flood_control_home(req: HttpRequest) -> Result<HttpResponse, ActixError
     Ok(HttpResponse::Ok().content_type("text/html").body(rendered))
 }
 
+async fn fmr_home(req: HttpRequest) -> Result<HttpResponse, ActixError> {
+    let tera = Tera::new("templates/**/*").map_err(actix_web::error::ErrorInternalServerError)?;
+    let mut context = Context::new();
+    add_frontend_env_to_context(&mut context, &req);
+    context.insert("title", "Farm-to-Market Roads · BetterGovPH");
+    context.insert("company_name", "BetterGovPH");
+    context.insert("platform", "BetterGovPH");
+    let rendered = tera.render("fmr_home.html", &context)
+        .map_err(actix_web::error::ErrorInternalServerError)?;
+    Ok(HttpResponse::Ok().content_type("text/html").body(rendered))
+}
+
 // Catalog of public draft pages that are intentionally kept out of the main navigation.
 async fn drafts(req: HttpRequest) -> Result<HttpResponse, ActixError> {
     let tera = Tera::new("templates/**/*").map_err(actix_web::error::ErrorInternalServerError)?;
@@ -975,6 +987,7 @@ async fn main() -> std::io::Result<()> {
             .service(web::resource("/mpb").to(mpb))
             .service(web::resource("/roads-bridges").to(roads_bridges_home))
             .service(web::resource("/flood-control").to(flood_control_home))
+            .service(web::resource("/fmr").to(fmr_home))
             .service(web::resource("/connectivity").to(connectivity_home))
         .service(web::resource("/philgeps").to(contractors))
         .service(web::resource("/dynasty").to(dynasty))

@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>FMR · BetterGovPH</title>
+  <meta name="description" content="Compare FY2027 farm-to-market road proposal amounts with the Annex A-1 project amount distribution.">
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{--ink:#212121;--muted:#616161;--blue:#0038A8;--navy:#00246A;--gold:#FCD116;--line:#E0E0E0;--paper:#FAFAFA;--fmr:#087a61}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 Inter,system-ui,sans-serif}
+    .content{max-width:1224px;margin:auto;padding:30px 28px 64px}.story-list{display:grid;gap:22px}.story-card{overflow:hidden;border:1px solid var(--line);border-radius:14px;background:#fff;box-shadow:0 6px 24px #00246A0A}.story-card>header{display:flex;align-items:flex-start;gap:16px;padding:20px 24px 14px}.story-number{flex:0 0 38px;height:38px;display:grid;place-items:center;border-radius:50%;background:#EAF0FF;color:var(--navy);font-size:13px;font-weight:850}.story-card>header h2{margin:3px 0 0;font-size:clamp(18px,2.5vw,24px);line-height:1.25;letter-spacing:-.02em}.pair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);border-top:1px solid var(--line)}.pair>section{min-width:0;padding:22px 24px 24px}.pair>.detail{border-left:1px solid var(--line);background:#FAFAFA}.label{margin:0 0 12px;color:var(--blue);font-size:11px;text-transform:uppercase;letter-spacing:.11em;font-weight:850}.infographic{min-height:275px;display:grid;align-content:center;justify-items:center;text-align:center}.big-stat{color:var(--navy);font-size:clamp(34px,5vw,56px);font-weight:800;line-height:1.05;letter-spacing:-.04em}.stat-caption{margin:10px 0 18px;color:var(--muted);font-size:14px}.mini-bars{display:flex;width:min(100%,400px);height:100px;align-items:flex-end;justify-content:center;gap:8px;border-bottom:1px solid #94a3b8}.mini-bars i{display:block;width:9%;min-height:3px;border-radius:4px 4px 0 0;background:#087a61}.mini-bars i:nth-child(3n){background:#0038A8}.mini-bars i:nth-child(4n){background:#9bb6e5}.detail h3{margin:0 0 8px;color:var(--navy);font-size:18px;line-height:1.35}.detail p{margin:0 0 14px;color:var(--muted);font-size:13px}.chart-wrap{height:410px;overflow:auto;background:#fff;border:1px solid var(--line);border-radius:10px}.chart-wrap svg{display:block;min-width:760px}.legend{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:12px;color:var(--muted);font-size:12px}.legend span{display:flex;align-items:center;gap:6px}.legend i{width:11px;height:11px;border-radius:2px}.note{margin:14px 0 0;color:var(--muted);font-size:12px;line-height:1.5}.loading{padding:50px;text-align:center;color:var(--muted)}
+    @media(max-width:800px){.content{padding:24px 12px 44px}.pair{grid-template-columns:1fr}.pair>.detail{border-left:0;border-top:1px solid var(--line)}.pair>section{padding:18px 17px 20px}.infographic{min-height:230px}}
+  </style>
+</head>
+<body>
+{% set topic_nav_active = "fmr" %}
+{% set topic_title_id = "fmr-page-title" %}
+{% set topic_kicker = "BetterGovPH · Public infrastructure" %}
+{% set topic_title = "Farm-to-market roads" %}
+{% set topic_deck = "Compare FY2027 FMR proposal amounts with the Annex A-1 project amount distribution to see where price clusters overlap." %}
+{% set topic_badges = ["FY2027 House Bill · 3rd reading", "DA Farm-to-Market Roads"] %}
+{% set topic_snapshot_index = -1 %}
+{% include "visualizations_topic_header.html" %}
+<main class="content"><div class="story-list">
+  <article class="story-card">
+    <header><span class="story-number">01</span><h2>Do FMR proposals share the same price clusters?</h2></header>
+    <div class="pair">
+      <section><p class="label">The simple picture</p>
+        <div class="infographic" role="img" aria-label="Summary of repeated proposal amounts">
+          <div id="fmr-repeat-share" class="big-stat">—</div>
+          <p class="stat-caption">of FY2027 FMR proposals share an exact amount with another FMR proposal</p>
+          <div id="fmr-mini-bars" class="mini-bars" aria-hidden="true"></div>
+        </div>
+        <p id="fmr-summary-note" class="note">Loading amount records…</p>
+      </section>
+      <section class="detail"><p class="label">Explore the detail</p>
+        <h3>Annex A-1 Project Amount Distribution</h3>
+        <p>Bars show how many Annex A-1 records use each exact amount. The green overlay highlights FY2027 farm-to-market road proposals at those same amounts.</p>
+        <div id="fmr-chart" class="chart-wrap"><div class="loading">Loading amount distributions…</div></div>
+        <div class="legend"><span><i style="background:#9bb6e5"></i>Other Annex A-1 records</span><span><i style="background:#087a61"></i>FY2027 FMR proposals</span></div>
+        <p class="note">An exact shared amount is a price-cluster signal. It does not by itself establish comparable scope, unit cost, or overpricing.</p>
+      </section>
+    </div>
+  </article>
+</div></main>
+<script>
+(async function(){
+ const chart=document.getElementById('fmr-chart');
+ try{
+  const [annexResponse,fmrResponse]=await Promise.all([
+   fetch('/api/budget/amendments/annex-a1-amounts'),
+   fetch('/static/nep-preview/connectivity-fmr-road.json')
+  ]);
+  if(!annexResponse.ok)throw new Error('Annex A-1 data request failed ('+annexResponse.status+')');
+  if(!fmrResponse.ok)throw new Error('FY2027 FMR data request failed ('+fmrResponse.status+')');
+  const [annex,fmr]=await Promise.all([annexResponse.json(),fmrResponse.json()]);
+  if(!annex.success||!Array.isArray(annex.amounts))throw new Error(annex.error||'Annex A-1 amount data is unavailable');
+  const projects=Array.isArray(fmr.projects)?fmr.projects:[];
+  const fmrAmounts=projects.map(p=>Number(p.amountPesos)).filter(n=>Number.isFinite(n)&&n>0);
+  const allAmounts=annex.amounts.map(Number).filter(n=>Number.isFinite(n)&&n>0);
+  if(!allAmounts.length||!fmrAmounts.length)throw new Error('No comparable project amounts were found');
+  const freq=values=>values.reduce((m,v)=>m.set(v,(m.get(v)||0)+1),new Map());
+  const allFreq=freq(allAmounts),fmrFreq=freq(fmrAmounts);
+  const sorted=[...allFreq.keys()].sort((a,b)=>a-b), repeatedFmr=fmrAmounts.filter(v=>fmrFreq.get(v)>1).length;
+  document.getElementById('fmr-repeat-share').textContent=(100*repeatedFmr/fmrAmounts.length).toFixed(0)+'%';
+  document.getElementById('fmr-summary-note').textContent=fmrAmounts.length.toLocaleString()+' FY2027 FMR proposals · '+new Set(fmrAmounts).size.toLocaleString()+' distinct exact amounts · Annex A-1 total '+allAmounts.length.toLocaleString()+' records.';
+  const mini=document.getElementById('fmr-mini-bars'), topFmr=[...fmrFreq.entries()].sort((a,b)=>b[1]-a[1]).slice(0,10),maxF=Math.max(...topFmr.map(x=>x[1]),1);
+  mini.innerHTML=topFmr.map(([amount,count])=>'<i style="height:'+Math.max(4,count/maxF*95)+'%" title="₱'+amount.toLocaleString()+' · '+count+' FMR records"></i>').join('');
+  const width=Math.max(760,sorted.length*17),height=365,left=70,right=20,top=25,bottom=92,plotW=width-left-right,plotH=height-top-bottom;
+  const maxCount=Math.max(...sorted.map(v=>allFreq.get(v)),1),step=plotW/sorted.length,bw=Math.max(2,Math.min(13,step*.72));
+  const grid=[0,.25,.5,.75,1].map(r=>{const y=top+plotH*(1-r),value=Math.round(maxCount*r);return '<line x1="'+left+'" y1="'+y+'" x2="'+(width-right)+'" y2="'+y+'" stroke="#e5e7eb" stroke-dasharray="3 4"/><text x="'+(left-10)+'" y="'+(y+4)+'" text-anchor="end" fill="#616161" font-size="10">'+value+'</text>'}).join('');
+  const bars=sorted.map((amount,i)=>{const total=allFreq.get(amount),highlight=fmrFreq.get(amount)||0,x=left+i*step+(step-bw)/2,base=top+plotH,fullH=total/maxCount*plotH,highH=Math.min(fullH,highlight/maxCount*plotH);return '<g><rect x="'+x+'" y="'+(base-fullH)+'" width="'+bw+'" height="'+fullH+'" fill="#9bb6e5"><title>₱'+amount.toLocaleString()+': '+total+' Annex A-1 projects</title></rect>'+(highlight?'<rect x="'+x+'" y="'+(base-highH)+'" width="'+bw+'" height="'+highH+'" fill="#087a61"><title>₱'+amount.toLocaleString()+': '+highlight+' FY2027 FMR proposals</title></rect>':'')+(i%Math.ceil(sorted.length/24)===0?'<text transform="rotate(-45 '+x+' '+(base+17)+')" x="'+x+'" y="'+(base+17)+'" text-anchor="end" fill="#616161" font-size="9">'+(amount>=1000000?'₱'+(amount/1000000).toFixed(1)+'M':amount>=1000?'₱'+(amount/1000).toFixed(0)+'K':'₱'+amount)+'</text>':'')+'</g>'}).join('');
+  chart.innerHTML='<svg viewBox="0 0 '+width+' '+height+'" role="img" aria-label="Annex A-1 project amounts with FY2027 FMR proposals highlighted"><text x="20" y="'+(height/2)+'" transform="rotate(-90 20 '+(height/2)+')" text-anchor="middle" fill="#616161" font-size="12">Number of projects</text>'+grid+'<line x1="'+left+'" y1="'+(top+plotH)+'" x2="'+(width-right)+'" y2="'+(top+plotH)+'" stroke="#475569"/>'+bars+'<text x="'+(width/2)+'" y="'+(height-5)+'" text-anchor="middle" fill="#616161" font-size="12">Exact project amount (PHP) · scroll horizontally for all amounts</text></svg>';
+ }catch(e){console.error('FMR amount comparison failed',e);chart.innerHTML='<p class="loading" role="alert">The amount comparison could not be loaded: '+String(e.message||e).replace(/[<>]/g,'')+'</p>';document.getElementById('fmr-summary-note').textContent='The FMR and Annex A-1 amount records could not be compared.'}
+})();
+</script>
+</body>
+</html>
