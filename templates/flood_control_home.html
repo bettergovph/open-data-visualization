@@ -18,7 +18,7 @@
 {% set topic_nav_active = "flood-control" %}
 {% set topic_title_id = "flood-control-page-title" %}
 {% set topic_kicker = "BetterGovPH · Public infrastructure" %}
-{% set topic_title = "Flood Control" %}
+{% set topic_title = "Remembering the flood control scandal" %}
 {% set topic_deck = "Explore how DPWH flood control projects are distributed across contractors, including project counts and total contract costs." %}
 {% set topic_badges = [] %}
 {% set topic_snapshot_index = -1 %}
@@ -31,7 +31,7 @@
         <svg id="contractor-infographic" class="infographic" viewBox="0 0 720 300" role="img" aria-labelledby="infographic-title infographic-desc"><title id="infographic-title">The top ten percent of contractors receive about half of projects</title><desc id="infographic-desc">One hundred contractor figures are shown. The ten highlighted figures represent the top ten percent, with colors matching those contractors in the scatter plot.</desc><text x="360" y="135" text-anchor="middle" fill="#616161" font-size="16">Loading contractor distribution…</text></svg>
         <p id="takeaway-stat" class="takeaway">Loading distribution…</p>
         <div id="infographic-legend" class="chart-note" aria-label="Contractor share by scatter plot color"></div>
-        <p class="chart-note">Each icon represents 1% of contractors. Icon colors use the same project-count bands as the scatter plot.</p>
+        <p class="chart-note">Each icon represents 1% of total project allocation. Colors match the contractor bands in the scatter plot.</p>
         <a class="explore" href="#contractor-chart-title">Explore the detail ↓</a>
       </section>
       <section class="detail" aria-labelledby="contractor-chart-title"><p class="label">Explore individual contractors</p>
@@ -66,14 +66,15 @@
   const svg=document.getElementById('contractor-infographic');
   const topContractors=Math.ceil(points.length*0.1), projectShare=points.slice(0,topContractors).reduce((sum,p)=>sum+p.y,0)/points.reduce((sum,p)=>sum+p.y,0);
   const bands=[{label:'Green',color:'#28a745',test:z=>z<=1},{label:'Yellow',color:'#ffc107',test:z=>z>1&&z<=1.5},{label:'Orange',color:'#fd7e14',test:z=>z>1.5&&z<=2},{label:'Red',color:'#dc3545',test:z=>z>2&&z<=2.5},{label:'Purple',color:'#6f42c1',test:z=>z>2.5&&z<=3},{label:'Pink',color:'#e83e8c',test:z=>z>3}];
-  const bandCounts=bands.map(b=>points.filter(p=>b.test(sd?Math.abs(p.y-mean)/sd:0)).length);
-  const rawShares=bandCounts.map(n=>n/points.length*100),iconCounts=rawShares.map(Math.floor);
+  const allocationTotal=points.reduce((sum,p)=>sum+p.cost,0);
+  const bandAllocations=bands.map(b=>points.filter(p=>b.test(sd?Math.abs(p.y-mean)/sd:0)).reduce((sum,p)=>sum+p.cost,0));
+  const rawShares=bandAllocations.map(n=>allocationTotal?n/allocationTotal*100:0),iconCounts=rawShares.map(Math.floor);
   const assigned=iconCounts.reduce((a,b)=>a+b,0);
   rawShares.map((share,i)=>({i,fraction:share-Math.floor(share)})).sort((a,b)=>b.fraction-a.fraction).slice(0,100-assigned).forEach(x=>iconCounts[x.i]++);
   const ordered=bands.flatMap((band,i)=>Array(iconCounts[i]).fill(band.color));
-  const person='<circle cx="0" cy="-5" r="3.2"/><path d="M-6 7 C-5 1 -3 -1 0 -1 C3 -1 5 1 6 7 Z"/>';
-  svg.innerHTML=ordered.map((fill,i)=>{const x=28+(i%10)*70,y=30+Math.floor(i/10)*25;return '<g fill="'+fill+'" stroke="#fff" stroke-width=".7" transform="translate('+x+' '+y+')">'+person+'<title>Contractor '+(i+1)+(i<10?' (top ten percent; color matches scatter plot)':'')+'</title></g>'}).join('');
-  document.getElementById('infographic-legend').innerHTML=bands.map((b,i)=>'<span style="display:inline-flex;align-items:center;gap:5px;margin:0 12px 5px 0"><i style="width:10px;height:10px;border-radius:50%;background:'+b.color+'"></i>'+b.label+': '+rawShares[i].toFixed(1)+'%</span>').join('');
+  const floodIcon='<path d="M-9 -5 L-4 -9 L1 -5 L6 -9 L10 -5 L10 1 L-9 1 Z"/><path d="M-9 5 Q-6 2 -3 5 T3 5 T9 5 M-9 9 Q-6 6 -3 9 T3 9 T9 9" fill="none" stroke="currentColor" stroke-width="2"/>';
+  svg.innerHTML=ordered.map((fill,i)=>{const x=28+(i%10)*70,y=30+Math.floor(i/10)*25;return '<g fill="'+fill+'" stroke="#fff" stroke-width=".7" transform="translate('+x+' '+y+')">'+floodIcon+'<title>'+rawShares[bands.findIndex(b=>b.color===fill)].toFixed(1)+'% allocation band: '+bands.find(b=>b.color===fill).label+'</title></g>'}).join('');
+  document.getElementById('infographic-legend').innerHTML=bands.map((b,i)=>'<span style="display:inline-flex;align-items:center;gap:5px;margin:0 12px 5px 0"><i style="width:10px;height:10px;border-radius:50%;background:'+b.color+'"></i>'+b.label+': '+rawShares[i].toFixed(1)+'% allocation</span>').join('');
   document.getElementById('takeaway-stat').textContent=(projectShare*100).toFixed(0)+'% of projects';
   new Chart(document.getElementById('contractorScatterChart'),{type:'scatter',data:{datasets:[{label:'Contractors',data:points,parsing:{xAxisKey:'x',yAxisKey:'y'},backgroundColor:color,borderColor:color,borderWidth:1,pointRadius:radius,pointHoverRadius:radius.map(r=>Math.min(r*1.5,25))}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},title:{display:true,text:points.length.toLocaleString()+' contractors · Mean '+mean.toFixed(1)+' projects · SD '+sd.toFixed(1),color:'#666'},tooltip:{callbacks:{title(items){return points[items[0].dataIndex].name||'Contractor #'+items[0].parsed.x},label(item){const p=points[item.dataIndex];return ['Projects: '+p.y,'Z-score: '+(sd?((p.y-mean)/sd).toFixed(1):'—'),'Total cost: ₱'+p.cost.toLocaleString('en-PH',{maximumFractionDigits:0})]}}}},scales:{x:{type:'linear',title:{display:true,text:'Contractor rank'},ticks:{callback:v=>Math.round(v)}},y:{beginAtZero:true,title:{display:true,text:'Number of projects'},ticks:{callback:v=>Math.round(v)}}}}});
   status.remove();
