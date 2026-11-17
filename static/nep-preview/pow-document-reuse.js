@@ -33,7 +33,12 @@
       const list=projects.map(project=>{
         const linked=(project.linkedRows||[]).map(row=>`<div class="reuse-linked-row"><strong>${esc(row.hgabId)}</strong> · ${esc(row.title)}${row.region?` <span class="muted">· ${esc(row.region)}</span>`:''}</div>`).join('');
         const title=project.title?`<div>${esc(project.title)}${project.region?` <span class="muted">· ${esc(project.region)}</span>`:''}</div>`:'';
-        const files=(project.files||[]).map(file=>esc(file.filename)).join('<br>');
+        const files=(project.files||[]).map(file=>{
+          const link=file.sourceUrl?`<a href="${esc(file.sourceUrl)}" target="_blank" rel="noopener noreferrer">${esc(file.linkLabel||'Open PDF')} ↗</a>`:'<span class="muted">No public file link found</span>';
+          const alternates=(file.additionalSourceUrls||[]).map(url=>`<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">another exact copy ↗</a>`).join(' · ');
+          const shared=file.linkProjectCode?` <span class="muted">(identical file listed under ${esc(file.linkProjectCode)})</span>`:'';
+          return `<div class="reuse-file">${esc(file.filename)} · ${link}${shared}${alternates?` · ${alternates}`:''}</div>`;
+        }).join('');
         return `<li><strong>${esc(project.projectCode||'Project code unavailable')}</strong> <span class="pill">${esc(project.source||'')}</span>${title}${linked}${files?`<small class="reuse-filenames">${files}</small>`:''}</li>`;
       }).join('');
       return `<tr><td>${(group.documentTypes||[]).map(esc).join('<br>')}</td><td><details><summary>${fmt(codes)} source project folders · show assignments</summary><ul class="reuse-project-list">${list}</ul></details></td><td>${bytes(group.sizeBytes)}</td><td><code title="SHA-256 ${esc(group.sha256)}">${esc(group.sha256)}</code></td></tr>`;
