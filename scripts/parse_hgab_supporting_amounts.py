@@ -7,6 +7,7 @@ The script updates expectation-vs-reality JSON and its project-context shards.
 """
 import argparse
 import concurrent.futures
+import collections
 import hashlib
 import json
 import os
@@ -139,6 +140,87 @@ def extract_coi(pdf_path, title):
         return result, 'value_extracted'
     return None, 'ambiguous_project_amount' if unique else 'exact_project_amount_not_found'
 
+def extract_coi_project_list(pdf_path, title_rows):
+    """Extract separately titled project amounts from a COI that lists many projects."""
+    import pymupdf
+    wanted = collections.defaultdict(list)
+    for row in title_rows:
+        key = normalize(row.get('title'))
+        if key:
+            wanted[key].append(row)
+    doc = pymupdf.open(pdf_path)
+    pages = list(enumerate(doc, 1)); hits = collections.defaultdict(list); methods = set()
+    all_text = []
+
+    def scan(page_no, text, method):
+        methods.add(method); all_text.append(text)
+        normalized_chars, source_positions = [], []
+        previous_space = True
+        for source_index, original_char in enumerate(text):
+            chars = unicodedata.normalize('NFKD', original_char).encode('ascii', 'ignore').decode().lower()
+            for char in chars:
+                if char.isalnum():
+                    normalized_chars.append(char); source_positions.append(source_index); previous_space = False
+                elif not previous_space:
+                    normalized_chars.append(' '); source_positions.append(source_index); previous_space = True
+        normalized = ''.join(normalized_chars).strip()
+        for title, rows in wanted.items():
+            start = 0
+            while True:
+                start = normalized.find(title, start)
+                if start < 0:
+                    break
+                end = start + len(title)
+                bounded = (start == 0 or normalized[start - 1] == ' ') and (end == len(normalized) or normalized[end] == ' ')
+                if bounded and source_positions:
+                    source_end = source_positions[min(end - 1, len(source_positions) - 1)] + 1
+                    amount_match = AMOUNT.search(text[source_end:source_end + 250])
+                    if amount_match:
+                        raw = amount_match.group(0)
+                        hits[title].append({'amountPesos': money(raw, thousands=bool(re.search(r"(?:\bp\s*['‘’]?\s*000\b|\bphp\s*['‘’]?\s*000\b)", text, re.I))),
+                                            'printedValue': raw, 'amountUnit': "P'000 (converted to PHP)" if re.search(r"(?:\bp\s*['‘’]?\s*000\b|\bphp\s*['‘’]?\s*000\b)", text, re.I) else 'PHP as printed',
+                                            'amountLabel': 'Project amount in COI project list', 'sourcePage': page_no,
+                                            'extractionMethod': 'Tesseract OCR' if method == 'Tesseract OCR' else 'native PDF text extraction'})
+                start = end
+
+    native_texts = []
+    for page_no, page in pages:
+        text, method = page_text(page)
+        native_texts.append(text)
+        if text.strip():
+            scan(page_no, text, method)
+    # OCR pages without native text even if another page already produced hits.
+    for page_no, page in pages:
+        if native_texts[page_no - 1].strip():
+            continue
+        text, method = page_text(page, allow_ocr=True)
+        if method == 'Tesseract OCR':
+            scan(page_no, text, method)
+
+    document_text = '\n'.join(all_text or native_texts)
+    thousands = bool(re.search(r"(?:\bp\s*['‘’]?\s*000\b|\bphp\s*['‘’]?\s*000\b)", document_text, re.I))
+    results = {}
+    for title, rows in wanted.items():
+        # Repeated identical titles cannot be assigned safely by title alone.
+        if len(rows) != 1 or title not in hits:
+            continue
+        unique = {(x['amountPesos'], x['sourcePage'], x['printedValue']): x for x in hits[title] if x['amountPesos'] is not None}
+        row = rows[0]
+        if len(unique) == 1:
+            result = next(iter(unique.values()))
+            result['status'] = 'value_extracted'
+            result['matchBasis'] = 'Exact normalized project title followed by the listed amount; multi-project COI list'
+        elif unique:
+            result = {'status': 'ambiguous_project_amount', 'amountLabel': 'Project amount in COI project list',
+                      'extractionMethod': 'native PDF text extraction · multiple amount candidates'}
+        else:
+            result = {'status': 'exact_project_amount_not_found', 'amountLabel': 'Project amount in COI project list',
+                      'extractionMethod': 'native PDF text + Tesseract OCR fallback attempted'}
+        result.update({'documentKind': 'Certificate of Implementability', 'sourceStage': 'HGAB supporting document',
+                       'sourceProvider': 'BetterGov budget assets', 'sourceUrl': None, 'sourceName': None})
+        results[row['hgabId']] = result
+    return results
+
 def parse_one(project_id, doc, title, cache_dir, max_bytes):
     code, kind, url, filename = doc[:4]
     provider = 'InfraWatch' if 'infrawatch' in url.lower() else 'BetterGov budget assets'
@@ -149,6 +231,11 @@ def parse_one(project_id, doc, title, cache_dir, max_bytes):
         path = fetch(url, cache_dir, max_bytes)
         extracted, status = extract_bp202(path) if kind == 'BP 202' else extract_coi(path, title)
         result['status'] = status
+        if not extracted:
+            if status in {'amount_not_found', 'exact_project_amount_not_found'}:
+                result['extractionMethod'] = 'native PDF text + Tesseract OCR fallback attempted'
+            elif status in {'ambiguous_amount', 'ambiguous_project_amount'}:
+                result['extractionMethod'] = 'native PDF text extraction · multiple amount candidates'
         if extracted and extracted['amountPesos'] < 100_000:
             result['candidateAmountPesos'] = extracted['amountPesos']
             result['candidatePrintedValue'] = extracted['printedValue']
@@ -205,10 +292,87 @@ def load_infrawatch_documents(project_ids):
                             result.setdefault(project_id, {})[kind] = (filename, url)
     return result
 
+def parse_coi_list_one(url, filename, title_rows, cache_dir, max_bytes):
+    path = fetch(url, cache_dir, max_bytes)
+    results = extract_coi_project_list(path, title_rows)
+    provider = 'InfraWatch' if 'infrawatch' in url.lower() else 'BetterGov budget assets'
+    for result in results.values():
+        result['sourceProvider'] = provider
+        result['sourceStage'] = 'NEP counterpart Proposal document' if provider == 'InfraWatch' else 'HGAB supporting document'
+        result['sourceUrl'] = url
+        result['sourceName'] = filename
+    return url, results
+
+def run_coi_project_list_scan(rows, contexts, manifest_path, manifest, args):
+    """Scan each COI once and map its exact project-list titles to all comparison rows."""
+    title_rows = [{'hgabId': row['hgabId'], 'title': row['title'], 'office': row.get('office'),
+                   'amountPesos': row.get('allocationPesos')} for row in rows]
+    documents = {}
+    project_ids = {row['hgabId'] for row in rows}
+    linked = load_infrawatch_documents(project_ids)
+    for row in rows:
+        context = contexts.get(row['hgabId'])
+        if not context:
+            continue
+        for doc in context[1].get('documents', []):
+            if len(doc) >= 4 and doc[1] == 'Certificate of Implementability' and doc[2]:
+                documents.setdefault(doc[2], doc[3] or doc[0])
+        for kind, (filename, url) in linked.get(row['hgabId'], {}).items():
+            if kind == 'Certificate of Implementability':
+                documents.setdefault(url, filename)
+    print(f'COI list scan: {len(documents):,} distinct PDFs · {len(title_rows):,} comparison project titles', flush=True)
+    outcomes = {}
+    max_bytes = args.max_pdf_mb * 1024 * 1024
+    with concurrent.futures.ThreadPoolExecutor(max_workers=args.workers) as pool:
+        futures = [pool.submit(parse_coi_list_one, url, filename, title_rows, args.cache, max_bytes)
+                   for url, filename in documents.items()]
+        for index, future in enumerate(concurrent.futures.as_completed(futures), 1):
+            url, projects = future.result()
+            for hgab_id, result in projects.items():
+                result['documentKind'] = 'Certificate of Implementability'
+                outcomes.setdefault(hgab_id, {})[(result['documentKind'], url)] = result
+            if index % 100 == 0:
+                print(f'COI PDFs scanned {index:,}/{len(futures):,}', flush=True)
+    counts = {}
+    for hgab_id, results in outcomes.items():
+        context = contexts.get(hgab_id)
+        if not context:
+            continue
+        existing = {(item.get('documentKind'), item.get('sourceUrl')): item
+                    for item in context[1].get('supportingDocumentAmounts', [])}
+        for key, item in results.items():
+            prior = existing.get(key)
+            if prior and prior.get('status') == 'value_extracted':
+                continue
+            existing[key] = item
+            counts[item['status']] = counts.get(item['status'], 0) + 1
+        context[1]['supportingDocumentAmounts'] = sorted(existing.values(), key=lambda item: (item.get('documentKind', ''), item.get('sourceUrl', '')))
+    updates = {hgab_id: context[1].get('supportingDocumentAmounts', []) for hgab_id, context in contexts.items() if hgab_id in outcomes}
+    for filename in ['expectation-vs-reality-data.json', 'expectation-vs-reality-flagged-data.json']:
+        path = STATIC / filename
+        data = json.loads(path.read_text())
+        for row in data.get('projects', []):
+            if row['hgabId'] in updates:
+                row['supportingDocumentAmounts'] = updates[row['hgabId']]
+        path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + '\n')
+    for shard, meta in manifest['shards'].items():
+        path = STATIC / 'project-context' / meta['path']
+        data = json.loads(path.read_text()); changed = False
+        for row in data.get('projects', []):
+            if row['hgabId'] in updates and row.get('supportingDocumentAmounts') != updates[row['hgabId']]:
+                row['supportingDocumentAmounts'] = updates[row['hgabId']]; changed = True
+        if changed:
+            raw = (json.dumps(data, ensure_ascii=False, separators=(',', ':')) + '\n').encode()
+            path.write_bytes(raw); meta['bytes'] = len(raw); meta['version'] = hashlib.sha256(raw).hexdigest()[:8]
+    manifest['sourceVersion'] = hashlib.sha256(json.dumps({key: value for key, value in updates.items()}, sort_keys=True).encode()).hexdigest()[:16]
+    manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, separators=(',', ':')) + '\n')
+    print('COI project-list statuses:', json.dumps(counts, sort_keys=True), flush=True)
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--limit', type=int, default=0, help='Limit project rows for a small initial pass')
     parser.add_argument('--hgab-id', help='Process one exact HGAB row for a pilot')
+    parser.add_argument('--scan-coi-project-lists', action='store_true', help='Scan each linked COI once against all selected project titles to recover amounts for every listed project')
     parser.add_argument('--workers', type=int, default=8)
     parser.add_argument('--max-pdf-mb', type=int, default=50)
     parser.add_argument('--cache', type=Path, default=Path(tempfile.gettempdir()) / 'hgab-supporting-pdf-cache')
@@ -222,6 +386,9 @@ def main():
         rows = [row for row in rows if row['hgabId'] == args.hgab_id]
     if args.limit:
         rows = rows[:args.limit]
+    if args.scan_coi_project_lists:
+        run_coi_project_list_scan(rows, contexts, manifest_path, manifest, args)
+        return
     tasks = []
     infrawatch_docs = load_infrawatch_documents({row['hgabId'] for row in rows})
     for row in rows:
