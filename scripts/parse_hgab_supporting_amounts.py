@@ -35,6 +35,24 @@ def money(text, thousands=False):
     except (TypeError, ValueError):
         return None
 
+def coi_money(text, document_text=''):
+    """Respect P'000 for abbreviated values, but don't rescale full-peso figures.
+
+    Some COIs print amounts such as 12,000,000 under a generic Php'000 header.
+    Scaling those again creates a thousand-fold overstatement. Values below
+    one million are treated as abbreviated thousands when that header exists;
+    larger printed figures are retained as pesos.
+    """
+    value = money(text)
+    if value is None:
+        return None, 'PHP as printed'
+    thousands_header = bool(re.search(r"(?:\bp\s*['‘’]?\s*000\b|\bphp\s*['‘’]?\s*000\b)", document_text, re.I))
+    if thousands_header and value < 1_000_000:
+        return value * 1000, "P'000 (converted to PHP)"
+    if thousands_header:
+        return value, "PHP as printed (P'000 header; no additional scaling)"
+    return value, 'PHP as printed'
+
 def page_text(page, allow_ocr=False):
     text = page.get_text('text')
     if not allow_ocr:
@@ -98,7 +116,6 @@ def extract_coi(pdf_path, title):
     hits = []
     doc = pymupdf.open(pdf_path)
     document_text = '\n'.join(page.get_text('text') for page in doc)
-    thousands = bool(re.search(r"(?:\bp\s*['‘’]?\s*000\b|\bphp\s*['‘’]?\s*000\b)", document_text, re.I))
     pages = list(enumerate(doc, 1)); methods = set()
     def scan_page(page_no, page, allow_ocr=False):
         text, method = page_text(page, allow_ocr=allow_ocr)
@@ -123,10 +140,10 @@ def extract_coi(pdf_path, title):
             if not match:
                 continue
             raw = match.group(0)
-            value = money(raw, thousands=thousands)
+            value, amount_unit = coi_money(raw, document_text + '\n' + text)
             if value is not None:
                 hits.append({'amountPesos': value, 'printedValue': raw,
-                             'amountUnit': "P'000 (converted to PHP)" if thousands else 'PHP as printed',
+                             'amountUnit': amount_unit,
                              'amountLabel': 'Project amount in COI project list', 'sourcePage': page_no})
     for page_no, page in pages:
         scan_page(page_no, page)
@@ -150,6 +167,7 @@ def extract_coi_project_list(pdf_path, title_rows):
             wanted[key].append(row)
     doc = pymupdf.open(pdf_path)
     pages = list(enumerate(doc, 1)); hits = collections.defaultdict(list); methods = set()
+    document_text = '\n'.join(page.get_text('text') for page in doc)
     all_text = []
 
     def scan(page_no, text, method):
@@ -177,8 +195,9 @@ def extract_coi_project_list(pdf_path, title_rows):
                     amount_match = AMOUNT.search(text[source_end:source_end + 250])
                     if amount_match:
                         raw = amount_match.group(0)
-                        hits[title].append({'amountPesos': money(raw, thousands=bool(re.search(r"(?:\bp\s*['‘’]?\s*000\b|\bphp\s*['‘’]?\s*000\b)", text, re.I))),
-                                            'printedValue': raw, 'amountUnit': "P'000 (converted to PHP)" if re.search(r"(?:\bp\s*['‘’]?\s*000\b|\bphp\s*['‘’]?\s*000\b)", text, re.I) else 'PHP as printed',
+                        value, amount_unit = coi_money(raw, document_text + '\n' + text)
+                        hits[title].append({'amountPesos': value,
+                                            'printedValue': raw, 'amountUnit': amount_unit,
                                             'amountLabel': 'Project amount in COI project list', 'sourcePage': page_no,
                                             'extractionMethod': 'Tesseract OCR' if method == 'Tesseract OCR' else 'native PDF text extraction'})
                 start = end
@@ -197,8 +216,6 @@ def extract_coi_project_list(pdf_path, title_rows):
         if method == 'Tesseract OCR':
             scan(page_no, text, method)
 
-    document_text = '\n'.join(all_text or native_texts)
-    thousands = bool(re.search(r"(?:\bp\s*['‘’]?\s*000\b|\bphp\s*['‘’]?\s*000\b)", document_text, re.I))
     results = {}
     for title, rows in wanted.items():
         # Repeated identical titles cannot be assigned safely by title alone.
