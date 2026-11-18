@@ -487,14 +487,14 @@ def main():
         for doc in context_row.get('documents', []):
             if len(doc) >= 4 and doc[1] in KINDS and doc[2]:
                 previous = prior.get((doc[1], doc[2]))
-                if previous and previous.get('status') in {'value_extracted', 'amount_requires_review'}:
+                if previous and previous.get('status') in {'value_extracted', 'amount_requires_review', 'project_mismatch'}:
                     continue
                 tasks.append((hgab_id, doc, row['title'], row.get('allocationPesos')))
         seen_urls = {doc[2] for doc in context_row.get('documents', []) if len(doc) >= 4}
         for kind, (filename, url) in infrawatch_docs.get(hgab_id, {}).items():
             if url not in seen_urls:
                 previous = prior.get((kind, url))
-                if previous and previous.get('status') in {'value_extracted', 'amount_requires_review'}:
+                if previous and previous.get('status') in {'value_extracted', 'amount_requires_review', 'project_mismatch'}:
                     continue
                 tasks.append((hgab_id, (filename, kind, url, filename), row['title'], row.get('allocationPesos')))
     print(f'Projects: {len(rows):,} · PDF documents queued: {len(tasks):,}', flush=True)

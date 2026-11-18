@@ -23934,8 +23934,6 @@
           "multipleDocumentMatchReview": false
         },
         {
-          "amountPesos": 10000000.0,
-          "printedValue": "10,000,000.00",
           "amountUnit": "PHP as printed",
           "amountScaleCheck": "PHP_as_printed",
           "amountLabel": "Project amount in COI project list",
@@ -23947,15 +23945,18 @@
             "10,000,000.00"
           ],
           "extractionMethod": "Tesseract OCR",
-          "status": "value_extracted",
-          "matchBasis": "Exact normalized project title with its adjacent amount; multi-project COI list",
+          "status": "amount_requires_review",
+          "matchBasis": "Project title matched in multi-project COI; adjacent amount belongs to the next row.",
           "documentKind": "Certificate of Implementability",
           "sourceStage": "HGAB supporting document",
           "sourceProvider": "BetterGov budget assets",
           "sourceUrl": "https://budget-assets.bettergov.ph/hgab/2027/dpwh/supporting-documents/Region%20IV-A/CSSP/2027DPWH-HGAB-14456/2027DPWH-HGAB-14456_Certificate%20of%20Implementability.pdf",
           "sourceName": "2027DPWH-HGAB-14456_Certificate of Implementability.pdf",
           "projectMatchCount": 1,
-          "multipleDocumentMatchReview": false
+          "multipleDocumentMatchReview": false,
+          "candidateAmountPesos": 10000000.0,
+          "candidatePrintedValue": "10,000,000.00",
+          "reviewReason": "Manually checked: the ₱10,000,000 amount belongs to the next COI project row, not Barangay Ulat."
         }
       ]
     },
@@ -36959,17 +36960,18 @@
           "sourceProvider": "BetterGov budget assets",
           "sourceUrl": "https://budget-assets.bettergov.ph/hgab/2027/dpwh/supporting-documents/Region%20III/CSSP/Zambales%201st%20DEO/2027DPWH-HGAB-14218/2027DPWH-HGAB-14218_BP202.pdf",
           "sourceName": "2027DPWH-HGAB-14218_BP202.pdf",
-          "status": "value_extracted",
-          "amountPesos": 25000000.0,
-          "printedValue": "25,000,000.00",
+          "status": "project_mismatch",
           "amountUnit": "PHP",
           "amountLabel": "Total Proposal Cost",
           "sourcePage": 1,
-          "matchBasis": "Labelled Total Proposal Cost field",
+          "matchBasis": "Project location manually checked; linked BP 202 is for San Narciso, not San Felipe.",
           "extractionMethod": "native PDF text extraction",
           "sourceStage": "HGAB supporting document",
           "projectMatchCount": 1,
-          "multipleDocumentMatchReview": false
+          "multipleDocumentMatchReview": false,
+          "candidateAmountPesos": 25000000.0,
+          "candidatePrintedValue": "25,000,000.00",
+          "reviewReason": "Manually verified as a San Narciso BP 202; this project is in San Felipe."
         },
         {
           "amountPesos": 14500000.0,
@@ -101720,21 +101722,21 @@
           "multipleDocumentMatchReview": false
         },
         {
-          "amountPesos": 7000.0,
-          "printedValue": "7,000",
-          "amountUnit": "PHP as printed",
-          "amountScaleCheck": "PHP_as_printed",
+          "amountPesos": 5000000.0,
+          "printedValue": "5,000",
+          "amountUnit": "PHP (₱’000; ×1,000)",
+          "amountScaleCheck": "manual_row_31_thousands_x1000",
           "amountLabel": "Project amount in COI project list",
           "sourcePage": 4,
           "sourcePages": [
             4
           ],
           "amountCandidatesPrinted": [
-            "7,000"
+            "5,000"
           ],
-          "extractionMethod": "Tesseract OCR",
+          "extractionMethod": "Manual visual verification",
           "status": "value_extracted",
-          "matchBasis": "Exact normalized project title with its adjacent amount; multi-project COI list",
+          "matchBasis": "Manually verified row 31: printed 5,000 in thousands, ×1,000 = ₱5,000,000",
           "documentKind": "Certificate of Implementability",
           "sourceStage": "HGAB supporting document",
           "sourceProvider": "BetterGov budget assets",
@@ -113858,8 +113860,8 @@
           "multipleDocumentMatchReview": false
         },
         {
-          "amountPesos": 20000000.0,
-          "printedValue": "20,000,000",
+          "amountPesos": 25000000.0,
+          "printedValue": "25,000,000",
           "amountUnit": "PHP as printed",
           "amountScaleCheck": "PHP_as_printed",
           "amountLabel": "Project amount in COI project list",
@@ -113868,11 +113870,11 @@
             2
           ],
           "amountCandidatesPrinted": [
-            "20,000,000"
+            "25,000,000"
           ],
-          "extractionMethod": "native PDF text extraction",
+          "extractionMethod": "Manual visual verification",
           "status": "value_extracted",
-          "matchBasis": "Exact normalized project title with its adjacent amount; multi-project COI list",
+          "matchBasis": "Manually verified first project row and adjacent ₱25,000,000 amount in multi-project COI",
           "documentKind": "Certificate of Implementability",
           "sourceStage": "HGAB supporting document",
           "sourceProvider": "BetterGov budget assets",
@@ -221979,13 +221981,13 @@
           "sourceUrl": "https://budget-assets.bettergov.ph/hgab/2027/dpwh/supporting-documents/CAR/CSSP/2027DPWH-HGAB-13622/2027DPWH-HGAB-13622_BP202.pdf",
           "sourceName": "2027DPWH-HGAB-13622_BP202.pdf",
           "status": "value_extracted",
-          "amountPesos": 40000000.0,
-          "printedValue": "40,000,000.00",
+          "amountPesos": 10000000.0,
+          "printedValue": "10,000,000.00",
           "amountUnit": "PHP",
           "amountLabel": "Total Proposal Cost",
           "sourcePage": 1,
-          "extractionMethod": "Tesseract OCR",
-          "matchBasis": "Labelled Total Proposal Cost field · one BP 202 per project",
+          "extractionMethod": "Manual visual verification",
+          "matchBasis": "Manually verified against BP 202 source PDF, page 1",
           "projectMatchCount": 1,
           "multipleDocumentMatchReview": false
         },
