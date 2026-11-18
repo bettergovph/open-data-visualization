@@ -33,13 +33,14 @@ const sharedScript=document.currentScript?.src||new URL('report-table-readabilit
 let evidenceLoader;
 function linkedEvidence(){
  if(window.ReportProjectEvidence)return Promise.resolve(window.ReportProjectEvidence);
- if(!evidenceLoader)evidenceLoader=new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=new URL('project-evidence-details.js?v=3910087de5f1',sharedScript).href;script.onload=()=>window.ReportProjectEvidence?resolve(window.ReportProjectEvidence):reject(Error('Evidence reader did not initialize'));script.onerror=()=>reject(Error('Evidence reader could not be loaded'));document.head.append(script)}).catch(e=>{evidenceLoader=null;throw e});
+ if(!evidenceLoader)evidenceLoader=new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=new URL('project-evidence-details.js?v=666f10fd9f6e',sharedScript).href;script.onload=()=>window.ReportProjectEvidence?resolve(window.ReportProjectEvidence):reject(Error('Evidence reader did not initialize'));script.onerror=()=>reject(Error('Evidence reader could not be loaded'));document.head.append(script)}).catch(e=>{evidenceLoader=null;throw e});
  return evidenceLoader;
 }
 const titleHeader=text=>{
  const value=normalize(text).toLowerCase();
  if(value==='enacted gaa line item')return false;
  if(/\b(?:amount|allocation|cost|rate|price|count|entries|project id|project rows|project lines)\b/.test(value))return false;
+ if(/\bproject\b/.test(value)&&/\b(?:type|category|code|status|count|number|rows|lines)\b/.test(value))return false;
  return /\bproject\b/.test(value)||(/\b(?:closest|prior|current|nep|hgab|gaa)\b.*\btitle\b/.test(value)&&!/\bsimilarity\b/.test(value))||/\b(?:nep|hgab|gaa)\b.*\bline(?: item)?\b/.test(value)||/^extracted hgab record$/.test(value)||/^(?:(?:2nd|3rd|first|second|third) reading line|title)$/.test(value)||/^(?:facility|school\s*\/\s*building|named project)$/.test(value);
 };
 window.ReportProjectDetails={enrichLinked:request=>linkedEvidence().then(reader=>reader.enrich(request))};

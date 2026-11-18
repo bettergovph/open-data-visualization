@@ -34,6 +34,16 @@ def money(text, thousands=False):
     except (TypeError, ValueError):
         return None
 
+def page_text(page, allow_ocr=False):
+    text = page.get_text('text')
+    if not allow_ocr:
+        return text, 'native PDF text'
+    try:
+        textpage = page.get_textpage_ocr(language='eng', dpi=240, full=True)
+        return page.get_text('text', textpage=textpage), 'Tesseract OCR'
+    except Exception:
+        return text, 'native PDF text; OCR unavailable'
+
 def fetch(url, cache_dir, max_bytes):
     key = hashlib.sha256(url.encode()).hexdigest() + '.pdf'
     path = cache_dir / key
@@ -51,17 +61,32 @@ def fetch(url, cache_dir, max_bytes):
 def extract_bp202(pdf_path):
     import pymupdf
     doc = pymupdf.open(pdf_path)
-    results = []
-    for page_no, page in enumerate(doc, 1):
-        text = page.get_text('text')
+    results, methods = [], set()
+    pages = list(enumerate(doc, 1))
+    for page_no, page in pages:
+        text, method = page_text(page)
+        methods.add(method)
         for match in re.finditer(r'Total\s+Proposal\s+Cost\s*:?\s*(?:(?:PHP)\s*|₱\s*)?((?:\d{1,3}(?:,\d{3})+(?:\.\d{2})?|\d{6,}(?:\.\d{2})?))', text, re.I):
             value = money(match.group(1))
             if value is not None:
                 results.append({'amountPesos': value, 'printedValue': match.group(1), 'amountUnit': 'PHP',
                                 'amountLabel': 'Total Proposal Cost', 'sourcePage': page_no})
+    if not results:
+        for page_no, page in pages:
+            text, method = page_text(page, allow_ocr=True)
+            methods.add(method)
+            if method != 'Tesseract OCR':
+                continue
+            for match in re.finditer(r'Total\s+Proposal\s+Cost\s*:?\s*(?:(?:PHP)\s*|₱\s*)?((?:\d{1,3}(?:,\d{3})+(?:\.\d{2})?|\d{6,}(?:\.\d{2})?))', text, re.I):
+                value = money(match.group(1))
+                if value is not None:
+                    results.append({'amountPesos': value, 'printedValue': match.group(1), 'amountUnit': 'PHP',
+                                    'amountLabel': 'Total Proposal Cost', 'sourcePage': page_no})
     unique = {(x['amountPesos'], x['sourcePage']): x for x in results}
     if len(unique) == 1:
-        return next(iter(unique.values())), 'value_extracted'
+        result = next(iter(unique.values()))
+        result['extractionMethod'] = 'Tesseract OCR' if 'Tesseract OCR' in methods else 'native PDF text extraction'
+        return result, 'value_extracted'
     return None, 'ambiguous_amount' if unique else 'amount_not_found'
 
 def extract_coi(pdf_path, title):
@@ -73,8 +98,10 @@ def extract_coi(pdf_path, title):
     doc = pymupdf.open(pdf_path)
     document_text = '\n'.join(page.get_text('text') for page in doc)
     thousands = bool(re.search(r"(?:\bp\s*['‘’]?\s*000\b|\bphp\s*['‘’]?\s*000\b)", document_text, re.I))
-    for page_no, page in enumerate(doc, 1):
-        text = page.get_text('text')
+    pages = list(enumerate(doc, 1)); methods = set()
+    def scan_page(page_no, page, allow_ocr=False):
+        text, method = page_text(page, allow_ocr=allow_ocr)
+        methods.add(method)
         normalized_chars = []
         source_positions = []
         previous_space = True
@@ -100,9 +127,16 @@ def extract_coi(pdf_path, title):
                 hits.append({'amountPesos': value, 'printedValue': raw,
                              'amountUnit': "P'000 (converted to PHP)" if thousands else 'PHP as printed',
                              'amountLabel': 'Project amount in COI project list', 'sourcePage': page_no})
+    for page_no, page in pages:
+        scan_page(page_no, page)
+    if not hits:
+        for page_no, page in pages:
+            scan_page(page_no, page, allow_ocr=True)
     unique = {(x['amountPesos'], x['sourcePage'], x['printedValue']): x for x in hits}
     if len(unique) == 1:
-        return next(iter(unique.values())), 'value_extracted'
+        result = next(iter(unique.values()))
+        result['extractionMethod'] = 'Tesseract OCR' if 'Tesseract OCR' in methods else 'native PDF text extraction'
+        return result, 'value_extracted'
     return None, 'ambiguous_project_amount' if unique else 'exact_project_amount_not_found'
 
 def parse_one(project_id, doc, title, cache_dir, max_bytes):
@@ -123,8 +157,8 @@ def parse_one(project_id, doc, title, cache_dir, max_bytes):
             extracted = None
         if extracted:
             result.update(extracted)
-            result['matchBasis'] = ('Labelled Total Proposal Cost field' if kind == 'BP 202' else 'Exact normalized project title followed by the listed amount')
-            result['extractionMethod'] = 'native PDF text extraction'
+            result['matchBasis'] = ('Labelled Total Proposal Cost field · one BP 202 per project' if kind == 'BP 202' else 'Exact normalized project title followed by its listed amount; one COI may support multiple project rows')
+            result.setdefault('extractionMethod', 'native PDF text extraction')
         return project_id, kind, result
     except Exception as exc:
         result['errorType'] = type(exc).__name__
@@ -195,13 +229,20 @@ def main():
         if not context:
             continue
         context_row = context[1]
-        context_row['supportingDocumentAmounts'] = []
+        existing = context_row.get('supportingDocumentAmounts', [])
+        prior = {(item.get('documentKind'), item.get('sourceUrl')): item for item in existing}
         for doc in context_row.get('documents', []):
             if len(doc) >= 4 and doc[1] in KINDS and doc[2]:
+                previous = prior.get((doc[1], doc[2]))
+                if previous and previous.get('status') in {'value_extracted', 'amount_requires_review'}:
+                    continue
                 tasks.append((hgab_id, doc, row['title']))
         seen_urls = {doc[2] for doc in context_row.get('documents', []) if len(doc) >= 4}
         for kind, (filename, url) in infrawatch_docs.get(hgab_id, {}).items():
             if url not in seen_urls:
+                previous = prior.get((kind, url))
+                if previous and previous.get('status') in {'value_extracted', 'amount_requires_review'}:
+                    continue
                 tasks.append((hgab_id, (filename, kind, url, filename), row['title']))
     print(f'Projects: {len(rows):,} · PDF documents queued: {len(tasks):,}', flush=True)
     outcomes = {}
@@ -218,7 +259,11 @@ def main():
         hgab_id = row['hgabId']; context = contexts.get(hgab_id)
         if not context:
             continue
-        amounts = outcomes.get(hgab_id, [])
+        prior = {(item.get('documentKind'), item.get('sourceUrl')): item
+                 for item in context[1].get('supportingDocumentAmounts', [])}
+        for item in outcomes.get(hgab_id, []):
+            prior[(item.get('documentKind'), item.get('sourceUrl'))] = item
+        amounts = list(prior.values())
         amounts.sort(key=lambda item: (item['documentKind'], item.get('sourceUrl', '')))
         context[1]['supportingDocumentAmounts'] = amounts
         row['supportingDocumentAmounts'] = amounts
