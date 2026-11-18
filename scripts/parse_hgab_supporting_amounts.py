@@ -35,7 +35,7 @@ def money(text, thousands=False):
     except (TypeError, ValueError):
         return None
 
-def coi_money(text, document_text=''):
+def coi_money(text, document_text='', expected_pesos=None):
     """Respect P'000 for abbreviated values, but don't rescale full-peso figures.
 
     Some COIs print amounts such as 12,000,000 under a generic Php'000 header.
@@ -45,13 +45,24 @@ def coi_money(text, document_text=''):
     """
     value = money(text)
     if value is None:
-        return None, 'PHP as printed'
+        return None, 'PHP as printed', 'amount unavailable'
     thousands_header = bool(re.search(r"(?:\bp\s*['‘’]?\s*000\b|\bphp\s*['‘’]?\s*000\b)", document_text, re.I))
+    if expected_pesos is not None:
+        tolerance = max(1.0, abs(float(expected_pesos)) * 1e-8)
+        raw_matches = abs(value - float(expected_pesos)) <= tolerance
+        scaled_matches = abs(value * 1000 - float(expected_pesos)) <= tolerance
+        divided_matches = abs(value / 1000 - float(expected_pesos)) <= tolerance
+        if raw_matches:
+            return value, 'PHP as printed (×1 matches HGAB allocation)', 'allocation_factor_match_x1'
+        if scaled_matches:
+            return value * 1000, "P'000 ×1000 (matches HGAB allocation)", 'allocation_factor_match_x1000'
+        if divided_matches:
+            return value / 1000, 'Printed amount ÷1000 (matches HGAB allocation)', 'allocation_factor_match_divide_1000'
     if thousands_header and value < 1_000_000:
-        return value * 1000, "P'000 (converted to PHP)"
+        return value * 1000, "P'000 (converted to PHP)", 'header_and_amount_scale_heuristic'
     if thousands_header:
-        return value, "PHP as printed (P'000 header; no additional scaling)"
-    return value, 'PHP as printed'
+        return value, "PHP as printed (P'000 header; no additional scaling)", 'large_printed_amount_retained'
+    return value, 'PHP as printed', 'PHP_as_printed'
 
 def page_text(page, allow_ocr=False):
     text = page.get_text('text')
@@ -108,54 +119,17 @@ def extract_bp202(pdf_path):
         return result, 'value_extracted'
     return None, 'ambiguous_amount' if unique else 'amount_not_found'
 
-def extract_coi(pdf_path, title):
-    import pymupdf
-    wanted = normalize(title)
-    if not wanted:
-        return None, 'title_unavailable'
-    hits = []
-    doc = pymupdf.open(pdf_path)
-    document_text = '\n'.join(page.get_text('text') for page in doc)
-    pages = list(enumerate(doc, 1)); methods = set()
-    def scan_page(page_no, page, allow_ocr=False):
-        text, method = page_text(page, allow_ocr=allow_ocr)
-        methods.add(method)
-        normalized_chars = []
-        source_positions = []
-        previous_space = True
-        for source_index, original_char in enumerate(text):
-            chars = unicodedata.normalize('NFKD', original_char).encode('ascii', 'ignore').decode().lower()
-            for char in chars:
-                if char.isalnum():
-                    normalized_chars.append(char); source_positions.append(source_index); previous_space = False
-                elif not previous_space:
-                    normalized_chars.append(' '); source_positions.append(source_index); previous_space = True
-        normalized = ''.join(normalized_chars).strip()
-        starts = [m.start() for m in re.finditer(re.escape(wanted), normalized)]
-        for start in starts:
-            normalized_end = start + len(wanted) - 1
-            source_end = source_positions[min(normalized_end, len(source_positions)-1)] + 1
-            tail = text[source_end:source_end + 250]
-            match = AMOUNT.search(tail)
-            if not match:
-                continue
-            raw = match.group(0)
-            value, amount_unit = coi_money(raw, document_text + '\n' + text)
-            if value is not None:
-                hits.append({'amountPesos': value, 'printedValue': raw,
-                             'amountUnit': amount_unit,
-                             'amountLabel': 'Project amount in COI project list', 'sourcePage': page_no})
-    for page_no, page in pages:
-        scan_page(page_no, page)
-    if not hits:
-        for page_no, page in pages:
-            scan_page(page_no, page, allow_ocr=True)
-    unique = {(x['amountPesos'], x['sourcePage'], x['printedValue']): x for x in hits}
-    if len(unique) == 1:
-        result = next(iter(unique.values()))
-        result['extractionMethod'] = 'Tesseract OCR' if 'Tesseract OCR' in methods else 'native PDF text extraction'
-        return result, 'value_extracted'
-    return None, 'ambiguous_project_amount' if unique else 'exact_project_amount_not_found'
+def extract_coi(pdf_path, title, expected_pesos=None):
+    """Use the same exact-title/adjacent-amount matcher for single and multi-row COIs."""
+    row = {'hgabId': 'single-project', 'title': title, 'amountPesos': expected_pesos}
+    result = extract_coi_project_list(pdf_path, [row]).get(row['hgabId'])
+    if not result:
+        return None, 'exact_project_amount_not_found'
+    status = result.pop('status')
+    fields = ('amountPesos', 'printedValue', 'amountUnit', 'amountScaleCheck', 'amountLabel',
+              'sourcePage', 'sourcePages', 'extractionMethod', 'matchBasis')
+    extracted = {key: result[key] for key in fields if key in result}
+    return (extracted if status == 'value_extracted' else None), status
 
 def extract_coi_project_list(pdf_path, title_rows):
     """Extract separately titled project amounts from a COI that lists many projects."""
@@ -166,7 +140,7 @@ def extract_coi_project_list(pdf_path, title_rows):
         if key:
             wanted[key].append(row)
     doc = pymupdf.open(pdf_path)
-    pages = list(enumerate(doc, 1)); hits = collections.defaultdict(list); methods = set()
+    pages = list(enumerate(doc, 1)); hits = collections.defaultdict(list); methods = set(); title_seen = set()
     document_text = '\n'.join(page.get_text('text') for page in doc)
     all_text = []
 
@@ -182,7 +156,10 @@ def extract_coi_project_list(pdf_path, title_rows):
                 elif not previous_space:
                     normalized_chars.append(' '); source_positions.append(source_index); previous_space = True
         normalized = ''.join(normalized_chars).strip()
+        occurrences = []
         for title, rows in wanted.items():
+            if len(rows) != 1:
+                continue
             start = 0
             while True:
                 start = normalized.find(title, start)
@@ -191,16 +168,28 @@ def extract_coi_project_list(pdf_path, title_rows):
                 end = start + len(title)
                 bounded = (start == 0 or normalized[start - 1] == ' ') and (end == len(normalized) or normalized[end] == ' ')
                 if bounded and source_positions:
-                    source_end = source_positions[min(end - 1, len(source_positions) - 1)] + 1
-                    amount_match = AMOUNT.search(text[source_end:source_end + 250])
-                    if amount_match:
-                        raw = amount_match.group(0)
-                        value, amount_unit = coi_money(raw, document_text + '\n' + text)
-                        hits[title].append({'amountPesos': value,
-                                            'printedValue': raw, 'amountUnit': amount_unit,
-                                            'amountLabel': 'Project amount in COI project list', 'sourcePage': page_no,
-                                            'extractionMethod': 'Tesseract OCR' if method == 'Tesseract OCR' else 'native PDF text extraction'})
+                    occurrences.append({'title': title, 'start': start, 'end': end})
                 start = end
+        # A short project title can be a word-boundary prefix of a longer title.
+        # Keep the longest exact title for each overlapping occurrence.
+        occurrences = [occ for occ in occurrences if not any(
+            other['title'] != occ['title'] and other['start'] <= occ['start'] and other['end'] >= occ['end']
+            for other in occurrences)]
+        occurrences.sort(key=lambda occ: (occ['start'], occ['end']))
+        for index, occ in enumerate(occurrences):
+            title = occ['title']; title_seen.add(title)
+            source_end = source_positions[occ['end'] - 1] + 1
+            next_start = len(text)
+            for following in occurrences[index + 1:]:
+                if following['start'] >= occ['end']:
+                    next_start = source_positions[following['start']]
+                    break
+            row_end = min(next_start, source_end + 250)
+            amount_match = AMOUNT.search(text[source_end:row_end])
+            if amount_match:
+                raw = amount_match.group(0)
+                hits[title].append({'printedValue': raw, 'sourcePage': page_no,
+                                    'extractionMethod': 'Tesseract OCR' if method == 'Tesseract OCR' else 'native PDF text extraction'})
 
     native_texts = []
     for page_no, page in pages:
@@ -217,28 +206,61 @@ def extract_coi_project_list(pdf_path, title_rows):
             scan(page_no, text, method)
 
     results = {}
+    unit_context = document_text + '\n' + '\n'.join(all_text)
     for title, rows in wanted.items():
         # Repeated identical titles cannot be assigned safely by title alone.
-        if len(rows) != 1 or title not in hits:
+        if len(rows) != 1:
             continue
-        unique = {(x['amountPesos'], x['sourcePage'], x['printedValue']): x for x in hits[title] if x['amountPesos'] is not None}
         row = rows[0]
-        if len(unique) == 1:
-            result = next(iter(unique.values()))
+        if title not in title_seen:
+            results[row['hgabId']] = {'status': 'exact_project_title_not_found',
+                                      'amountLabel': 'Project amount in COI project list',
+                                      'extractionMethod': 'Exact project title not found in linked COI'}
+            continue
+        unique_printed = {x['printedValue'] for x in hits.get(title, [])}
+        resolved = [(raw, *coi_money(raw, unit_context, row.get('amountPesos'))) for raw in unique_printed]
+        allocation_matches = [candidate for candidate in resolved if candidate[3].startswith('allocation_factor_match_')]
+        if allocation_matches:
+            matched_values = {candidate[1] for candidate in allocation_matches}
+        else:
+            matched_values = set()
+        if allocation_matches and len(matched_values) == 1:
+            raw, amount, amount_unit, scale_check = allocation_matches[0]
+            matching_hits = [x for x in hits[title] if x['printedValue'] == raw]
+            pages_hit = sorted({x['sourcePage'] for x in matching_hits})
+            methods_hit = {x['extractionMethod'] for x in matching_hits}
+            result = {'amountPesos': amount, 'printedValue': raw, 'amountUnit': amount_unit,
+                      'amountScaleCheck': scale_check, 'amountLabel': 'Project amount in COI project list',
+                      'sourcePage': pages_hit[0], 'sourcePages': pages_hit,
+                      'amountCandidatesPrinted': sorted(unique_printed),
+                      'extractionMethod': 'Tesseract OCR' if 'Tesseract OCR' in methods_hit else 'native PDF text extraction'}
             result['status'] = 'value_extracted'
-            result['matchBasis'] = 'Exact normalized project title followed by the listed amount; multi-project COI list'
-        elif unique:
-            result = {'status': 'ambiguous_project_amount', 'amountLabel': 'Project amount in COI project list',
-                      'extractionMethod': 'native PDF text extraction · multiple amount candidates'}
+            result['matchBasis'] = 'Exact normalized project title with adjacent amount; ×1, ×1000, and ÷1000 checked against HGAB allocation'
+        elif len(unique_printed) == 1:
+            raw, amount, amount_unit, scale_check = resolved[0]
+            matching_hits = [x for x in hits[title] if x['printedValue'] == raw]
+            pages_hit = sorted({x['sourcePage'] for x in matching_hits})
+            methods_hit = {x['extractionMethod'] for x in matching_hits}
+            result = {'amountPesos': amount, 'printedValue': raw, 'amountUnit': amount_unit,
+                      'amountScaleCheck': scale_check, 'amountLabel': 'Project amount in COI project list',
+                      'sourcePage': pages_hit[0], 'sourcePages': pages_hit,
+                      'amountCandidatesPrinted': sorted(unique_printed),
+                      'extractionMethod': 'Tesseract OCR' if 'Tesseract OCR' in methods_hit else 'native PDF text extraction'}
+            result['status'] = 'value_extracted'
+            result['matchBasis'] = 'Exact normalized project title with its adjacent amount; multi-project COI list'
+        elif len(unique_printed) > 1:
+            result = {'status': 'amount_requires_review', 'amountLabel': 'Project amount in COI project list',
+                      'amountCandidatesPrinted': sorted(unique_printed),
+                      'extractionMethod': 'native PDF text extraction · multiple candidates; no ×1/×1000/÷1000 candidate matched HGAB allocation'}
         else:
             result = {'status': 'exact_project_amount_not_found', 'amountLabel': 'Project amount in COI project list',
-                      'extractionMethod': 'native PDF text + Tesseract OCR fallback attempted'}
+                      'extractionMethod': 'exact project title found, but no adjacent amount was recovered'}
         result.update({'documentKind': 'Certificate of Implementability', 'sourceStage': 'HGAB supporting document',
                        'sourceProvider': 'BetterGov budget assets', 'sourceUrl': None, 'sourceName': None})
         results[row['hgabId']] = result
     return results
 
-def parse_one(project_id, doc, title, cache_dir, max_bytes):
+def parse_one(project_id, doc, title, allocation_pesos, cache_dir, max_bytes):
     code, kind, url, filename = doc[:4]
     provider = 'InfraWatch' if 'infrawatch' in url.lower() else 'BetterGov budget assets'
     result = {'documentKind': kind, 'sourceProvider': provider,
@@ -246,7 +268,7 @@ def parse_one(project_id, doc, title, cache_dir, max_bytes):
               'sourceUrl': url, 'sourceName': filename, 'status': 'fetch_failed'}
     try:
         path = fetch(url, cache_dir, max_bytes)
-        extracted, status = extract_bp202(path) if kind == 'BP 202' else extract_coi(path, title)
+        extracted, status = extract_bp202(path) if kind == 'BP 202' else extract_coi(path, title, allocation_pesos)
         result['status'] = status
         if not extracted:
             if status in {'amount_not_found', 'exact_project_amount_not_found'}:
@@ -261,7 +283,9 @@ def parse_one(project_id, doc, title, cache_dir, max_bytes):
             extracted = None
         if extracted:
             result.update(extracted)
-            result['matchBasis'] = ('Labelled Total Proposal Cost field · one BP 202 per project' if kind == 'BP 202' else 'Exact normalized project title followed by its listed amount; one COI may support multiple project rows')
+            result.update({'sourceUrl': url, 'sourceName': filename, 'sourceProvider': provider,
+                           'sourceStage': 'NEP counterpart Proposal document' if provider == 'InfraWatch' else 'HGAB supporting document'})
+            result['matchBasis'] = ('Labelled Total Proposal Cost field · one BP 202 per project' if kind == 'BP 202' else 'Exact normalized project title with adjacent amount; ×1/×1000 checked against HGAB allocation')
             result.setdefault('extractionMethod', 'native PDF text extraction')
         return project_id, kind, result
     except Exception as exc:
@@ -321,7 +345,7 @@ def parse_coi_list_one(url, filename, title_rows, cache_dir, max_bytes):
     return url, results
 
 def run_coi_project_list_scan(rows, contexts, manifest_path, manifest, args):
-    """Scan each COI once and map its exact project-list titles to all comparison rows."""
+    """Check each row only against its linked COI files; one COI may list several rows."""
     title_rows = [{'hgabId': row['hgabId'], 'title': row['title'], 'office': row.get('office'),
                    'amountPesos': row.get('allocationPesos')} for row in rows]
     documents = {}
@@ -333,16 +357,18 @@ def run_coi_project_list_scan(rows, contexts, manifest_path, manifest, args):
             continue
         for doc in context[1].get('documents', []):
             if len(doc) >= 4 and doc[1] == 'Certificate of Implementability' and doc[2]:
-                documents.setdefault(doc[2], doc[3] or doc[0])
+                entry = documents.setdefault(doc[2], {'filename': doc[3] or doc[0], 'titleRows': {}})
+                entry['titleRows'][row['hgabId']] = next(x for x in title_rows if x['hgabId'] == row['hgabId'])
         for kind, (filename, url) in linked.get(row['hgabId'], {}).items():
             if kind == 'Certificate of Implementability':
-                documents.setdefault(url, filename)
-    print(f'COI list scan: {len(documents):,} distinct PDFs · {len(title_rows):,} comparison project titles', flush=True)
+                entry = documents.setdefault(url, {'filename': filename, 'titleRows': {}})
+                entry['titleRows'][row['hgabId']] = next(x for x in title_rows if x['hgabId'] == row['hgabId'])
+    print(f'COI linked-row scan: {len(documents):,} distinct PDFs · {sum(len(x["titleRows"]) for x in documents.values()):,} linked project rows', flush=True)
     outcomes = {}
     max_bytes = args.max_pdf_mb * 1024 * 1024
     with concurrent.futures.ThreadPoolExecutor(max_workers=args.workers) as pool:
-        futures = [pool.submit(parse_coi_list_one, url, filename, title_rows, args.cache, max_bytes)
-                   for url, filename in documents.items()]
+        futures = [pool.submit(parse_coi_list_one, url, item['filename'], list(item['titleRows'].values()), args.cache, max_bytes)
+                   for url, item in documents.items()]
         for index, future in enumerate(concurrent.futures.as_completed(futures), 1):
             url, projects = future.result()
             for hgab_id, result in projects.items():
@@ -350,22 +376,31 @@ def run_coi_project_list_scan(rows, contexts, manifest_path, manifest, args):
                 outcomes.setdefault(hgab_id, {})[(result['documentKind'], url)] = result
             if index % 100 == 0:
                 print(f'COI PDFs scanned {index:,}/{len(futures):,}', flush=True)
-    counts = {}
-    for hgab_id, results in outcomes.items():
+    counts = collections.Counter()
+    linked_urls_by_id = collections.defaultdict(set)
+    for url, item in documents.items():
+        for hgab_id in item['titleRows']:
+            linked_urls_by_id[hgab_id].add(url)
+    for hgab_id in project_ids:
         context = contexts.get(hgab_id)
         if not context:
             continue
         existing = {(item.get('documentKind'), item.get('sourceUrl')): item
-                    for item in context[1].get('supportingDocumentAmounts', [])}
-        for key, item in results.items():
-            prior = existing.get(key)
-            if prior and prior.get('status') == 'value_extracted':
-                continue
+                    for item in context[1].get('supportingDocumentAmounts', [])
+                    if not (item.get('documentKind') == 'Certificate of Implementability' and item.get('sourceUrl') not in linked_urls_by_id[hgab_id])}
+        for key, item in outcomes.get(hgab_id, {}).items():
             existing[key] = item
-            counts[item['status']] = counts.get(item['status'], 0) + 1
-        context[1]['supportingDocumentAmounts'] = sorted(existing.values(), key=lambda item: (item.get('documentKind', ''), item.get('sourceUrl', '')))
-    updates = {hgab_id: context[1].get('supportingDocumentAmounts', []) for hgab_id, context in contexts.items() if hgab_id in outcomes}
-    for filename in ['expectation-vs-reality-data.json', 'expectation-vs-reality-flagged-data.json']:
+            counts[item['status']] += 1
+        amounts = list(existing.values())
+        match_counts = {kind: sum(1 for item in amounts if item.get('documentKind') == kind and item.get('status') == 'value_extracted')
+                        for kind in KINDS}
+        for item in amounts:
+            if item.get('documentKind') in KINDS:
+                item['projectMatchCount'] = match_counts[item['documentKind']]
+                item['multipleDocumentMatchReview'] = match_counts[item['documentKind']] > 1
+        context[1]['supportingDocumentAmounts'] = sorted(amounts, key=lambda item: (item.get('documentKind', ''), item.get('sourceUrl', '')))
+    updates = {hgab_id: contexts[hgab_id][1].get('supportingDocumentAmounts', []) for hgab_id in project_ids if hgab_id in contexts}
+    for filename in ['expectation-vs-reality-data.json', 'expectation-vs-reality-flagged-data.json', 'expectation-vs-reality-red-data.json', 'expectation-vs-reality-double-red-data.json']:
         path = STATIC / filename
         data = json.loads(path.read_text())
         for row in data.get('projects', []):
@@ -420,19 +455,20 @@ def main():
                 previous = prior.get((doc[1], doc[2]))
                 if previous and previous.get('status') in {'value_extracted', 'amount_requires_review'}:
                     continue
-                tasks.append((hgab_id, doc, row['title']))
+                tasks.append((hgab_id, doc, row['title'], row.get('allocationPesos')))
         seen_urls = {doc[2] for doc in context_row.get('documents', []) if len(doc) >= 4}
         for kind, (filename, url) in infrawatch_docs.get(hgab_id, {}).items():
             if url not in seen_urls:
                 previous = prior.get((kind, url))
                 if previous and previous.get('status') in {'value_extracted', 'amount_requires_review'}:
                     continue
-                tasks.append((hgab_id, (filename, kind, url, filename), row['title']))
+                tasks.append((hgab_id, (filename, kind, url, filename), row['title'], row.get('allocationPesos')))
     print(f'Projects: {len(rows):,} · PDF documents queued: {len(tasks):,}', flush=True)
     outcomes = {}
     max_bytes = args.max_pdf_mb * 1024 * 1024
     with concurrent.futures.ThreadPoolExecutor(max_workers=args.workers) as pool:
-        futures = [pool.submit(parse_one, project_id, doc, title, args.cache, max_bytes) for project_id, doc, title in tasks]
+        futures = [pool.submit(parse_one, project_id, doc, title, allocation, args.cache, max_bytes)
+                   for project_id, doc, title, allocation in tasks]
         for index, future in enumerate(concurrent.futures.as_completed(futures), 1):
             code, kind, result = future.result()
             outcomes.setdefault(code, []).append(result)
