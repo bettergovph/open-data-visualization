@@ -51118,13 +51118,13 @@
         },
         {
           "amountPesos": 75000000.0,
-          "printedValue": "75,000,000.00",
+          "printedValue": "75,000,000",
           "amountUnit": "PHP as printed (×1 matches HGAB allocation)",
           "amountScaleCheck": "allocation_factor_match_x1",
           "amountLabel": "Project amount in COI project list",
-          "sourcePage": 1,
+          "sourcePage": 2,
           "sourcePages": [
-            1
+            2
           ],
           "amountCandidatesPrinted": [
             "75,000,000",
@@ -101269,8 +101269,7 @@
           "sourceProvider": "BetterGov budget assets",
           "sourceUrl": "https://budget-assets.bettergov.ph/hgab/2027/dpwh/supporting-documents/Region%20IV-A/CSSP/2027DPWH-HGAB-14494/2027DPWH-HGAB-14494_BP202.pdf",
           "sourceName": "2027DPWH-HGAB-14494_BP202.pdf",
-          "status": "value_extracted",
-          "amountPesos": 17000000.0,
+          "status": "amount_requires_review",
           "printedValue": "17,000,000.00",
           "amountUnit": "PHP",
           "amountLabel": "Total Proposal Cost",
@@ -101278,8 +101277,12 @@
           "matchBasis": "Labelled Total Proposal Cost field",
           "extractionMethod": "native PDF text extraction",
           "sourceStage": "HGAB supporting document",
-          "projectMatchCount": 2,
-          "multipleDocumentMatchReview": true
+          "projectMatchCount": 1,
+          "multipleDocumentMatchReview": false,
+          "candidateAmountPesos": 17000000.0,
+          "candidatePrintedValue": "17,000,000.00",
+          "candidateSourcePage": 1,
+          "reviewReason": "Another linked BP 202 amount matched the HGAB allocation; this nonmatching file was excluded from the project comparison."
         },
         {
           "documentKind": "BP 202",
@@ -101295,8 +101298,8 @@
           "matchBasis": "Labelled Total Proposal Cost field",
           "extractionMethod": "native PDF text extraction",
           "sourceStage": "HGAB supporting document",
-          "projectMatchCount": 2,
-          "multipleDocumentMatchReview": true
+          "projectMatchCount": 1,
+          "multipleDocumentMatchReview": false
         },
         {
           "status": "exact_project_title_not_found",
@@ -117089,8 +117092,7 @@
           "sourceProvider": "BetterGov budget assets",
           "sourceUrl": "https://budget-assets.bettergov.ph/hgab/2027/dpwh/supporting-documents/Region%20IV-A/CSSP/2027DPWH-HGAB-14487/2027DPWH-HGAB-14487_BP202.pdf",
           "sourceName": "2027DPWH-HGAB-14487_BP202.pdf",
-          "status": "value_extracted",
-          "amountPesos": 12000000.0,
+          "status": "amount_requires_review",
           "printedValue": "12,000,000.00",
           "amountUnit": "PHP",
           "amountLabel": "Total Proposal Cost",
@@ -117098,8 +117100,12 @@
           "matchBasis": "Labelled Total Proposal Cost field",
           "extractionMethod": "native PDF text extraction",
           "sourceStage": "HGAB supporting document",
-          "projectMatchCount": 2,
-          "multipleDocumentMatchReview": true
+          "projectMatchCount": 1,
+          "multipleDocumentMatchReview": false,
+          "candidateAmountPesos": 12000000.0,
+          "candidatePrintedValue": "12,000,000.00",
+          "candidateSourcePage": 1,
+          "reviewReason": "Another linked BP 202 amount matched the HGAB allocation; this nonmatching file was excluded from the project comparison."
         },
         {
           "documentKind": "BP 202",
@@ -117115,8 +117121,8 @@
           "matchBasis": "Labelled Total Proposal Cost field",
           "extractionMethod": "native PDF text extraction",
           "sourceStage": "HGAB supporting document",
-          "projectMatchCount": 2,
-          "multipleDocumentMatchReview": true
+          "projectMatchCount": 1,
+          "multipleDocumentMatchReview": false
         },
         {
           "status": "exact_project_title_not_found",
@@ -121540,27 +121546,15 @@
           "multipleDocumentMatchReview": false
         },
         {
-          "amountPesos": 30000000.0,
-          "printedValue": "30,000,000.00",
-          "amountUnit": "PHP as printed (×1 matches HGAB allocation)",
-          "amountScaleCheck": "allocation_factor_match_x1",
+          "status": "exact_project_title_not_found",
           "amountLabel": "Project amount in COI project list",
-          "sourcePage": 1,
-          "sourcePages": [
-            1
-          ],
-          "amountCandidatesPrinted": [
-            "30,000,000.00"
-          ],
-          "extractionMethod": "Tesseract OCR",
-          "status": "value_extracted",
-          "matchBasis": "Exact normalized project title with adjacent amount; ×1, ×1000, and ÷1000 checked against HGAB allocation",
-          "documentKind": "Certificate of Implementability",
-          "sourceStage": "HGAB supporting document",
+          "extractionMethod": "Exact project title not found in linked COI",
           "sourceProvider": "BetterGov budget assets",
+          "sourceStage": "HGAB supporting document",
           "sourceUrl": "https://budget-assets.bettergov.ph/hgab/2027/dpwh/supporting-documents/Region%20VII/CSSP/Cebu%206th%20DEO/2027DPWH-HGAB-15407/2027DPWH-HGAB-15407_Cert%20of%20Implementability.pdf",
           "sourceName": "2027DPWH-HGAB-15407_Cert of Implementability.pdf",
-          "projectMatchCount": 1,
+          "documentKind": "Certificate of Implementability",
+          "projectMatchCount": 0,
           "multipleDocumentMatchReview": false
         }
       ]
@@ -134149,8 +134143,7 @@
           "sourceProvider": "BetterGov budget assets",
           "sourceUrl": "https://budget-assets.bettergov.ph/hgab/2027/dpwh/supporting-documents/Region%20VI/CSSP/Iloilo%204th%20DEO/2027DPWH-HGAB-12418/2027DPWH-HGAB-12418_BP202.pdf",
           "sourceName": "2027DPWH-HGAB-12418_BP202.pdf",
-          "status": "value_extracted",
-          "amountPesos": 10000000.0,
+          "status": "amount_requires_review",
           "printedValue": "10,000,000.00",
           "amountUnit": "PHP",
           "amountLabel": "Total Proposal Cost",
@@ -134158,8 +134151,12 @@
           "matchBasis": "Labelled Total Proposal Cost field",
           "extractionMethod": "native PDF text extraction",
           "sourceStage": "HGAB supporting document",
-          "projectMatchCount": 2,
-          "multipleDocumentMatchReview": true
+          "projectMatchCount": 1,
+          "multipleDocumentMatchReview": false,
+          "candidateAmountPesos": 10000000.0,
+          "candidatePrintedValue": "10,000,000.00",
+          "candidateSourcePage": 1,
+          "reviewReason": "Another linked BP 202 amount matched the HGAB allocation; this nonmatching file was excluded from the project comparison."
         },
         {
           "documentKind": "BP 202",
@@ -134175,8 +134172,8 @@
           "matchBasis": "Labelled Total Proposal Cost field",
           "extractionMethod": "native PDF text extraction",
           "sourceStage": "HGAB supporting document",
-          "projectMatchCount": 2,
-          "multipleDocumentMatchReview": true
+          "projectMatchCount": 1,
+          "multipleDocumentMatchReview": false
         },
         {
           "status": "exact_project_amount_not_found",
@@ -139445,15 +139442,27 @@
           "multipleDocumentMatchReview": false
         },
         {
-          "status": "exact_project_title_not_found",
+          "amountPesos": 10000000.0,
+          "printedValue": "10,000,000.00",
+          "amountUnit": "PHP as printed (×1 matches HGAB allocation)",
+          "amountScaleCheck": "allocation_factor_match_x1",
           "amountLabel": "Project amount in COI project list",
-          "extractionMethod": "Exact project title not found in linked COI",
-          "sourceProvider": "BetterGov budget assets",
+          "sourcePage": 1,
+          "sourcePages": [
+            1
+          ],
+          "amountCandidatesPrinted": [
+            "10,000,000.00"
+          ],
+          "extractionMethod": "Tesseract OCR",
+          "status": "value_extracted",
+          "matchBasis": "Exact normalized project title with adjacent amount; ×1, ×1000, and ÷1000 checked against HGAB allocation",
+          "documentKind": "Certificate of Implementability",
           "sourceStage": "HGAB supporting document",
+          "sourceProvider": "BetterGov budget assets",
           "sourceUrl": "https://budget-assets.bettergov.ph/hgab/2027/dpwh/supporting-documents/Region%20III/CSSP/Bataan%202nd%20DEO/2027DPWH-HGAB-14022/2027DPWH-HGAB-14022_Cert%20of%20Implementability.pdf",
           "sourceName": "2027DPWH-HGAB-14022_Cert of Implementability.pdf",
-          "documentKind": "Certificate of Implementability",
-          "projectMatchCount": 0,
+          "projectMatchCount": 1,
           "multipleDocumentMatchReview": false
         }
       ]
@@ -142430,8 +142439,7 @@
           "sourceProvider": "BetterGov budget assets",
           "sourceUrl": "https://budget-assets.bettergov.ph/hgab/2027/dpwh/supporting-documents/Region%20IV-A/CSSP/2027DPWH-HGAB-12253/2027DPWH-HGAB-12253_BP202.pdf",
           "sourceName": "2027DPWH-HGAB-12253_BP202.pdf",
-          "status": "value_extracted",
-          "amountPesos": 10000000.0,
+          "status": "amount_requires_review",
           "printedValue": "10,000,000.00",
           "amountUnit": "PHP",
           "amountLabel": "Total Proposal Cost",
@@ -142439,16 +142447,19 @@
           "matchBasis": "Labelled Total Proposal Cost field",
           "extractionMethod": "native PDF text extraction",
           "sourceStage": "HGAB supporting document",
-          "projectMatchCount": 3,
-          "multipleDocumentMatchReview": true
+          "projectMatchCount": 1,
+          "multipleDocumentMatchReview": false,
+          "candidateAmountPesos": 10000000.0,
+          "candidatePrintedValue": "10,000,000.00",
+          "candidateSourcePage": 1,
+          "reviewReason": "Another linked BP 202 amount matched the HGAB allocation; this nonmatching file was excluded from the project comparison."
         },
         {
           "documentKind": "BP 202",
           "sourceProvider": "BetterGov budget assets",
           "sourceUrl": "https://budget-assets.bettergov.ph/hgab/2027/dpwh/supporting-documents/Region%20IV-A/CSSP/2027DPWH-HGAB-12254/2027DPWH-HGAB-12254_BP202.pdf",
           "sourceName": "2027DPWH-HGAB-12254_BP202.pdf",
-          "status": "value_extracted",
-          "amountPesos": 36000000.0,
+          "status": "amount_requires_review",
           "printedValue": "36,000,000.00",
           "amountUnit": "PHP",
           "amountLabel": "Total Proposal Cost",
@@ -142456,8 +142467,12 @@
           "matchBasis": "Labelled Total Proposal Cost field",
           "extractionMethod": "native PDF text extraction",
           "sourceStage": "HGAB supporting document",
-          "projectMatchCount": 3,
-          "multipleDocumentMatchReview": true
+          "projectMatchCount": 1,
+          "multipleDocumentMatchReview": false,
+          "candidateAmountPesos": 36000000.0,
+          "candidatePrintedValue": "36,000,000.00",
+          "candidateSourcePage": 1,
+          "reviewReason": "Another linked BP 202 amount matched the HGAB allocation; this nonmatching file was excluded from the project comparison."
         },
         {
           "documentKind": "BP 202",
@@ -142473,8 +142488,8 @@
           "matchBasis": "Labelled Total Proposal Cost field",
           "extractionMethod": "native PDF text extraction",
           "sourceStage": "HGAB supporting document",
-          "projectMatchCount": 3,
-          "multipleDocumentMatchReview": true
+          "projectMatchCount": 1,
+          "multipleDocumentMatchReview": false
         },
         {
           "amountPesos": 5000000.0,
@@ -145501,15 +145516,27 @@
           "multipleDocumentMatchReview": false
         },
         {
-          "status": "exact_project_title_not_found",
+          "amountPesos": 6400000.0,
+          "printedValue": "6,400,000.00",
+          "amountUnit": "PHP as printed (×1 matches HGAB allocation)",
+          "amountScaleCheck": "allocation_factor_match_x1",
           "amountLabel": "Project amount in COI project list",
-          "extractionMethod": "Exact project title not found in linked COI",
-          "sourceProvider": "BetterGov budget assets",
+          "sourcePage": 1,
+          "sourcePages": [
+            1
+          ],
+          "amountCandidatesPrinted": [
+            "6,400,000.00"
+          ],
+          "extractionMethod": "Tesseract OCR",
+          "status": "value_extracted",
+          "matchBasis": "Exact normalized project title with adjacent amount; ×1, ×1000, and ÷1000 checked against HGAB allocation",
+          "documentKind": "Certificate of Implementability",
           "sourceStage": "HGAB supporting document",
+          "sourceProvider": "BetterGov budget assets",
           "sourceUrl": "https://budget-assets.bettergov.ph/hgab/2027/dpwh/supporting-documents/Region%20VII/CSSP/Cebu%206th%20DEO/2027DPWH-HGAB-12499/2027DPWH-HGAB-12499_Cert%20of%20Implementability.pdf",
           "sourceName": "2027DPWH-HGAB-12499_Cert of Implementability.pdf",
-          "documentKind": "Certificate of Implementability",
-          "projectMatchCount": 0,
+          "projectMatchCount": 1,
           "multipleDocumentMatchReview": false
         }
       ]
@@ -145713,8 +145740,7 @@
           "sourceProvider": "BetterGov budget assets",
           "sourceUrl": "https://budget-assets.bettergov.ph/hgab/2027/dpwh/supporting-documents/Region%20VII/CSSP/Cebu%206th%20DEO/2027DPWH-HGAB-12500/2027DPWH-HGAB-12500_BP202.pdf",
           "sourceName": "2027DPWH-HGAB-12500_BP202.pdf",
-          "status": "value_extracted",
-          "amountPesos": 5625000.0,
+          "status": "amount_requires_review",
           "printedValue": "5,625,000.00",
           "amountUnit": "PHP",
           "amountLabel": "Total Proposal Cost",
@@ -145722,8 +145748,12 @@
           "matchBasis": "Labelled Total Proposal Cost field",
           "extractionMethod": "native PDF text extraction",
           "sourceStage": "HGAB supporting document",
-          "projectMatchCount": 2,
-          "multipleDocumentMatchReview": true
+          "projectMatchCount": 1,
+          "multipleDocumentMatchReview": false,
+          "candidateAmountPesos": 5625000.0,
+          "candidatePrintedValue": "5,625,000.00",
+          "candidateSourcePage": 1,
+          "reviewReason": "Another linked BP 202 amount matched the HGAB allocation; this nonmatching file was excluded from the project comparison."
         },
         {
           "documentKind": "BP 202",
@@ -145739,8 +145769,8 @@
           "matchBasis": "Labelled Total Proposal Cost field",
           "extractionMethod": "native PDF text extraction",
           "sourceStage": "HGAB supporting document",
-          "projectMatchCount": 2,
-          "multipleDocumentMatchReview": true
+          "projectMatchCount": 1,
+          "multipleDocumentMatchReview": false
         },
         {
           "status": "exact_project_title_not_found",
@@ -145881,15 +145911,27 @@
           "multipleDocumentMatchReview": false
         },
         {
-          "status": "exact_project_title_not_found",
+          "amountPesos": 15620000.0,
+          "printedValue": "15,620,000.00",
+          "amountUnit": "PHP as printed (×1 matches HGAB allocation)",
+          "amountScaleCheck": "allocation_factor_match_x1",
           "amountLabel": "Project amount in COI project list",
-          "extractionMethod": "Exact project title not found in linked COI",
-          "sourceProvider": "BetterGov budget assets",
+          "sourcePage": 1,
+          "sourcePages": [
+            1
+          ],
+          "amountCandidatesPrinted": [
+            "15,620,000.00"
+          ],
+          "extractionMethod": "Tesseract OCR",
+          "status": "value_extracted",
+          "matchBasis": "Exact normalized project title with adjacent amount; ×1, ×1000, and ÷1000 checked against HGAB allocation",
+          "documentKind": "Certificate of Implementability",
           "sourceStage": "HGAB supporting document",
+          "sourceProvider": "BetterGov budget assets",
           "sourceUrl": "https://budget-assets.bettergov.ph/hgab/2027/dpwh/supporting-documents/Region%20VII/CSSP/Cebu%206th%20DEO/2027DPWH-HGAB-12502/2027DPWH-HGAB-12502_Cert%20of%20Implementability.pdf",
           "sourceName": "2027DPWH-HGAB-12502_Cert of Implementability.pdf",
-          "documentKind": "Certificate of Implementability",
-          "projectMatchCount": 0,
+          "projectMatchCount": 1,
           "multipleDocumentMatchReview": false
         }
       ]
@@ -146811,8 +146853,7 @@
           "sourceProvider": "BetterGov budget assets",
           "sourceUrl": "https://budget-assets.bettergov.ph/hgab/2027/dpwh/supporting-documents/Region%20III/CSSP/Nueva%20Ecija%201st%20DEO/2027DPWH-HGAB-02597/2027DPWH-HGAB-02597_BP%20202.pdf",
           "sourceName": "2027DPWH-HGAB-02597_BP 202.pdf",
-          "status": "value_extracted",
-          "amountPesos": 15000000.0,
+          "status": "amount_requires_review",
           "printedValue": "15,000,000.00",
           "amountUnit": "PHP",
           "amountLabel": "Total Proposal Cost",
@@ -146820,8 +146861,12 @@
           "matchBasis": "Labelled Total Proposal Cost field",
           "extractionMethod": "native PDF text extraction",
           "sourceStage": "HGAB supporting document",
-          "projectMatchCount": 2,
-          "multipleDocumentMatchReview": true
+          "projectMatchCount": 1,
+          "multipleDocumentMatchReview": false,
+          "candidateAmountPesos": 15000000.0,
+          "candidatePrintedValue": "15,000,000.00",
+          "candidateSourcePage": 1,
+          "reviewReason": "Another linked BP 202 amount matched the HGAB allocation; this nonmatching file was excluded from the project comparison."
         },
         {
           "documentKind": "BP 202",
@@ -146837,8 +146882,8 @@
           "matchBasis": "Labelled Total Proposal Cost field",
           "extractionMethod": "native PDF text extraction",
           "sourceStage": "HGAB supporting document",
-          "projectMatchCount": 2,
-          "multipleDocumentMatchReview": true
+          "projectMatchCount": 1,
+          "multipleDocumentMatchReview": false
         },
         {
           "amountPesos": 7000000.0,
@@ -151301,27 +151346,15 @@
           "multipleDocumentMatchReview": false
         },
         {
-          "amountPesos": 5000000.0,
-          "printedValue": "5,000",
-          "amountUnit": "P'000 ×1000 (matches HGAB allocation)",
-          "amountScaleCheck": "allocation_factor_match_x1000",
+          "status": "exact_project_title_not_found",
           "amountLabel": "Project amount in COI project list",
-          "sourcePage": 3,
-          "sourcePages": [
-            3
-          ],
-          "amountCandidatesPrinted": [
-            "5,000"
-          ],
-          "extractionMethod": "Tesseract OCR",
-          "status": "value_extracted",
-          "matchBasis": "Exact normalized project title with adjacent amount; ×1, ×1000, and ÷1000 checked against HGAB allocation",
-          "documentKind": "Certificate of Implementability",
-          "sourceStage": "HGAB supporting document",
+          "extractionMethod": "Exact project title not found in linked COI",
           "sourceProvider": "BetterGov budget assets",
+          "sourceStage": "HGAB supporting document",
           "sourceUrl": "https://budget-assets.bettergov.ph/hgab/2027/dpwh/supporting-documents/Region%20II/CSSP/Cagayan%203rd%20DEO/2027DPWH-HGAB-11834/2027DPWH-HGAB-11834_Certificate%20of%20Implementability.pdf",
           "sourceName": "2027DPWH-HGAB-11834_Certificate of Implementability.pdf",
-          "projectMatchCount": 1,
+          "documentKind": "Certificate of Implementability",
+          "projectMatchCount": 0,
           "multipleDocumentMatchReview": false
         }
       ]
@@ -152307,15 +152340,27 @@
           "multipleDocumentMatchReview": false
         },
         {
-          "status": "exact_project_title_not_found",
+          "amountPesos": 20000000.0,
+          "printedValue": "20,000",
+          "amountUnit": "P'000 ×1000 (matches HGAB allocation)",
+          "amountScaleCheck": "allocation_factor_match_x1000",
           "amountLabel": "Project amount in COI project list",
-          "extractionMethod": "Exact project title not found in linked COI",
-          "sourceProvider": "BetterGov budget assets",
+          "sourcePage": 3,
+          "sourcePages": [
+            3
+          ],
+          "amountCandidatesPrinted": [
+            "20,000"
+          ],
+          "extractionMethod": "Tesseract OCR",
+          "status": "value_extracted",
+          "matchBasis": "Exact normalized project title with adjacent amount; ×1, ×1000, and ÷1000 checked against HGAB allocation",
+          "documentKind": "Certificate of Implementability",
           "sourceStage": "HGAB supporting document",
+          "sourceProvider": "BetterGov budget assets",
           "sourceUrl": "https://budget-assets.bettergov.ph/hgab/2027/dpwh/supporting-documents/Region%20II/CSSP/Cagayan%203rd%20DEO/2027DPWH-HGAB-11831/2027DPWH-HGAB-11831_Certificate%20of%20Implementability.pdf",
           "sourceName": "2027DPWH-HGAB-11831_Certificate of Implementability.pdf",
-          "documentKind": "Certificate of Implementability",
-          "projectMatchCount": 0,
+          "projectMatchCount": 1,
           "multipleDocumentMatchReview": false
         }
       ]
@@ -175011,13 +175056,13 @@
         },
         {
           "amountPesos": 42100000.0,
-          "printedValue": "42,100,000.00",
+          "printedValue": "42,100,000",
           "amountUnit": "PHP as printed (×1 matches HGAB allocation)",
           "amountScaleCheck": "allocation_factor_match_x1",
           "amountLabel": "Project amount in COI project list",
-          "sourcePage": 1,
+          "sourcePage": 2,
           "sourcePages": [
-            1
+            2
           ],
           "amountCandidatesPrinted": [
             "42,100,000",
@@ -175099,13 +175144,13 @@
         },
         {
           "amountPesos": 21500000.0,
-          "printedValue": "21,500,000",
+          "printedValue": "21,500,000.00",
           "amountUnit": "PHP as printed (×1 matches HGAB allocation)",
           "amountScaleCheck": "allocation_factor_match_x1",
           "amountLabel": "Project amount in COI project list",
-          "sourcePage": 2,
+          "sourcePage": 1,
           "sourcePages": [
-            2
+            1
           ],
           "amountCandidatesPrinted": [
             "21,500,000",
@@ -180951,13 +180996,13 @@
         },
         {
           "amountPesos": 34400000.0,
-          "printedValue": "34,400,000.00",
+          "printedValue": "34,400,000",
           "amountUnit": "PHP as printed (×1 matches HGAB allocation)",
           "amountScaleCheck": "allocation_factor_match_x1",
           "amountLabel": "Project amount in COI project list",
-          "sourcePage": 1,
+          "sourcePage": 2,
           "sourcePages": [
-            1
+            2
           ],
           "amountCandidatesPrinted": [
             "34,400,000",
@@ -181447,13 +181492,13 @@
         },
         {
           "amountPesos": 60000000.0,
-          "printedValue": "60,000,000.00",
+          "printedValue": "60,000,000",
           "amountUnit": "PHP as printed (×1 matches HGAB allocation)",
           "amountScaleCheck": "allocation_factor_match_x1",
           "amountLabel": "Project amount in COI project list",
-          "sourcePage": 1,
+          "sourcePage": 2,
           "sourcePages": [
-            1
+            2
           ],
           "amountCandidatesPrinted": [
             "60,000,000",
@@ -183494,8 +183539,8 @@
           "sourcePage": 1,
           "extractionMethod": "Tesseract OCR",
           "matchBasis": "Labelled Total Proposal Cost field · one BP 202 per project",
-          "projectMatchCount": 2,
-          "multipleDocumentMatchReview": true
+          "projectMatchCount": 1,
+          "multipleDocumentMatchReview": false
         },
         {
           "documentKind": "BP 202",
@@ -183503,16 +183548,19 @@
           "sourceStage": "NEP counterpart Proposal document",
           "sourceUrl": "https://s3.infrawatch.ph/nep/fy2027/2027DPWH-Proposal-19872/2027DPWH-Proposal-19872_BP202.pdf",
           "sourceName": "2027DPWH-Proposal-19872_BP202.pdf",
-          "status": "value_extracted",
-          "amountPesos": 150000000.0,
+          "status": "amount_requires_review",
           "printedValue": "150,000,000",
           "amountUnit": "PHP",
           "amountLabel": "Total Proposal Cost",
           "sourcePage": 1,
           "extractionMethod": "Tesseract OCR",
           "matchBasis": "Labelled Total Proposal Cost field · one BP 202 per project",
-          "projectMatchCount": 2,
-          "multipleDocumentMatchReview": true
+          "projectMatchCount": 1,
+          "multipleDocumentMatchReview": false,
+          "candidateAmountPesos": 150000000.0,
+          "candidatePrintedValue": "150,000,000",
+          "candidateSourcePage": 1,
+          "reviewReason": "Another linked BP 202 amount matched the HGAB allocation; this nonmatching file was excluded from the project comparison."
         },
         {
           "amountPesos": 210000000.0,
@@ -187203,15 +187251,27 @@
           "multipleDocumentMatchReview": false
         },
         {
-          "status": "exact_project_title_not_found",
+          "amountPesos": 5000000.0,
+          "printedValue": "5,000,000.00",
+          "amountUnit": "PHP as printed (×1 matches HGAB allocation)",
+          "amountScaleCheck": "allocation_factor_match_x1",
           "amountLabel": "Project amount in COI project list",
-          "extractionMethod": "Exact project title not found in linked COI",
-          "sourceProvider": "BetterGov budget assets",
+          "sourcePage": 1,
+          "sourcePages": [
+            1
+          ],
+          "amountCandidatesPrinted": [
+            "5,000,000.00"
+          ],
+          "extractionMethod": "Tesseract OCR",
+          "status": "value_extracted",
+          "matchBasis": "Exact normalized project title with adjacent amount; ×1, ×1000, and ÷1000 checked against HGAB allocation",
+          "documentKind": "Certificate of Implementability",
           "sourceStage": "HGAB supporting document",
+          "sourceProvider": "BetterGov budget assets",
           "sourceUrl": "https://budget-assets.bettergov.ph/hgab/2027/dpwh/supporting-documents/Region%20III/CSSP/Bataan%202nd%20DEO/2027DPWH-HGAB-14029/2027DPWH-HGAB-14029_Cert%20of%20Implementability.pdf",
           "sourceName": "2027DPWH-HGAB-14029_Cert of Implementability.pdf",
-          "documentKind": "Certificate of Implementability",
-          "projectMatchCount": 0,
+          "projectMatchCount": 1,
           "multipleDocumentMatchReview": false
         }
       ]
@@ -187768,15 +187828,27 @@
           "multipleDocumentMatchReview": false
         },
         {
-          "status": "exact_project_title_not_found",
+          "amountPesos": 8000000.0,
+          "printedValue": "8,000,000.00",
+          "amountUnit": "PHP as printed (×1 matches HGAB allocation)",
+          "amountScaleCheck": "allocation_factor_match_x1",
           "amountLabel": "Project amount in COI project list",
-          "extractionMethod": "Exact project title not found in linked COI",
-          "sourceProvider": "BetterGov budget assets",
+          "sourcePage": 1,
+          "sourcePages": [
+            1
+          ],
+          "amountCandidatesPrinted": [
+            "8,000,000.00"
+          ],
+          "extractionMethod": "Tesseract OCR",
+          "status": "value_extracted",
+          "matchBasis": "Exact normalized project title with adjacent amount; ×1, ×1000, and ÷1000 checked against HGAB allocation",
+          "documentKind": "Certificate of Implementability",
           "sourceStage": "HGAB supporting document",
+          "sourceProvider": "BetterGov budget assets",
           "sourceUrl": "https://budget-assets.bettergov.ph/hgab/2027/dpwh/supporting-documents/Region%20III/CSSP/Bataan%202nd%20DEO/2027DPWH-HGAB-14031/2027DPWH-HGAB-14031_Cert%20of%20Implementability.pdf",
           "sourceName": "2027DPWH-HGAB-14031_Cert of Implementability.pdf",
-          "documentKind": "Certificate of Implementability",
-          "projectMatchCount": 0,
+          "projectMatchCount": 1,
           "multipleDocumentMatchReview": false
         }
       ]
@@ -193058,15 +193130,27 @@
           "multipleDocumentMatchReview": false
         },
         {
-          "status": "exact_project_title_not_found",
+          "amountPesos": 3000000.0,
+          "printedValue": "3,000,000.00",
+          "amountUnit": "PHP as printed (×1 matches HGAB allocation)",
+          "amountScaleCheck": "allocation_factor_match_x1",
           "amountLabel": "Project amount in COI project list",
-          "extractionMethod": "Exact project title not found in linked COI",
-          "sourceProvider": "BetterGov budget assets",
+          "sourcePage": 1,
+          "sourcePages": [
+            1
+          ],
+          "amountCandidatesPrinted": [
+            "3,000,000.00"
+          ],
+          "extractionMethod": "Tesseract OCR",
+          "status": "value_extracted",
+          "matchBasis": "Exact normalized project title with adjacent amount; ×1, ×1000, and ÷1000 checked against HGAB allocation",
+          "documentKind": "Certificate of Implementability",
           "sourceStage": "HGAB supporting document",
+          "sourceProvider": "BetterGov budget assets",
           "sourceUrl": "https://budget-assets.bettergov.ph/hgab/2027/dpwh/supporting-documents/Region%20III/CSSP/Bataan%202nd%20DEO/2027DPWH-HGAB-14025/2027DPWH-HGAB-14025_Cert%20of%20Implementability.pdf",
           "sourceName": "2027DPWH-HGAB-14025_Cert of Implementability.pdf",
-          "documentKind": "Certificate of Implementability",
-          "projectMatchCount": 0,
+          "projectMatchCount": 1,
           "multipleDocumentMatchReview": false
         }
       ]
@@ -213119,27 +213203,15 @@
           "multipleDocumentMatchReview": false
         },
         {
-          "amountPesos": 5000000.0,
-          "printedValue": "5,000,000.00",
-          "amountUnit": "PHP as printed (×1 matches HGAB allocation)",
-          "amountScaleCheck": "allocation_factor_match_x1",
+          "status": "exact_project_title_not_found",
           "amountLabel": "Project amount in COI project list",
-          "sourcePage": 2,
-          "sourcePages": [
-            2
-          ],
-          "amountCandidatesPrinted": [
-            "5,000,000.00"
-          ],
-          "extractionMethod": "Tesseract OCR",
-          "status": "value_extracted",
-          "matchBasis": "Exact normalized project title with adjacent amount; ×1, ×1000, and ÷1000 checked against HGAB allocation",
-          "documentKind": "Certificate of Implementability",
-          "sourceStage": "HGAB supporting document",
+          "extractionMethod": "Exact project title not found in linked COI",
           "sourceProvider": "BetterGov budget assets",
+          "sourceStage": "HGAB supporting document",
           "sourceUrl": "https://budget-assets.bettergov.ph/hgab/2027/dpwh/supporting-documents/Region%20IV-A/OO2/2027DPWH-HGAB-11042/2027DPWH-HGAB-11042_Certificate%20of%20Implementability.pdf",
           "sourceName": "2027DPWH-HGAB-11042_Certificate of Implementability.pdf",
-          "projectMatchCount": 1,
+          "documentKind": "Certificate of Implementability",
+          "projectMatchCount": 0,
           "multipleDocumentMatchReview": false
         }
       ]
@@ -213657,15 +213729,27 @@
           "multipleDocumentMatchReview": false
         },
         {
-          "status": "exact_project_title_not_found",
+          "amountPesos": 100000000.0,
+          "printedValue": "100,000,000.00",
+          "amountUnit": "PHP as printed (×1 matches HGAB allocation)",
+          "amountScaleCheck": "allocation_factor_match_x1",
           "amountLabel": "Project amount in COI project list",
-          "extractionMethod": "Exact project title not found in linked COI",
-          "sourceProvider": "BetterGov budget assets",
+          "sourcePage": 1,
+          "sourcePages": [
+            1
+          ],
+          "amountCandidatesPrinted": [
+            "100,000,000.00"
+          ],
+          "extractionMethod": "Tesseract OCR",
+          "status": "value_extracted",
+          "matchBasis": "Exact normalized project title with adjacent amount; ×1, ×1000, and ÷1000 checked against HGAB allocation",
+          "documentKind": "Certificate of Implementability",
           "sourceStage": "HGAB supporting document",
+          "sourceProvider": "BetterGov budget assets",
           "sourceUrl": "https://budget-assets.bettergov.ph/hgab/2027/dpwh/supporting-documents/Region%20II/OO2/Cagayan%201st%20DEO/2027DPWH-HGAB-11150/2027DPWH-HGAB-11150_Cert%20of%20Implementability.PDF",
           "sourceName": "2027DPWH-HGAB-11150_Cert of Implementability.PDF",
-          "documentKind": "Certificate of Implementability",
-          "projectMatchCount": 0,
+          "projectMatchCount": 1,
           "multipleDocumentMatchReview": false
         }
       ]
@@ -214152,27 +214236,15 @@
           "multipleDocumentMatchReview": false
         },
         {
-          "amountPesos": 5000000.0,
-          "printedValue": "5,000",
-          "amountUnit": "P'000 ×1000 (matches HGAB allocation)",
-          "amountScaleCheck": "allocation_factor_match_x1000",
+          "status": "exact_project_title_not_found",
           "amountLabel": "Project amount in COI project list",
-          "sourcePage": 2,
-          "sourcePages": [
-            2
-          ],
-          "amountCandidatesPrinted": [
-            "5,000"
-          ],
-          "extractionMethod": "Tesseract OCR",
-          "status": "value_extracted",
-          "matchBasis": "Exact normalized project title with adjacent amount; ×1, ×1000, and ÷1000 checked against HGAB allocation",
-          "documentKind": "Certificate of Implementability",
-          "sourceStage": "HGAB supporting document",
+          "extractionMethod": "Exact project title not found in linked COI",
           "sourceProvider": "BetterGov budget assets",
+          "sourceStage": "HGAB supporting document",
           "sourceUrl": "https://budget-assets.bettergov.ph/hgab/2027/dpwh/supporting-documents/Region%20II/CSSP/Cagayan%203rd%20DEO/2027DPWH-HGAB-11197/2027DPWH-HGAB-11197_Certificate%20of%20Implementability.pdf",
           "sourceName": "2027DPWH-HGAB-11197_Certificate of Implementability.pdf",
-          "projectMatchCount": 1,
+          "documentKind": "Certificate of Implementability",
+          "projectMatchCount": 0,
           "multipleDocumentMatchReview": false
         }
       ]
@@ -218268,16 +218340,15 @@
           "sourcePage": 1,
           "extractionMethod": "Tesseract OCR",
           "matchBasis": "Labelled Total Proposal Cost field · one BP 202 per project",
-          "projectMatchCount": 3,
-          "multipleDocumentMatchReview": true
+          "projectMatchCount": 1,
+          "multipleDocumentMatchReview": false
         },
         {
           "documentKind": "BP 202",
           "sourceProvider": "BetterGov budget assets",
           "sourceUrl": "https://budget-assets.bettergov.ph/hgab/2027/dpwh/supporting-documents/Region%20X/CSSP/Lanao%20del%20Norte%201st%20DEO/2027DPWH-HGAB-09056/2027DPWH-HGAB-09056_BP202.pdf",
           "sourceName": "2027DPWH-HGAB-09056_BP202.pdf",
-          "status": "value_extracted",
-          "amountPesos": 8000000.0,
+          "status": "amount_requires_review",
           "printedValue": "8,000,000.00",
           "amountUnit": "PHP",
           "amountLabel": "Total Proposal Cost",
@@ -218285,16 +218356,19 @@
           "matchBasis": "Labelled Total Proposal Cost field",
           "extractionMethod": "native PDF text extraction",
           "sourceStage": "HGAB supporting document",
-          "projectMatchCount": 3,
-          "multipleDocumentMatchReview": true
+          "projectMatchCount": 1,
+          "multipleDocumentMatchReview": false,
+          "candidateAmountPesos": 8000000.0,
+          "candidatePrintedValue": "8,000,000.00",
+          "candidateSourcePage": 1,
+          "reviewReason": "Another linked BP 202 amount matched the HGAB allocation; this nonmatching file was excluded from the project comparison."
         },
         {
           "documentKind": "BP 202",
           "sourceProvider": "BetterGov budget assets",
           "sourceUrl": "https://budget-assets.bettergov.ph/hgab/2027/dpwh/supporting-documents/Region%20X/CSSP/Lanao%20del%20Norte%201st%20DEO/2027DPWH-HGAB-09058/2027DPWH-HGAB-09058_BP202.pdf",
           "sourceName": "2027DPWH-HGAB-09058_BP202.pdf",
-          "status": "value_extracted",
-          "amountPesos": 8000000.0,
+          "status": "amount_requires_review",
           "printedValue": "8,000,000.00",
           "amountUnit": "PHP",
           "amountLabel": "Total Proposal Cost",
@@ -218302,8 +218376,12 @@
           "matchBasis": "Labelled Total Proposal Cost field",
           "extractionMethod": "native PDF text extraction",
           "sourceStage": "HGAB supporting document",
-          "projectMatchCount": 3,
-          "multipleDocumentMatchReview": true
+          "projectMatchCount": 1,
+          "multipleDocumentMatchReview": false,
+          "candidateAmountPesos": 8000000.0,
+          "candidatePrintedValue": "8,000,000.00",
+          "candidateSourcePage": 1,
+          "reviewReason": "Another linked BP 202 amount matched the HGAB allocation; this nonmatching file was excluded from the project comparison."
         },
         {
           "amountPesos": 10000000.0,
@@ -245061,8 +245139,7 @@
           "sourceProvider": "BetterGov budget assets",
           "sourceUrl": "https://budget-assets.bettergov.ph/hgab/2027/dpwh/supporting-documents/Region%20I/CSSP/2027DPWH-HGAB-11626/2027DPWH-HGAB-11626_BP202.pdf",
           "sourceName": "2027DPWH-HGAB-11626_BP202.pdf",
-          "status": "value_extracted",
-          "amountPesos": 5000000.0,
+          "status": "amount_requires_review",
           "printedValue": "5,000,000.00",
           "amountUnit": "PHP",
           "amountLabel": "Total Proposal Cost",
@@ -245070,8 +245147,12 @@
           "matchBasis": "Labelled Total Proposal Cost field",
           "extractionMethod": "native PDF text extraction",
           "sourceStage": "HGAB supporting document",
-          "projectMatchCount": 2,
-          "multipleDocumentMatchReview": true
+          "projectMatchCount": 1,
+          "multipleDocumentMatchReview": false,
+          "candidateAmountPesos": 5000000.0,
+          "candidatePrintedValue": "5,000,000.00",
+          "candidateSourcePage": 1,
+          "reviewReason": "Another linked BP 202 amount matched the HGAB allocation; this nonmatching file was excluded from the project comparison."
         },
         {
           "documentKind": "BP 202",
@@ -245087,8 +245168,8 @@
           "matchBasis": "Labelled Total Proposal Cost field",
           "extractionMethod": "native PDF text extraction",
           "sourceStage": "HGAB supporting document",
-          "projectMatchCount": 2,
-          "multipleDocumentMatchReview": true
+          "projectMatchCount": 1,
+          "multipleDocumentMatchReview": false
         },
         {
           "amountPesos": 20000000.0,
@@ -248535,16 +248616,15 @@
           "matchBasis": "Labelled Total Proposal Cost field",
           "extractionMethod": "native PDF text extraction",
           "sourceStage": "HGAB supporting document",
-          "projectMatchCount": 2,
-          "multipleDocumentMatchReview": true
+          "projectMatchCount": 1,
+          "multipleDocumentMatchReview": false
         },
         {
           "documentKind": "BP 202",
           "sourceProvider": "InfraWatch",
           "sourceUrl": "https://s3.infrawatch.ph/nep/fy2027/2027DPWH-Proposal-13257/2027DPWH-Proposal-13257_BP202.pdf",
           "sourceName": "2027DPWH-Proposal-13257_BP202.pdf",
-          "status": "value_extracted",
-          "amountPesos": 9473000.0,
+          "status": "amount_requires_review",
           "printedValue": "9,473,000.00",
           "amountUnit": "PHP",
           "amountLabel": "Total Proposal Cost",
@@ -248552,8 +248632,12 @@
           "matchBasis": "Labelled Total Proposal Cost field",
           "extractionMethod": "native PDF text extraction",
           "sourceStage": "NEP counterpart Proposal document",
-          "projectMatchCount": 2,
-          "multipleDocumentMatchReview": true
+          "projectMatchCount": 1,
+          "multipleDocumentMatchReview": false,
+          "candidateAmountPesos": 9473000.0,
+          "candidatePrintedValue": "9,473,000.00",
+          "candidateSourcePage": 1,
+          "reviewReason": "Another linked BP 202 amount matched the HGAB allocation; this nonmatching file was excluded from the project comparison."
         },
         {
           "amountPesos": 15580000.0,
@@ -248576,11 +248660,10 @@
           "sourceProvider": "BetterGov budget assets",
           "sourceUrl": "https://budget-assets.bettergov.ph/hgab/2027/dpwh/supporting-documents/Region%20IV-A/OO1/2027DPWH-HGAB-10197/2027DPWH-HGAB-10197_CERT%20OF%20IMPLEMENTABILITY.pdf",
           "sourceName": "2027DPWH-HGAB-10197_CERT OF IMPLEMENTABILITY.pdf",
-          "projectMatchCount": 2,
-          "multipleDocumentMatchReview": true
+          "projectMatchCount": 1,
+          "multipleDocumentMatchReview": false
         },
         {
-          "amountPesos": 9473000.0,
           "printedValue": "9,473,000",
           "amountUnit": "PHP as printed",
           "amountScaleCheck": "PHP_as_printed",
@@ -248593,15 +248676,19 @@
             "9,473,000"
           ],
           "extractionMethod": "native PDF text extraction",
-          "status": "value_extracted",
+          "status": "amount_requires_review",
           "matchBasis": "Exact normalized project title with its adjacent amount; multi-project COI list",
           "documentKind": "Certificate of Implementability",
           "sourceStage": "NEP counterpart Proposal document",
           "sourceProvider": "InfraWatch",
           "sourceUrl": "https://s3.infrawatch.ph/nep/fy2027/2027DPWH-Proposal-13257/2027DPWH-Proposal-13257_Cert%20of%20Implementability.pdf",
           "sourceName": "2027DPWH-Proposal-13257_Cert%20of%20Implementability.pdf",
-          "projectMatchCount": 2,
-          "multipleDocumentMatchReview": true
+          "projectMatchCount": 1,
+          "multipleDocumentMatchReview": false,
+          "candidateAmountPesos": 9473000.0,
+          "candidatePrintedValue": "9,473,000",
+          "candidateSourcePage": 9,
+          "reviewReason": "Another linked Certificate of Implementability amount matched the HGAB allocation; this nonmatching file was excluded from the project comparison."
         }
       ]
     },

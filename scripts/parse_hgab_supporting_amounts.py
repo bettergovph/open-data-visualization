@@ -64,6 +64,27 @@ def coi_money(text, document_text='', expected_pesos=None):
         return value, "PHP as printed (P'000 header; no additional scaling)", 'large_printed_amount_retained'
     return value, 'PHP as printed', 'PHP_as_printed'
 
+def exclude_nonmatching_duplicates_when_exact_match(amounts, allocation_pesos):
+    """Keep exact allocation matches as the project match; demote competing files for review."""
+    if allocation_pesos is None:
+        return amounts
+    for kind in KINDS:
+        group = [item for item in amounts if item.get('documentKind') == kind and item.get('status') == 'value_extracted']
+        exact = [item for item in group if item.get('amountPesos') is not None and
+                 abs(float(item['amountPesos']) - float(allocation_pesos)) <= max(1.0, abs(float(allocation_pesos)) * 1e-8)]
+        if not exact:
+            continue
+        for item in group:
+            if item in exact or item.get('amountPesos') is None:
+                continue
+            value = item.pop('amountPesos')
+            item['candidateAmountPesos'] = value
+            item['candidatePrintedValue'] = item.get('printedValue')
+            item['candidateSourcePage'] = item.get('sourcePage')
+            item['status'] = 'amount_requires_review'
+            item['reviewReason'] = f'Another linked {kind} amount matched the HGAB allocation; this nonmatching file was excluded from the project comparison.'
+    return amounts
+
 def page_text(page, allow_ocr=False):
     text = page.get_text('text')
     if not allow_ocr:
@@ -131,7 +152,7 @@ def extract_coi(pdf_path, title, expected_pesos=None):
     extracted = {key: result[key] for key in fields if key in result}
     return (extracted if status == 'value_extracted' else None), status
 
-def extract_coi_project_list(pdf_path, title_rows):
+def extract_coi_project_list(pdf_path, title_rows, allowed_hgab_ids=None):
     """Extract separately titled project amounts from a COI that lists many projects."""
     import pymupdf
     wanted = collections.defaultdict(list)
@@ -158,8 +179,6 @@ def extract_coi_project_list(pdf_path, title_rows):
         normalized = ''.join(normalized_chars).strip()
         occurrences = []
         for title, rows in wanted.items():
-            if len(rows) != 1:
-                continue
             start = 0
             while True:
                 start = normalized.find(title, start)
@@ -209,7 +228,7 @@ def extract_coi_project_list(pdf_path, title_rows):
     unit_context = document_text + '\n' + '\n'.join(all_text)
     for title, rows in wanted.items():
         # Repeated identical titles cannot be assigned safely by title alone.
-        if len(rows) != 1:
+        if len(rows) != 1 or (allowed_hgab_ids is not None and rows[0]['hgabId'] not in allowed_hgab_ids):
             continue
         row = rows[0]
         if title not in title_seen:
@@ -333,9 +352,9 @@ def load_infrawatch_documents(project_ids):
                             result.setdefault(project_id, {})[kind] = (filename, url)
     return result
 
-def parse_coi_list_one(url, filename, title_rows, cache_dir, max_bytes):
+def parse_coi_list_one(url, filename, title_rows, allowed_hgab_ids, cache_dir, max_bytes):
     path = fetch(url, cache_dir, max_bytes)
-    results = extract_coi_project_list(path, title_rows)
+    results = extract_coi_project_list(path, title_rows, allowed_hgab_ids)
     provider = 'InfraWatch' if 'infrawatch' in url.lower() else 'BetterGov budget assets'
     for result in results.values():
         result['sourceProvider'] = provider
@@ -363,11 +382,11 @@ def run_coi_project_list_scan(rows, contexts, manifest_path, manifest, args):
             if kind == 'Certificate of Implementability':
                 entry = documents.setdefault(url, {'filename': filename, 'titleRows': {}})
                 entry['titleRows'][row['hgabId']] = next(x for x in title_rows if x['hgabId'] == row['hgabId'])
-    print(f'COI linked-row scan: {len(documents):,} distinct PDFs · {sum(len(x["titleRows"]) for x in documents.values()):,} linked project rows', flush=True)
+    print(f'COI linked-row scan: {len(documents):,} distinct PDFs · {sum(len(x["titleRows"]) for x in documents.values()):,} linked project rows; all titles used only as row boundaries', flush=True)
     outcomes = {}
     max_bytes = args.max_pdf_mb * 1024 * 1024
     with concurrent.futures.ThreadPoolExecutor(max_workers=args.workers) as pool:
-        futures = [pool.submit(parse_coi_list_one, url, item['filename'], list(item['titleRows'].values()), args.cache, max_bytes)
+        futures = [pool.submit(parse_coi_list_one, url, item['filename'], title_rows, set(item['titleRows']), args.cache, max_bytes)
                    for url, item in documents.items()]
         for index, future in enumerate(concurrent.futures.as_completed(futures), 1):
             url, projects = future.result()
@@ -392,6 +411,8 @@ def run_coi_project_list_scan(rows, contexts, manifest_path, manifest, args):
             existing[key] = item
             counts[item['status']] += 1
         amounts = list(existing.values())
+        allocation = next((row.get('allocationPesos') for row in rows if row['hgabId'] == hgab_id), None)
+        amounts = exclude_nonmatching_duplicates_when_exact_match(amounts, allocation)
         match_counts = {kind: sum(1 for item in amounts if item.get('documentKind') == kind and item.get('status') == 'value_extracted')
                         for kind in KINDS}
         for item in amounts:
