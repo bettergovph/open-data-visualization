@@ -3,9 +3,10 @@
  const script=document.currentScript;
  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const norm=v=>String(v??'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
- const contextBase=new URL('project-context/',script?.src||location.href);let contextManifestPromise;const contextShards=new Map();
+ const contextBase=new URL('project-context/',script?.src||location.href),titleIndexBase=new URL('project-context/title-index/',script?.src||location.href);let contextManifestPromise,titleManifestPromise;const contextShards=new Map(),titleShards=new Map();
  const contextBucket=v=>{let hash=2166136261;for(const c of new TextEncoder().encode(v))hash=Math.imul(hash^c,16777619)>>>0;return(hash&63).toString(16).padStart(2,'0')};
  async function projectContext(id){if(!/^HB\d+-[23]-[\w-]+$/i.test(id))return null;if(!contextManifestPromise)contextManifestPromise=fetch(new URL('manifest.json',contextBase),{cache:'no-cache'}).then(r=>{if(!r.ok)throw Error('Project context index: HTTP '+r.status);return r.json()}).catch(e=>{contextManifestPromise=null;throw e});const m=await contextManifestPromise,key=contextBucket(id),meta=m.shards[key];if(!meta)return null;if(!contextShards.has(key))contextShards.set(key,fetch(new URL(meta.path+'?v='+meta.version,contextBase)).then(r=>{if(!r.ok)throw Error('Project context: HTTP '+r.status);return r.json()}).catch(e=>{contextShards.delete(key);throw e}));const d=await contextShards.get(key);return(d.projects||[]).find(p=>p.hgabId===id)||null}
+ async function projectContextByTitle(title,ctx){const normalized=norm(title);if(!normalized)return null;if(!titleManifestPromise)titleManifestPromise=fetch(new URL('manifest.json',titleIndexBase),{cache:'no-cache'}).then(r=>{if(!r.ok)throw Error('Project title index: HTTP '+r.status);return r.json()}).catch(e=>{titleManifestPromise=null;throw e});const manifest=await titleManifestPromise,key=contextBucket(normalized),meta=manifest.shards[key];if(!meta)return null;if(!titleShards.has(key))titleShards.set(key,fetch(new URL(meta.path+'?v='+meta.version,titleIndexBase)).then(r=>{if(!r.ok)throw Error('Project title index shard: HTTP '+r.status);return r.json()}).catch(e=>{titleShards.delete(key);throw e}));const data=await titleShards.get(key);let matches=(data.rows||[]).filter(row=>row.normalizedTitle===normalized);if(matches.length>1&&ctx.amount!==null){const byAmount=matches.filter(row=>Math.abs(Number(row.amountPesos)-ctx.amount)<.01);if(byAmount.length)matches=byAmount}if(matches.length>1&&ctx.office){const office=norm(ctx.office),byOffice=matches.filter(row=>norm(row.office)===office||norm(row.office).includes(office)||office.includes(norm(row.office)));if(byOffice.length)matches=byOffice}return matches.length===1?projectContext(matches[0].hgabId):null}
  function projectSnapshot(record,title){
   if(!record)return '<section class="linked-source-record project-snapshot"><h3>Project information at a glance</h3><p class="muted">No prepared project summary is available for this row.</p></section>';
   const peso=n=>'₱'+Number(n||0).toLocaleString('en-PH',{maximumFractionDigits:2}),escText=esc;
@@ -44,18 +45,19 @@
   }
   const primaryIndex=row.querySelector('.report-project-title-cell')?.cellIndex;
   const primaryStage=head?.cells[primaryIndex]?.textContent.match(/\b(NEP|HGAB|GAA)\b/i)?.[1]?.toUpperCase();
-  let year=row.dataset.projectYear,stage=row.dataset.projectStage||primaryStage,amount=null,district=null;
+  let year=row.dataset.projectYear,stage=row.dataset.projectStage||primaryStage,amount=null,district=null,office=null;
   if(head)[...head.cells].forEach((th,i)=>{const key=norm(th.textContent),cell=row.cells[i];if(!cell)return;const text=cell.textContent;
    if(!year&&/year|fiscal|stage/.test(key)){const columnStage=(th.textContent+' '+text).match(/\b(HGAB|GAA|NEP)\b/i)?.[1]?.toUpperCase();if(!primaryStage||!columnStage||columnStage===primaryStage){year=text.match(/(?:FY\s*)?((?:19|20)\d{2})\b/)?.[1];if(columnStage)stage=columnStage}}
    if(/^(?:district|legislative district)$/.test(key))district=text;
-   if(amount===null&&/^(?:allocation|amount|budget|total cost)(?: |$)/.test(key)){const n=text.replace(/[,₱\s]/g,'');if(/^\d+(?:\.\d+)?$/.test(n))amount=Number(n)}
+   if(!office&&/^(?:office|implementing office|office \/ deo|deo)$/.test(key))office=text;
+   if(amount===null&&/\b(?:allocation|amount|budget|total cost)\b/.test(key)){const n=text.replace(/[,₱\s]/g,'');if(/^\d+(?:\.\d+)?$/.test(n))amount=Number(n)}
   });
-  return {identifiers:[...identifiers],year:year?Number(year):null,stage,amount,district};
+  return {identifiers:[...identifiers],year:year?Number(year):null,stage,amount,district,office};
  }
  async function enrich({host,table,row,titles,visible={headers:[],values:[]}}){
   const token={};host._evidenceToken=token;host.innerHTML='<section class="linked-source-record project-snapshot"><h3>Project information at a glance</h3><p role="status">Loading project documents, flags and location context…</p></section>';
   try{
-   const ctx=context(table,row),hgabId=ctx.identifiers.find(id=>/^HB\d+-[23]-[\w-]+$/i.test(id));const directProject=hgabId?await projectContext(hgabId):null;if(host._evidenceToken!==token)return;const infoHost=host.querySelector('.project-snapshot');infoHost.outerHTML=projectSnapshot(directProject,titles[0]);
+   const ctx=context(table,row),hgabId=ctx.identifiers.find(id=>/^HB\d+-[23]-[\w-]+$/i.test(id));let directProject=hgabId?await projectContext(hgabId):null;if(!directProject)directProject=await projectContextByTitle(titles[0],ctx);if(host._evidenceToken!==token)return;const infoHost=host.querySelector('.project-snapshot');infoHost.outerHTML=projectSnapshot(directProject,titles[0]);
   }catch(e){if(host._evidenceToken===token){host.innerHTML='<section class="linked-source-record project-snapshot"><h3>Project information at a glance</h3><p role="status">Could not load the prepared project information: '+esc(e.message)+'.</p><button type="button" class="project-summary-retry">Retry</button></section>';host.querySelector('.project-summary-retry').onclick=()=>enrich({host,table,row,titles,visible})}}
  }
  window.ReportProjectEvidence={enrich};

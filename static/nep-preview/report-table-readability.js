@@ -33,7 +33,7 @@ const sharedScript=document.currentScript?.src||new URL('report-table-readabilit
 let evidenceLoader;
 function linkedEvidence(){
  if(window.ReportProjectEvidence)return Promise.resolve(window.ReportProjectEvidence);
- if(!evidenceLoader)evidenceLoader=new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=new URL('project-evidence-details.js?v=project-supporting-amounts-20261118-3',sharedScript).href;script.onload=()=>window.ReportProjectEvidence?resolve(window.ReportProjectEvidence):reject(Error('Evidence reader did not initialize'));script.onerror=()=>reject(Error('Evidence reader could not be loaded'));document.head.append(script)}).catch(e=>{evidenceLoader=null;throw e});
+ if(!evidenceLoader)evidenceLoader=new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=new URL('project-evidence-details.js?v=3910087de5f1',sharedScript).href;script.onload=()=>window.ReportProjectEvidence?resolve(window.ReportProjectEvidence):reject(Error('Evidence reader did not initialize'));script.onerror=()=>reject(Error('Evidence reader could not be loaded'));document.head.append(script)}).catch(e=>{evidenceLoader=null;throw e});
  return evidenceLoader;
 }
 const titleHeader=text=>{
@@ -60,7 +60,7 @@ function openProjectDetails(table,row,titleIndexes){
  detailDialog.querySelector('#report-project-dialog-title').textContent=title||'Project details';
  if(!detailDialog.open)detailDialog.showModal();
  const host=detailDialog.querySelector('.report-linked-project-evidence'),request={};host._loadingRequest=request;
- const titles=titleIndexes.flatMap(index=>{const cell=row.cells[index],copy=cell.cloneNode(true);copy.querySelectorAll('button,small,.report-project-details-trigger').forEach(n=>n.remove());const text=normalize(copy.textContent);return [cell.dataset.projectTitle,text,text.split(' · ')[0],cellText(cell)].filter(Boolean)});
+ const titles=[...new Set(titleIndexes.map(index=>{const cell=row.cells[index],copy=cell.cloneNode(true);copy.querySelectorAll('button,small,.report-project-details-trigger').forEach(n=>n.remove());return normalize(copy.textContent)}).filter(Boolean))];
  host.innerHTML='<h3>Linked project evidence</h3><p role="status">Loading linked source records…</p>';
  const visible={headers:[...head.cells].map(cell=>normalize(cell.innerText||cell.textContent)),values:[...row.cells].map(cellText)};
  linkedEvidence().then(reader=>{if(host._loadingRequest===request)reader.enrich({host,table,row,titles,visible})}).catch(e=>{if(host._loadingRequest===request)host.textContent='Linked source records could not be loaded: '+e.message});
@@ -73,7 +73,7 @@ document.addEventListener('click',event=>{
  if(mapped&&window.ReportMpbDetails?.hasRecord(mapped.dataset.mpbProjectId))return;
  const table=cell.closest('table'),head=table?.tHead?.rows[table.tHead.rows.length-1];
  if(!head)return;
- const indexes=[...head.cells].map((th,index)=>titleHeader(th.textContent)?index:-1).filter(index=>index>=0).slice(0,1);
+ const indexes=[...head.cells].map((th,index)=>titleHeader(th.textContent)?index:-1).filter(index=>index>=0);
  if(!indexes.length)return;
  event.preventDefault();event.stopPropagation();openProjectDetails(table,cell.parentElement,indexes);
 },true);
