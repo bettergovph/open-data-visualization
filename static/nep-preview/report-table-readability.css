@@ -74,3 +74,19 @@
 .project-snapshot{border:1px solid #cbd7e5;background:#fff;margin:0 0 18px}.project-snapshot>h3{margin-top:0}.project-snapshot-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:12px 0}.project-snapshot-grid>div,.project-snapshot-cost{display:flex;flex-direction:column;gap:5px;padding:12px;border:1px solid #e0e6ed;border-radius:8px;background:#f7f9fc}.project-snapshot-grid strong,.project-snapshot-cost strong{font-size:12px;color:#526173}.project-snapshot-grid span,.project-snapshot-cost span{font-weight:650}.project-snapshot-cost{margin:12px 0;border-left:4px solid #0038A8}.project-snapshot-section{margin:10px 0;padding:10px 12px;border:1px solid #e0e6ed;border-radius:8px;background:#fbfcfe}.project-snapshot-section summary{cursor:pointer;color:#0038A8;font-weight:750}.project-snapshot-section ul{padding-left:22px}.project-snapshot-section li{margin:7px 0;overflow-wrap:anywhere}.project-snapshot a{color:#0038A8;text-decoration:underline;text-underline-offset:2px;font-weight:700}.project-document-name{display:block;margin-top:2px;color:#526173;font-size:12px;overflow-wrap:anywhere}.linked-project-related{margin-top:18px;padding-top:4px;border-top:2px solid #d8e1eb}
 @media(max-width:650px){.project-snapshot-grid{grid-template-columns:minmax(0,1fr)}}
 .project-source-comparison{margin:12px 0;padding:12px;border:1px solid #cad7e7;border-left:4px solid #0038A8;border-radius:8px;background:#f7f9fc}.project-source-comparison summary{cursor:pointer;color:#0038A8;font-weight:750}.project-source-comparison p{margin:10px 0}.project-source-comparison a{display:inline-block;margin:3px 8px 3px 0;color:#0038A8;font-weight:750;text-decoration:underline;text-underline-offset:2px}
+
+/* Color cues make the prepared project details easier to scan. */
+.project-snapshot-grid>div:nth-child(1){background:#e8f1ff;border-color:#9bbcf4;border-top:4px solid #2457a6}
+.project-snapshot-grid>div:nth-child(2){background:#e8f6f2;border-color:#9bd6c6;border-top:4px solid #16836b}
+.project-snapshot-grid>div:nth-child(3){background:#f1edff;border-color:#c4b7f3;border-top:4px solid #7052b5}
+.project-snapshot-grid>div:nth-child(4){background:#e8f7fb;border-color:#9fd8e5;border-top:4px solid #167f99}
+.project-snapshot-cost{background:#fff8e8;border-color:#edd08a;border-left-color:#c17b00}
+.project-source-comparison{background:#fff8e8;border-color:#edd08a;border-left-color:#c17b00}
+.project-source-comparison summary{color:#875500}
+.project-proposal-section{background:#f6f2ff;border-color:#d8cef5;border-left:4px solid #7052b5}
+.project-documents-section{background:#edf6ff;border-color:#c3dcf4;border-left:4px solid #3977b8}
+.project-signatories-section{background:#eef8f1;border-color:#c5e3cc;border-left:4px solid #39804b}
+.project-flags-section{background:#fff1ef;border-color:#f0c3bd;border-left:4px solid #bd3c32}
+.project-flags-section summary{color:#a12d27}
+.project-geography-section{background:#eef8f8;border-color:#bee0dc;border-left:4px solid #25877c}
+.project-other-section{background:#f4f5f7;border-color:#d6dbe1;border-left:4px solid #687786}
