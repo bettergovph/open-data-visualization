@@ -53,7 +53,7 @@
     const other=groups.filter(group=>!(group.documentTypes||[]).includes('Photos'));
     const sources=data.bySourceStage||{};
     $('document-reuse-summary').innerHTML=[
-      [`${fmt(photo.length)}`,`photo-document groups · ${fmt(photoCodes.size)} source folders`],
+      [`${fmt(photo.length)}`,`identical photo-PDF groups · ${fmt(photoCodes.size)} project folders`],
       [`${fmt(other.length)}`,`other exact-content groups`],
       [`${fmt(sources['Proposal-only groups'])} / ${fmt(sources['Senate-HGAB-only groups'])}`,`Proposal-only / Senate-HGAB-only groups · ${fmt(sources['Cross-stage groups'])} cross-stage`],
       [fmt(data.scannedPdfFiles),`local PDFs scanned · ${esc(data.generatedAtUtc||'')}`],
