@@ -65,11 +65,20 @@ def coi_money(text, document_text='', expected_pesos=None):
     return value, 'PHP as printed', 'PHP_as_printed'
 
 def exclude_nonmatching_duplicates_when_exact_match(amounts, allocation_pesos):
-    """Keep exact allocation matches as the project match; demote competing files for review."""
+    """Keep allocation-matching files and demote competing files when sources duplicate.
+
+    Apply the factor-resolved amount already stored on each COI row (×1, ×1000,
+    or ÷1000) the same way as a BP amount. Preserve duplicate counts so the UI
+    can show that alternatives were reviewed even after nonmatching files are
+    excluded from the comparison.
+    """
     if allocation_pesos is None:
         return amounts
     for kind in KINDS:
         group = [item for item in amounts if item.get('documentKind') == kind and item.get('status') == 'value_extracted']
+        if len(group) > 1:
+            for item in group:
+                item['duplicateSourceCount'] = len(group)
         exact = [item for item in group if item.get('amountPesos') is not None and
                  abs(float(item['amountPesos']) - float(allocation_pesos)) <= max(1.0, abs(float(allocation_pesos)) * 1e-8)]
         if not exact:
@@ -82,7 +91,11 @@ def exclude_nonmatching_duplicates_when_exact_match(amounts, allocation_pesos):
             item['candidatePrintedValue'] = item.get('printedValue')
             item['candidateSourcePage'] = item.get('sourcePage')
             item['status'] = 'amount_requires_review'
-            item['reviewReason'] = f'Another linked {kind} amount matched the HGAB allocation; this nonmatching file was excluded from the project comparison.'
+            item['excludedByAllocationMatch'] = True
+            item['reviewReason'] = f'Excluded from comparison: another linked {kind} source matched this project title and the HGAB allocation (after checking ×1, ×1000, and ÷1000 where applicable).'
+        if exact and len(group) > 1:
+            for item in exact:
+                item['excludedNonmatchingSourceCount'] = len(group) - len(exact)
     return amounts
 
 def page_text(page, allow_ocr=False):
@@ -418,7 +431,7 @@ def run_coi_project_list_scan(rows, contexts, manifest_path, manifest, args):
         for item in amounts:
             if item.get('documentKind') in KINDS:
                 item['projectMatchCount'] = match_counts[item['documentKind']]
-                item['multipleDocumentMatchReview'] = match_counts[item['documentKind']] > 1
+                item['multipleDocumentMatchReview'] = max(match_counts[item['documentKind']], item.get('duplicateSourceCount', 0)) > 1
         context[1]['supportingDocumentAmounts'] = sorted(amounts, key=lambda item: (item.get('documentKind', ''), item.get('sourceUrl', '')))
     updates = {hgab_id: contexts[hgab_id][1].get('supportingDocumentAmounts', []) for hgab_id in project_ids if hgab_id in contexts}
     for filename in ['expectation-vs-reality-data.json', 'expectation-vs-reality-flagged-data.json', 'expectation-vs-reality-red-data.json', 'expectation-vs-reality-double-red-data.json']:
