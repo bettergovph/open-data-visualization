@@ -13,6 +13,8 @@
   const prev=document.getElementById(prefix+'-prev');
   const next=document.getElementById(prefix+'-next');
   const size=document.getElementById(prefix+'-page-size');
+  const requestedHgabId=allHgab?new URLSearchParams(window.location.search).get('hgabId'):'';
+  if(requestedHgabId){search.value=requestedHgabId;size.value='100'}
   let rows=[],page=0;
   function render(){
     const q=search.value.trim().toLocaleLowerCase();
@@ -44,5 +46,5 @@
   const source=section?.dataset.hgabCoverageSource;
   if(!source){body.innerHTML='<tr><td colspan="'+(allHgab?'8':'7')+'">Coverage source is not configured.</td></tr>';count.textContent='Coverage unavailable';return;}
   const indexSource=source.replace(/\.json(?:\?.*)?$/,'-index.json');
-  (window.loadReportShardedJson?window.loadReportShardedJson(indexSource):fetch(source).then(r=>{if(!r.ok)throw Error('Coverage export unavailable ('+r.status+')');return r.json()})).then(d=>{rows=Array.isArray(d.projects)?d.projects:[];render()}).catch(e=>{body.innerHTML='<tr><td colspan="'+(allHgab?'8':'7')+'">Could not load the document coverage export. '+esc(e.message)+'</td></tr>';count.textContent='Coverage unavailable';console.error(e)});
+  (window.loadReportShardedJson?window.loadReportShardedJson(indexSource):fetch(source).then(r=>{if(!r.ok)throw Error('Coverage export unavailable ('+r.status+')');return r.json()})).then(d=>{rows=Array.isArray(d.projects)?d.projects:[];render();if(requestedHgabId)section?.scrollIntoView({block:'start'})}).catch(e=>{body.innerHTML='<tr><td colspan="'+(allHgab?'8':'7')+'">Could not load the document coverage export. '+esc(e.message)+'</td></tr>';count.textContent='Coverage unavailable';console.error(e)});
 })();
