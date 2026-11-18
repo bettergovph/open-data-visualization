@@ -33,7 +33,7 @@ const sharedScript=document.currentScript?.src||new URL('report-table-readabilit
 let evidenceLoader;
 function linkedEvidence(){
  if(window.ReportProjectEvidence)return Promise.resolve(window.ReportProjectEvidence);
- if(!evidenceLoader)evidenceLoader=new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=new URL('project-evidence-details.js?v=e4bfcea3670e',sharedScript).href;script.onload=()=>window.ReportProjectEvidence?resolve(window.ReportProjectEvidence):reject(Error('Evidence reader did not initialize'));script.onerror=()=>reject(Error('Evidence reader could not be loaded'));document.head.append(script)}).catch(e=>{evidenceLoader=null;throw e});
+ if(!evidenceLoader)evidenceLoader=new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=new URL('project-evidence-details.js?v=project-details-20261118-1',sharedScript).href;script.onload=()=>window.ReportProjectEvidence?resolve(window.ReportProjectEvidence):reject(Error('Evidence reader did not initialize'));script.onerror=()=>reject(Error('Evidence reader could not be loaded'));document.head.append(script)}).catch(e=>{evidenceLoader=null;throw e});
  return evidenceLoader;
 }
 const titleHeader=text=>{
@@ -47,7 +47,7 @@ document.dispatchEvent(new Event('report-project-details-ready'));
 const detailDialog=(()=>{
  const dialog=document.createElement('dialog');dialog.className='report-project-dialog';dialog.setAttribute('aria-labelledby','report-project-dialog-title');
  dialog.setAttribute('data-report-table-exempt','true');
- dialog.innerHTML='<div class="report-project-card"><header><div><span class="report-project-kicker">Additional linked records</span><h2 id="report-project-dialog-title"></h2></div><button type="button" class="report-project-close" aria-label="Close project details">×</button></header><section class="report-linked-project-evidence" aria-live="polite"></section></div>';
+ dialog.innerHTML='<div class="report-project-card"><header><div><span class="report-project-kicker">Project details · source-linked information</span><h2 id="report-project-dialog-title"></h2></div><button type="button" class="report-project-close" aria-label="Close project details">×</button></header><section class="report-linked-project-evidence" aria-live="polite"></section></div>';
  document.body.append(dialog);
  dialog.querySelector('.report-project-close').addEventListener('click',()=>dialog.close());
  dialog.addEventListener('click',event=>{if(event.target===dialog)dialog.close()});

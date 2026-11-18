@@ -94,7 +94,7 @@
       ],
       "rescanDisposition": "rescan_agrees",
       "flagAmountPesos": 98000155.18,
-      "flag": "double_red_flag"
+      "flag": "red_flag"
     },
     {
       "hgabId": "HB10858-3-0416-005785",
@@ -312,7 +312,7 @@
       ],
       "rescanDisposition": "baseline_retained_rescan_unavailable",
       "flagAmountPesos": 10000000.0,
-      "flag": "double_red_flag"
+      "flag": "red_flag"
     },
     {
       "hgabId": "HB10858-3-0594-009532",
@@ -391,7 +391,7 @@
       ],
       "rescanDisposition": "baseline_retained_rescan_unavailable",
       "flagAmountPesos": 9999999.99,
-      "flag": "double_red_flag"
+      "flag": "red_flag"
     },
     {
       "hgabId": "HB10858-3-0536-008238",
@@ -714,7 +714,7 @@
       ],
       "rescanDisposition": "baseline_retained_rescan_unavailable",
       "flagAmountPesos": 5000000.0,
-      "flag": "double_red_flag"
+      "flag": "red_flag"
     },
     {
       "hgabId": "HB10858-3-0643-010458",
@@ -781,7 +781,7 @@
       ],
       "rescanDisposition": "baseline_retained_rescan_unavailable",
       "flagAmountPesos": 5000000.0,
-      "flag": "double_red_flag"
+      "flag": "red_flag"
     },
     {
       "hgabId": "HB10858-3-0764-012876",
@@ -1137,7 +1137,7 @@
         "rescanComparableEstimateCandidatePesos": null
       },
       "flagAmountPesos": 3000000.0,
-      "flag": "double_red_flag"
+      "flag": "red_flag"
     },
     {
       "hgabId": "HB10858-3-0418-005813",
@@ -1226,7 +1226,7 @@
         "rescanComparableEstimateCandidatePesos": null
       },
       "flagAmountPesos": 2640276.98,
-      "flag": "double_red_flag"
+      "flag": "red_flag"
     },
     {
       "hgabId": "HB10858-3-0462-006670",
@@ -1499,7 +1499,7 @@
       ],
       "rescanDisposition": "baseline_retained_rescan_unavailable",
       "flagAmountPesos": 1000000.0,
-      "flag": "double_red_flag"
+      "flag": "red_flag"
     },
     {
       "hgabId": "HB10858-3-0129-000366",
@@ -156713,7 +156713,7 @@
       ],
       "rescanDisposition": "augmented_from_rescan",
       "flagAmountPesos": 20000000.0,
-      "flag": "double_red_flag"
+      "flag": "red_flag"
     },
     {
       "hgabId": "HB10858-3-0131-000411",
@@ -157079,21 +157079,21 @@
     }
   ],
   "flagging": {
-    "basis": "absolute difference between POW I. TOTAL ESTIMATED COST (As Submitted) and HGAB allocation",
+    "basis": "directional difference between POW I. TOTAL ESTIMATED COST (As Submitted) and HGAB allocation",
     "thresholdsPesos": {
       "doubleRedFlagAbove": 500000,
       "redFlagAbove": 50000
     },
-    "comparison": "strictly greater than",
+    "comparison": "Strictly greater than thresholds. If estimated cost is above allocation, the row is Red flag only; if allocation is above estimate by more than ₱500,000, it is Double red flag.",
     "labels": {
-      "double_red_flag": "Double red flag",
-      "red_flag": "Red flag",
-      "no_flag": "No flag (at or below ₱50,000)",
+      "double_red_flag": "Double red flag (allocation exceeds estimate by more than ₱500,000)",
+      "red_flag": "Red flag (difference above ₱50,000; above-allocation estimates remain red)",
+      "no_flag": "No flag (difference at or below ₱50,000)",
       "not_comparable": "Not comparable (difference unavailable)"
     },
     "counts": {
-      "double_red_flag": 25,
-      "red_flag": 3,
+      "double_red_flag": 16,
+      "red_flag": 12,
       "no_flag": 1713,
       "not_comparable": 437
     },
