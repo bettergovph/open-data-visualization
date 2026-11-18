@@ -115,9 +115,9 @@
       "region": "Region VII",
       "pap": "BIP - Multi-Purpose Buildings/ Facilities to support Social Services",
       "allocationPesos": 180000000,
-      "powEstimatePesos": 790000000.0,
-      "differencePesos": 610000000.0,
-      "differencePct": 338.89,
+      "powEstimatePesos": 180000000,
+      "differencePesos": 0,
+      "differencePct": 0.0,
       "status": "comparable_total_estimated_cost",
       "powFiles": [
         {
@@ -129,12 +129,12 @@
           ],
           "categoryCount": 7,
           "shareTotalPct": 100.0,
-          "totalEstimatedCostPesos": 790000000.0,
+          "totalEstimatedCostPesos": 180000000,
           "evaluatedTotalEstimatedCostPesos": null,
-          "totalEstimateStatus": "visible_total_estimated_cost_ocr",
+          "totalEstimateStatus": "user_verified_manual_correction",
           "totalConstructionCostPesos": 200000.0,
           "engineeringAdministrativeOverheadPesos": null,
-          "printedTotalEstimatedCostPesos": 790000000.0,
+          "printedTotalEstimatedCostPesos": 180000000,
           "sourcePdfCount": 1,
           "sourcePdfSha256": [
             "753b8f8c7284951b552832137ad0b451f9d156607768490b99ecffec85a9c03f"
@@ -187,11 +187,13 @@
             }
           ],
           "duplicateParseCount": 1,
-          "conflictingEstimatePesos": []
+          "conflictingEstimatePesos": [],
+          "totalEstimateReviewIssue": "Earlier OCR value of ₱790,000,000 corrected to ₱180,000,000 after source review; matches HGAB allocation.",
+          "reviewedPreviousOcrEstimatePesos": 790000000
         }
       ],
-      "flagAmountPesos": 610000000.0,
-      "flag": "double_red_flag"
+      "flagAmountPesos": 0,
+      "flag": "no_flag"
     },
     {
       "hgabId": "HB10858-3-0494-007368",
@@ -156525,9 +156527,9 @@
       "not_comparable": "Not comparable (difference unavailable)"
     },
     "counts": {
-      "double_red_flag": 57,
+      "double_red_flag": 56,
       "red_flag": 2,
-      "no_flag": 436,
+      "no_flag": 437,
       "not_comparable": 1683
     },
     "sourceFile": "expectation-vs-reality-data.json"
