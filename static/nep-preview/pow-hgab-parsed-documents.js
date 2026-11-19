@@ -17,6 +17,7 @@
   const query=document.getElementById('hgab-pow-query');
   const match=document.getElementById('hgab-pow-match');
   const tbody=document.querySelector('#hgab-pow-table tbody');
+  const hasHgabPowTable=Boolean(query&&match&&tbody);
   const pageSize=20;
   const tokenBody=document.querySelector('#token-pow-table tbody');
   const tokenQuery=document.getElementById('token-pow-query');
@@ -58,6 +59,7 @@
     }).join('')||'<tr><td colspan="4">No 5/5 projects match this filter.</td></tr>';
   };
   const renderTokenReview=(parsed,coverage)=>{
+    if(!tokenBody)return;
     const documents=parsed.documents||[];
     const noBill=documents.filter(file=>file.status==='no_bill_rows_recovered');
     const withSummary=noBill.filter(file=>Number(file.categorySummaryRowCount||0)>0);
@@ -92,6 +94,7 @@
   };
   let rows=[],page=0;
   const render=()=>{
+    if(!hasHgabPowTable)return;
     const needle=query.value.trim().toLocaleLowerCase();
     const selected=rows.filter(row=>{
       const text=[row.code,row.hgabTitle,row.hgabId,row.proposalCode,(row.candidateHgabIds||[]).join(' ')].join(' ').toLocaleLowerCase();
@@ -120,30 +123,32 @@
       [fmt(summary.filesWithAcceptedHgabTitleMatch),'files with an accepted HGAB title match'],
       [fmt(summary.uniqueMatchedHgabProjectRows),'unique HGAB project rows linked by title'],
     ];
-    document.getElementById('hgab-pow-summary').innerHTML=counts.map(([value,caption])=>`<div class="metric"><strong>${value}</strong><span>${esc(caption)}</span></div>`).join('');
+    const summaryNode=document.getElementById('hgab-pow-summary');
+    if(summaryNode)summaryNode.innerHTML=counts.map(([value,caption])=>`<div class="metric"><strong>${value}</strong><span>${esc(caption)}</span></div>`).join('');
     const options=[...new Set(rows.map(row=>row.matchStatus||'unknown'))].sort();
-    match.innerHTML='<option value="">All title-match statuses</option>'+options.map(value=>`<option value="${esc(value)}">${esc(label(value))}</option>`).join('');
-    document.getElementById('hgab-pow-export').addEventListener('click',()=>{
+    if(match)match.innerHTML='<option value="">All title-match statuses</option>'+options.map(value=>`<option value="${esc(value)}">${esc(label(value))}</option>`).join('');
+    document.getElementById('hgab-pow-export')?.addEventListener('click',()=>{
       const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
       const link=document.createElement('a');link.href=URL.createObjectURL(blob);link.download='senate-hgab-pow-parsed-records.json';link.click();
       setTimeout(()=>URL.revokeObjectURL(link.href),1000);
     });
-    render();
+    if(hasHgabPowTable)render();
     return data;
   });
   const coveragePromise=fetchJson('hgab-only-document-coverage.json');
   parsedPromise.catch(error=>{
-    document.getElementById('hgab-pow-summary').innerHTML=`<p class="caution">Could not load parsed Senate HGAB POW records: ${esc(error.message)}</p>`;
-    tbody.innerHTML='<tr><td colspan="8">Parsed Senate HGAB POW records are unavailable.</td></tr>';
+    const summaryNode=document.getElementById('hgab-pow-summary');
+    if(summaryNode)summaryNode.innerHTML=`<p class="caution">Could not load parsed Senate HGAB POW records: ${esc(error.message)}</p>`;
+    if(tbody)tbody.innerHTML='<tr><td colspan="8">Parsed Senate HGAB POW records are unavailable.</td></tr>';
     showTokenLoadError(error);
   });
-  Promise.all([parsedPromise,coveragePromise])
+  if(tokenBody)Promise.all([parsedPromise,coveragePromise])
     .then(([data,coverage])=>renderTokenReview(data,coverage))
     .catch(showTokenLoadError);
-  query.addEventListener('input',()=>{page=0;render()});
-  match.addEventListener('change',()=>{page=0;render()});
-  document.getElementById('hgab-pow-prev').addEventListener('click',()=>{page--;render()});
-  document.getElementById('hgab-pow-next').addEventListener('click',()=>{page++;render()});
+  query?.addEventListener('input',()=>{page=0;render()});
+  match?.addEventListener('change',()=>{page=0;render()});
+  document.getElementById('hgab-pow-prev')?.addEventListener('click',()=>{page--;render()});
+  document.getElementById('hgab-pow-next')?.addEventListener('click',()=>{page++;render()});
   tokenQuery?.addEventListener('input',()=>{tokenPage=0;renderTokenRows()});
   tokenSignal?.addEventListener('change',()=>{tokenPage=0;renderTokenRows()});
   document.getElementById('token-pow-prev')?.addEventListener('click',()=>{tokenPage--;renderTokenRows()});
