@@ -4,6 +4,14 @@
     .topic-nav-brand { display:flex; flex:0 0 auto; align-items:center; }
     .topic-nav-brand img { display:block; width:155px; height:auto; }
     .topic-nav-links { display:flex; align-items:center; gap:8px; }
+    .topic-nav-mobile { display:none; position:relative; }
+    .topic-nav-mobile summary { list-style:none; display:flex; align-items:center; gap:9px; padding:10px 12px; border:1px solid #D8DEE2; border-radius:8px; color:#0038A8; font-weight:700; cursor:pointer; }
+    .topic-nav-mobile summary::-webkit-details-marker { display:none; }
+    .topic-nav-mobile summary::before { content:'☰'; font-size:19px; line-height:1; }
+    .topic-nav-mobile[open] summary::before { content:'×'; font-size:23px; }
+    .topic-nav-mobile-panel { position:absolute; top:calc(100% + 8px); right:0; z-index:100; display:grid; gap:4px; width:min(300px,calc(100vw - 24px)); padding:8px; border:1px solid #D8DEE2; border-radius:10px; background:#fff; box-shadow:0 12px 28px #001b4d30; }
+    .topic-nav-mobile-panel a { padding:11px 12px; border-radius:6px; color:#616161; font-size:14px; font-weight:700; text-decoration:none; }
+    .topic-nav-mobile-panel a:hover,.topic-nav-mobile-panel a[aria-current="page"] { background:#EAF0FF; color:#00246A; }
     .topic-nav-links a { border-radius:7px; padding:9px 13px; color:#616161; font-size:14px; font-weight:700; text-decoration:none; white-space:nowrap; }
     .topic-nav-links a:hover,.topic-nav-links a[aria-current="page"] { background:#EAF0FF; color:#00246A; }
     .topic-nav-links a.topic-nav-research { background:#0038A8; color:#fff; }
@@ -12,13 +20,12 @@
     @media(max-width:800px) {
         .topic-nav-inner { min-height:58px; padding:0 12px; gap:4px; }
         .topic-nav-brand img { width:105px; }
-        .topic-nav-links { gap:0; }
-        .topic-nav-links a { padding:7px 6px; font-size:11px; }
+        .topic-nav-links { display:none; }
+        .topic-nav-mobile { display:block; }
     }
     @media(max-width:470px) {
-        .topic-nav-inner { padding:0 6px; gap:3px; }
-        .topic-nav-brand img { width:82px; }
-        .topic-nav-links a { padding:6px 4px; font-size:10px; }
+        .topic-nav-inner { padding:0 12px; gap:3px; }
+        .topic-nav-brand img { width:105px; }
     }
 </style>
 <header class="topic-nav">
@@ -35,5 +42,17 @@
             <a href="/archive"{% if topic_nav_active == "archive" %} aria-current="page"{% endif %}>Archive</a>
             <a href="/sources"{% if topic_nav_active == "sources" %} aria-current="page"{% endif %}>Sources</a>
         </nav>
+        <details class="topic-nav-mobile">
+            <summary aria-label="Open navigation menu">Menu</summary>
+            <nav class="topic-nav-mobile-panel" aria-label="Main navigation">
+                <a href="/"{% if topic_nav_active == "mpb" %} aria-current="page"{% endif %}>MPB</a>
+                <a href="/roads-bridges"{% if topic_nav_active == "roads-bridges" %} aria-current="page"{% endif %}>Roads &amp; Bridges</a>
+                <a href="/fmr"{% if topic_nav_active == "fmr" %} aria-current="page"{% endif %}>FMR</a>
+                <a href="/flood-control"{% if topic_nav_active == "flood-control" %} aria-current="page"{% endif %}>Flood Control</a>
+                <a href="/connectivity"{% if topic_nav_active == "connectivity" %} aria-current="page"{% endif %}>Connectivity</a>
+                <a href="/archive"{% if topic_nav_active == "archive" %} aria-current="page"{% endif %}>Archive</a>
+                <a href="/sources"{% if topic_nav_active == "sources" %} aria-current="page"{% endif %}>Sources</a>
+            </nav>
+        </details>
     </div>
 </header>
