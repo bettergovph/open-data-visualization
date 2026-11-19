@@ -29,7 +29,7 @@
       const senate=r.senateHgabDocumentsMatched
         ?'<strong>Matched</strong><small>'+esc((r.senateDocumentTypes||[]).join(', ')||'Supporting file')+' · '+fmt(r.senateMatchedFileRecords)+' file records</small>'
         :'No matched Senate HGAB file';
-      const documents=(r.senateDocuments||[]).map(d=>'<div><a href="'+esc(d.url)+'" target="_blank" rel="noopener noreferrer">'+esc(d.documentId||d.documentName)+'</a><small>'+esc(d.documentType||'Other')+(d.fileLinkId!=null?' · file-link ID '+esc(d.fileLinkId):'')+'</small></div>').join('')||'<small>No uniquely linked file names</small>';
+      const documents=(r.senateDocuments||[]).map(d=>'<div><a href="'+esc(d.url)+'" target="_blank" rel="noopener noreferrer">'+esc(d.documentId||d.documentName)+'</a><small>'+esc(d.documentType||'Other')+(d.fileLinkId!=null?' · file-link ID '+esc(d.fileLinkId):'')+'</small>'+((d.printedDates||[]).length?'<small>Printed date(s): '+esc(d.printedDates.map(x=>x.printedDate+' · p. '+x.sourcePage).join('; '))+'</small>':'<small>Printed date not yet extracted</small>')+'</div>').join('')||'<small>No uniquely linked file names</small>';
       const documentCell=allHgab?'<td>'+documents+'</td>':'';
       const signatories=(r.signatories||[]).map(s=>'<div><strong>'+esc(s.name)+'</strong>'+(s.role?' · '+esc(s.role):'')+(s.sources?.length?'<small>'+esc(s.sources.join('; '))+'</small>':'')+'</div>').join('');
       const signatoryCell='<strong>'+fmt(r.signatoryCandidateCount??(r.signatories||[]).length)+' candidates</strong>'+(signatories||'<small>No extracted signatory candidate</small>');
