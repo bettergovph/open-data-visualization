@@ -69,7 +69,7 @@
       "rank": 4,
       "id": "hgab-no-listed-documents",
       "title": "HGAB-only projects without a matched Senate supporting document",
-      "lead": "2,328 / 6,105 HGAB-only rows · 38.13%",
+      "lead": "2,313 / 6,105 HGAB-only rows · 37.89%",
       "basis": "Senate HGAB all-document scan; unique House-row title/code linkage",
       "page": "dpwh.html#senate-supporting-document-coverage",
       "question": "Which unmatched rows have files that need clearer title or file-code linkage?",
@@ -77,7 +77,7 @@
       "alternative": "Image-only, damaged or ambiguously coded files can remain unmatched even when a document exists.",
       "next": "Review per-project file counts and source documents, then resolve ambiguous or unreadable file associations.",
       "caution": "A title/code match signals file presence, not verified contents; no match is not proof of absence.",
-      "costExposurePesos": 65478200000,
+      "costExposurePesos": 65147430000,
       "costExposureBasis": "Allocations for HGAB-only rows without a matched supporting file",
       "detailLinks": [
         {
@@ -280,7 +280,77 @@
       "historicalRepeatProjects": 645,
       "removalCandidates": 137,
       "removalPesos": 2560500000,
-      "adjustedLines": 127
+      "adjustedLines": 127,
+      "fy2027HistoricalDistribution": {
+        "fiscalYear": 2027,
+        "stage": "HGAB 3rd",
+        "mappedProjectRows": 5147,
+        "coveredBarangays": 4296,
+        "historicalTitleMatches": 5147,
+        "newTitleMatches": 4240,
+        "repeatedTitleMatches": 907,
+        "newTitleMatchSharePct": 82.37808432096367,
+        "repeatedTitleMatchSharePct": 17.62191567903633,
+        "newTitleAllocationPesos": 56867891000,
+        "repeatedTitleAllocationPesos": 10911102000,
+        "totalAllocationPesos": 67778993000,
+        "firstTimeBarangays": 1071,
+        "previouslyMappedBarangays": 3225,
+        "firstTimeBarangaySharePct": 24.93016759776536
+      },
+      "fy2027DocumentCoverage": {
+        "fiscalYear": 2027,
+        "stage": "HGAB 3rd reading",
+        "source": "MPB HGAB project IDs reconciled to all-HGAB Proposal and Senate document coverage by House ledger ID",
+        "documentCoverageGeneratedAtUtc": "2026-11-12T08:41:15.688422+00:00",
+        "denominatorProjectRows": 5765,
+        "completeDocumentProjectRows": 3762,
+        "completeDocumentProjectRowsPct": 65.26,
+        "incompleteDocumentProjectRows": 2003,
+        "proposalCompleteDocumentProjectRows": 2039,
+        "senateCompleteDocumentProjectRows": 1720,
+        "completeDocumentTypeThreshold": 4,
+        "completeDocumentTypeNames": [
+          "BP 202",
+          "Certificate of Implementability",
+          "Development Council",
+          "Geotagged photos",
+          "POW"
+        ],
+        "countsByMatchedTypeCount": [
+          {
+            "matchedTypeCount": 0,
+            "projectRows": 1245,
+            "projectRowsPct": 21.6
+          },
+          {
+            "matchedTypeCount": 1,
+            "projectRows": 54,
+            "projectRowsPct": 0.94
+          },
+          {
+            "matchedTypeCount": 2,
+            "projectRows": 95,
+            "projectRowsPct": 1.65
+          },
+          {
+            "matchedTypeCount": 3,
+            "projectRows": 609,
+            "projectRowsPct": 10.56
+          },
+          {
+            "matchedTypeCount": 4,
+            "projectRows": 2330,
+            "projectRowsPct": 40.42
+          },
+          {
+            "matchedTypeCount": 5,
+            "projectRows": 1432,
+            "projectRowsPct": 24.84
+          }
+        ],
+        "method": "Each FY2027 MPB HGAB ledger row is joined by its House project ID. Proposal and Senate HGAB document types are combined and deduplicated. Complete means at least four of five named types: POW, BP 202, Development Council, geotagged photos, and Certificate of Implementability. Other document types are excluded. A title match or file presence does not verify document contents."
+      }
     },
     "lengthCoverage": [
       {
@@ -514,7 +584,7 @@
   "sources": [
     {
       "file": "dpwh-data.json",
-      "sha256": "e305de67dd9062c2f51afc5f895be90b7677e921ffebfbae6e54b4fd4ca94431"
+      "sha256": "713c7199755aedbc12bec15fcac6a80535ab2f019bc8c346549e8a31ba6819b3"
     },
     {
       "file": "rcs-data.json",

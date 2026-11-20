@@ -2,6 +2,7 @@
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const fmt=v=>Number(v||0).toLocaleString('en-PH');
   const peso=v=>'₱'+fmt(v);
+  const dateText=dates=>{const unique=[...new Map((dates||[]).map(d=>[d.isoDate||d.printedDate,d])).values()];return unique.slice(0,4).map(d=>d.printedDate+' · p. '+d.sourcePage+(d.context?' · '+d.context:'' )).join('; ')+(unique.length>4?' · +'+fmt(unique.length-4)+' more distinct dates':'')};
   const body=document.getElementById('all-hgab-coverage-rows')||document.getElementById('coverage-rows');
   if(!body)return;
   const allHgab=body.id==='all-hgab-coverage-rows';
@@ -13,8 +14,6 @@
   const prev=document.getElementById(prefix+'-prev');
   const next=document.getElementById(prefix+'-next');
   const size=document.getElementById(prefix+'-page-size');
-  const requestedHgabId=allHgab?new URLSearchParams(window.location.search).get('hgabId'):'';
-  if(requestedHgabId){search.value=requestedHgabId;size.value='100'}
   let rows=[],page=0;
   function render(){
     const q=search.value.trim().toLocaleLowerCase();
@@ -29,7 +28,7 @@
       const senate=r.senateHgabDocumentsMatched
         ?'<strong>Matched</strong><small>'+esc((r.senateDocumentTypes||[]).join(', ')||'Supporting file')+' · '+fmt(r.senateMatchedFileRecords)+' file records</small>'
         :'No matched Senate HGAB file';
-      const documents=(r.senateDocuments||[]).map(d=>'<div><a href="'+esc(d.url)+'" target="_blank" rel="noopener noreferrer">'+esc(d.documentId||d.documentName)+'</a><small>'+esc(d.documentType||'Other')+(d.fileLinkId!=null?' · file-link ID '+esc(d.fileLinkId):'')+'</small>'+((d.printedDates||[]).length?'<small>Printed date(s): '+esc(d.printedDates.map(x=>x.printedDate+' · p. '+x.sourcePage).join('; '))+'</small>':'<small>Printed date not yet extracted</small>')+'</div>').join('')||'<small>No uniquely linked file names</small>';
+      const documents=(r.senateDocuments||[]).map(d=>'<div><a href="'+esc(d.url)+'" target="_blank" rel="noopener noreferrer">'+esc(d.documentId||d.documentName)+'</a><small>'+esc(d.documentType||'Other')+(d.fileLinkId!=null?' · file-link ID '+esc(d.fileLinkId):'')+'</small>'+((d.printedDates||[]).length?'<small>Printed date(s): '+esc(dateText(d.printedDates))+'</small>':'<small>Printed date not yet extracted</small>')+'</div>').join('')||'<small>No uniquely linked file names</small>';
       const documentCell=allHgab?'<td>'+documents+'</td>':'';
       const signatories=(r.signatories||[]).map(s=>'<div><strong>'+esc(s.name)+'</strong>'+(s.role?' · '+esc(s.role):'')+(s.sources?.length?'<small>'+esc(s.sources.join('; '))+'</small>':'')+'</div>').join('');
       const signatoryCell='<strong>'+fmt(r.signatoryCandidateCount??(r.signatories||[]).length)+' candidates</strong>'+(signatories||'<small>No extracted signatory candidate</small>');
@@ -46,5 +45,5 @@
   const source=section?.dataset.hgabCoverageSource;
   if(!source){body.innerHTML='<tr><td colspan="'+(allHgab?'8':'7')+'">Coverage source is not configured.</td></tr>';count.textContent='Coverage unavailable';return;}
   const indexSource=source.replace(/\.json(?:\?.*)?$/,'-index.json');
-  (window.loadReportShardedJson?window.loadReportShardedJson(indexSource):fetch(source).then(r=>{if(!r.ok)throw Error('Coverage export unavailable ('+r.status+')');return r.json()})).then(d=>{rows=Array.isArray(d.projects)?d.projects:[];render();if(requestedHgabId)section?.scrollIntoView({block:'start'})}).catch(e=>{body.innerHTML='<tr><td colspan="'+(allHgab?'8':'7')+'">Could not load the document coverage export. '+esc(e.message)+'</td></tr>';count.textContent='Coverage unavailable';console.error(e)});
+  (window.loadReportShardedJson?window.loadReportShardedJson(indexSource):fetch(source).then(r=>{if(!r.ok)throw Error('Coverage export unavailable ('+r.status+')');return r.json()})).then(d=>{rows=Array.isArray(d.projects)?d.projects:[];render()}).catch(e=>{body.innerHTML='<tr><td colspan="'+(allHgab?'8':'7')+'">Could not load the document coverage export. '+esc(e.message)+'</td></tr>';count.textContent='Coverage unavailable';console.error(e)});
 })();
