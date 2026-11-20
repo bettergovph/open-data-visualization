@@ -58,6 +58,7 @@
     }).join('')||'<tr><td colspan="4">No 5/5 projects match this filter.</td></tr>';
   };
   const renderTokenReview=(parsed,coverage)=>{
+    if(!tokenBody)return;
     const documents=parsed.documents||[];
     const noBill=documents.filter(file=>file.status==='no_bill_rows_recovered');
     const withSummary=noBill.filter(file=>Number(file.categorySummaryRowCount||0)>0);
