@@ -91,7 +91,8 @@
     tokenPage=0;
     renderTokenRows();
   };
-  let rows=[],page=0;
+  let rows=[],page=0,printedDatesByCode={};
+  const printedDatesPromise=fetchJson('pow-printed-dates.json?v=e945d1ac89ba').then(data=>{printedDatesByCode=data.byCode||{};render();}).catch(()=>{});
   const render=()=>{
     const needle=query.value.trim().toLocaleLowerCase();
     const selected=rows.filter(row=>{
@@ -107,8 +108,8 @@
     tbody.innerHTML=selected.slice(page*pageSize,(page+1)*pageSize).map(row=>{
       const title=row.hgabTitle?`<strong>${esc(row.hgabTitle)}</strong><small>${esc(row.hgabId||'')}</small>`:
         row.candidateHgabIds?.length?`Unconfirmed candidate ${esc(row.candidateHgabIds.join(', '))}`:'No accepted title match';
-      return `<tr><td>${esc(row.code||'—')}</td><td>${title}</td><td>${esc(label(row.matchStatus))}</td><td>${esc(label(row.status))}</td><td>${fmt(row.rowCount)}</td><td>${fmt(row.categorySummaryRowCount)}</td><td>${fmt(row.pageCount)}</td><td>${esc(row.proposalCode||'—')}</td></tr>`;
-    }).join('')||'<tr><td colspan="8">No parsed Senate HGAB POW files match this filter.</td></tr>';
+      return `<tr><td>${esc(row.code||'—')}</td><td>${title}</td><td>${esc(label(row.matchStatus))}</td><td>${esc(label(row.status))}</td><td>${fmt(row.rowCount)}</td><td>${fmt(row.categorySummaryRowCount)}</td><td>${fmt(row.pageCount)}</td><td>${(printedDatesByCode[row.code]?.dates||[]).length?(printedDatesByCode[row.code].dates.map(date=>`${esc(date.printedDate)}${date.sourcePages?.length?` · p. ${date.sourcePages.map(fmt).join(', ')}`:''}`).join('<br>')):'No printed date extracted'}</td><td>${esc(row.proposalCode||'—')}</td></tr>`;
+    }).join('')||'<tr><td colspan="9">No parsed Senate HGAB POW files match this filter.</td></tr>';
   };
   const parsedPromise=fetchJson('pow-hgab-parsed-documents.json').then(data=>{
     rows=data.documents||[];
@@ -135,7 +136,7 @@
   const coveragePromise=fetchJson('hgab-only-document-coverage.json');
   parsedPromise.catch(error=>{
     document.getElementById('hgab-pow-summary').innerHTML=`<p class="caution">Could not load parsed Senate HGAB POW records: ${esc(error.message)}</p>`;
-    tbody.innerHTML='<tr><td colspan="8">Parsed Senate HGAB POW records are unavailable.</td></tr>';
+    tbody.innerHTML='<tr><td colspan="9">Parsed Senate HGAB POW records are unavailable.</td></tr>';
     showTokenLoadError(error);
   });
   Promise.all([parsedPromise,coveragePromise])
