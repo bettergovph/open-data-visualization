@@ -134,7 +134,7 @@
       note: 'Review whether the revision resolves or changes a title, scope, or location flag.',
     };
     if (row.status === 'unchanged') return {cls: '', label: 'Unchanged in SCR', note: 'House amount and project line retained.'};
-    return {cls: '', label: 'NEP only', note: 'Not present in the House bill or SCR project schedule.'};
+    return {cls: '', label: 'Not listed in SCR schedule', note: 'This NEP row has no corresponding line in the House or SCR project schedule.'};
   }
 
   function makeCell(rows) {
@@ -167,13 +167,16 @@
 
   function enhanceTable(table, titleIndex) {
     if (!table.tHead) return;
+    const pageTables = [...document.querySelectorAll('table')];
+    const tableIndex = pageTables.indexOf(table);
+    const forceNiaProjectTable = filename === 'nia.html' && tableIndex >= 0 && tableIndex < 2;
     const bodyRows = [...table.querySelectorAll('tbody tr')];
     if (!bodyRows.length) return;
     const matched = bodyRows.map(row => ({row, records: matchRow(row, titleIndex)}));
     const headRow = table.tHead.rows[table.tHead.rows.length - 1];
     if (!headRow) return;
     let heading = [...headRow.cells].find(cell => cell.dataset.scrStageHeading === 'true');
-    if (!heading && !matched.some(item => item.records.length) && !isProjectTable(table)) return;
+    if (!heading && !matched.some(item => item.records.length) && !forceNiaProjectTable && !isProjectTable(table)) return;
     if (!heading) {
       heading = document.createElement('th');
       heading.scope = 'col';
@@ -217,7 +220,8 @@
     panel.className = 'scr-page-summary';
     panel.dataset.scrPageSummary = 'true';
     panel.setAttribute('aria-label', 'Senate Committee Report comparison summary');
-    panel.innerHTML = `<h2>${esc(summary.title)}</h2><p><strong>${Number(summary.removedCount).toLocaleString('en-PH')} of ${Number(summary.matchedCount).toLocaleString('en-PH')} matched rows</strong> in this review set are labeled Removed in SCR.</p><p><strong>${esc(summary.valueLabel)}: ${peso(summary.removedGross)}</strong> in House allocations.</p><p>${esc(summary.note)}</p>`;
+    const denominator = Number(summary.sourceRows ?? summary.matchedCount);
+    panel.innerHTML = `<h2>${esc(summary.title)}</h2><p><strong>${Number(summary.removedCount).toLocaleString('en-PH')} of ${denominator.toLocaleString('en-PH')} listed rows</strong> in this review set are labeled Removed in SCR. ${Number(summary.matchedCount) < denominator ? `${Number(summary.matchedCount).toLocaleString('en-PH')} rows had a reliable SCR match.` : ''}</p><p><strong>${esc(summary.valueLabel)}: ${peso(summary.removedGross)}</strong> in House allocations.</p><p>${esc(summary.note)}</p>`;
     target.insertAdjacentElement('afterend', panel);
   }
 

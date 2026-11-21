@@ -256,11 +256,21 @@
   }
 
   const dataVersion = document.querySelector('meta[name="cmpd-data-version"]')?.content || '';
-  fetch('cmpd-cost-per-unit-data.json?v=' + encodeURIComponent(dataVersion))
-    .then(response => {
-      if (!response.ok) throw new Error('Source data returned HTTP ' + response.status);
-      return response.json();
-    })
+  const fetchJson = async (url, label) => {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 45000);
+    try {
+      const response = await fetch(url, { signal: controller.signal });
+      if (!response.ok) throw new Error(label + ' returned HTTP ' + response.status);
+      return await response.json();
+    } catch (error) {
+      if (error.name === 'AbortError') throw new Error(label + ' did not respond within 45 seconds. Reload the page to retry.');
+      throw error;
+    } finally {
+      clearTimeout(timeout);
+    }
+  };
+  fetchJson('cmpd-cost-per-unit-data.json?v=' + encodeURIComponent(dataVersion), 'CMPD index')
     .then(data => {
       const candidateCategories = new Set(Object.keys(data.candidateShards || {}));
       const materials = data.materials.filter(material =>
@@ -295,18 +305,13 @@
           if (!rates) {
             const name = data.rateShards[material.code];
             if (!name) throw new Error('CMPD office-rate shard is missing.');
-            requests.push(fetch(name + '?v=' + encodeURIComponent(data.version)).then(response => {
-              if (!response.ok) throw new Error('CMPD office rates returned HTTP ' + response.status);
-              return response.json();
-            }).then(value => { rates = value; rateCache.set(material.code, value); }));
+            requests.push(fetchJson(name + '?v=' + encodeURIComponent(data.version), 'CMPD office rates')
+              .then(value => { rates = value; rateCache.set(material.code, value); }));
           }
           if (!candidates) {
             const shardNames = data.candidateShards[category] || [];
             requests.push(Promise.all(shardNames.map(name =>
-            fetch(name + '?v=' + encodeURIComponent(data.version)).then(response => {
-              if (!response.ok) throw new Error('POW data shard returned HTTP ' + response.status);
-              return response.json();
-            })
+              fetchJson(name + '?v=' + encodeURIComponent(data.version), 'POW data shard')
             )).then(shards => { candidates = shards.flat(); candidateCache.set(category, candidates); }));
           }
           await Promise.all(requests);
