@@ -16,6 +16,14 @@
       "caution": "No selected counterpart means a review candidate, not a confirmed insertion.",
       "costExposurePesos": 170494419000,
       "costExposureBasis": "All HGAB-only row allocations; 6,105-row cohort",
+      "scrRemoved": {
+        "removedRows": 3018,
+        "removedPesos": 82804145000,
+        "cohortExposurePesos": 170494419000,
+        "remainingExposurePesos": 87690274000,
+        "cohortRows": 6105,
+        "unresolvedRows": 6
+      },
       "detailLinks": [
         {
           "page": "dpwh.html#hgab-coverage",
@@ -37,6 +45,14 @@
       "caution": "Missing includes absent and unusable extracted evidence, not proof the original documents lack length. Coordinate distances do not establish construction length; mixed scopes are separate.",
       "costExposurePesos": 158977972000,
       "costExposureBasis": "Allocations with absent or unusable extracted length",
+      "scrRemoved": {
+        "removedRows": 662,
+        "removedPesos": 18654497750,
+        "cohortExposurePesos": 158977972000,
+        "remainingExposurePesos": 140323474250,
+        "cohortRows": 5279,
+        "unresolvedRows": 961
+      },
       "detailLinks": [
         {
           "page": "cost-matching.html#cost-coverage",
@@ -58,6 +74,14 @@
       "caution": "An OO2 match is a candidate correspondence, not proof of identical scope or formal NEP incorporation; HGAB-only remains a review classification, not a confirmed insertion.",
       "costExposurePesos": 149558895000,
       "costExposureBasis": "OO2-adjusted domestic HGAB-only candidate allocations",
+      "scrRemoved": {
+        "removedRows": 2736,
+        "removedPesos": 73456977000,
+        "cohortExposurePesos": 149558895000,
+        "remainingExposurePesos": 76101918000,
+        "cohortRows": 5491,
+        "unresolvedRows": 3
+      },
       "detailLinks": [
         {
           "page": "dpwh-OO2-hgab.html#hgab-insertion",
@@ -79,6 +103,14 @@
       "caution": "A title/code match signals file presence, not verified contents; no match is not proof of absence.",
       "costExposurePesos": 65147430000,
       "costExposureBasis": "Allocations for HGAB-only rows without a matched supporting file",
+      "scrRemoved": {
+        "removedRows": 1307,
+        "removedPesos": 35652443000,
+        "cohortExposurePesos": 65147430000,
+        "remainingExposurePesos": 29494987000,
+        "cohortRows": 2313,
+        "unresolvedRows": 3
+      },
       "detailLinks": [
         {
           "page": "dpwh.html#senate-supporting-document-coverage",
@@ -100,6 +132,14 @@
       "caution": "The 737 headline counts NEP–old GAA comparison pairs. Potential retention and missing counterparts remain separate.",
       "costExposurePesos": 51293004750,
       "costExposureBasis": "Unique current NEP proposal allocations in the repeat screen",
+      "scrRemoved": {
+        "removedRows": 58,
+        "removedPesos": 1640130750,
+        "cohortExposurePesos": 51293004750,
+        "remainingExposurePesos": 49652874000,
+        "cohortRows": 1576,
+        "unresolvedRows": 276
+      },
       "detailLinks": [
         {
           "page": "repeats.html#repeat-hgab-survival",
@@ -121,6 +161,14 @@
       "caution": "MPB overlaps the full DPWH insertion/repeat findings; do not add their amounts. Equal allocations are not equal construction unit prices.",
       "costExposurePesos": 38746744000,
       "costExposureBasis": "MPB insertion-candidate allocations",
+      "scrRemoved": {
+        "removedRows": 1395,
+        "removedPesos": 20170297000,
+        "cohortExposurePesos": 38746744000,
+        "remainingExposurePesos": 18576447000,
+        "cohortRows": 2835,
+        "unresolvedRows": 1
+      },
       "detailLinks": [
         {
           "page": "mpb.html#mpb-insertions",
@@ -142,6 +190,14 @@
       "caution": "These are appropriations per stated segment meter, not verified construction unit costs. Bridge chainage is not necessarily bridge span. No cross-category average, overpricing estimate or corruption probability is established. Inventory lanes are existing asset characteristics, not verified funded quantities; widening needs additional funded lanes. Overpasses, flyovers and viaducts use bridge peers.",
       "costExposurePesos": 29317489000,
       "costExposureBasis": "Allocation of high-rate screen candidates",
+      "scrRemoved": {
+        "removedRows": 27,
+        "removedPesos": 4467111000,
+        "cohortExposurePesos": 29317489000,
+        "remainingExposurePesos": 24850378000,
+        "cohortRows": 191,
+        "unresolvedRows": 0
+      },
       "detailLinks": [
         {
           "page": "cost-per-km.html#cost-roads",
@@ -171,6 +227,14 @@
       "caution": "DEO is not LEG; province rainfall is not a district observation. Returning FY2026 program.",
       "costExposurePesos": 835800000,
       "costExposureBasis": "199 equal RCS office allocations",
+      "scrRemoved": {
+        "removedRows": 0,
+        "removedPesos": 0,
+        "cohortExposurePesos": 835800000,
+        "remainingExposurePesos": 835800000,
+        "cohortRows": 199,
+        "unresolvedRows": 199
+      },
       "detailLinks": [
         {
           "page": "rcs.html#rcs-statistical-evidence",
@@ -609,6 +673,10 @@
     {
       "file": "hb_nep_comparison_3rd.csv",
       "sha256": "6358f901c9416f7c6cde9328e5a65ac05f6d8962f0bdf6bab3c5f0ef124d36c9"
+    },
+    {
+      "file": "scr-data.json",
+      "sha256": "b8e4a9dbc08de7107446f5badf714efb65df4b5680bd62350e370c0b138de8ee"
     }
   ],
   "scope": "FY2027 NEP/HGAB 3rd reading; historical GAA comparisons where locally available. No GAB/GAA 2027 outcome inferred.",

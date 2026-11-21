@@ -81,7 +81,7 @@
       buckets.get(prefix).push({key, records});
     }
     for (const aliases of buckets.values()) aliases.sort((a, b) => b.key.length - a.key.length);
-    return {buckets};
+    return {buckets, records: new Map(rows.map(row => [row.id, row]))};
   }
 
   function matchRow(tr, titleIndex) {
@@ -211,7 +211,14 @@
     title.after(review);
   }
 
-  function addHeroSummary(summary) {
+  function summaryHtml(summary) {
+    const matched = Number(summary.matchedCount || 0);
+    const examined = Number(summary.sourceRows ?? matched);
+    const unmatched = Math.max(0, examined - matched);
+    return `<h2>${esc(summary.title)}</h2><p><strong>${Number(summary.removedCount).toLocaleString('en-PH')} of ${matched.toLocaleString('en-PH')} matched rows</strong> in this page-specific review are labeled Removed in SCR.${unmatched ? ` ${unmatched.toLocaleString('en-PH')} listed rows had no reliable SCR match and are excluded.` : ''}</p><p><strong>${esc(summary.valueLabel)}: ${peso(summary.removedGross)}</strong> in House allocations.</p><p>${esc(summary.note)}</p>`;
+  }
+
+  function addSummary(summary) {
     if (!summary || document.querySelector('[data-scr-page-summary]')) return;
     const hero = document.querySelector('.repeat-hero, .hgab-coverage-hero, .out-of-place-overview, #report-hero, .mpb-hero, .page-hero, .unit-hero, .history-hero');
     const target = hero || document.querySelector('main')?.firstElementChild;
@@ -220,9 +227,42 @@
     panel.className = 'scr-page-summary';
     panel.dataset.scrPageSummary = 'true';
     panel.setAttribute('aria-label', 'Senate Committee Report comparison summary');
-    const denominator = Number(summary.sourceRows ?? summary.matchedCount);
-    panel.innerHTML = `<h2>${esc(summary.title)}</h2><p><strong>${Number(summary.removedCount).toLocaleString('en-PH')} of ${denominator.toLocaleString('en-PH')} listed rows</strong> in this review set are labeled Removed in SCR. ${Number(summary.matchedCount) < denominator ? `${Number(summary.matchedCount).toLocaleString('en-PH')} rows had a reliable SCR match.` : ''}</p><p><strong>${esc(summary.valueLabel)}: ${peso(summary.removedGross)}</strong> in House allocations.</p><p>${esc(summary.note)}</p>`;
+    panel.innerHTML = summaryHtml(summary);
     target.insertAdjacentElement('afterend', panel);
+  }
+
+  function addPageTableSummary(titleIndex, hasSpecificSummary) {
+    if (hasSpecificSummary) return;
+    const tables = [...document.querySelectorAll('table[data-scr-stage-table]')];
+    if (!tables.length) return;
+    const rows = tables.flatMap(table => [...table.querySelectorAll('tbody tr')]);
+    const matched = new Map();
+    for (const row of rows) {
+      const cell = row.querySelector(':scope > td[data-scr-stage-cell]');
+      for (const id of (cell?.dataset.scrRowIds || '').split(/\s+/).filter(Boolean)) {
+        const record = titleIndex.records.get(id);
+        if (record) matched.set(id, record);
+      }
+    }
+    const records = [...matched.values()];
+    const removed = records.filter(row => row.status === 'cut');
+    const summary = {
+      title: 'SCR · project rows on this page',
+      sourceRows: rows.length,
+      matchedCount: records.length,
+      removedCount: removed.length,
+      removedGross: removed.reduce((sum, row) => sum + Math.abs(Number(row.house_php) || 0), 0),
+      valueLabel: 'Gross House allocation on rows Removed in SCR',
+      note: 'Counts unique SCR rows matched to project rows in this page’s tables. Rows without a reliable title-and-amount match are excluded; a project shown in multiple tables is counted once. Gross House allocations are not net or realized savings.',
+    };
+    let panel = document.querySelector('[data-scr-dynamic-summary]');
+    if (!panel) {
+      addSummary(summary);
+      panel = document.querySelector('[data-scr-page-summary]');
+      if (panel) panel.dataset.scrDynamicSummary = 'true';
+    } else {
+      panel.innerHTML = summaryHtml(summary);
+    }
   }
 
   fetch('scr-data.json').then(response => {
@@ -230,7 +270,8 @@
     return response.json();
   }).then(data => {
     const titleIndex = buildTitleIndex(data.rows || []);
-    addHeroSummary(data.pageSummaries?.[filename]);
+    const dataSummaryExists = Boolean(data.pageSummaries?.[filename]);
+    addSummary(data.pageSummaries?.[filename]);
     const scan = node => {
       if (node.nodeType !== Node.ELEMENT_NODE) return;
       if (node.matches('table')) enhanceTable(node, titleIndex);
@@ -241,8 +282,10 @@
       }
     };
     scan(document.body);
+    addPageTableSummary(titleIndex, dataSummaryExists);
     const observer = new MutationObserver(records => {
       for (const record of records) {
+        if (record.target.closest?.('.scr-page-summary')) continue;
         const added = [...record.addedNodes];
         if (added.length && added.every(node => node.nodeType === Node.ELEMENT_NODE &&
           (node.matches('[data-scr-stage-cell], [data-scr-stage-heading]')))) continue;
@@ -250,6 +293,7 @@
         if (table) enhanceTable(table, titleIndex);
         for (const node of added) scan(node);
       }
+      addPageTableSummary(titleIndex, dataSummaryExists);
     });
     observer.observe(document.body, {childList: true, subtree: true});
   }).catch(error => console.warn('SCR stage comparison unavailable:', error));
