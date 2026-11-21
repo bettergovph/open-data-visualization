@@ -161,7 +161,7 @@
     if (!table.tHead) return false;
     const headers = [...table.tHead.rows].flatMap(row => [...row.cells]).map(cell => normalize(cell.innerText || cell.textContent));
     return headers.some(label => /\bproject\b/.test(label) &&
-      !/\b(?:projects|project details|project list|project count|project rows|assigned projects)\b/.test(label) &&
+      !/\b(?:projects|project folders?|project rows?|project details|project list|project count|assigned projects)\b/.test(label) &&
       /\b(?:project|title|line|item|source|name|candidate|office)\b/.test(label));
   }
 
