@@ -4,18 +4,24 @@
   'use strict';
 
   const PAGE_PROGRAMS = {
+    'documents.html': ['dpwh'],
     'dpwh.html': ['dpwh'],
-    'dpwh-hgab.html': ['dpwh'],
-    'dpwh-OO2-hgab.html': ['dpwh'],
-    'dpwh-hgab-comparison.html': ['dpwh'],
     'fmr.html': ['fmr'],
     'nia.html': ['nia'],
-    'hfep.html': ['hfep'],
+    'dpwh-transparency.html': ['dpwh'],
     'repeats.html': ['dpwh', 'fmr', 'nia', 'hfep'],
-    'out-of-place.html': ['dpwh', 'fmr', 'nia', 'hfep'],
+    'out-of-place.html': ['dpwh'],
     'congress.html': ['dpwh', 'fmr', 'nia', 'hfep'],
     'flags.html': ['dpwh', 'fmr', 'nia', 'hfep'],
-    'cost-per-km.html': ['dpwh'],
+    'undocumented-hgab.html': ['dpwh'],
+    'cost-per-km.html': ['dpwh', 'fmr'],
+    'pccp-cost-per-unit.html': ['dpwh'],
+    'cost-per-unit.html': ['dpwh'],
+    'cmpd-cost-per-unit.html': ['dpwh'],
+    'expectation-vs-reality.html': ['dpwh'],
+    'rcs.html': ['dpwh'],
+    'mpb.html': ['dpwh'],
+    'barangay.html': ['dpwh'],
   };
   const filename = decodeURIComponent(location.pathname.split('/').pop() || '');
   const programs = PAGE_PROGRAMS[filename];
@@ -36,6 +42,10 @@
     .scr-stage-item+.scr-stage-item{margin-top:9px;padding-top:9px;border-top:1px solid #E0E0E0}
     .scr-stage-title{display:block;margin-bottom:4px;color:#212121;font-size:12px;font-weight:700}
     .scr-stage-review{margin:14px 0;padding:12px;border:1px solid #BDBDBD;border-left:4px solid #FCD116;border-radius:8px;background:#F5F5F5}
+    .scr-page-summary{box-sizing:border-box;margin:12px 0 20px;padding:14px 18px;border:1px solid #BDBDBD;border-left:5px solid #FCD116;border-radius:10px;background:#EAF0FF;color:#212121}
+    .scr-page-summary h2{margin:0 0 5px;color:#00246A;font-size:16px}
+    .scr-page-summary p{margin:4px 0;font-size:13px;line-height:1.45}
+    .scr-page-summary strong{color:#00246A}
   `;
   document.head.append(style);
 
@@ -147,6 +157,14 @@
     return cell;
   }
 
+  function isProjectTable(table) {
+    if (!table.tHead) return false;
+    const headers = [...table.tHead.rows].flatMap(row => [...row.cells]).map(cell => normalize(cell.innerText || cell.textContent));
+    return headers.some(label => /\bproject\b/.test(label) &&
+      !/\b(?:projects|project details|project list|project count|project rows|assigned projects)\b/.test(label) &&
+      /\b(?:project|title|line|item|source|name|candidate|office)\b/.test(label));
+  }
+
   function enhanceTable(table, titleIndex) {
     if (!table.tHead) return;
     const bodyRows = [...table.querySelectorAll('tbody tr')];
@@ -155,7 +173,7 @@
     const headRow = table.tHead.rows[table.tHead.rows.length - 1];
     if (!headRow) return;
     let heading = [...headRow.cells].find(cell => cell.dataset.scrStageHeading === 'true');
-    if (!heading && !matched.some(item => item.records.length)) return;
+    if (!heading && !matched.some(item => item.records.length) && !isProjectTable(table)) return;
     if (!heading) {
       heading = document.createElement('th');
       heading.scope = 'col';
@@ -190,11 +208,25 @@
     title.after(review);
   }
 
+  function addHeroSummary(summary) {
+    if (!summary || document.querySelector('[data-scr-page-summary]')) return;
+    const hero = document.querySelector('.repeat-hero, .hgab-coverage-hero, .out-of-place-overview, #report-hero, .mpb-hero, .page-hero, .unit-hero, .history-hero');
+    const target = hero || document.querySelector('main')?.firstElementChild;
+    if (!target) return;
+    const panel = document.createElement('section');
+    panel.className = 'scr-page-summary';
+    panel.dataset.scrPageSummary = 'true';
+    panel.setAttribute('aria-label', 'Senate Committee Report comparison summary');
+    panel.innerHTML = `<h2>${esc(summary.title)}</h2><p><strong>${Number(summary.removedCount).toLocaleString('en-PH')} of ${Number(summary.matchedCount).toLocaleString('en-PH')} matched rows</strong> in this review set are labeled Removed in SCR.</p><p><strong>${esc(summary.valueLabel)}: ${peso(summary.removedGross)}</strong> in House allocations.</p><p>${esc(summary.note)}</p>`;
+    target.insertAdjacentElement('afterend', panel);
+  }
+
   fetch('scr-data.json').then(response => {
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     return response.json();
   }).then(data => {
     const titleIndex = buildTitleIndex(data.rows || []);
+    addHeroSummary(data.pageSummaries?.[filename]);
     const scan = node => {
       if (node.nodeType !== Node.ELEMENT_NODE) return;
       if (node.matches('table')) enhanceTable(node, titleIndex);
