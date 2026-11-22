@@ -705,6 +705,10 @@ html {
 /* Fix mobile scrolling and touch */
 html, body {
     -webkit-overflow-scrolling: touch;
+}
+
+/* html only. On body it stops the mouse wheel from scrolling the page */
+html {
     overscroll-behavior: none;
 }
 
