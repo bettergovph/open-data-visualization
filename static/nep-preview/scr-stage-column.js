@@ -288,15 +288,27 @@
     scan(document.body);
     addPageTableSummary(titleIndex, dataSummaryExists);
     const observer = new MutationObserver(records => {
+      const changedTables = new Set();
+      const addedNodes = [];
       for (const record of records) {
         if (record.target.closest?.('.scr-page-summary')) continue;
         const added = [...record.addedNodes];
         if (added.length && added.every(node => node.nodeType === Node.ELEMENT_NODE &&
           (node.matches('[data-scr-stage-cell], [data-scr-stage-heading]')))) continue;
         const table = record.target.closest && record.target.closest('table');
-        if (table) enhanceTable(table, titleIndex);
-        for (const node of added) scan(node);
+        if (table) changedTables.add(table);
+        addedNodes.push(...added);
       }
+      for (const node of addedNodes) {
+        if (node.nodeType !== Node.ELEMENT_NODE) continue;
+        if (node.matches('table')) changedTables.add(node);
+        node.querySelectorAll('table').forEach(table => changedTables.add(table));
+        if (filename === 'out-of-place.html') {
+          const card = document.getElementById('project-card');
+          if (card && (node === card || card.contains(node) || node.contains(card))) enhanceOutOfPlaceCard(card, titleIndex);
+        }
+      }
+      for (const table of changedTables) enhanceTable(table, titleIndex);
       addPageTableSummary(titleIndex, dataSummaryExists);
     });
     observer.observe(document.body, {childList: true, subtree: true});

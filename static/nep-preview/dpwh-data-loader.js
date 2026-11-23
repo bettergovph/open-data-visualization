@@ -21,6 +21,11 @@
     const mode=options.mode||'full';
     if(pending.has(mode))return pending.get(mode);
     const task=(async()=>{
+      if(mode==='pccp'){
+        const response=await fetch('pccp-cost-per-unit-data.json?v='+encodeURIComponent(dataVersion),{cache:'force-cache'});
+        if(!response.ok)throw Error('PCCP-specific bill data unavailable ('+response.status+')');
+        return response.json();
+      }
       const response=await Promise.race([fetch('dpwh-in-depth-data.json?v='+encodeURIComponent(dataVersion),{cache:'no-cache'}),new Promise((_,reject)=>setTimeout(()=>reject(Error('DPWH data index request timed out')),20000))]);
       if(!response.ok)throw Error('DPWH data index unavailable ('+response.status+')');
       const index=await response.json();

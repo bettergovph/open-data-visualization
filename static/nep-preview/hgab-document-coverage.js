@@ -45,5 +45,14 @@
   const source=section?.dataset.hgabCoverageSource;
   if(!source){body.innerHTML='<tr><td colspan="'+(allHgab?'8':'7')+'">Coverage source is not configured.</td></tr>';count.textContent='Coverage unavailable';return;}
   const indexSource=source.replace(/\.json(?:\?.*)?$/,'-index.json');
-  (window.loadReportShardedJson?window.loadReportShardedJson(indexSource):fetch(source).then(r=>{if(!r.ok)throw Error('Coverage export unavailable ('+r.status+')');return r.json()})).then(d=>{rows=Array.isArray(d.projects)?d.projects:[];render()}).catch(e=>{body.innerHTML='<tr><td colspan="'+(allHgab?'8':'7')+'">Could not load the document coverage export. '+esc(e.message)+'</td></tr>';count.textContent='Coverage unavailable';console.error(e)});
+  let started=false;
+  const load=()=>{
+    if(started)return;
+    started=true;
+    (window.loadReportShardedJson?window.loadReportShardedJson(indexSource):fetch(source).then(r=>{if(!r.ok)throw Error('Coverage export unavailable ('+r.status+')');return r.json()})).then(d=>{rows=Array.isArray(d.projects)?d.projects:[];render()}).catch(e=>{body.innerHTML='<tr><td colspan="'+(allHgab?'8':'7')+'">Could not load the document coverage export. '+esc(e.message)+'</td></tr>';count.textContent='Coverage unavailable';console.error(e)});
+  };
+  if('IntersectionObserver' in window&&section){
+    const observer=new IntersectionObserver(entries=>{if(entries.some(entry=>entry.isIntersecting)){observer.disconnect();load()}},{rootMargin:'500px'});
+    observer.observe(section);
+  }else load();
 })();
