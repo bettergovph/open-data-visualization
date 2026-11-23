@@ -26,6 +26,7 @@
   const filename = decodeURIComponent(location.pathname.split('/').pop() || '');
   const programs = PAGE_PROGRAMS[filename];
   if (!programs) return;
+  const dataUrl = document.body.dataset.scrDataUrl || 'scr-data.json';
 
   const style = document.createElement('style');
   style.textContent = `
@@ -149,8 +150,11 @@
     cell.innerHTML = rows.map(row => {
       const view = statusView(row);
       const title = rows.length > 1 ? `<span class="scr-stage-title">${esc(row.title || row.house_title)}</span>` : '';
-      const link = row.senate_pdf_url
-        ? `<a href="${esc(row.senate_pdf_url)}" target="_blank" rel="noopener">SCR p. ${esc(row.senate_page || 'open')} ↗</a>`
+      const senatePdfUrl = row.senate_pdf_url || (row.senate_doc
+        ? `https://budget-assets.bettergov.ph/senate/2027/pdf/${encodeURIComponent(row.senate_doc)}.pdf${row.senate_page ? `#page=${encodeURIComponent(row.senate_page)}` : ''}`
+        : '');
+      const link = senatePdfUrl
+        ? `<a href="${esc(senatePdfUrl)}" target="_blank" rel="noopener">SCR p. ${esc(row.senate_page || 'open')} ↗</a>`
         : '';
       return `<div class="scr-stage-item">${title}<span class="scr-stage-badge ${view.cls}">${esc(view.label)}</span><span class="scr-stage-note">${esc(view.note)}</span>${link}</div>`;
     }).join('');
@@ -265,7 +269,7 @@
     }
   }
 
-  fetch('scr-data.json').then(response => {
+  fetch(dataUrl).then(response => {
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     return response.json();
   }).then(data => {
