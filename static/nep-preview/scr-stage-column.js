@@ -75,32 +75,35 @@
         if (!list.some(item => item.id === row.id)) list.push(row);
       }
     }
-    const buckets = new Map();
-    for (const [key, records] of index) {
-      const prefix = key.split(' ').slice(0, 3).join(' ');
-      if (!buckets.has(prefix)) buckets.set(prefix, []);
-      buckets.get(prefix).push({key, records});
+    return {index, records: new Map(rows.map(row => [row.id, row]))};
+  }
+
+  function longestTitleMatch(text, index) {
+    for (let end = text.length; end >= 18; end = text.lastIndexOf(' ', end - 1)) {
+      const candidates = index.get(text.slice(0, end));
+      if (candidates) return candidates;
     }
-    for (const aliases of buckets.values()) aliases.sort((a, b) => b.key.length - a.key.length);
-    return {buckets, records: new Map(rows.map(row => [row.id, row]))};
+    return [];
   }
 
   function matchRow(tr, titleIndex) {
-    const cells = [...tr.cells].filter(cell => cell.tagName === 'TD' && !cell.hasAttribute('colspan'));
-    if (!cells.length) return [];
-    const texts = cells.map(cell => normalize(cell.innerText || cell.textContent));
+    if (!titleIndex.index.size) return [];
+    const cells = [...tr.cells].filter(cell => cell.tagName === 'TD' && !cell.hasAttribute('colspan') && !cell.dataset.scrStageCell);
+    // A title can sit directly against a source label or a Details button.
+    const raw = cells.map(cell => Array.from(cell.childNodes, node => node.textContent).join(' '));
+    return matchText(raw, titleIndex);
+  }
+
+  function matchText(raw, titleIndex) {
+    const texts = raw.map(normalize);
     const visible = texts.filter(text => text.length >= 18 && text.length <= 600);
-    const rowText = texts.join(' ');
-    const amounts = new Set([...rowText.matchAll(/(?:₱|php\s*)?\b([\d,]{5,})\b/g)].map(m => m[1].replace(/,/g, '')));
+    let amounts;
     const matches = new Map();
     for (const text of visible) {
-      const prefix = text.split(' ').slice(0, 3).join(' ');
-      const aliases = (titleIndex.buckets.get(prefix) || []).filter(alias => text === alias.key || text.startsWith(alias.key + ' '));
-      if (!aliases.length) continue;
-      const maxLength = aliases.reduce((maximum, alias) => Math.max(maximum, alias.key.length), 0);
-      let candidates = [...new Map(aliases.filter(alias => alias.key.length === maxLength)
-        .flatMap(alias => alias.records).map(row => [row.id, row])).values()];
+      let candidates = longestTitleMatch(text, titleIndex.index);
       if (candidates.length > 1) {
+        amounts ??= new Set([...raw.join(' ').matchAll(/\b(\d{1,3}(?:,\d{3})+|\d{5,})(?:\.\d+)?\b/g)]
+          .map(match => match[0].replace(/,/g, '')).map(value => String(Number(value))));
         const amountMatches = candidates.filter(row => [amount(row.house_php), amount(row.senate_php)]
           .some(n => n != null && amounts.has(String(n))));
         if (amountMatches.length === 1) candidates = amountMatches;
@@ -206,6 +209,23 @@
     amountCell.textContent = card.querySelector('dl')?.innerText || '';
     pseudo.append(titleCell, amountCell);
     const records = matchRow(pseudo, titleIndex);
+    addCardReview(title, records);
+  }
+
+  const reviewedCongressCards = new WeakSet();
+  function enhanceCongressCards(node, titleIndex) {
+    const selector = '#project-results .project-card';
+    const cards = node.matches(selector) ? [node] : node.querySelectorAll(selector);
+    for (const card of cards) {
+      if (reviewedCongressCards.has(card)) continue;
+      reviewedCongressCards.add(card);
+      const title = card.querySelector('h3');
+      const allocation = card.querySelector('.project-meta strong');
+      if (title) addCardReview(title, matchText([title.textContent, allocation?.textContent || ''], titleIndex));
+    }
+  }
+
+  function addCardReview(title, records) {
     if (!records.length) return;
     const review = document.createElement('div');
     review.className = 'scr-stage-review';
@@ -280,6 +300,7 @@
       if (node.nodeType !== Node.ELEMENT_NODE) return;
       if (node.matches('table')) enhanceTable(node, titleIndex);
       node.querySelectorAll('table').forEach(table => enhanceTable(table, titleIndex));
+      if (filename === 'congress.html') enhanceCongressCards(node, titleIndex);
       if (filename === 'out-of-place.html') {
         const card = document.getElementById('project-card');
         if (card && (node === card || card.contains(node) || node.contains(card))) enhanceOutOfPlaceCard(card, titleIndex);
@@ -308,6 +329,7 @@
         if (node.nodeType !== Node.ELEMENT_NODE) continue;
         if (node.matches('table')) changedTables.add(node);
         node.querySelectorAll('table').forEach(table => changedTables.add(table));
+        if (filename === 'congress.html') enhanceCongressCards(node, titleIndex);
         if (filename === 'out-of-place.html') {
           const card = document.getElementById('project-card');
           if (card && (node === card || card.contains(node) || node.contains(card))) enhanceOutOfPlaceCard(card, titleIndex);
