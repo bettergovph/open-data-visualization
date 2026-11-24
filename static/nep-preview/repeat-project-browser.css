@@ -50,6 +50,35 @@
 #repeat-project-browser .repeat-browser-filters button:disabled { opacity: .55; }
 #repeat-project-browser .repeat-browser-location { margin: 0 0 .75rem; }
 .repeat-browser-location span { color: var(--repeat-muted); font-size: .8rem; }
+.repeat-browser-geography {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .45rem .6rem;
+  align-items: end;
+  margin-top: .55rem;
+}
+#repeat-project-browser .repeat-browser-geography label {
+  display: grid;
+  gap: .15rem;
+  min-width: 0;
+  flex: 1 1 9rem;
+  color: var(--repeat-muted);
+  font-size: .8rem;
+  font-weight: 650;
+}
+#repeat-project-browser .repeat-browser-geography select,
+#repeat-project-browser .repeat-browser-geography button {
+  min-width: 0;
+  min-height: 2.2rem;
+  padding: .3rem .5rem;
+  border: 1px solid var(--repeat-line);
+  border-radius: 7px;
+  background: #fff;
+  color: var(--repeat-blue);
+  font: inherit;
+}
+#repeat-project-browser .repeat-browser-geography button { font-size: .8rem; }
+#repeat-project-browser .repeat-browser-geography :disabled { opacity: .55; }
 #repeat-project-browser .repeat-browser-header h2 { font-size: 1.15rem; margin: 0; }
 #repeat-project-browser .repeat-browser-header a {
   color: var(--repeat-blue);

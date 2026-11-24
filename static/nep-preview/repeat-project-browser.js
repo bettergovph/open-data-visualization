@@ -8,13 +8,15 @@
   const photoControls = get('photo-controls'), photoSelect = photoControls.querySelector('select');
   const previous = get('prev'), next = get('next'), retry = get('retry'), position = get('position');
   const filters = [...browser.querySelectorAll('[data-repeat-filter]')];
+  const places = [...browser.querySelectorAll('[data-repeat-place]')], clearPlace = get('clear-place');
   const locationLinks = get('location') || element('div', '', 'repeat-browser-location');
   if (!locationLinks.isConnected) get('stats').after(locationLinks);
   const number = value => Number(value).toLocaleString('en-PH');
   const peso = value => '₱' + number(value);
   const currentStages = ['2027 SCR', '2027 HGAB', '2027 NEP'];
   const pages = new Map();
-  let index, project, category = 'all', current = 0, selected, activePhoto = -1, moving = false;
+  let index, project, category = 'all', current = 0, selected, activePhoto = -1;
+  let geography = new Map(), results = null, requestId = 0;
 
   function element(tag, text, className) {
     const node = document.createElement(tag);
@@ -163,7 +165,7 @@
   function render() {
     get('title').textContent = project.title;
     get('office').textContent = project.office;
-    const total = count(category);
+    const total = resultCount();
     position.textContent = 'Project ' + number(current + 1) + ' of ' + number(total);
     const repeated = index.mode === '2027' ? 'FY2027 candidate pair' : 'matched GAA line';
     get('stats').replaceChildren(stat(number(project.repeatCount), repeated + (project.repeatCount === 1 ? '' : 's')),
@@ -172,11 +174,6 @@
     get('body').hidden = false;
     previous.disabled = current === 0;
     next.disabled = current === total - 1;
-    for (const button of filters) {
-      const key = button.dataset.repeatFilter;
-      button.disabled = count(key) === 0;
-      button.setAttribute('aria-pressed', String(key === category));
-    }
     timeline.replaceChildren();
     selected = null;
     activePhoto = -1;
@@ -225,47 +222,124 @@
     console.warn('Historical project browser unavailable:', error);
   }
 
-  function count(key) {
-    return key === 'all' ? index.total : (index.filters?.[key]?.length || 0);
+  function resultCount() {
+    return results?.length ?? index.total;
   }
 
-  async function openProject(key, target) {
-    if (moving || target < 0 || target >= count(key)) return;
+  function optionsFor(level) {
+    const region = places[0].value, province = places[1].value, town = places[2].value;
+    return [...geography.values()].filter(place => {
+      if (place.level !== level) return false;
+      if (level === 'region') return true;
+      if (level === 'province') return region && place.parent === region;
+      if (level === 'barangay') return town && place.parent === town;
+      if (province) return place.parent === province;
+      return region && (place.parent === region || geography.get(place.parent)?.parent === region);
+    }).sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  function fillPlaces(changed = -1) {
+    for (const [i, select] of places.entries()) {
+      const keep = i <= changed ? select.value : '';
+      const options = optionsFor(select.dataset.repeatPlace);
+      const names = new Map();
+      for (const place of options) names.set(place.name, (names.get(place.name) || 0) + 1);
+      select.replaceChildren(select.options[0], ...options.map(place => {
+        const parent = names.get(place.name) > 1 && geography.get(place.parent);
+        return new Option(parent ? place.name + ' · ' + parent.name : place.name, place.code);
+      }));
+      select.value = options.some(place => place.code === keep) ? keep : '';
+      select.disabled = options.length === 0;
+    }
+    if (clearPlace) clearPlace.disabled = !places.some(select => select.value);
+  }
+
+  function applyFilters() {
+    const place = places.reduce((code, select) => select.value || code, '');
+    const ranked = category === 'all' ? null : (index.filters?.[category] || []);
+    const atPlace = geography.get(place)?.offsets;
+    if (ranked && atPlace) {
+      const available = new Set(atPlace);
+      results = ranked.filter(offset => available.has(offset));
+    } else {
+      results = ranked || atPlace || null;
+    }
+    for (const button of filters) {
+      const key = button.dataset.repeatFilter;
+      button.disabled = key !== 'all' && !index.filters?.[key]?.length;
+      button.setAttribute('aria-pressed', String(key === category));
+    }
+    requestId++;
+    current = 0;
+    retry.hidden = true;
+    get('title').textContent = '';
+    get('office').textContent = '';
+    get('stats').hidden = get('body').hidden = locationLinks.hidden = true;
+    photoStage.replaceChildren();
+    if (resultCount()) openProject(0);
+    else position.textContent = 'No projects match these filters.';
+  }
+
+  async function openProject(target) {
+    if (target < 0 || target >= resultCount()) return;
+    const ticket = ++requestId;
     const focusedArrow = document.activeElement;
-    const offset = key === 'all' ? target : index.filters[key][target];
+    const offset = results ? results[target] : target;
     const page = Math.floor(offset / index.pageSize);
     retry.hidden = true;
-    moving = true;
     try {
-      if (!pages.has(page)) {
+      let part = pages.get(page);
+      if (!Array.isArray(part)) {
         position.textContent = 'Loading project ' + number(target + 1) + '…';
-        pages.set(page, await fetchJson(index.pages[page - 1]));
+        if (!part) {
+          part = fetchJson(index.pages[page - 1]).then(rows => {
+            pages.set(page, rows);
+            return rows;
+          }).catch(error => {
+            pages.delete(page);
+            throw error;
+          });
+          pages.set(page, part);
+        }
+        part = await part;
       }
-      const entry = pages.get(page)[offset % index.pageSize];
+      if (ticket !== requestId) return;
+      const entry = part[offset % index.pageSize];
       if (!entry) throw Error('Project record is missing');
       project = entry;
-      category = key;
       current = target;
       render();
       if (focusedArrow === previous && previous.disabled) next.focus();
       if (focusedArrow === next && next.disabled) previous.focus();
     } catch (error) {
+      if (ticket !== requestId) return;
       pages.delete(page);
-      showError('Could not load project ' + number(target + 1) + '.', () => openProject(key, target), error);
-    } finally {
-      moving = false;
+      showError('Could not load project ' + number(target + 1) + '.', () => openProject(target), error);
     }
   }
 
-  const move = delta => openProject(category, current + delta);
+  const move = delta => openProject(current + delta);
   previous.onclick = () => move(-1);
   next.onclick = () => move(1);
   for (const button of filters) {
     button.onclick = () => {
       const key = button.dataset.repeatFilter;
-      if (key !== category) openProject(key, 0);
+      if (key === category) return;
+      category = key;
+      applyFilters();
     };
   }
+  for (const [i, select] of places.entries()) {
+    select.onchange = () => {
+      fillPlaces(i);
+      applyFilters();
+    };
+  }
+  if (clearPlace) clearPlace.onclick = () => {
+    fillPlaces();
+    places[0]?.focus();
+    applyFilters();
+  };
   photoSelect.onchange = () => showPhoto(Number(photoSelect.value));
   browser.addEventListener('keydown', event => {
     if (event.target !== previous && event.target !== next) return;
@@ -281,8 +355,10 @@
       index = await fetchJson(browser.dataset.source);
       if (!index.first?.length) throw Error('No project records');
       pages.set(0, index.first);
-      project = index.first[0];
-      render();
+      geography = new Map((index.geography || []).map(([code, name, level, parent, offsets]) =>
+        [code, {code, name, level, parent, offsets}]));
+      fillPlaces();
+      applyFilters();
     } catch (error) {
       showError('Could not load the project browser.', load, error);
     }
