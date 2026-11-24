@@ -171,17 +171,19 @@
 
   function enhanceTable(table, titleIndex) {
     if (!table.tHead) return;
-    const pageTables = [...document.querySelectorAll('table')];
-    const tableIndex = pageTables.indexOf(table);
-    const forceNiaProjectTable = filename === 'nia.html' && tableIndex >= 0 && tableIndex < 2;
-    const bodyRows = [...table.querySelectorAll('tbody tr')];
-    if (!bodyRows.length) return;
-    const matched = bodyRows.map(row => ({row, records: matchRow(row, titleIndex)}));
     const headRow = table.tHead.rows[table.tHead.rows.length - 1];
     if (!headRow) return;
     let heading = [...headRow.cells].find(cell => cell.dataset.scrStageHeading === 'true');
-    if (!heading && !matched.some(item => item.records.length) && !forceNiaProjectTable && !isProjectTable(table)) return;
+    const bodyRows = [...table.tBodies].flatMap(body => [...body.rows]);
+    const newRows = bodyRows.filter(row => row.cells.length &&
+      !row.cells[row.cells.length - 1].hasAttribute('colspan') &&
+      !row.querySelector(':scope > td[data-scr-stage-cell]'));
+    if (!newRows.length) return;
+    const matched = newRows.map(row => ({row, records: matchRow(row, titleIndex)}));
     if (!heading) {
+      const forceNiaProjectTable = filename === 'nia.html' &&
+        [...document.querySelectorAll('table')].slice(0, 2).includes(table);
+      if (!matched.some(item => item.records.length) && !forceNiaProjectTable && !isProjectTable(table)) return;
       heading = document.createElement('th');
       heading.scope = 'col';
       heading.className = 'scr-stage-heading';
@@ -189,9 +191,7 @@
       heading.textContent = 'SCR stage / flag review';
       headRow.append(heading);
     }
-    for (const {row, records} of matched) {
-      if (!row.querySelector(':scope > td[data-scr-stage-cell]') && row.cells.length && !row.cells[row.cells.length - 1].hasAttribute('colspan')) row.append(makeCell(records));
-    }
+    for (const {row, records} of matched) row.append(makeCell(records));
     table.dataset.scrStageTable = 'true';
   }
 
@@ -290,6 +290,7 @@
     const observer = new MutationObserver(records => {
       const changedTables = new Set();
       const addedNodes = [];
+      let removedStageTable = false;
       for (const record of records) {
         if (record.target.closest?.('.scr-page-summary')) continue;
         const added = [...record.addedNodes];
@@ -297,6 +298,10 @@
           (node.matches('[data-scr-stage-cell], [data-scr-stage-heading]')))) continue;
         const table = record.target.closest && record.target.closest('table');
         if (table) changedTables.add(table);
+        if (!dataSummaryExists && !table && !removedStageTable) {
+          removedStageTable = [...record.removedNodes].some(node => node.nodeType === Node.ELEMENT_NODE &&
+            (node.matches('table[data-scr-stage-table]') || node.querySelector('table[data-scr-stage-table]')));
+        }
         addedNodes.push(...added);
       }
       for (const node of addedNodes) {
@@ -308,8 +313,11 @@
           if (card && (node === card || card.contains(node) || node.contains(card))) enhanceOutOfPlaceCard(card, titleIndex);
         }
       }
-      for (const table of changedTables) enhanceTable(table, titleIndex);
-      addPageTableSummary(titleIndex, dataSummaryExists);
+      for (const table of changedTables) {
+        if (table.isConnected) enhanceTable(table, titleIndex);
+      }
+      // The fallback summary mutates the DOM too. Rebuild it only for table changes.
+      if (changedTables.size || removedStageTable) addPageTableSummary(titleIndex, dataSummaryExists);
     });
     observer.observe(document.body, {childList: true, subtree: true});
   }).catch(error => console.warn('SCR stage comparison unavailable:', error));

@@ -92,7 +92,6 @@
     renderTokenRows();
   };
   let rows=[],page=0,printedDatesByCode={};
-  const printedDatesPromise=fetchJson('pow-printed-dates.json?v=e945d1ac89ba').then(data=>{printedDatesByCode=data.byCode||{};render();}).catch(()=>{});
   const render=()=>{
     const needle=query.value.trim().toLocaleLowerCase();
     const selected=rows.filter(row=>{
@@ -111,7 +110,9 @@
       return `<tr><td>${esc(row.code||'—')}</td><td>${title}</td><td>${esc(label(row.matchStatus))}</td><td>${esc(label(row.status))}</td><td>${fmt(row.rowCount)}</td><td>${fmt(row.categorySummaryRowCount)}</td><td>${fmt(row.pageCount)}</td><td>${(printedDatesByCode[row.code]?.dates||[]).length?(printedDatesByCode[row.code].dates.map(date=>`${esc(date.printedDate)}${date.sourcePages?.length?` · p. ${date.sourcePages.map(fmt).join(', ')}`:''}`).join('<br>')):'No printed date extracted'}</td><td>${esc(row.proposalCode||'—')}</td></tr>`;
     }).join('')||'<tr><td colspan="9">No parsed Senate HGAB POW files match this filter.</td></tr>';
   };
+  if(!tbody&&!tokenBody)return;
   const parsedPromise=fetchJson('pow-hgab-parsed-documents.json').then(data=>{
+    if(!tbody)return data;
     rows=data.documents||[];
     const summary=data.summary||{};
     const counts=[
@@ -133,19 +134,25 @@
     render();
     return data;
   });
-  const coveragePromise=fetchJson('hgab-only-document-coverage.json');
-  parsedPromise.catch(error=>{
-    document.getElementById('hgab-pow-summary').innerHTML=`<p class="caution">Could not load parsed Senate HGAB POW records: ${esc(error.message)}</p>`;
-    tbody.innerHTML='<tr><td colspan="9">Parsed Senate HGAB POW records are unavailable.</td></tr>';
-    showTokenLoadError(error);
-  });
-  Promise.all([parsedPromise,coveragePromise])
-    .then(([data,coverage])=>renderTokenReview(data,coverage))
-    .catch(showTokenLoadError);
-  query.addEventListener('input',()=>{page=0;render()});
-  match.addEventListener('change',()=>{page=0;render()});
-  document.getElementById('hgab-pow-prev').addEventListener('click',()=>{page--;render()});
-  document.getElementById('hgab-pow-next').addEventListener('click',()=>{page++;render()});
+  if(tbody){
+    fetchJson('pow-printed-dates.json?v=e945d1ac89ba').then(data=>{
+      printedDatesByCode=data.byCode||{};
+      if(rows.length)render();
+    }).catch(()=>{});
+    parsedPromise.catch(error=>{
+      document.getElementById('hgab-pow-summary').innerHTML=`<p class="caution">Could not load parsed Senate HGAB POW records: ${esc(error.message)}</p>`;
+      tbody.innerHTML='<tr><td colspan="9">Parsed Senate HGAB POW records are unavailable.</td></tr>';
+    });
+    query.addEventListener('input',()=>{page=0;render()});
+    match.addEventListener('change',()=>{page=0;render()});
+    document.getElementById('hgab-pow-prev').addEventListener('click',()=>{page--;render()});
+    document.getElementById('hgab-pow-next').addEventListener('click',()=>{page++;render()});
+  }
+  if(tokenBody){
+    Promise.all([parsedPromise,fetchJson('hgab-only-document-coverage.json')])
+      .then(([data,coverage])=>renderTokenReview(data,coverage))
+      .catch(showTokenLoadError);
+  }
   tokenQuery?.addEventListener('input',()=>{tokenPage=0;renderTokenRows()});
   tokenSignal?.addEventListener('change',()=>{tokenPage=0;renderTokenRows()});
   document.getElementById('token-pow-prev')?.addEventListener('click',()=>{tokenPage--;renderTokenRows()});
