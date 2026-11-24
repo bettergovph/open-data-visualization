@@ -8,6 +8,7 @@
   const photoControls = get('photo-controls'), photoSelect = photoControls.querySelector('select');
   const previous = get('prev'), next = get('next'), retry = get('retry'), position = get('position');
   const filters = [...browser.querySelectorAll('[data-repeat-filter]')];
+  const periodFilters = [...browser.querySelectorAll('[data-repeat-period]')];
   const places = [...browser.querySelectorAll('[data-repeat-place]')], clearPlace = get('clear-place');
   const locationLinks = get('location') || element('div', '', 'repeat-browser-location');
   if (!locationLinks.isConnected) get('stats').after(locationLinks);
@@ -16,6 +17,7 @@
   const currentStages = ['2027 SCR', '2027 HGAB', '2027 NEP'];
   const pages = new Map();
   let index, project, category = 'all', current = 0, selected, activePhoto = -1;
+  let period = periodFilters.length ? '2027' : 'all', linked2027 = new Set();
   let geography = new Map(), results = null, requestId = 0;
 
   function element(tag, text, className) {
@@ -264,6 +266,12 @@
     } else {
       results = ranked || atPlace || null;
     }
+    if (period === '2027') {
+      results = results ? results.filter(offset => linked2027.has(offset)) : index.linked2027;
+    }
+    for (const button of periodFilters) {
+      button.setAttribute('aria-pressed', String(button.dataset.repeatPeriod === period));
+    }
     for (const button of filters) {
       const key = button.dataset.repeatFilter;
       button.disabled = key !== 'all' && !index.filters?.[key]?.length;
@@ -277,7 +285,9 @@
     get('stats').hidden = get('body').hidden = locationLinks.hidden = true;
     photoStage.replaceChildren();
     if (resultCount()) openProject(0);
-    else position.textContent = 'No projects match these filters.';
+    else position.textContent = period === '2027'
+      ? 'No FY2027-linked projects match these filters.'
+      : 'No projects match these filters.';
   }
 
   async function openProject(target) {
@@ -321,6 +331,14 @@
   const move = delta => openProject(current + delta);
   previous.onclick = () => move(-1);
   next.onclick = () => move(1);
+  for (const button of periodFilters) {
+    button.onclick = () => {
+      const key = button.dataset.repeatPeriod;
+      if (key === period) return;
+      period = key;
+      applyFilters();
+    };
+  }
   for (const button of filters) {
     button.onclick = () => {
       const key = button.dataset.repeatFilter;
@@ -354,10 +372,12 @@
     try {
       index = await fetchJson(browser.dataset.source);
       if (!index.first?.length) throw Error('No project records');
+      linked2027 = new Set(index.linked2027);
       pages.set(0, index.first);
       geography = new Map((index.geography || []).map(([code, name, level, parent, offsets]) =>
         [code, {code, name, level, parent, offsets}]));
       fillPlaces();
+      for (const button of periodFilters) button.disabled = false;
       applyFilters();
     } catch (error) {
       showError('Could not load the project browser.', load, error);
