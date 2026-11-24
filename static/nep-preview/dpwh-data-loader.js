@@ -26,6 +26,34 @@
         if(!response.ok)throw Error('PCCP-specific bill data unavailable ('+response.status+')');
         return response.json();
       }
+      if(mode==='cost-per-unit-index'){
+        const response=await fetch('cost-per-unit-index.json?v='+encodeURIComponent(dataVersion),{cache:'force-cache'});
+        if(!response.ok)throw Error('Cost-per-unit data index unavailable ('+response.status+')');
+        return response.json();
+      }
+      if(mode==='summary-peers'){
+        const response=await fetch('cost-per-unit-index.json?v='+encodeURIComponent(dataVersion),{cache:'force-cache'});
+        if(!response.ok)throw Error('Cost-per-unit data index unavailable ('+response.status+')');
+        const pageIndex=await response.json();
+        const summary=await fetch(pageIndex.costUnitSummaryFile,{cache:'force-cache'});
+        if(!summary.ok)throw Error('Cost-per-unit peer summaries unavailable ('+summary.status+')');
+        return summary.json();
+      }
+      if(mode==='project-details'){
+        const response=await fetch('dpwh-in-depth-data.json?v='+encodeURIComponent(dataVersion),{cache:'no-cache'});
+        if(!response.ok)throw Error('DPWH data index unavailable ('+response.status+')');
+        const index=await response.json(),shards=index.arrayShards?.projects||[];
+        const parts=await Promise.all(shards.map(async shard=>{
+          const result=await fetch(shard.path+'?v='+encodeURIComponent(shard.sha256||''),{cache:'force-cache'});
+          if(!result.ok)throw Error('DPWH project data shard unavailable ('+result.status+')');
+          const rows=await result.json();
+          if(!Array.isArray(rows)||(Number.isFinite(shard.itemCount)&&rows.length!==shard.itemCount))throw Error('Incomplete DPWH project data shard');
+          return rows;
+        }));
+        index.projects=parts.flat();
+        if(Number.isFinite(index.projectCount)&&index.projects.length!==index.projectCount)throw Error('DPWH project data is incomplete');
+        return index;
+      }
       const response=await Promise.race([fetch('dpwh-in-depth-data.json?v='+encodeURIComponent(dataVersion),{cache:'no-cache'}),new Promise((_,reject)=>setTimeout(()=>reject(Error('DPWH data index request timed out')),20000))]);
       if(!response.ok)throw Error('DPWH data index unavailable ('+response.status+')');
       const index=await response.json();
