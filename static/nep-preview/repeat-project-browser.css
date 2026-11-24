@@ -57,7 +57,8 @@
   align-items: end;
   margin-top: .55rem;
 }
-#repeat-project-browser .repeat-browser-geography label {
+#repeat-project-browser .repeat-browser-geography label,
+#repeat-project-browser .repeat-browser-title-search {
   display: grid;
   gap: .15rem;
   min-width: 0;
@@ -66,8 +67,10 @@
   font-size: .8rem;
   font-weight: 650;
 }
+#repeat-project-browser .repeat-browser-title-search { width: min(100%, 32rem); margin-top: .65rem; }
 #repeat-project-browser .repeat-browser-geography select,
-#repeat-project-browser .repeat-browser-geography button {
+#repeat-project-browser .repeat-browser-geography button,
+#repeat-project-browser .repeat-browser-title-search input {
   min-width: 0;
   min-height: 2.2rem;
   padding: .3rem .5rem;

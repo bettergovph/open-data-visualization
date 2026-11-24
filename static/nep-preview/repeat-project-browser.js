@@ -9,6 +9,7 @@
   const previous = get('prev'), next = get('next'), retry = get('retry'), position = get('position');
   const filters = [...browser.querySelectorAll('[data-repeat-filter]')];
   const periodFilters = [...browser.querySelectorAll('[data-repeat-period]')];
+  const search = get('title-search')?.querySelector('input');
   const places = [...browser.querySelectorAll('[data-repeat-place]')], clearPlace = get('clear-place');
   const locationLinks = get('location') || element('div', '', 'repeat-browser-location');
   if (!locationLinks.isConnected) get('stats').after(locationLinks);
@@ -19,6 +20,8 @@
   let index, project, category = 'all', current = 0, selected, activePhoto = -1;
   let period = periodFilters.length ? '2027' : 'all', linked2027 = new Set();
   let geography = new Map(), results = null, requestId = 0;
+  let titles, titleRequest;
+  const searchKey = title => title.trim().toLowerCase().replace(/\s+/g, ' ');
 
   function element(tag, text, className) {
     const node = document.createElement(tag);
@@ -257,6 +260,7 @@
   }
 
   function applyFilters() {
+    const query = searchKey(search?.value || '');
     const place = places.reduce((code, select) => select.value || code, '');
     const ranked = category === 'all' ? null : (index.filters?.[category] || []);
     const atPlace = geography.get(place)?.offsets;
@@ -277,17 +281,40 @@
       button.disabled = key !== 'all' && !index.filters?.[key]?.length;
       button.setAttribute('aria-pressed', String(key === category));
     }
-    requestId++;
+    const ticket = ++requestId;
     current = 0;
     retry.hidden = true;
     get('title').textContent = '';
     get('office').textContent = '';
     get('stats').hidden = get('body').hidden = locationLinks.hidden = true;
     photoStage.replaceChildren();
+    if (query && !titles) {
+      position.textContent = 'Loading project titles…';
+      loadTitles().then(() => {
+        if (ticket === requestId) applyFilters();
+      }).catch(error => {
+        if (ticket === requestId) showError('Could not load project titles.', applyFilters, error);
+      });
+      return;
+    }
+    if (query) {
+      results = Array.from(results ?? titles.keys()).filter(offset => titles[offset].includes(query));
+    }
     if (resultCount()) openProject(0);
     else position.textContent = period === '2027'
       ? 'No FY2027-linked projects match these filters.'
       : 'No projects match these filters.';
+  }
+
+  function loadTitles() {
+    titleRequest ??= fetchJson(index.titleIndex).then(rows => {
+      if (!Array.isArray(rows) || rows.length !== index.total) throw Error('Incomplete title index');
+      titles = rows.map(searchKey);
+    }).catch(error => {
+      titleRequest = undefined;
+      throw error;
+    });
+    return titleRequest;
   }
 
   async function openProject(target) {
@@ -331,6 +358,7 @@
   const move = delta => openProject(current + delta);
   previous.onclick = () => move(-1);
   next.onclick = () => move(1);
+  if (search) search.oninput = applyFilters;
   for (const button of periodFilters) {
     button.onclick = () => {
       const key = button.dataset.repeatPeriod;
@@ -377,6 +405,7 @@
       geography = new Map((index.geography || []).map(([code, name, level, parent, offsets]) =>
         [code, {code, name, level, parent, offsets}]));
       fillPlaces();
+      if (search) search.disabled = false;
       for (const button of periodFilters) button.disabled = false;
       applyFilters();
     } catch (error) {
