@@ -491,8 +491,12 @@ async fn philgeps_fy2027() -> Result<HttpResponse, ActixError> {
     let mut context = Context::new();
     context.insert("philgeps_hero_summary", &hero_summary);
     context.insert("philgeps_hero_badges", &hero_badges);
+    let chart_data = serde_json::json!({
+        "notices": notices,
+        "asOf": report["crawl"]["asOf"],
+    });
     // Keep source titles inside the inert JSON script, including literal tags.
-    context.insert("philgeps_chart_data", &report["invitations"].to_string().replace('<', "\\u003c"));
+    context.insert("philgeps_chart_data", &chart_data.to_string().replace('<', "\\u003c"));
     let rendered = tera.render("philgeps_fy2027.html", &context)
         .map_err(actix_web::error::ErrorInternalServerError)?;
     Ok(HttpResponse::Ok().content_type("text/html; charset=utf-8").body(rendered))

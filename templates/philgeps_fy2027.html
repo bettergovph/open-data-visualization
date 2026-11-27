@@ -13,8 +13,8 @@
 {% set topic_title_id = "philgeps-page-title" %}
 {% set topic_kicker = "BetterGovPH · Public procurement" %}
 {% set topic_title = "PhilGEPS and the FY2027 budget" %}
-{% set topic_deck = philgeps_hero_summary %}
-{% set topic_badges = philgeps_hero_badges %}
+{% set topic_deck = philgeps_hero_summary | default(value="Follow published invitations to bid to their matching proposed budget lines and review flags.") %}
+{% set topic_badges = philgeps_hero_badges | default(value=[]) %}
 {% set topic_snapshot_index = -1 %}
 {% include "visualizations_topic_header.html" %}
 <main class="philgeps-content">
@@ -53,6 +53,7 @@
   </div>
   <aside class="philgeps-method" aria-labelledby="source-heading">
     <h2 id="source-heading">Source and scope</h2>
+    <p id="snapshot-date" class="philgeps-caption" hidden></p>
     <p>This sample comes from the BetterGov research report’s limited crawl and individually verified notices. The sources establish invitations and, where stated, scheduled bid openings. Review flags identify records that warrant checking.</p>
     <p>Section 12 permits early procurement subject to its requirements. Award requires approved, effective funding. <a href="https://www.gppb.gov.ph/wp-content/uploads/2025/02/IRR-of-RA-No.-12009.pdf">Approved procurement rules</a></p>
     <div class="philgeps-links">
@@ -62,6 +63,6 @@
   </aside>
 </main>
 <script type="application/json" id="philgeps-data">{{ philgeps_chart_data | safe }}</script>
-<script src="/static/js/philgeps-fy2027.js" defer></script>
+<script src="/static/js/philgeps-fy2027.js?v=hero-rollout" defer></script>
 </body>
 </html>

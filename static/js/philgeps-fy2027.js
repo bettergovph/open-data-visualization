@@ -58,12 +58,22 @@
     return card;
   }
 
-  function render(records) {
+  function render(records, asOf) {
     const notices = records.map(notice => ({ ...notice, stages: new Set(notice.budget.map(line => line.stage)) }));
     if (!notices.length) throw new Error('No notice records.');
     const total = notices.length;
     const matched = notices.filter(notice => notice.stages.size).length;
     const sourceCount = new Set(notices.map(notice => notice.url)).size;
+    const hero = document.querySelector('.topic-hero');
+    if (hero) {
+      hero.querySelector('.topic-hero-deck').textContent =
+        `${number.format(sourceCount)} official PhilGEPS sources list ${number.format(total)} contracts citing FY2027 funds. ${number.format(matched)} have a budget match in the available schedules.`;
+      if (asOf && !hero.querySelector('.topic-hero-meta')) {
+        const badge = node('div', '', 'topic-hero-meta');
+        badge.append(node('span', 'Public notices screened through ' + asOf));
+        hero.querySelector('.topic-hero-inner').append(badge);
+      }
+    }
     get('match-count').textContent = number.format(matched);
     get('contract-count').textContent = 'of ' + number.format(total) + ' contracts';
     get('source-count').textContent = number.format(sourceCount) + ' official PhilGEPS sources';
@@ -130,7 +140,8 @@
   }
 
   try {
-    render(JSON.parse(get('philgeps-data').textContent));
+    const data = JSON.parse(get('philgeps-data').textContent);
+    render(Array.isArray(data) ? data : data.notices, data.asOf);
   } catch (error) {
     console.error('PhilGEPS visualization:', error);
     get('philgeps-status').textContent = 'The notice figures could not be loaded. See the research report below.';
