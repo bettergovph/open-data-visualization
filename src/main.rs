@@ -473,14 +473,26 @@ async fn philgeps_fy2027() -> Result<HttpResponse, ActixError> {
         .map_err(actix_web::error::ErrorServiceUnavailable)?;
     let report: serde_json::Value = serde_json::from_reader(std::io::BufReader::new(file.file()))
         .map_err(actix_web::error::ErrorInternalServerError)?;
-    let data = serde_json::json!({
-        "notices": report["invitations"],
-        "asOf": report["crawl"]["asOf"],
-    });
+    let notices = report["invitations"].as_array()
+        .ok_or_else(|| actix_web::error::ErrorInternalServerError("Missing PhilGEPS invitations"))?;
+    let source_count = notices.iter().filter_map(|notice| notice["url"].as_str())
+        .collect::<std::collections::HashSet<_>>().len();
+    let match_count = notices.iter().filter(|notice| {
+        notice["budget"].as_array().is_some_and(|lines| !lines.is_empty())
+    }).count();
+    let hero_summary = format!(
+        "{source_count} official PhilGEPS sources list {} contracts citing FY2027 funds. {match_count} have a budget match in the available schedules.",
+        notices.len(),
+    );
+    let hero_badges: Vec<_> = report["crawl"]["asOf"].as_str().into_iter()
+        .map(|date| format!("Public notices screened through {date}"))
+        .collect();
     let tera = Tera::new("templates/**/*").map_err(actix_web::error::ErrorInternalServerError)?;
     let mut context = Context::new();
+    context.insert("philgeps_hero_summary", &hero_summary);
+    context.insert("philgeps_hero_badges", &hero_badges);
     // Keep source titles inside the inert JSON script, including literal tags.
-    context.insert("philgeps_chart_data", &data.to_string().replace('<', "\\u003c"));
+    context.insert("philgeps_chart_data", &report["invitations"].to_string().replace('<', "\\u003c"));
     let rendered = tera.render("philgeps_fy2027.html", &context)
         .map_err(actix_web::error::ErrorInternalServerError)?;
     Ok(HttpResponse::Ok().content_type("text/html; charset=utf-8").body(rendered))

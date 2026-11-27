@@ -9,9 +9,6 @@
   };
   const number = new Intl.NumberFormat('en-PH');
   const pesos = new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' });
-  const displayDate = value => new Intl.DateTimeFormat('en-PH', {
-    year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Asia/Manila',
-  }).format(new Date(value + 'T00:00:00+08:00'));
   const stages = [
     ['NEP', 'National Expenditure Program'],
     ['HGAB', 'House third reading'],
@@ -61,8 +58,8 @@
     return card;
   }
 
-  function render(data) {
-    const notices = data.notices.map(notice => ({ ...notice, stages: new Set(notice.budget.map(line => line.stage)) }));
+  function render(records) {
+    const notices = records.map(notice => ({ ...notice, stages: new Set(notice.budget.map(line => line.stage)) }));
     if (!notices.length) throw new Error('No notice records.');
     const total = notices.length;
     const matched = notices.filter(notice => notice.stages.size).length;
@@ -70,7 +67,6 @@
     get('match-count').textContent = number.format(matched);
     get('contract-count').textContent = 'of ' + number.format(total) + ' contracts';
     get('source-count').textContent = number.format(sourceCount) + ' official PhilGEPS sources';
-    if (data.asOf) get('snapshot-date').textContent = 'Public notices screened through ' + displayDate(data.asOf) + '.';
 
     const grid = get('contract-grid');
     grid.setAttribute('aria-label', matched + ' contracts with a budget match out of ' + total);
