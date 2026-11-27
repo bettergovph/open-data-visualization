@@ -31,10 +31,8 @@
 .philgeps-legend span { display: inline-flex; align-items: center; gap: 7px; }
 .philgeps-legend i { display: inline-block; width: 14px; height: 12px; border-radius: 2px; background: #087760; }
 .stage-chart { display: grid; gap: 8px; margin: 14px 0; }
-.stage-bar, .philgeps-button, .chart-filter select { font: inherit; color: #00246a; border: 1px solid #a7b9d0; background: #fff; border-radius: 7px; }
-.stage-bar, .philgeps-button { cursor: pointer; }
+.stage-bar, .chart-filter select { font: inherit; color: #00246a; border: 1px solid #a7b9d0; background: #fff; border-radius: 7px; }
 .stage-bar { padding: 9px 11px; width: 100%; text-align: left; }
-.stage-bar[aria-pressed="true"] { background: #e9f1ff; border-color: #0038a8; }
 .stage-bar-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; font-weight: 650; font-size: .9rem; }
 .stage-track { display: flex; overflow: hidden; height: 18px; margin-top: 8px; background: #e8edf4; border-radius: 4px; }
 .stage-track > span { flex: 0 0 auto; height: 100%; }
@@ -50,15 +48,8 @@
 .chart-filter { display: grid; gap: 4px; margin-bottom: 10px; font-weight: 650; font-size: .83rem; }
 .chart-filter select { width: 100%; min-width: 0; min-height: 40px; padding: 5px 8px; }
 .stage-legend { gap: 4px 12px; }
-.philgeps-button { padding: 7px 11px; font-size: .85rem; min-height: 36px; }
-.philgeps-button:disabled { opacity: .55; cursor: default; }
-.philgeps-explorer, .philgeps-method { margin-top: 20px; padding: clamp(15px, 2.7vw, 28px); border: 1px solid #dce4ed; border-radius: 12px; background: #fff; }
-.notice-results { max-height: 28rem; overflow: auto; border-block: 1px solid #e1e8ef; }
-.notice-results details { padding: 10px 9px; border-bottom: 1px solid #e1e8ef; overflow-wrap: anywhere; }
-.notice-results summary { cursor: pointer; font-weight: 650; }
-.notice-results small { display: block; margin: 3px 0 0 17px; color: #4c5c6e; }
-.notice-results ul { margin: 7px 0; padding-left: 24px; }
-.notice-results .philgeps-caption { padding-inline: 9px; }
+.research-records-link { display: inline-block; font-size: .9rem; font-weight: 650; }
+.philgeps-method { margin-top: 20px; padding: clamp(15px, 2.7vw, 28px); border: 1px solid #dce4ed; border-radius: 12px; background: #fff; }
 .philgeps-links { display: flex; flex-wrap: wrap; gap: 6px 18px; font-weight: 650; }
 @media (max-width: 760px) {
   .philgeps-pair { grid-template-columns: minmax(0, 1fr); }

@@ -8,56 +8,11 @@
     return element;
   };
   const number = new Intl.NumberFormat('en-PH');
-  const pesos = new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' });
   const stages = [
     ['NEP', 'National Expenditure Program'],
     ['HGAB', 'House third reading'],
     ['SCR', 'Senate Committee Report'],
   ];
-  const research = 'https://research.bettergov.ph/static/nep-preview/';
-
-  function source(text, path) {
-    if (!path) return node('span', text);
-    const url = new URL(path, research);
-    if (url.protocol !== 'https:') return node('span', text);
-    const link = node('a', text);
-    link.href = url;
-    return link;
-  }
-
-  function noticeCard(notice) {
-    const card = node('details');
-    const contract = notice.title.startsWith(notice.contract) ? notice.title : notice.contract + ' · ' + notice.title;
-    card.append(
-      node('summary', contract),
-      node('small', [notice.office, notice.status, notice.abc == null ? null : 'ABC ' + pesos.format(notice.abc)]
-        .filter(Boolean).join(' · ')),
-    );
-    const links = node('ul');
-    const original = node('li');
-    original.append(source('PhilGEPS notice ' + notice.reference, notice.url));
-    links.append(original);
-    for (const line of notice.budget) {
-      const item = node('li');
-      const amount = line.amount == null ? '' : ' · ' + pesos.format(line.amount);
-      item.append(source(line.stage + amount, line.url));
-      links.append(item);
-    }
-    card.append(links);
-    if (!notice.budget.length && notice.basis) card.append(node('small', notice.basis));
-    if (notice.flags.length) {
-      const flags = node('ul');
-      for (const flag of notice.flags) {
-        const item = node('li');
-        item.append(source(flag.label, flag.url));
-        if (flag.evidence) item.append(document.createTextNode(' · ' + flag.evidence));
-        flags.append(item);
-      }
-      card.append(flags);
-    }
-    return card;
-  }
-
   const flagBuckets = [
     { label: '0 flags', color: 'flag-none', includes: notice => notice.flagLabels.size === 0 },
     { label: '1–2 flags', color: 'flag-low', includes: notice => [1, 2].includes(notice.flagLabels.size) },
@@ -66,16 +21,14 @@
   ];
 
   function chartBar(label, count) {
-    const button = node('button', '', 'stage-bar');
-    button.type = 'button';
-    button.setAttribute('aria-controls', 'notice-results');
+    const row = node('div', '', 'stage-bar');
     const title = node('span', '', 'stage-bar-head');
     title.append(node('span', label), node('span', number.format(count)));
     const track = node('span', '', 'stage-track');
     track.setAttribute('aria-hidden', 'true');
     const breakdown = node('span', '', 'stage-breakdown');
-    button.append(title, track, breakdown);
-    return { button, track, breakdown };
+    row.append(title, track, breakdown);
+    return { row, track, breakdown };
   }
 
   function keyLabel(bucket, count) {
@@ -89,7 +42,7 @@
 
   function render(records, asOf) {
     const notices = records.map(notice => ({
-      ...notice,
+      url: notice.url,
       stages: new Set(notice.budget.map(line => line.stage)),
       flagLabels: new Set(notice.flags.map(flag => flag.label)),
     }));
@@ -124,31 +77,24 @@
     for (const [label, count] of flags) filter.add(new Option(`${label} (${number.format(count)})`, label));
     const chart = get('stage-chart');
     const legend = get('stage-legend');
-    const reset = get('reset-stage');
-    const bars = new Map();
-    let selectedStage = '';
+    const bars = [];
 
     for (const [stage, label] of stages) {
       const stageNotices = notices.filter(notice => notice.stages.has(stage));
       const bar = chartBar(stage + ' · ' + label, stageNotices.length);
-      bar.button.dataset.stage = stage;
-      bar.button.onclick = () => {
-        selectedStage = selectedStage === stage ? '' : stage;
-        showMatches();
-      };
-      bars.set(stage, { ...bar, notices: stageNotices });
-      chart.append(bar.button);
+      bar.row.dataset.stage = stage;
+      bars.push({ ...bar, notices: stageNotices });
+      chart.append(bar.row);
     }
 
-    function showMatches() {
+    function drawStacks() {
       const selectedFlag = filter.value;
       const buckets = selectedFlag ? [
         { label: 'With selected flag', color: 'flag-selected', includes: notice => notice.flagLabels.has(selectedFlag) },
         { label: 'Other stage matches', color: 'other-matches', includes: notice => !notice.flagLabels.has(selectedFlag) },
       ] : flagBuckets;
       legend?.replaceChildren(...buckets.map(bucket => keyLabel(bucket)));
-      for (const [stage, bar] of bars) {
-        bar.button.setAttribute('aria-pressed', String(stage === selectedStage));
+      for (const bar of bars) {
         const counts = buckets.map(bucket => bar.notices.filter(bucket.includes).length);
         bar.track.replaceChildren(...buckets.map((bucket, i) => {
           const segment = node('span', '', bucket.color);
@@ -157,25 +103,10 @@
         }));
         bar.breakdown.replaceChildren(...buckets.map((bucket, i) => keyLabel(bucket, counts[i])));
       }
-      reset.disabled = !selectedStage && !selectedFlag;
-      const scoped = selectedStage ? bars.get(selectedStage).notices : notices;
-      const filtered = selectedFlag ? scoped.filter(notice => notice.flagLabels.has(selectedFlag)) : scoped;
-      get('results-count').textContent = 'Showing ' + filtered.length + ' of ' + total + ' contracts' +
-        (selectedStage ? ' · ' + selectedStage : '') + '.';
-      const results = get('notice-results');
-      results.replaceChildren(...(filtered.length ? filtered.map(noticeCard) :
-        [node('p', 'No contracts match these filters.', 'philgeps-caption')]));
-      results.scrollTop = 0;
     }
 
-    reset.onclick = () => {
-      selectedStage = '';
-      filter.value = '';
-      showMatches();
-      chart.querySelector('button').focus();
-    };
-    filter.onchange = showMatches;
-    showMatches();
+    filter.onchange = drawStacks;
+    drawStacks();
     get('philgeps-dashboard').hidden = false;
     get('philgeps-status').hidden = true;
   }
