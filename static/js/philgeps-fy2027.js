@@ -58,8 +58,38 @@
     return card;
   }
 
+  function chartBar(label) {
+    const button = node('button', '', 'stage-bar');
+    button.type = 'button';
+    button.setAttribute('aria-controls', 'notice-results');
+    const title = node('span', '', 'stage-bar-head');
+    const value = node('span');
+    title.append(node('span', label), value);
+    const track = node('span', '', 'stage-track');
+    track.setAttribute('aria-hidden', 'true');
+    const fill = node('span');
+    track.append(fill);
+    button.append(title, track);
+    return { button, setCount(count, total) {
+      value.textContent = number.format(count);
+      fill.style.width = (total ? count / total * 100 : 0) + '%';
+    } };
+  }
+
+  function countFlags(notices) {
+    const counts = new Map();
+    for (const notice of notices) {
+      for (const flag of notice.flagLabels) counts.set(flag, (counts.get(flag) || 0) + 1);
+    }
+    return counts;
+  }
+
   function render(records, asOf) {
-    const notices = records.map(notice => ({ ...notice, stages: new Set(notice.budget.map(line => line.stage)) }));
+    const notices = records.map(notice => ({
+      ...notice,
+      stages: new Set(notice.budget.map(line => line.stage)),
+      flagLabels: new Set(notice.flags.map(flag => flag.label)),
+    }));
     if (!notices.length) throw new Error('No notice records.');
     const total = notices.length;
     const matched = notices.filter(notice => notice.stages.size).length;
@@ -83,7 +113,8 @@
     grid.replaceChildren(...Array.from({ length: total }, (_, i) => node('span', '', i >= matched ? 'unmatched' : 'matched')));
 
     const filter = get('flag-filter');
-    const labels = [...new Set(notices.flatMap(notice => notice.flags.map(flag => flag.label)))].sort((a, b) => a.localeCompare(b));
+    const allFlags = countFlags(notices);
+    const labels = [...allFlags.keys()].sort((a, b) => a.localeCompare(b));
     for (const label of labels) filter.add(new Option(label, label));
     const chart = get('stage-chart');
     const reset = get('reset-stage');
@@ -91,23 +122,33 @@
 
     for (const [stage, label] of stages) {
       const count = notices.filter(notice => notice.stages.has(stage)).length;
-      const bar = node('button', '', 'stage-bar');
-      bar.type = 'button';
-      bar.dataset.stage = stage;
-      bar.setAttribute('aria-controls', 'notice-results');
-      const head = node('span', '', 'stage-bar-head');
-      head.append(node('span', stage + ' · ' + label), node('span', number.format(count)));
-      const track = node('span', '', 'stage-track');
-      track.setAttribute('aria-hidden', 'true');
-      const fill = node('span');
-      fill.style.width = (count / total * 100) + '%';
-      track.append(fill);
-      bar.append(head, track);
-      bar.onclick = () => {
+      const bar = chartBar(stage + ' · ' + label);
+      bar.button.dataset.stage = stage;
+      bar.setCount(count, total);
+      bar.button.onclick = () => {
         selectedStage = selectedStage === stage ? '' : stage;
         showMatches();
       };
-      chart.append(bar);
+      chart.append(bar.button);
+    }
+
+    const flagChart = get('flag-chart');
+    const flagScope = get('flag-chart-scope');
+    const flagBars = new Map();
+    if (flagChart) {
+      const extraChart = get('extra-flag-chart');
+      const more = get('more-flags');
+      const order = [...labels].sort((a, b) => allFlags.get(b) - allFlags.get(a) || a.localeCompare(b));
+      for (const [index, label] of order.entries()) {
+        const bar = chartBar(label);
+        bar.button.onclick = () => {
+          filter.value = filter.value === label ? '' : label;
+          showMatches();
+        };
+        flagBars.set(label, bar);
+        (index < 5 ? flagChart : extraChart).append(bar.button);
+      }
+      more.hidden = labels.length <= 5;
     }
 
     function showMatches() {
@@ -115,10 +156,19 @@
         bar.setAttribute('aria-pressed', String(bar.dataset.stage === selectedStage));
       }
       reset.disabled = !selectedStage && !filter.value;
-      const filtered = notices.filter(notice =>
-        (!selectedStage || notice.stages.has(selectedStage)) &&
-        (!filter.value || notice.flags.some(flag => flag.label === filter.value))
-      );
+      const scoped = selectedStage ? notices.filter(notice => notice.stages.has(selectedStage)) : notices;
+      if (flagScope) {
+        flagScope.textContent = `Among ${number.format(scoped.length)} ${selectedStage ? selectedStage + ' matches' : 'contracts'}. A contract may have multiple flags. Select a flag to filter the records.`;
+      }
+      const counts = selectedStage ? countFlags(scoped) : allFlags;
+      for (const [label, bar] of flagBars) {
+        const count = counts.get(label) || 0;
+        const selected = label === filter.value;
+        bar.setCount(count, scoped.length);
+        bar.button.setAttribute('aria-pressed', String(selected));
+        bar.button.disabled = !count && !selected;
+      }
+      const filtered = filter.value ? scoped.filter(notice => notice.flagLabels.has(filter.value)) : scoped;
       get('results-count').textContent = 'Showing ' + filtered.length + ' of ' + total + ' contracts' +
         (selectedStage ? ' · ' + selectedStage : '') + '.';
       const results = get('notice-results');

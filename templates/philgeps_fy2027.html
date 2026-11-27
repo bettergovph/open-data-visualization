@@ -6,7 +6,7 @@
   <title>PhilGEPS · FY2027 early procurement | BetterGovPH</title>
   <meta name="description" content="Explore official PhilGEPS invitations tied to FY2027 funding, matched budget stages, and the source records behind each review flag.">
   <link rel="canonical" href="https://visualizations.bettergov.ph/philgeps/fy2027">
-  <link rel="stylesheet" href="/static/css/philgeps-fy2027.css">
+  <link rel="stylesheet" href="/static/css/philgeps-fy2027.css?v=review-flags">
 </head>
 <body class="philgeps-page">
 {% set topic_nav_active = "philgeps" %}
@@ -37,6 +37,13 @@
         <h2 id="stage-chart-heading">Budget matches by stage</h2>
         <p class="philgeps-caption">A contract may appear in more than one stage. Select a bar to see the linked contracts.</p>
         <div id="stage-chart" class="stage-chart" role="group" aria-label="Filter contracts by matched budget stage"></div>
+        <h3 class="flag-chart-heading" id="flag-chart-heading">Contracts by review flag</h3>
+        <p class="philgeps-caption" id="flag-chart-scope" aria-live="polite"></p>
+        <div id="flag-chart" class="stage-chart flag-chart" role="group" aria-labelledby="flag-chart-heading"></div>
+        <details class="flag-chart-more" id="more-flags" hidden>
+          <summary>Show more flags</summary>
+          <div id="extra-flag-chart" class="stage-chart flag-chart" role="group" aria-label="Additional review flags"></div>
+        </details>
         <button type="button" id="reset-stage" class="philgeps-button">Show all contracts</button>
       </section>
     </div>
@@ -63,6 +70,6 @@
   </aside>
 </main>
 <script type="application/json" id="philgeps-data">{{ philgeps_chart_data | safe }}</script>
-<script src="/static/js/philgeps-fy2027.js?v=hero-rollout" defer></script>
+<script src="/static/js/philgeps-fy2027.js?v=review-flags" defer></script>
 </body>
 </html>

@@ -38,6 +38,13 @@
 .stage-bar-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; font-weight: 650; font-size: .9rem; }
 .stage-track { display: block; height: 9px; margin-top: 6px; background: #e0e8f4; border-radius: 4px; }
 .stage-track > span { display: block; height: 100%; border-radius: inherit; background: #0038a8; }
+.flag-chart-heading { margin: 18px 0 4px; color: #00246a; font-size: 1.03rem; }
+.flag-chart .stage-track { background: #f2e7d9; }
+.flag-chart .stage-track > span { background: #94520d; }
+.flag-chart .stage-bar { overflow-wrap: anywhere; }
+.flag-chart .stage-bar:disabled { cursor: default; opacity: .6; }
+.flag-chart-more { margin: 0 0 12px; }
+.flag-chart-more summary { cursor: pointer; color: #0038a8; font-size: .85rem; font-weight: 650; }
 .philgeps-button { padding: 7px 11px; font-size: .85rem; min-height: 36px; }
 .philgeps-button:disabled { opacity: .55; cursor: default; }
 .philgeps-explorer, .philgeps-method { margin-top: 20px; padding: clamp(15px, 2.7vw, 28px); border: 1px solid #dce4ed; border-radius: 12px; background: #fff; }
