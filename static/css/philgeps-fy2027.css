@@ -1,0 +1,57 @@
+.philgeps-page {
+  margin: 0;
+  background: #fafafa;
+  color: #212121;
+  font: 16px/1.55 Inter, system-ui, sans-serif;
+}
+.philgeps-page *, .philgeps-page *::before, .philgeps-page *::after { box-sizing: border-box; }
+.philgeps-content { max-width: 1224px; margin: auto; padding: 28px clamp(12px, 3vw, 28px) 58px; }
+.philgeps-content [hidden] { display: none !important; }
+.philgeps-content h2 { margin: 0 0 8px; color: #00246a; font-size: clamp(19px, 2.2vw, 25px); line-height: 1.25; }
+.philgeps-content a { color: #0038a8; text-underline-offset: 3px; }
+.philgeps-content :focus-visible { outline: 3px solid #9b6a00; outline-offset: 3px; }
+.philgeps-pair {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  border: 1px solid #dce4ed;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 5px 20px #00246a0d;
+}
+.philgeps-pair > section { min-width: 0; padding: clamp(16px, 2.7vw, 30px); }
+.philgeps-pair > section + section { border-left: 1px solid #dce4ed; background: #f4f7fc; border-radius: 0 14px 14px 0; }
+.philgeps-metric { display: flex; align-items: baseline; flex-wrap: wrap; gap: .25rem .55rem; margin-top: 12px; color: #00246a; }
+.philgeps-metric strong { font-size: clamp(44px, 6vw, 68px); line-height: 1; letter-spacing: -.06em; }
+.philgeps-metric span { font-weight: 650; }
+.philgeps-caption { margin: 5px 0 14px; color: #4c5c6e; font-size: .9rem; }
+.contract-grid { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 6px; max-width: 360px; margin: 18px 0; }
+.contract-grid span { aspect-ratio: 1.3; border-radius: 3px; background: #087760; }
+.contract-grid .unmatched, .philgeps-legend .unmatched { background: repeating-linear-gradient(135deg, #ffe8bc 0 4px, #a35a10 4px 6px); border: 1px solid #a35a10; }
+.philgeps-legend { display: flex; flex-wrap: wrap; gap: 8px 16px; color: #35485c; font-size: .82rem; }
+.philgeps-legend span { display: inline-flex; align-items: center; gap: 7px; }
+.philgeps-legend i { display: inline-block; width: 14px; height: 12px; border-radius: 2px; background: #087760; }
+.stage-chart { display: grid; gap: 8px; margin: 14px 0; }
+.stage-bar, .philgeps-button, .explorer-header select { font: inherit; color: #00246a; border: 1px solid #a7b9d0; background: #fff; border-radius: 7px; }
+.stage-bar, .philgeps-button { cursor: pointer; }
+.stage-bar { padding: 9px 11px; width: 100%; text-align: left; }
+.stage-bar[aria-pressed="true"] { background: #e9f1ff; border-color: #0038a8; }
+.stage-bar-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; font-weight: 650; font-size: .9rem; }
+.stage-track { display: block; height: 9px; margin-top: 6px; background: #e0e8f4; border-radius: 4px; }
+.stage-track > span { display: block; height: 100%; border-radius: inherit; background: #0038a8; }
+.philgeps-button { padding: 7px 11px; font-size: .85rem; min-height: 36px; }
+.philgeps-button:disabled { opacity: .55; cursor: default; }
+.philgeps-explorer, .philgeps-method { margin-top: 20px; padding: clamp(15px, 2.7vw, 28px); border: 1px solid #dce4ed; border-radius: 12px; background: #fff; }
+.explorer-header { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 8px 18px; }
+.explorer-header label { display: grid; gap: 3px; font-weight: 650; font-size: .83rem; max-width: 100%; }
+.explorer-header select { width: min(100%, 21rem); min-height: 40px; padding: 5px 8px; }
+.notice-results { max-height: 28rem; overflow: auto; border-block: 1px solid #e1e8ef; }
+.notice-results details { padding: 10px 9px; border-bottom: 1px solid #e1e8ef; overflow-wrap: anywhere; }
+.notice-results summary { cursor: pointer; font-weight: 650; }
+.notice-results small { display: block; margin: 3px 0 0 17px; color: #4c5c6e; }
+.notice-results ul { margin: 7px 0; padding-left: 24px; }
+.notice-results .philgeps-caption { padding-inline: 9px; }
+.philgeps-links { display: flex; flex-wrap: wrap; gap: 6px 18px; font-weight: 650; }
+@media (max-width: 760px) {
+  .philgeps-pair { grid-template-columns: minmax(0, 1fr); }
+  .philgeps-pair > section + section { border-left: 0; border-top: 1px solid #dce4ed; border-radius: 0 0 14px 14px; }
+}

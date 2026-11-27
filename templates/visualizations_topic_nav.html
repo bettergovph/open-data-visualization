@@ -17,7 +17,7 @@
     .topic-nav-links a.topic-nav-research { background:#0038A8; color:#fff; }
     .topic-nav-links a.topic-nav-research:hover { background:#00246A; }
     .topic-nav a:focus-visible { outline:3px solid #FCD116; outline-offset:3px; }
-    @media(max-width:800px) {
+    @media(max-width:1024px) {
         .topic-nav-inner { min-height:58px; padding:0 12px; gap:4px; }
         .topic-nav-brand img { width:105px; }
         .topic-nav-links { display:none; }
@@ -39,6 +39,7 @@
             <a href="/fmr"{% if topic_nav_active == "fmr" %} aria-current="page"{% endif %}>FMR</a>
             <a href="/flood-control"{% if topic_nav_active == "flood-control" %} aria-current="page"{% endif %}>Flood Control</a>
             <a href="/connectivity"{% if topic_nav_active == "connectivity" %} aria-current="page"{% endif %}>Connectivity</a>
+            <a href="/philgeps/fy2027"{% if topic_nav_active == "philgeps" %} aria-current="page"{% endif %}>PhilGEPS</a>
             <a href="/archive"{% if topic_nav_active == "archive" %} aria-current="page"{% endif %}>Archive</a>
             <a href="/sources"{% if topic_nav_active == "sources" %} aria-current="page"{% endif %}>Sources</a>
         </nav>
@@ -50,6 +51,7 @@
                 <a href="/fmr"{% if topic_nav_active == "fmr" %} aria-current="page"{% endif %}>FMR</a>
                 <a href="/flood-control"{% if topic_nav_active == "flood-control" %} aria-current="page"{% endif %}>Flood Control</a>
                 <a href="/connectivity"{% if topic_nav_active == "connectivity" %} aria-current="page"{% endif %}>Connectivity</a>
+                <a href="/philgeps/fy2027"{% if topic_nav_active == "philgeps" %} aria-current="page"{% endif %}>PhilGEPS</a>
                 <a href="/archive"{% if topic_nav_active == "archive" %} aria-current="page"{% endif %}>Archive</a>
                 <a href="/sources"{% if topic_nav_active == "sources" %} aria-current="page"{% endif %}>Sources</a>
             </nav>

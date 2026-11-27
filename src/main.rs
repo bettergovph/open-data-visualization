@@ -468,6 +468,24 @@ async fn fmr_home(req: HttpRequest) -> Result<HttpResponse, ActixError> {
     Ok(HttpResponse::Ok().content_type("text/html").body(rendered))
 }
 
+async fn philgeps_fy2027() -> Result<HttpResponse, ActixError> {
+    let file = open_non_symlink_file("static/nep-preview/philgeps-data.json")
+        .map_err(actix_web::error::ErrorServiceUnavailable)?;
+    let report: serde_json::Value = serde_json::from_reader(std::io::BufReader::new(file.file()))
+        .map_err(actix_web::error::ErrorInternalServerError)?;
+    let data = serde_json::json!({
+        "notices": report["invitations"],
+        "asOf": report["crawl"]["asOf"],
+    });
+    let tera = Tera::new("templates/**/*").map_err(actix_web::error::ErrorInternalServerError)?;
+    let mut context = Context::new();
+    // Keep source titles inside the inert JSON script, including literal tags.
+    context.insert("philgeps_chart_data", &data.to_string().replace('<', "\\u003c"));
+    let rendered = tera.render("philgeps_fy2027.html", &context)
+        .map_err(actix_web::error::ErrorInternalServerError)?;
+    Ok(HttpResponse::Ok().content_type("text/html; charset=utf-8").body(rendered))
+}
+
 // Catalog of public draft pages that are intentionally kept out of the main navigation.
 async fn drafts(req: HttpRequest) -> Result<HttpResponse, ActixError> {
     let tera = Tera::new("templates/**/*").map_err(actix_web::error::ErrorInternalServerError)?;
@@ -989,6 +1007,7 @@ async fn main() -> std::io::Result<()> {
             .service(web::resource("/flood-control").to(flood_control_home))
             .service(web::resource("/fmr").to(fmr_home))
             .service(web::resource("/connectivity").to(connectivity_home))
+            .service(web::resource("/philgeps/fy2027").route(web::get().to(philgeps_fy2027)))
         .service(web::resource("/philgeps").to(contractors))
         .service(web::resource("/dynasty").to(dynasty))
         .service(web::resource("/dynasty-projects").to(dynasty_projects))
