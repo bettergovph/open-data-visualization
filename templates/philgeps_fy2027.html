@@ -6,7 +6,7 @@
   <title>PhilGEPS · FY2027 early procurement | BetterGovPH</title>
   <meta name="description" content="Explore official PhilGEPS invitations tied to FY2027 funding, matched budget stages, and the source records behind each review flag.">
   <link rel="canonical" href="https://visualizations.bettergov.ph/philgeps/fy2027">
-  <link rel="stylesheet" href="/static/css/philgeps-fy2027.css?v=review-flags">
+  <link rel="stylesheet" href="/static/css/philgeps-fy2027.css?v=stacked-stages">
 </head>
 <body class="philgeps-page">
 {% set topic_nav_active = "philgeps" %}
@@ -34,26 +34,18 @@
         </div>
       </section>
       <section aria-labelledby="stage-chart-heading">
-        <h2 id="stage-chart-heading">Budget matches by stage</h2>
-        <p class="philgeps-caption">A contract may appear in more than one stage. Select a bar to see the linked contracts.</p>
+        <h2 id="stage-chart-heading">Budget matches and review flags by stage</h2>
+        <p class="philgeps-caption">Each bar counts contracts matched to that stage. A contract may appear in multiple stages. Select a bar to inspect its records.</p>
+        <label class="chart-filter">Review flag
+          <select id="flag-filter"><option value="">All flags per contract</option></select>
+        </label>
+        <div id="stage-legend" class="philgeps-legend stage-legend" aria-label="Bar segments"></div>
         <div id="stage-chart" class="stage-chart" role="group" aria-label="Filter contracts by matched budget stage"></div>
-        <h3 class="flag-chart-heading" id="flag-chart-heading">Contracts by review flag</h3>
-        <p class="philgeps-caption" id="flag-chart-scope" aria-live="polite"></p>
-        <div id="flag-chart" class="stage-chart flag-chart" role="group" aria-labelledby="flag-chart-heading"></div>
-        <details class="flag-chart-more" id="more-flags" hidden>
-          <summary>Show more flags</summary>
-          <div id="extra-flag-chart" class="stage-chart flag-chart" role="group" aria-label="Additional review flags"></div>
-        </details>
         <button type="button" id="reset-stage" class="philgeps-button">Show all contracts</button>
       </section>
     </div>
     <section class="philgeps-explorer" aria-labelledby="notices-heading">
-      <div class="explorer-header">
-        <h2 id="notices-heading">Contract records</h2>
-        <label>Review flag
-          <select id="flag-filter"><option value="">All records</option></select>
-        </label>
-      </div>
+      <h2 id="notices-heading">Contract records</h2>
       <p class="philgeps-caption" id="results-count" aria-live="polite"></p>
       <div id="notice-results" class="notice-results" role="region" aria-label="Filtered contract records" tabindex="0"></div>
     </section>
@@ -70,6 +62,6 @@
   </aside>
 </main>
 <script type="application/json" id="philgeps-data">{{ philgeps_chart_data | safe }}</script>
-<script src="/static/js/philgeps-fy2027.js?v=review-flags" defer></script>
+<script src="/static/js/philgeps-fy2027.js?v=stacked-stages" defer></script>
 </body>
 </html>

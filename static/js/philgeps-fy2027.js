@@ -58,30 +58,33 @@
     return card;
   }
 
-  function chartBar(label) {
+  const flagBuckets = [
+    { label: '0 flags', color: 'flag-none', includes: notice => notice.flagLabels.size === 0 },
+    { label: '1–2 flags', color: 'flag-low', includes: notice => [1, 2].includes(notice.flagLabels.size) },
+    { label: '3–4 flags', color: 'flag-mid', includes: notice => [3, 4].includes(notice.flagLabels.size) },
+    { label: '5+ flags', color: 'flag-high', includes: notice => notice.flagLabels.size >= 5 },
+  ];
+
+  function chartBar(label, count) {
     const button = node('button', '', 'stage-bar');
     button.type = 'button';
     button.setAttribute('aria-controls', 'notice-results');
     const title = node('span', '', 'stage-bar-head');
-    const value = node('span');
-    title.append(node('span', label), value);
+    title.append(node('span', label), node('span', number.format(count)));
     const track = node('span', '', 'stage-track');
     track.setAttribute('aria-hidden', 'true');
-    const fill = node('span');
-    track.append(fill);
-    button.append(title, track);
-    return { button, setCount(count, total) {
-      value.textContent = number.format(count);
-      fill.style.width = (total ? count / total * 100 : 0) + '%';
-    } };
+    const breakdown = node('span', '', 'stage-breakdown');
+    button.append(title, track, breakdown);
+    return { button, track, breakdown };
   }
 
-  function countFlags(notices) {
-    const counts = new Map();
-    for (const notice of notices) {
-      for (const flag of notice.flagLabels) counts.set(flag, (counts.get(flag) || 0) + 1);
-    }
-    return counts;
+  function keyLabel(bucket, count) {
+    const label = node('span');
+    const marker = node('i', '', bucket.color);
+    marker.setAttribute('aria-hidden', 'true');
+    label.append(marker, document.createTextNode(count === undefined ? bucket.label :
+      bucket.label + ': ' + number.format(count)));
+    return label;
   }
 
   function render(records, asOf) {
@@ -113,62 +116,50 @@
     grid.replaceChildren(...Array.from({ length: total }, (_, i) => node('span', '', i >= matched ? 'unmatched' : 'matched')));
 
     const filter = get('flag-filter');
-    const allFlags = countFlags(notices);
-    const labels = [...allFlags.keys()].sort((a, b) => a.localeCompare(b));
-    for (const label of labels) filter.add(new Option(label, label));
+    const flagCounts = new Map();
+    for (const notice of notices) {
+      for (const flag of notice.flagLabels) flagCounts.set(flag, (flagCounts.get(flag) || 0) + 1);
+    }
+    const flags = [...flagCounts].sort(([a, left], [b, right]) => right - left || a.localeCompare(b));
+    for (const [label, count] of flags) filter.add(new Option(`${label} (${number.format(count)})`, label));
     const chart = get('stage-chart');
+    const legend = get('stage-legend');
     const reset = get('reset-stage');
+    const bars = new Map();
     let selectedStage = '';
 
     for (const [stage, label] of stages) {
-      const count = notices.filter(notice => notice.stages.has(stage)).length;
-      const bar = chartBar(stage + ' · ' + label);
+      const stageNotices = notices.filter(notice => notice.stages.has(stage));
+      const bar = chartBar(stage + ' · ' + label, stageNotices.length);
       bar.button.dataset.stage = stage;
-      bar.setCount(count, total);
       bar.button.onclick = () => {
         selectedStage = selectedStage === stage ? '' : stage;
         showMatches();
       };
+      bars.set(stage, { ...bar, notices: stageNotices });
       chart.append(bar.button);
     }
 
-    const flagChart = get('flag-chart');
-    const flagScope = get('flag-chart-scope');
-    const flagBars = new Map();
-    if (flagChart) {
-      const extraChart = get('extra-flag-chart');
-      const more = get('more-flags');
-      const order = [...labels].sort((a, b) => allFlags.get(b) - allFlags.get(a) || a.localeCompare(b));
-      for (const [index, label] of order.entries()) {
-        const bar = chartBar(label);
-        bar.button.onclick = () => {
-          filter.value = filter.value === label ? '' : label;
-          showMatches();
-        };
-        flagBars.set(label, bar);
-        (index < 5 ? flagChart : extraChart).append(bar.button);
-      }
-      more.hidden = labels.length <= 5;
-    }
-
     function showMatches() {
-      for (const bar of chart.querySelectorAll('button')) {
-        bar.setAttribute('aria-pressed', String(bar.dataset.stage === selectedStage));
+      const selectedFlag = filter.value;
+      const buckets = selectedFlag ? [
+        { label: 'With selected flag', color: 'flag-selected', includes: notice => notice.flagLabels.has(selectedFlag) },
+        { label: 'Other stage matches', color: 'other-matches', includes: notice => !notice.flagLabels.has(selectedFlag) },
+      ] : flagBuckets;
+      legend?.replaceChildren(...buckets.map(bucket => keyLabel(bucket)));
+      for (const [stage, bar] of bars) {
+        bar.button.setAttribute('aria-pressed', String(stage === selectedStage));
+        const counts = buckets.map(bucket => bar.notices.filter(bucket.includes).length);
+        bar.track.replaceChildren(...buckets.map((bucket, i) => {
+          const segment = node('span', '', bucket.color);
+          segment.style.width = (counts[i] / total * 100) + '%';
+          return segment;
+        }));
+        bar.breakdown.replaceChildren(...buckets.map((bucket, i) => keyLabel(bucket, counts[i])));
       }
-      reset.disabled = !selectedStage && !filter.value;
-      const scoped = selectedStage ? notices.filter(notice => notice.stages.has(selectedStage)) : notices;
-      if (flagScope) {
-        flagScope.textContent = `Among ${number.format(scoped.length)} ${selectedStage ? selectedStage + ' matches' : 'contracts'}. A contract may have multiple flags. Select a flag to filter the records.`;
-      }
-      const counts = selectedStage ? countFlags(scoped) : allFlags;
-      for (const [label, bar] of flagBars) {
-        const count = counts.get(label) || 0;
-        const selected = label === filter.value;
-        bar.setCount(count, scoped.length);
-        bar.button.setAttribute('aria-pressed', String(selected));
-        bar.button.disabled = !count && !selected;
-      }
-      const filtered = filter.value ? scoped.filter(notice => notice.flagLabels.has(filter.value)) : scoped;
+      reset.disabled = !selectedStage && !selectedFlag;
+      const scoped = selectedStage ? bars.get(selectedStage).notices : notices;
+      const filtered = selectedFlag ? scoped.filter(notice => notice.flagLabels.has(selectedFlag)) : scoped;
       get('results-count').textContent = 'Showing ' + filtered.length + ' of ' + total + ' contracts' +
         (selectedStage ? ' · ' + selectedStage : '') + '.';
       const results = get('notice-results');
