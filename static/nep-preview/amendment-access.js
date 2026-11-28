@@ -157,6 +157,7 @@ function setup(data) {
     origin.disabled = wait.disabled = false;
 
     function redraw() {
+        if (document.querySelector('#bolinao-routes').hidden) return;
         const row = rows.find(item => item.name === origin.value);
         for (const mode of ['ferry', 'bridge']) draw(document.querySelector(`#${mode}-map`), data, row, mode);
     }
@@ -239,3 +240,137 @@ async function loadNational() {
 national.addEventListener('toggle', loadNational);
 loadNational();
 serviceFilter.addEventListener('change', () => { if (nationalData) renderNational(); });
+
+const bridgeSelect = document.querySelector('#bridge-scenario');
+const bridgeOrigin = document.querySelector('#bridge-origin');
+const bridgeResearch = document.querySelector('#bridge-research');
+const bridgeCoverage = document.querySelector('#bridge-coverage');
+let bridgeData;
+const detourMinutes = value => number.format(Math.round(Math.max(0, value) * 10) / 10) + ' min';
+
+function drawDetour(canvas, trip, span, mode) {
+    const width = canvas.clientWidth;
+    const height = canvas.clientHeight;
+    const density = window.devicePixelRatio || 1;
+    canvas.width = Math.round(width * density);
+    canvas.height = Math.round(height * density);
+    const ctx = canvas.getContext('2d');
+    ctx.scale(density, density);
+    const all = [...trip.open.points, ...(trip.closed?.points || []), ...span.flat(), trip.point, trip.hospital];
+    const latitudes = all.map(p => p[0]);
+    const longitudes = all.map(p => p[1]);
+    const lat = (Math.min(...latitudes) + Math.max(...latitudes)) / 2;
+    const lon = (Math.min(...longitudes) + Math.max(...longitudes)) / 2;
+    const lonScale = Math.cos(lat * Math.PI / 180);
+    const scale = Math.min((width - 48) / Math.max(.001, (Math.max(...longitudes) - Math.min(...longitudes)) * lonScale),
+        (height - 48) / Math.max(.001, Math.max(...latitudes) - Math.min(...latitudes)));
+    const project = ([y, x]) => [width / 2 + (x - lon) * scale * lonScale, height / 2 - (y - lat) * scale];
+    function paint(points, color, weight, dash = []) {
+        ctx.beginPath();
+        points.forEach((point, index) => {
+            const [x, y] = project(point);
+            if (index === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        });
+        ctx.strokeStyle = color;
+        ctx.lineWidth = weight;
+        ctx.lineJoin = 'round';
+        ctx.setLineDash(dash);
+        ctx.stroke();
+    }
+    if (trip[mode]) paint(trip[mode].points, '#075394', 3);
+    for (const points of span) paint(points, mode === 'closed' ? '#a13721' : '#08746c', 5, mode === 'closed' ? [4, 3] : []);
+    for (const [point, label] of [[trip.point, 'Start'], [trip.hospital, 'Hospital']]) {
+        const [x, y] = project(point);
+        ctx.beginPath();
+        ctx.arc(x, y, 5, 0, Math.PI * 2);
+        ctx.fillStyle = '#082a57';
+        ctx.fill();
+        ctx.font = '600 12px system-ui';
+        const left = Math.min(x + 8, width - ctx.measureText(label).width - 8);
+        ctx.fillText(label, left, y - 7);
+    }
+}
+
+function redrawOtherBridge() {
+    const scenario = bridgeData?.scenarios[bridgeSelect.value];
+    if (!scenario) return;
+    const trip = scenario.origins[bridgeOrigin.value];
+    if (!trip) return;
+    const result = trip.closed
+        ? `with a ${detourMinutes(trip.closed.minutes - trip.open.minutes)} detour if the bridge closes`
+        : 'with no alternate road route found in the modeled window';
+    document.querySelector('#bridge-route-status').textContent =
+        `${trip.name} to ${trip.hospitalName} · ${detourMinutes(trip.open.minutes)} with the bridge open, ${result}.`;
+    for (const mode of ['open', 'closed']) drawDetour(document.querySelector(`#${mode}-map`), trip, scenario.span, mode);
+}
+
+function showBridgeSelection() {
+    const scenario = bridgeData?.scenarios[bridgeSelect.value];
+    document.querySelector('#bolinao-routes').hidden = Boolean(scenario);
+    document.querySelector('#other-bridge-routes').hidden = !scenario;
+    if (!scenario) {
+        window.dispatchEvent(new Event('resize'));
+        return;
+    }
+    bridgeOrigin.replaceChildren(...scenario.origins.map((row, i) => new Option(row.name, i)));
+    const chart = scenario.origins.filter(trip => trip.closed)
+        .map(trip => [trip.name, Math.max(0, trip.closed.minutes - trip.open.minutes)]);
+    document.querySelector('#detour-chart').closest('figure').hidden = !chart.length;
+    if (chart.length) drawQuestionBars('detour-chart', chart, ' min');
+    document.querySelector('#mapped-span').href = `https://www.openstreetmap.org/way/${scenario.bridgeWay}`;
+    document.querySelector('#bridge-route-comparison').replaceChildren(...scenario.origins.map(trip => {
+        const row = document.createElement('tr');
+        row.append(element('th', trip.name), element('td', trip.hospitalName), element('td', detourMinutes(trip.open.minutes)),
+            element('td', trip.closed ? detourMinutes(trip.closed.minutes) : 'No local detour found'),
+            element('td', trip.closed ? detourMinutes(trip.closed.minutes - trip.open.minutes) : '—'));
+        return row;
+    }));
+    redrawOtherBridge();
+}
+
+function showBridgeInventory() {
+    if (!bridgeData || !bridgeResearch.open) return;
+    const term = document.querySelector('#bridge-search').value.trim().toLowerCase();
+    const filter = document.querySelector('#bridge-filter').value;
+    const projects = bridgeData.projects.filter(row => (!filter || filter === row.status) &&
+        (!term || [row.title, row.region, row.bridgeId].join(' ').toLowerCase().includes(term)));
+    document.querySelector('#bridge-list-count').textContent = `${number.format(projects.length)} budget lines`;
+    document.querySelector('#bridge-inventory').replaceChildren(...projects.map(project => {
+        const row = document.createElement('tr');
+        const result = element('td', project.status);
+        if (project.scenario) {
+            const button = element('button', 'Compare routes');
+            button.type = 'button';
+            button.addEventListener('click', () => {
+                bridgeSelect.value = project.scenario;
+                showBridgeSelection();
+                bridgeSelect.focus();
+            });
+            result.append(document.createElement('br'), button);
+        }
+        row.append(budgetCell(project.title, project.url), element('td', project.region),
+            element('td', project.bridgeId || '—'), element('td', pesos(project.amount)), result);
+        return row;
+    }));
+}
+
+bridgeSelect.addEventListener('change', showBridgeSelection);
+bridgeOrigin.addEventListener('change', redrawOtherBridge);
+window.addEventListener('resize', redrawOtherBridge);
+bridgeResearch.addEventListener('toggle', showBridgeInventory);
+document.querySelector('#bridge-search').addEventListener('input', showBridgeInventory);
+document.querySelector('#bridge-filter').addEventListener('change', showBridgeInventory);
+fetch('bridge-hospital-routes.json').then(response => {
+    if (!response.ok) throw new Error(String(response.status));
+    return response.json();
+}).then(data => {
+    bridgeData = data;
+    const scenarios = Object.entries(data.scenarios).sort(([, a], [, b]) => a.name.localeCompare(b.name));
+    for (const [id, scenario] of scenarios) bridgeSelect.add(new Option(`${scenario.name} (${id})`, id));
+    const filter = document.querySelector('#bridge-filter');
+    for (const state of [...new Set(data.projects.map(row => row.status))].sort()) filter.add(new Option(state));
+    bridgeCoverage.textContent =
+        `${number.format(scenarios.length)} existing bridges have modeled hospital routes with the span open and closed, in addition to the Bolinao proposal. The nationwide screen covers ${number.format(data.projects.length)} House budget lines.`;
+    showBridgeInventory();
+}).catch(() => { bridgeCoverage.textContent = 'The nationwide bridge screen could not be loaded.'; });

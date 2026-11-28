@@ -15,3 +15,5 @@ body.bettergov-research main.question-report{box-sizing:border-box;width:100%;ma
 .question-report label{max-width:100%;min-width:0}
 .question-report #contractors{width:min(100%,38rem);min-width:0}
 .question-report :has(> #contractors){display:grid;width:min(100%,38rem)}
+.question-report :is(#bridge-scenario,#bridge-origin,#bridge-filter){width:min(100%,38rem);min-width:0}
+.question-report :is(label:has(> #bridge-origin),label:has(> #bridge-filter)){width:min(100%,38rem);min-width:0}

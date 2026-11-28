@@ -75,6 +75,10 @@ body.bettergov-research main :is(.repeat-hero-breakdown>div,.unit-hero-stats>div
 </section>
 <section class="card panel" aria-labelledby="route-title">
 <h2 id="route-title">Compare routes to the hospital</h2>
+<label for="bridge-scenario">Bridge</label>
+<select id="bridge-scenario"><option value="bolinao">Bolinao–Santiago Island bridge</option></select>
+<p id="bridge-coverage" role="status"></p>
+<div id="bolinao-routes">
 <p>The existing route uses the mapped Santiago Island ferry. The other route assumes a completed bridge and approaches. Adjust the assumed wait to see how it changes the comparison.</p>
 <div class="controls">
 <label>Starting barangay <select id="origin" disabled></select></label>
@@ -93,6 +97,35 @@ body.bettergov-research main :is(.repeat-hero-breakdown>div,.unit-hero-stats>div
 <div class="table-wrap">
 <table><thead><tr><th scope="col">Barangay</th><th scope="col" class="num">Population</th><th scope="col" class="num">Via ferry</th><th scope="col" class="num">Via bridge</th><th scope="col" class="num">Time saved</th></tr></thead><tbody id="comparison"></tbody></table>
 </div>
+</div>
+<div id="other-bridge-routes" hidden>
+<p>The closure scenario removes the matched OpenStreetMap way. Bridges mapped as multiple carriageways require separate review. The open and closed trips start and end at the same mapped places.</p>
+<label>Starting settlement <select id="bridge-origin"></select></label>
+<p id="bridge-route-status" role="status"></p>
+<div class="maps">
+<figure><figcaption><h3>Bridge open</h3></figcaption><canvas id="open-map" role="img" aria-label="Fastest modeled road route with the bridge open"></canvas></figure>
+<figure><figcaption><h3>Bridge closed</h3></figcaption><canvas id="closed-map" role="img" aria-label="Modeled road detour when the bridge is closed"></canvas></figure>
+</div>
+<div class="legend" aria-label="Map legend"><span style="--swatch:#075394">Modeled road route</span><span style="--swatch:#08746c">Open bridge span</span><span class="bridge" style="--swatch:#a13721">Closed bridge span</span></div>
+<figure class="answer-chart"><figcaption>Modeled detour minutes for trips with a local alternate route</figcaption><div id="detour-chart"></div></figure>
+<div class="table-wrap"><table><thead><tr><th>Settlement</th><th>Mapped hospital</th><th>Bridge open</th><th>Bridge closed</th><th>Extra minutes</th></tr></thead><tbody id="bridge-route-comparison"></tbody></table></div>
+<p><a id="mapped-span">View the matched bridge in OpenStreetMap</a></p>
+</div>
+</section>
+<section class="card panel" aria-labelledby="bridge-screen-title">
+<h2 id="bridge-screen-title">FY2027 House bridge lines nationwide</h2>
+<p>Search every DPWH schedule line identified by bridge wording, spending category or a printed bridge ID. Each row links to the House schedule. A physical bridge can appear on multiple budget lines.</p>
+<details id="bridge-research"><summary>Browse bridge lines and routing evidence</summary>
+<div class="controls">
+<label>Search bridge lines <input id="bridge-search" type="search"></label>
+<label>Route evidence <select id="bridge-filter"><option value="">All results</option></select></label>
+</div>
+<p id="bridge-list-count" role="status"></p>
+<div class="table-wrap"><table><thead><tr><th>House budget line</th><th>Region</th><th>DPWH bridge ID</th><th>House amount</th><th>Hospital route</th></tr></thead><tbody id="bridge-inventory"></tbody></table></div>
+<p><a href="bridge-hospital-routes.json" download>Download the bridge screen and route results</a></p>
+</details>
+<p class="note">The closure screen uses printed DPWH bridge IDs on repair, rehabilitation, strengthening, retrofitting, widening and replacement lines. The mapped span must have the same normalized bridge name, pass within 100 m of the DPWH inventory point, and be the only such mapped way. The model tests up to 30 nearby named settlement points and up to three mapped hospitals. Settlement and hospital points must be within 250 m of a mapped road vertex. The search covers a local road window of roughly 24 km across. A missing detour means none appeared in that window. Operating status, traffic, actual closures, and emergency travel times require separate verification.</p>
+<p class="note"><a href="https://services1.arcgis.com/IwZZTMxZCmAmFYvF/ArcGIS/rest/services/Detailed_Bridge_Inventory_Final/FeatureServer/1">DPWH bridge inventory</a> · <a href="https://download.geofabrik.de/asia/philippines.html">OpenStreetMap Philippines road extract</a></p>
 </section>
 <section class="card panel" aria-labelledby="budget-title">
 <h2 id="budget-title">The two FY2027 budget lines</h2>
