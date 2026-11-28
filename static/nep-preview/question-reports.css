@@ -1,0 +1,17 @@
+body.bettergov-research main.question-report{box-sizing:border-box;width:100%;max-width:none;margin:0;padding:24px clamp(16px,2vw,32px)}
+.question-report .questions-menu{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+.questions-menu a{padding:7px 12px;border:1px solid #b4c2d3;border-radius:8px;color:#0038a8;background:#fff;text-decoration:none;font-weight:600;font-size:14px}
+.questions-menu [aria-current=page]{color:white;background:#00246a;border-color:#00246a}
+.question-report nav[aria-label="Related research"] a{color:#0038a8}
+.question-report .answer-chart{margin:18px 0;padding:16px;border:1px solid #ddd;border-radius:12px;background:#f5f5f5}
+.answer-chart figcaption{font-weight:650;color:#212121;margin-bottom:10px}
+.answer-bar{display:grid;grid-template-columns:minmax(9em,24%) minmax(45px,1fr) minmax(4em,auto);gap:10px;align-items:center;font-size:14px;margin:6px 0;font-variant-numeric:tabular-nums}
+.answer-bar i{display:block;height:14px;background:#0038a8;border-radius:0 3px 3px 0}
+.question-report .report-table-pagination select{min-width:0;width:auto}
+.question-report .report-table-pagination[hidden]{display:none!important}
+.question-report .flow{display:flex;flex-wrap:wrap;gap:8px 30px;padding-left:2em}
+.question-report .flow li{padding:6px 10px;background:#eaf0ff;border-radius:6px}
+@media(max-width:700px){.question-report .report-table-scroll{overflow-x:auto!important}.question-report .report-table-scroll:has(th:nth-child(4)) table{min-width:620px!important}.question-report select{max-width:100%}.answer-bar{grid-template-columns:minmax(6em,35%) 1fr auto;font-size:13px}.question-report .filters{display:grid}}
+.question-report label{max-width:100%;min-width:0}
+.question-report #contractors{width:min(100%,38rem);min-width:0}
+.question-report :has(> #contractors){display:grid;width:min(100%,38rem)}

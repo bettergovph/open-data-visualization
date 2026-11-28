@@ -129,6 +129,11 @@ function showCorridor(projects) {
 
 function setup(data) {
     showCorridor(data.corridorProjects);
+    const projectTypes = new Map();
+    for (const project of data.corridorProjects) {
+        projectTypes.set(project.kind, (projectTypes.get(project.kind) || 0) + 1);
+    }
+    drawQuestionBars('corridor-chart', [...projectTypes].sort((a, b) => b[1] - a[1]));
     const rows = data.origins;
     const population = rows.reduce((sum, row) => sum + row.population, 0);
     const house = data.budget.reduce((sum, row) => sum + row.house, 0);
@@ -164,6 +169,8 @@ function setup(data) {
             total + r.population * (r.ferry.minutes + delay - r.bridge.minutes), 0) / population;
         document.querySelector('#population-time').textContent =
             `Across the seven barangays, the model saves ${weightedSaving.toFixed(1)} minutes per one-way hospital trip at this ferry wait, weighting each barangay by its population. Actual trip frequency is unknown.`;
+        drawQuestionBars('route-chart', rows.map(row =>
+            [row.name, row.ferry.minutes + delay - row.bridge.minutes]), ' min');
         document.querySelector('#wait-value').textContent = minutes(delay);
         status.textContent = `${selected.name} to Bolinao Community Hospital · About ${minutes(ferryTime)} by ferry, ${minutes(selected.bridge.minutes)} via the completed bridge.`;
         document.querySelector('#ferry-label').textContent =
@@ -195,3 +202,40 @@ fetch('amendment-access-data.json')
     })
     .then(setup)
     .catch(() => { status.textContent = 'The route data could not be loaded. Reload the page to try again.'; });
+
+const national = document.querySelector('#national-fmrs');
+const serviceFilter = document.querySelector('#service-filter');
+let nationalData;
+function renderNational() {
+    const selected = nationalData.projects.filter(row => !serviceFilter.value || row.nearbyPublicServices[serviceFilter.value]);
+    document.querySelector('#national-count').textContent = number.format(selected.length) + ' matching proposals';
+    document.querySelector('#national-projects').replaceChildren(...selected.map(project => {
+        const row = document.createElement('tr');
+        const services = element('td', '');
+        const evidence = project.nearbyPublicServiceEvidence.filter(site => !serviceFilter.value || site.type === serviceFilter.value);
+        for (const site of evidence) {
+            const link = element('a', site.name + ' · ' + number.format(site.distanceMeters) + ' m');
+            link.href = site.sourceUrl;
+            services.append(link, document.createElement('br'));
+        }
+        if (!evidence.length) services.textContent = project.coordinateQualityFlag ? 'Coordinates require review' : 'No mapped service recorded';
+        row.append(element('th', project.title), element('td', project.nearestDistanceMeters == null ? project.result : number.format(project.nearestDistanceMeters) + ' m'), services);
+        return row;
+    }));
+}
+async function loadNational() {
+    if (!national.open || nationalData) return;
+    const message = document.querySelector('#national-count');
+    message.textContent = 'Loading project records…';
+    try {
+        const response = await fetch('connectivity-data.json');
+        if (!response.ok) throw new Error(String(response.status));
+        nationalData = await response.json();
+        renderNational();
+    } catch {
+        message.textContent = 'Could not load the proposals. Reopen this section to retry.';
+    }
+}
+national.addEventListener('toggle', loadNational);
+loadNational();
+serviceFilter.addEventListener('change', () => { if (nationalData) renderNational(); });
