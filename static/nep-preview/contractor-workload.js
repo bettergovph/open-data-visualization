@@ -4,6 +4,9 @@ const contractors = document.querySelector('#contractors');
 const selection = document.querySelector('#selection');
 const table = document.querySelector('#events');
 const download = document.querySelector('#download');
+const directory = document.querySelector('#contractor-directory');
+const directoryStatus = document.querySelector('#directory-status');
+const historyHeading = document.querySelector('#history-heading');
 const number = new Intl.NumberFormat('en-PH');
 const currency = new Intl.NumberFormat('en-PH', {style: 'currency', currency: 'PHP', maximumFractionDigits: 0});
 const folder = 'contractor-workload/';
@@ -85,28 +88,54 @@ function drawEvent(event, history) {
     return row;
 }
 
-search.addEventListener('input', () => {
+function renderDirectory() {
     const filter = search.value.trim().toLowerCase();
+    const records = [...index.values()].filter(row => (row.name + ' ' + row.id).toLowerCase().includes(filter));
+    const selected = contractors.value;
     contractors.replaceChildren(new Option('Choose a contractor', ''));
-    table.replaceChildren();
-    selection.textContent = '';
-    download.hidden = true;
-    for (const row of index.values()) {
-        if ((row.name + ' ' + row.id).toLowerCase().includes(filter)) {
-            contractors.add(new Option(row.name + ' · ' + row.id + ' · ' + row.awards + ' awards', row.id));
-        }
+    for (const row of records) {
+        contractors.add(new Option(row.name + ' · ' + row.id + ' · ' + row.awards + ' awards', row.id));
     }
-});
+    directory.replaceChildren(...records.map(record => {
+        const row = document.createElement('tr');
+        const name = document.createElement('th');
+        name.scope = 'row';
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.textContent = record.name;
+        button.addEventListener('click', () => {
+            contractors.value = record.id;
+            showAwards();
+            historyHeading.focus();
+        });
+        name.append(button);
+        row.append(name, cell(record.id), cell(number.format(record.awards)),
+            cell(number.format(record.withOverlap)), cell(record.latest));
+        return row;
+    }));
+    directoryStatus.textContent = records.length ? number.format(records.length) + ' contractor licenses' : 'No contractors match this search.';
+    if (records.some(record => record.id === selected)) {
+        contractors.value = selected;
+    } else {
+        contractors.value = records[0]?.id || '';
+        showAwards();
+    }
+}
 
-contractors.addEventListener('change', async () => {
+search.addEventListener('input', renderDirectory);
+contractors.addEventListener('change', showAwards);
+
+async function showAwards() {
     const id = contractors.value;
     const contractor = index.get(id);
     table.replaceChildren();
     download.hidden = true;
     if (!contractor) {
-        selection.textContent = '';
+        historyHeading.textContent = 'Award history';
+        selection.textContent = index.size ? 'Select a contractor to see their awards.' : 'No award records are available.';
         return;
     }
+    historyHeading.textContent = contractor.name + ' · License ' + contractor.id;
     selection.textContent = 'Loading award records…';
     try {
         if (!shards.has(contractor.shard)) {
@@ -126,7 +155,7 @@ contractors.addEventListener('change', async () => {
     } catch {
         if (contractors.value === id) selection.textContent = 'Could not load this contractor’s awards. Select the contractor again to retry.';
     }
-});
+}
 
 read('index.json').then(data => {
     index = new Map(data.contractors.map(row => [row.id, row]));
@@ -154,7 +183,7 @@ read('index.json').then(data => {
         : ' Live coverage after the quarterly files is pending.';
     document.querySelector('#crawl-coverage').textContent =
         `The offline contracts archive supports ${number.format(c.offlineAwardPairs || 0)} matched award–license pairs, including ${number.format(c.offlineOnlyPairs || 0)} unique to that archive. PhilGEPS v2 supports ${number.format(c.v2AwardPairs || 0)}. Eight official exports from Q4 2025 through Q3 2026 support ${number.format(c.quarterAwardPairs || 0)}. Those counts can overlap. Conflicting award dates excluded ${number.format(c.conflictingDateObservations)} award–license pairs.` + live;
-    drawQuestionBars('workload-chart', Object.entries(data.workloadBands).map(([band, counts]) => [band, counts.awards]));
+    window.drawQuestionBars?.('workload-chart', Object.entries(data.workloadBands).map(([band, counts]) => [band, counts.awards]));
     for (const [band, counts] of Object.entries(data.workloadBands)) {
         const row = document.createElement('tr');
         row.append(cell(band), cell(number.format(counts.awards)), cell(number.format(counts.afterLongProject)));
@@ -170,9 +199,12 @@ read('index.json').then(data => {
             Math.abs(difference).toFixed(2) + ' percentage points ' + direction +
             ' for contractors with recorded overlap, weighting groups by their overlap awards.';
     }
-    search.dispatchEvent(new Event('input'));
+    renderDirectory();
 }).catch(() => {
-    document.querySelector('#coverage').textContent = 'Could not load the award analysis. Reload the page to retry.';
+    const message = 'Could not load the award analysis. Reload the page to retry.';
+    document.querySelector('#coverage').textContent = message;
+    directoryStatus.textContent = message;
+    selection.textContent = message;
 });
 
 const liveNotices = document.querySelector('#live-notices');
