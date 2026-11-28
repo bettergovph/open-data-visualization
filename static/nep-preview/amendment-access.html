@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What would the Bolinao bridge change? · BetterGov Research</title>
+<style>
+:root{font:16px/1.55 system-ui,sans-serif;color:#152a3b;background:#f3f6f8;--navy:#082a57;--teal:#08746c;--line:#d6e0e7}
+*{box-sizing:border-box}body{margin:0}a{color:#075394}a:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid #f0b934;outline-offset:3px}
+.wrap{width:min(1100px,calc(100% - 32px));margin:auto}header{background:var(--navy);color:white;border-bottom:5px solid #f0c542;padding:28px 0 35px}
+nav{display:flex;gap:16px;flex-wrap:wrap}nav a{color:#deecff}h1{font-size:clamp(2.1rem,6vw,3.5rem);line-height:1.06;margin:22px 0 12px;letter-spacing:-.035em}header p{margin:0;max-width:700px;color:#edf4fc}
+main{padding:20px 0 48px}section{margin:0 0 22px}h2{margin:0 0 8px;font-size:1.45rem}h3{font-size:1.04rem;margin:0}p{margin:8px 0 12px}
+.stats,.maps{display:grid;gap:14px}.stats{grid-template-columns:repeat(3,minmax(0,1fr))}.maps{grid-template-columns:1fr 1fr}
+.stat,.panel,figure{background:white;border:1px solid var(--line);border-radius:10px}.stat,.panel{padding:16px 19px}.stat strong{font-size:clamp(1.5rem,4vw,2rem);display:block;color:var(--navy);line-height:1.2;margin-bottom:5px}
+.controls{display:flex;align-items:start;flex-wrap:wrap;gap:10px 26px;margin:14px 0}label{display:grid;gap:4px;font-weight:650}select{font:inherit;padding:7px 10px;border:1px solid #8297a8;border-radius:5px;background:white}input[type=range]{width:min(215px,80vw);accent-color:var(--teal)}
+figure{margin:0;overflow:hidden}figcaption{padding:10px 14px}figcaption p{margin:2px 0 0;color:#435969;font-size:.9rem}canvas{display:block;width:100%;height:400px;background:#f2f8fc;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.legend{display:flex;flex-wrap:wrap;gap:8px 17px;padding:8px 0;color:#435969;font-size:.9rem}.legend span::before{display:inline-block;width:20px;vertical-align:middle;margin-right:6px;content:"";border-top:3px solid var(--swatch)}.legend .ferry::before,.legend .bridge::before{border-top-style:dashed}
+.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}thead th{font-weight:650;background:#eef3f7}tfoot th,tfoot td{font-weight:750}.num{text-align:right;white-space:nowrap}small,.note{color:#435969}summary{cursor:pointer;color:var(--navy);font-weight:700}
+@media(max-width:720px){.stats,.maps{grid-template-columns:1fr}canvas{height:350px}.panel{padding:12px 14px}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+<nav aria-label="Research"><a href="connectivity.html">Road connectivity</a><a href="questions.html">Budget hearings</a><a href="scr.html">Senate committee report</a></nav>
+<h1>What would the Bolinao bridge change?</h1>
+<p>Follow two FY2027 budget lines for the Santiago Island bridge, then compare routes from seven barangays to Bolinao Community Hospital.</p>
+</div></header>
+<main class="wrap">
+<section class="stats" aria-label="Findings">
+<div class="stat"><strong id="covered">7 barangays</strong><span>Would gain a route to the hospital that does not require a ferry</span></div>
+<div class="stat"><strong id="population">18,918 residents</strong><span>2024 population of the modeled barangays</span></div>
+<div class="stat"><strong>₱550 million</strong><span>Across two House lines removed by the Senate committee</span></div>
+</section>
+<section class="panel" aria-labelledby="route-title">
+<h2 id="route-title">Compare routes to the hospital</h2>
+<p>The existing route uses the mapped Santiago Island ferry. The other route assumes a completed bridge and approaches. Adjust the assumed wait to see how it changes the comparison.</p>
+<div class="controls">
+<label>Starting barangay <select id="origin" disabled></select></label>
+<label for="wait">Assumed ferry wait <output id="wait-value" for="wait">0 min</output><input id="wait" type="range" min="0" max="45" step="5" value="0" disabled></label>
+</div>
+<p id="route-status" role="status">Loading the road network and modeled routes…</p>
+<div class="maps">
+<figure><figcaption><h3>Existing road and ferry</h3><p id="ferry-label"></p></figcaption><canvas id="ferry-map" role="img" aria-label="Map of the route using the ferry"></canvas></figure>
+<figure><figcaption><h3>Road route if bridge opens</h3><p id="bridge-label"></p></figcaption><canvas id="bridge-map" role="img" aria-label="Map of the modeled route via the proposed bridge"></canvas></figure>
+</div>
+<div class="legend" aria-label="Map legend">
+<span style="--swatch:#075394">Routed road</span><span class="ferry" style="--swatch:#93491c">Ferry</span><span class="bridge" style="--swatch:#08746c">Modeled bridge and approaches</span><span style="--swatch:#b9ceda">Other roads and shoreline</span>
+</div>
+<div class="table-wrap">
+<table><thead><tr><th scope="col">Barangay</th><th scope="col" class="num">Population</th><th scope="col" class="num">Via ferry</th><th scope="col" class="num">Via bridge</th><th scope="col" class="num">Time saved</th></tr></thead><tbody id="comparison"></tbody></table>
+</div>
+</section>
+<section class="panel" aria-labelledby="budget-title">
+<h2 id="budget-title">The two FY2027 budget lines</h2>
+<div class="table-wrap"><table><thead><tr><th scope="col">Bolinao–Santiago Island bridge</th><th scope="col">NEP</th><th scope="col" class="num">HGAB</th><th scope="col" class="num">SCR</th></tr></thead><tbody id="budget-rows"></tbody>
+<tfoot><tr><th scope="row">Two House lines combined</th><td>—</td><td class="num">₱550,000,000</td><td class="num">₱0</td></tr></tfoot></table></div>
+<p>The earlier FY2026 GAA includes ₱92.702 million for part of the corridor. DPWH published Package 1 engineering plans in 2025, and the Mines and Geosciences Bureau documented an assessment at both approach sites that year. The route scenario assumes the full crossing opens. The budget records establish proposed funding changes, while the date of any opening remains unverified.</p>
+<p class="note" id="budget-ratio"></p>
+<p class="note"><a href="https://www.dbm.gov.ph/wp-content/uploads/GAA/GAA2026/DBM-OFFICIAL-GAZETTE-FY-2026_VOLUME-1-C.pdf">FY2026 GAA, volume I-C</a> · <a href="https://www.dpwh.gov.ph/dpwh/sites/default/files/webform/civil_works/advertisement/25a00305_plans.pdf">DPWH Package 1 plans</a> · <a href="https://region1.mgb.gov.ph/wp-content/uploads/2026/02/MGB-I-2025-ANNUAL-REPORT.pdf">MGB site assessment</a></p>
+</section>
+<section class="panel" aria-labelledby="method-title">
+<h2 id="method-title">Data and assumptions</h2>
+<ul>
+<li>Origins use one OpenStreetMap settlement point per barangay. Population counts come from the 2024 Philippine Statistics Authority census. The province lists the existing public hospital in Sampaloc.</li>
+<li>Road routes use connected OpenStreetMap segments, mapped access restrictions and one-way directions. Speeds are assumed by road class. The ferry crossing uses its mapped 15-minute duration. Ferry waiting time is adjustable. Transfers, schedules, fares, weather and congestion are outside the model.</li>
+<li>The bridge scenario uses the geotagged mainland and island approach sites from the MGB assessment and straight connections to their respective mapped road networks. <span id="bridge-method"></span> The model uses 30 km/h for the crossing and approaches. The House completion line contains a malformed latitude, so the model uses the independent site evidence for the approximate alignment.</li>
+<li>A bridge would add a second way to cross the channel if ferry service continues. Both options may share access roads. The model does not measure end-to-end route independence or establish that either FY2027 line alone would complete the crossing.</li>
+</ul>
+<p class="note"><a href="https://psa.gov.ph/classification/psgc/barangays/0105514000">PSA barangay population</a> · <a href="https://www.pangasinan.gov.ph/department/bolinao-community-hospital/contact-us/">Hospital location</a> · <a href="https://www.openstreetmap.org/way/169529525">Mapped ferry</a> · <a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors</a> · <a href="amendment-access-data.json" download>Download modeled routes and budget lines</a></p>
+</section>
+</main>
+<script src="amendment-access.js" defer></script>
+</body>
+</html>
