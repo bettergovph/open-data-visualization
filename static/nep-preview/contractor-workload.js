@@ -33,7 +33,8 @@ function sourceLink(label, url) {
 
 function periodLabel(period) {
     return period.type + ' · ' + period.agency + ' · ' + period.start +
-        (period.end ? ' to ' + period.end : ' onward') + (period.order ? ' · Order ' + period.order : '');
+        (period.end ? ' to ' + period.end : ' onward') + (period.order ? ' · Order ' + period.order : '') +
+        (period.portalCreated ? ' · Portal record created ' + period.portalCreated : '');
 }
 
 function renderBlacklisting() {
@@ -52,6 +53,7 @@ function renderBlacklisting() {
             const activity = cell(event.type + ' · ' + event.date);
             const contract = cell(event.title + ' · ' + event.agency + ' · ');
             contract.append(sourceLink(event.source, event.url));
+            if (event.bidderSource) contract.append(' · ', sourceLink('Named bidder list', event.bidderSource));
             const period = cell(event.windows.map(i => periodLabel(record.periods[i])).join(' | ') + ' · ');
             period.append(sourceLink('GPPB report', blacklisting.source));
             row.append(name, activity, contract, period);
@@ -59,6 +61,16 @@ function renderBlacklisting() {
         }
     }
     rows.sort((a, b) => b.day.localeCompare(a.day));
+    const review = document.querySelector('#ffjj-date-review');
+    review.replaceChildren(...(blacklisting.ffjjReview || []).map(item => {
+        const row = document.createElement('tr');
+        const bid = cell('');
+        bid.append(sourceLink(item.bidOpening, item.bidSource));
+        const award = cell(item.awardee + ' · ');
+        award.append(sourceLink(item.awardDate, item.awardSource));
+        row.append(cell(item.title), bid, award, cell(item.ffjjRole));
+        return row;
+    }));
     document.querySelector('#blacklisting-overlaps').replaceChildren(...rows.map(item => item.row));
     document.querySelector('#blacklisting-status').textContent =
         `${number.format(rows.length)} dated overlaps across ${number.format(flaggedContractors)} contractors. ` +
@@ -82,6 +94,7 @@ function renderContractorBlacklisting(id) {
             event.temporaryRemoval ? ' · Temporary removal requires date review' : ' · Outside recorded blacklisting periods';
         paragraph.append(event.type + ' · ' + event.date + ' · ' + event.title + timing + ' · ',
             sourceLink(event.source, event.url));
+        if (event.bidderSource) paragraph.append(' · ', sourceLink('Named bidder list', event.bidderSource));
         container.append(paragraph);
     }
 }
@@ -129,8 +142,18 @@ function drawWorkloadChart() {
         `${number.format(selected.spanning)} spanning award · ${number.format(selected.unclear)} earlier status unclear`;
     const first = awardSnapshots[0];
     const last = awardSnapshots.at(-1);
-    for (const canvas of awardChart.querySelectorAll('canvas')) {
+    const series = [...awardChart.querySelectorAll('canvas')].map(canvas => ({
+        canvas,
+        max: Math.max(1, ...awardSnapshots.map(day => day[canvas.dataset.series])),
+    }));
+    const largestLabel = number.format(Math.max(...series.map(item => item.max)));
+    for (const {canvas, max} of series) {
         const key = canvas.dataset.series;
+        const panel = canvas.closest('[data-workload]');
+        const count = selected[key];
+        const pick = panel.querySelector('.award-workload-count');
+        pick.textContent = `${number.format(count)} ${count === 1 ? 'contract' : 'contracts'}`;
+        const color = getComputedStyle(panel).getPropertyValue('--series-color').trim();
         const {clientWidth: width, clientHeight: height} = canvas;
         const density = window.devicePixelRatio || 1;
         canvas.width = Math.round(width * density);
@@ -138,8 +161,7 @@ function drawWorkloadChart() {
         const ctx = canvas.getContext('2d');
         ctx.scale(density, density);
         ctx.font = '11px system-ui';
-        const max = Math.max(1, ...awardSnapshots.map(day => day[key]));
-        const left = Math.max(30, ctx.measureText(number.format(max)).width + 9);
+        const left = Math.max(30, ctx.measureText(largestLabel).width + 9);
         const right = width - 16;
         const top = 10;
         const bottom = height - 23;
@@ -162,27 +184,32 @@ function drawWorkloadChart() {
             ctx.fillText(last.date, right, height - 6);
             ctx.textAlign = 'left';
         }
-        ctx.strokeStyle = '#9aaab9';
+        ctx.strokeStyle = '#60758a';
         ctx.setLineDash([3, 3]);
         ctx.beginPath();
         ctx.moveTo(x(selected), top);
         ctx.lineTo(x(selected), bottom);
         ctx.stroke();
         ctx.setLineDash([]);
-        ctx.strokeStyle = '#0038a8';
-        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
         ctx.beginPath();
         awardSnapshots.forEach((day, i) => {
             if (i === 0) ctx.moveTo(x(day), y(day));
             else ctx.lineTo(x(day), y(day));
         });
         ctx.stroke();
-        ctx.fillStyle = '#0038a8';
+        ctx.fillStyle = color;
         for (const day of awardSnapshots) {
             ctx.beginPath();
-            ctx.arc(x(day), y(day), day === selected ? 4 : 1.5, 0, 2 * Math.PI);
+            ctx.arc(x(day), y(day), 1.5, 0, 2 * Math.PI);
             ctx.fill();
         }
+        ctx.beginPath();
+        ctx.arc(x(selected), y(selected), 4.5, 0, 2 * Math.PI);
+        ctx.fillStyle = '#fff';
+        ctx.fill();
+        ctx.stroke();
     }
 }
 

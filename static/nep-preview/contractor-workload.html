@@ -13,10 +13,14 @@ h1{line-height:1.15}h2{margin:0}a{color:#075394}.scroll{overflow:auto}table{widt
 .blacklisting-overlap,.blacklisting-overlap a,.question-report .report-table-scroll td .blacklisting-overlap a{color:#a21c1c!important;font-weight:700}
 .question-report #contractor-blacklisting p{margin:8px 0}
 .award-workload-series{display:grid;gap:12px}
-.award-workload-series>div{min-width:0}
-.award-workload-series strong{display:block}
+.award-workload-series>div{min-width:0;padding:10px 12px;border:1px solid #d6e0e7;border-left:4px solid var(--series-color);border-radius:8px;background:#fff}
+.award-workload-series [data-workload="completed"]{--series-color:#00589c;--series-tint:#e9f4ff}
+.award-workload-series [data-workload="spanning"]{--series-color:#00725e;--series-tint:#e8f6ef}
+.award-workload-series [data-workload="unclear"]{--series-color:#8b5000;--series-tint:#fff4db}
+.award-workload-panel-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;color:var(--series-color)}
+.award-workload-count{padding:2px 8px;border-radius:6px;background:var(--series-tint);font-weight:750;font-variant-numeric:tabular-nums;white-space:nowrap}
 .award-workload-series canvas{display:block;width:100%;height:94px}
-.award-workload-chart output{display:block;margin:6px 0 10px}
+.award-workload-chart output{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 .question-report .award-workload-chart[hidden]{display:none}
 </style>
 <link rel="stylesheet" href="report-disclaimer.css?v=20261029-disclaimer1"><link id="research-theme-style" rel="stylesheet" href="research-theme.css?v=a60c21b98857"><style id="uniform-report-menu-style">
@@ -83,7 +87,11 @@ body.bettergov-research main :is(.repeat-hero-breakdown>div,.unit-hero-stats>div
 <h2 id="blacklisting-heading">2026 onward bids and awards during blacklisting</h2>
 <p id="blacklisting-status" role="status">Checking dated procurement records against the published blacklisting periods…</p>
 <div class="table-wrap"><table><thead><tr><th>Contractor</th><th>Dated activity</th><th>Contract and source</th><th>Published blacklisting period</th></tr></thead><tbody id="blacklisting-overlaps"></tbody></table></div>
-<p>Red marks a documented bid or award date inside a published blacklisting period. The dates flag a case for review. The applicable procurement rules and any agency-specific exceptions require separate assessment. A tender advertisement or an undated bidder list gives no bid date. Bid coverage is limited to records with a named bidder and a documented date.</p>
+<h3>FFJJ Construction date check</h3>
+<p>GPPB lists May 26, 2026 as the start of the PNOC Exploration Corporation blacklisting and May 25, 2027 as the end. The portal records were created on July 22, 2026. The listing leaves the order number and order date blank. DPWH’s February 24, 2026 lifting entry refers to its separate 2025 suspension.</p>
+<div class="table-wrap"><table><thead><tr><th>Project</th><th>Actual bid opening</th><th>Award notice date and winner</th><th>FFJJ’s role</th></tr></thead><tbody id="ffjj-date-review"></tbody></table></div>
+<p><a href="https://onlineblacklistingportal.gppb.gov.ph/">GPPB blacklisting report</a> · <a href="https://www.dpwh.gov.ph/dpwh/sites/default/files/issuances/do_154_s2025.pdf">DPWH’s 2025 suspension order</a> · <a href="https://dpwh-redesign-deployment.vercel.app/">DPWH order index listing the February lifting</a></p>
+<p>Red marks a documented bid opening or award date inside a published blacklisting period. The dates flag a case for review. The applicable procurement rules and any agency-specific exceptions require separate assessment. The bid-opening date comes from the procurement plan and can differ from the date the bidder submitted its documents.</p>
 <p><a href="https://onlineblacklistingportal.gppb.gov.ph/">GPPB Consolidated Blacklisting Report</a> · <a href="contractor-workload/sanctions.json" download>Download the match and source records</a></p>
 </section>
 <section class="card" aria-labelledby="records-heading">
@@ -99,14 +107,14 @@ body.bettergov-research main :is(.repeat-hero-breakdown>div,.unit-hero-stats>div
 <p id="selection" role="status">Loading the first contractor’s award history…</p>
 <figure class="answer-chart award-workload-chart" id="contractor-workload-chart" hidden>
 <figcaption>Earlier contracts on each award date</figcaption>
-<p>Each point represents one award date. The three panels use separate count scales.</p>
-<div class="award-workload-series">
-<div><strong id="completed-series-title">Completed before award</strong><canvas data-series="completed" role="img" aria-labelledby="completed-series-title" aria-describedby="award-workload-values"></canvas></div>
-<div><strong id="spanning-series-title">Spanning the award date</strong><canvas data-series="spanning" role="img" aria-labelledby="spanning-series-title" aria-describedby="award-workload-values"></canvas></div>
-<div><strong id="unclear-series-title">Earlier status unclear</strong><canvas data-series="unclear" role="img" aria-labelledby="unclear-series-title" aria-describedby="award-workload-values"></canvas></div>
-</div>
+<p>Pick an award date to see the count in each panel. A vertical line and a larger dot mark that date. The vertical scale differs by panel.</p>
 <label>Inspect an award date <select id="award-workload-date"></select></label>
 <output id="award-workload-values" for="award-workload-date" aria-live="polite"></output>
+<div class="award-workload-series">
+<div data-workload="completed"><div class="award-workload-panel-heading"><strong id="completed-series-title">Completed before award</strong><span class="award-workload-count"></span></div><canvas data-series="completed" role="img" aria-labelledby="completed-series-title"></canvas></div>
+<div data-workload="spanning"><div class="award-workload-panel-heading"><strong id="spanning-series-title">Spanning the award date</strong><span class="award-workload-count"></span></div><canvas data-series="spanning" role="img" aria-labelledby="spanning-series-title"></canvas></div>
+<div data-workload="unclear"><div class="award-workload-panel-heading"><strong id="unclear-series-title">Earlier status unclear</strong><span class="award-workload-count"></span></div><canvas data-series="unclear" role="img" aria-labelledby="unclear-series-title"></canvas></div>
+</div>
 </figure>
 <div class="table-wrap"><table><thead><tr><th scope="col">Award and DPWH contract</th><th scope="col">New contract status at snapshot</th></tr></thead><tbody id="events"></tbody></table></div>
 <p><a id="download" hidden>Download the contractor’s award records</a></p>
@@ -129,6 +137,6 @@ body.bettergov-research main :is(.repeat-hero-breakdown>div,.unit-hero-stats>div
 <p><a href="https://transparency.dpwh.gov.ph/">DPWH Transparency Portal</a> · <a href="https://budget-assets.bettergov.ph/hgab/2027/contractors/downloads/manifest.json">DPWH archive manifest</a> · <a href="https://philgeps.gov.ph/">PhilGEPS</a></p>
 </section>
 </main>
-<script src="contractor-workload.js?v=award-timeline-1" defer></script>
+<script src="contractor-workload.js?v=award-chart-colors-1" defer></script>
 <footer class="site-ai-credit"><p><strong>Sources:</strong> <a href="https://visualizations.bettergov.ph/sources" target="_blank" rel="noreferrer">Common source catalog</a>. Each page identifies the years and records used in that analysis.</p><p><strong>Related BetterGov projects:</strong> <a href="https://visualizations.bettergov.ph/sources" target="_blank" rel="noreferrer">Visualizations and sources</a> · <a href="https://bettermiagao.org/" target="_blank" rel="noreferrer">Better Miagao</a>.</p><p><a href="budget-trivia.html">Budget Trivia · play the game</a></p><p><strong>AI assistance:</strong> OpenAI Codex contributed to software implementation and data-processing workflows for this site. This credit does not represent independent verification of the underlying sources, calculations, or conclusions.</p></footer><script id="report-menu-exclusive-groups">(()=>{const groups=[...document.querySelectorAll('header .report-nav-group')];groups.forEach(group=>group.addEventListener('toggle',()=>{if(group.open)groups.forEach(other=>{if(other!==group)other.open=false})}))})();</script></body>
 </html>

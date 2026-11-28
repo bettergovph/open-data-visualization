@@ -137,8 +137,10 @@ function setup(data) {
     const rows = data.origins;
     const population = rows.reduce((sum, row) => sum + row.population, 0);
     const house = data.budget.reduce((sum, row) => sum + row.house, 0);
-    document.querySelector('#covered').textContent = `${rows.length} barangays`;
-    document.querySelector('#population').textContent = `${number.format(population)} residents`;
+    bolinaoSummary[0][0] = `${number.format(rows.length)} barangays`;
+    bolinaoSummary[1][0] = `${number.format(population)} residents`;
+    bolinaoSummary[2][0] = house % 1e6 ? pesos(house) : `₱${number.format(house / 1e6)} million`;
+    if (bridgeSelect.value === 'bolinao') renderProjectSummary();
     document.querySelector('#budget-ratio').textContent =
         `The two House lines equal about ${pesos(Math.round(house / population))} per resident across the seven barangays. This compares the proposed lines with the population in reach of the modeled route. Total construction and operating costs are separate.`;
     const [islandGap, mainlandGap] = data.bridgeSnapMeters;
@@ -247,6 +249,59 @@ const bridgeCoverage = document.querySelector('#bridge-coverage');
 const routeData = {};
 const routeScenarios = new Map();
 const detourMinutes = value => number.format(Math.round(Math.max(0, value) * 10) / 10) + ' min';
+const routeDelta = trip => trip.closed ? trip.closed.minutes - trip.open.minutes : null;
+const fasterDetour = trip => trip.closed && routeDelta(trip) < 0;
+
+function timeChange(delta) {
+    if (delta === 0) return 'same travel time';
+    const duration = Math.abs(delta) < .05 ? 'under 0.1 min' : detourMinutes(Math.abs(delta));
+    return `${duration} ${delta < 0 ? 'faster' : 'longer'}`;
+}
+
+const summaryIds = ['covered', 'population', 'budget-summary'];
+const bolinaoSummary = summaryIds.map(id =>
+    [document.getElementById(id).textContent, document.getElementById(id + '-label').textContent]);
+
+function renderProjectSummary(scenario) {
+    let stats = bolinaoSummary;
+    if (scenario) {
+        const paving = scenario.kind === 'road' && scenario.mode !== 'closure';
+        const trips = scenario.origins;
+        const withAlternative = trips.filter(trip => trip.closed);
+        const noDetour = trips.length - withAlternative.length;
+        const flagged = paving ? 0 : withAlternative.filter(fasterDetour).length;
+        const changes = withAlternative.map(trip => paving ? -routeDelta(trip) : routeDelta(trip))
+            .filter(delta => delta >= 0);
+        let timeRange = flagged ? 'Check modeled routes' : 'No local detour';
+        if (changes.length) {
+            const min = detourMinutes(Math.min(...changes));
+            const max = detourMinutes(Math.max(...changes));
+            timeRange = min === max ? max : `${min.replace(' min', '')}–${max}`;
+        }
+        const kind = scenario.kind === 'road' ? 'road' : 'bridge';
+        const budgetLines = routeData[kind].projects.filter(row => row.scenario === bridgeSelect.value);
+        const amount = budgetLines.reduce((sum, row) => sum + row.amount, 0);
+        stats = [
+            [`${number.format(trips.length)} ${trips.length === 1 ? 'settlement' : 'settlements'}`,
+                'Sampled starting points for hospital trips. Population unavailable.'],
+            [timeRange,
+                paving ? 'Modeled time saved after paving' : [
+                    changes.length ? `Extra travel time if the ${kind} closes.` : '',
+                    noDetour ? `${number.format(noDetour)} of ${number.format(trips.length)} trips had no local detour.` : '',
+                    flagged ? `Check ${number.format(flagged)} ${flagged === 1 ? 'trip' : 'trips'} with a faster modeled detour.` : '',
+                ].filter(Boolean).join(' ')],
+            [budgetLines.length ? pesos(amount) : 'Budget unavailable',
+                budgetLines.length === 1 ? 'FY2027 House proposal for this project'
+                    : `${number.format(budgetLines.length)} matched FY2027 House budget lines`],
+        ];
+    }
+    summaryIds.forEach((id, i) => {
+        const [value, label] = stats[i];
+        document.getElementById(id).textContent = value;
+        document.getElementById(id + '-label').textContent = label;
+    });
+}
+
 
 function drawDetour(canvas, trip, span, mode, paving) {
     const width = canvas.clientWidth;
@@ -300,18 +355,23 @@ function redrawOtherBridge() {
     const road = scenario.kind === 'road';
     const paving = road && scenario.mode !== 'closure';
     const crossing = road ? 'road' : 'bridge';
+    const start = `${trip.name} to ${trip.hospitalName} · ${detourMinutes(trip.open.minutes)}`;
     const result = trip.closed
-        ? `with a ${detourMinutes(trip.closed.minutes - trip.open.minutes)} detour if the ${crossing} closes`
-        : 'with no alternate road route found in the modeled window';
-    document.querySelector('#bridge-route-status').textContent =
-        paving
-            ? `${trip.name} to ${trip.hospitalName} · ${detourMinutes(trip.open.minutes)} before paving, ${detourMinutes(trip.closed.minutes)} after paving.`
-            : `${trip.name} to ${trip.hospitalName} · ${detourMinutes(trip.open.minutes)} with the ${crossing} open, ${result}.`;
+        ? `${detourMinutes(trip.closed.minutes)} via the detour if the ${crossing} closes (${timeChange(routeDelta(trip))})`
+        : 'no alternate road route found in the modeled window';
+    const routeStatus = document.querySelector('#bridge-route-status');
+    routeStatus.textContent = paving
+        ? `${start} before paving, ${detourMinutes(trip.closed.minutes)} after paving (${timeChange(routeDelta(trip))}).`
+        : `${start} with the ${crossing} open, ${result}.`;
+    if (!paving && fasterDetour(trip)) {
+        routeStatus.append(' ', element('strong', 'Check route: the modeled detour is faster.', 'route-review-flag'));
+    }
     for (const mode of ['open', 'closed']) drawDetour(document.querySelector(`#${mode}-map`), trip, scenario.span, mode, paving);
 }
 
 function showBridgeSelection() {
     const scenario = routeScenarios.get(bridgeSelect.value);
+    renderProjectSummary(scenario);
     document.querySelector('#bolinao-routes').hidden = Boolean(scenario);
     document.querySelector('#other-bridge-routes').hidden = !scenario;
     if (!scenario) {
@@ -329,16 +389,16 @@ function showBridgeSelection() {
             : 'The closure scenario removes the matched OpenStreetMap way. Bridges mapped as multiple carriageways require separate review.';
     for (const id of ['open-map-title', 'route-before-col']) document.getElementById(id).textContent = before;
     for (const id of ['closed-map-title', 'route-after-col']) document.getElementById(id).textContent = after;
-    document.querySelector('#route-change-col').textContent = paving ? 'Minutes saved' : 'Extra minutes';
+    document.querySelector('#route-change-col').textContent = paving ? 'Minutes saved' : 'Travel-time change';
     document.querySelector('#detour-chart-title').textContent = paving
         ? 'Modeled minutes saved after paving' : 'Modeled detour minutes for trips with a local alternate route';
     document.querySelector('#before-legend').textContent = paving ? 'Paving segment' : road ? 'Open road segment' : 'Open bridge span';
     document.querySelector('#after-legend').textContent = road ? 'Closed road segment' : 'Closed bridge span';
     document.querySelector('#after-legend').hidden = paving;
-    const change = trip => Math.abs(trip.closed.minutes - trip.open.minutes);
     bridgeOrigin.replaceChildren(...scenario.origins.map((row, i) => new Option(row.name, i)));
     const chart = scenario.origins.filter(trip => trip.closed)
-        .map(trip => [trip.name, change(trip)]);
+        .map(trip => [trip.name, paving ? -routeDelta(trip) : routeDelta(trip)])
+        .filter(([, delta]) => delta >= 0);
     document.querySelector('#detour-chart').closest('figure').hidden = !chart.length;
     if (chart.length) drawQuestionBars('detour-chart', chart, ' min');
     const source = document.querySelector('#mapped-span');
@@ -346,9 +406,14 @@ function showBridgeSelection() {
     source.textContent = road ? 'View the House budget line' : 'View the matched bridge in OpenStreetMap';
     document.querySelector('#bridge-route-comparison').replaceChildren(...scenario.origins.map(trip => {
         const row = document.createElement('tr');
+        const change = element('td', trip.closed
+            ? paving && routeDelta(trip) <= 0 ? detourMinutes(-routeDelta(trip)) : timeChange(routeDelta(trip))
+            : '—');
+        if (!paving && fasterDetour(trip)) {
+            change.append(element('strong', 'Check route', 'route-review-flag'));
+        }
         row.append(element('th', trip.name), element('td', trip.hospitalName), element('td', detourMinutes(trip.open.minutes)),
-            element('td', trip.closed ? detourMinutes(trip.closed.minutes) : 'No local detour found'),
-            element('td', trip.closed ? detourMinutes(change(trip)) : '—'));
+            element('td', trip.closed ? detourMinutes(trip.closed.minutes) : 'No local detour found'), change);
         return row;
     }));
     redrawOtherBridge();
