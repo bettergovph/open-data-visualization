@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contractor track records before new awards · BetterGov Research</title>
+<style>
+:root{font:16px/1.55 system-ui,sans-serif;color:#152a3b;background:#f3f6f8}
+body{margin:0}header{background:#082a57;color:white;border-bottom:5px solid #f0c542;padding:26px 0}header a{color:#fff}
+nav{display:flex;flex-wrap:wrap;gap:10px 18px}.wrap{width:min(1100px,calc(100% - 32px));margin:auto}
+main{padding:20px 0 48px}section{padding:16px 20px;background:white;border:1px solid #d6e0e7;border-radius:10px;margin-bottom:16px}
+h1{line-height:1.15}h2{margin:0}a{color:#075394}.scroll{overflow:auto}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:9px;border-bottom:1px solid #d6e0e7;vertical-align:top}thead{background:#edf3f7}label{display:inline-grid;gap:4px;margin:8px 12px 8px 0}input,select{font:inherit;padding:6px;max-width:100%}small{display:block}button{font:inherit;color:#075394;cursor:pointer}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+<nav aria-label="Research questions"><a href="amendment-access.html">Question 1 · Infrastructure and access</a><a href="questions.html#question-2">Question 2 · Hearings and budget lines</a><a href="contractor-workload.html" aria-current="page">Question 3 · Contractor track records</a><a href="road-handover.html">Question 4 · Roads after handover</a></nav>
+<h1>What was on a contractor’s record when it received another project?</h1>
+</div></header>
+<main class="wrap">
+<section aria-labelledby="results-heading">
+<h2 id="results-heading">New awards and prior work</h2>
+<p id="coverage" role="status">Loading the award analysis…</p>
+<p id="comparison"></p>
+<h3>How many earlier projects spanned the next award?</h3>
+<div class="scroll"><table><thead><tr><th>Earlier projects spanning award</th><th>New award–license pairs</th><th>Of these, awards after a completed project took over 365 days</th></tr></thead><tbody id="workload-bands"></tbody></table></div>
+<p>A zero counts only recorded overlaps. A project can take more than a year under its approved schedule. Establishing a missed deadline requires the original contract and any approved extensions.</p>
+</section>
+<section aria-labelledby="records-heading">
+<h2 id="records-heading">Browse contractor award histories</h2>
+<label>Contractor name or license <input type="search" id="search" autocomplete="off"></label>
+<label>Contractor <select id="contractors"><option value="">Choose a contractor</option></select></label>
+<p id="selection" role="status"></p>
+<div class="scroll"><table><thead><tr><th scope="col">Award and project</th><th scope="col">Earlier completed</th><th scope="col">Earlier work spanning award</th><th scope="col">Earlier status unclear</th><th scope="col">New project status at snapshot</th></tr></thead><tbody id="events"></tbody></table></div>
+<p><a id="download" hidden>Download the contractor’s award records</a></p>
+</section>
+<section>
+<h2>Sources and coverage</h2>
+<p>PhilGEPS award dates are joined to the DPWH archive using the contract number and an exact normalized name for a listed license. Conflicting award dates are excluded. Awards to named joint ventures can appear for a matched member and the figures count award–license pairs.</p>
+<p>Earlier work spanning the award includes projects with a recorded completion on or after the award date and projects still listed as ongoing at the snapshot. The latter are shown separately in the table. Projects with uncertain earlier status stay visible. Same-day starts are excluded because the order is unknown. Archive coverage begins in FY2016.</p>
+<p>The outcome comparison uses completion within 365 days of the recorded start. It compares single-contractor projects with at least 365 days of follow-up, known outcomes, and comparable awards in the same office, category, year and value band. Value bands split at ₱5 million, ₱20 million and ₱100 million. The archive’s completion field and current status cannot establish the original deadline, extensions, or what an awarding office knew. The comparison measures association.</p>
+<p><a href="https://transparency.dpwh.gov.ph/">DPWH Transparency Portal</a> · <a href="https://budget-assets.bettergov.ph/hgab/2027/contractors/downloads/manifest.json">DPWH archive manifest</a> · <a href="https://philgeps.gov.ph/">PhilGEPS</a></p>
+</section>
+</main>
+<script src="contractor-workload.js" defer></script>
+</body>
+</html>

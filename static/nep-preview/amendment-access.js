@@ -95,7 +95,40 @@ function draw(canvas, data, row, mode) {
     ctx.fillText('↑ N', 13, 18);
 }
 
+function showCorridor(projects) {
+    const filter = document.querySelector('#corridor-kind');
+    for (const kind of new Set(projects.map(project => project.kind))) filter.add(new Option(kind));
+    function renderProjects() {
+        const selected = projects.filter(project => !filter.value || project.kind === filter.value);
+        document.querySelector('#corridor-result').textContent = `${selected.length} budget lines in view.`;
+        document.querySelector('#corridor-projects').replaceChildren(...selected.map(project => {
+            const row = document.createElement('tr');
+            const heading = element('th', project.title);
+            heading.scope = 'row';
+            const budget = project.gaa2026
+                ? budgetCell(`FY2026 GAA · ${pesos(project.gaa2026)}`, project.sourceUrl)
+                : budgetCell(`House · ${pesos(project.house)}`, project.houseUrl);
+            if (!project.gaa2026) {
+                const senate = element('a', `Senate committee · ${pesos(project.senate)}`);
+                senate.href = project.senateUrl;
+                budget.append(document.createElement('br'), senate);
+                if (project.nep !== null) budget.append(document.createElement('br'), `NEP · ${pesos(project.nep)}`);
+            }
+            const note = element('td', project.note);
+            if (project.routeDistancesMeters.length) {
+                const offsets = project.routeDistancesMeters.map(meters => `${number.format(meters)} m`);
+                note.append(element('small', `Endpoint distances to modeled road points · ${offsets.join(' and ')}`));
+            }
+            row.append(heading, element('td', project.kind), budget, note);
+            return row;
+        }));
+    }
+    filter.addEventListener('change', renderProjects);
+    renderProjects();
+}
+
 function setup(data) {
+    showCorridor(data.corridorProjects);
     const rows = data.origins;
     const population = rows.reduce((sum, row) => sum + row.population, 0);
     const house = data.budget.reduce((sum, row) => sum + row.house, 0);
@@ -127,6 +160,10 @@ function setup(data) {
         const delay = Number(wait.value);
         const selected = rows.find(row => row.name === origin.value);
         const ferryTime = selected.ferry.minutes + delay;
+        const weightedSaving = rows.reduce((total, r) =>
+            total + r.population * (r.ferry.minutes + delay - r.bridge.minutes), 0) / population;
+        document.querySelector('#population-time').textContent =
+            `Across the seven barangays, the model saves ${weightedSaving.toFixed(1)} minutes per one-way hospital trip at this ferry wait, weighting each barangay by its population. Actual trip frequency is unknown.`;
         document.querySelector('#wait-value').textContent = minutes(delay);
         status.textContent = `${selected.name} to Bolinao Community Hospital · About ${minutes(ferryTime)} by ferry, ${minutes(selected.bridge.minutes)} via the completed bridge.`;
         document.querySelector('#ferry-label').textContent =

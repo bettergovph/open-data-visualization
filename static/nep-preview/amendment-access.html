@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>What would the Bolinao bridge change? · BetterGov Research</title>
+<title>Which bridges and roads could improve access to daily services? · BetterGov Research</title>
 <style>
 :root{font:16px/1.55 system-ui,sans-serif;color:#152a3b;background:#f3f6f8;--navy:#082a57;--teal:#08746c;--line:#d6e0e7}
 *{box-sizing:border-box}body{margin:0}a{color:#075394}a:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid #f0b934;outline-offset:3px}
@@ -21,9 +21,10 @@ figure{margin:0;overflow:hidden}figcaption{padding:10px 14px}figcaption p{margin
 </head>
 <body>
 <header><div class="wrap">
-<nav aria-label="Research"><a href="connectivity.html">Road connectivity</a><a href="questions.html">Budget hearings</a><a href="scr.html">Senate committee report</a></nav>
-<h1>What would the Bolinao bridge change?</h1>
-<p>Follow two FY2027 budget lines for the Santiago Island bridge, then compare routes from seven barangays to Bolinao Community Hospital.</p>
+<nav aria-label="Research questions"><a href="amendment-access.html" aria-current="page">Question 1 · Infrastructure and access</a><a href="questions.html#question-2">Question 2 · Hearings and budget lines</a><a href="contractor-workload.html">Question 3 · Contractor track records</a><a href="road-handover.html">Question 4 · Roads after handover</a></nav>
+<nav aria-label="Related research"><a href="connectivity.html">Road connectivity</a><a href="scr.html">Senate committee report</a></nav>
+<h1>Which bridges and roads could improve access to daily services?</h1>
+<p>Compare hospital trips from Santiago Island and check where proposed farm-to-market roads pass schools, clinics and other public services nationwide.</p>
 </div></header>
 <main class="wrap">
 <section class="stats" aria-label="Findings">
@@ -39,6 +40,7 @@ figure{margin:0;overflow:hidden}figcaption{padding:10px 14px}figcaption p{margin
 <label for="wait">Assumed ferry wait <output id="wait-value" for="wait">0 min</output><input id="wait" type="range" min="0" max="45" step="5" value="0" disabled></label>
 </div>
 <p id="route-status" role="status">Loading the road network and modeled routes…</p>
+<p id="population-time"></p>
 <div class="maps">
 <figure><figcaption><h3>Existing road and ferry</h3><p id="ferry-label"></p></figcaption><canvas id="ferry-map" role="img" aria-label="Map of the route using the ferry"></canvas></figure>
 <figure><figcaption><h3>Road route if bridge opens</h3><p id="bridge-label"></p></figcaption><canvas id="bridge-map" role="img" aria-label="Map of the modeled route via the proposed bridge"></canvas></figure>
@@ -57,6 +59,21 @@ figure{margin:0;overflow:hidden}figcaption{padding:10px 14px}figcaption p{margin
 <p>The earlier FY2026 GAA includes ₱92.702 million for part of the corridor. DPWH published Package 1 engineering plans in 2025, and the Mines and Geosciences Bureau documented an assessment at both approach sites that year. The route scenario assumes the full crossing opens. The budget records establish proposed funding changes, while the date of any opening remains unverified.</p>
 <p class="note" id="budget-ratio"></p>
 <p class="note"><a href="https://www.dbm.gov.ph/wp-content/uploads/GAA/GAA2026/DBM-OFFICIAL-GAZETTE-FY-2026_VOLUME-1-C.pdf">FY2026 GAA, volume I-C</a> · <a href="https://www.dpwh.gov.ph/dpwh/sites/default/files/webform/civil_works/advertisement/25a00305_plans.pdf">DPWH Package 1 plans</a> · <a href="https://region1.mgb.gov.ph/wp-content/uploads/2026/02/MGB-I-2025-ANNUAL-REPORT.pdf">MGB site assessment</a></p>
+</section>
+<section class="panel" aria-labelledby="corridor-title">
+<h2 id="corridor-title">Access roads, farm-to-market roads and other bridges</h2>
+<p>The ₱83 million Siapar–Pilar road and ₱50 million Siapar bridge are separate FY2027 lines with different Senate outcomes. The corridor could give Santiago Island a second mainland connection if the necessary crossing and approaches are built. The available plans and schedule entries leave that connection unresolved.</p>
+<p>The FY2026 Liwa-Liwa farm-to-market road has one printed endpoint within about 10 meters of a mapped hospital-route point. It is a candidate tie-in for field verification. The other FY2026 farm-to-market road endpoints in this scan lie more than 4 km from those route points. <a href="https://www.dbm.gov.ph/wp-content/uploads/GAA/GAA2026/VolumeIB/FMR.pdf">FY2026 GAA farm-to-market road schedule</a></p>
+<p id="corridor-result" role="status"></p>
+<label>Project type <select id="corridor-kind"><option value="">All project types</option></select></label>
+<div class="table-wrap"><table><thead><tr><th scope="col">Project</th><th scope="col">Type</th><th scope="col">Budget evidence</th><th scope="col">Connection to the model</th></tr></thead><tbody id="corridor-projects"></tbody></table></div>
+<p class="note">Endpoint distances are straight-line distances to the closest mapped road point used by any of the seven hospital routes. They show proximity. Route effects require a verified alignment, a tie-in to the usable road network and evidence of road condition. The farm-to-market road lines establish funding and location. Travel to farms and markets would require geocoded origins and destinations.</p>
+</section>
+<section class="panel" aria-labelledby="national-title">
+<h2 id="national-title">Which proposed farm-to-market roads pass a public service?</h2>
+<p>Of 964 FY2027 House farm-to-market road lines, 489 have at least one mapped public service within 500 metres of the approximate route. Schools appear near 458 lines, health facilities near 55, civic services near 106 and emergency services near 17. A road can serve more than one category.</p>
+<p>Of those 489 lines, 339 have their nearest printed endpoint more than 500 metres from a classified national road. Local roads may connect them. Five of the 964 lines have endpoints over 20 km apart and require coordinate review. Measuring the benefit to users requires the actual alignment, a usable entrance and a before-and-after trip.</p>
+<p><a href="connectivity.html">Browse the project-level road, cropland and service evidence</a> · <a href="connectivity-data.json" download>Download all 964 candidates and mapped service references</a></p>
 </section>
 <section class="panel" aria-labelledby="method-title">
 <h2 id="method-title">Data and assumptions</h2>
