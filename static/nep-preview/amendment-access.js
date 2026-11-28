@@ -204,11 +204,23 @@ fetch('amendment-access-data.json')
         return response.json();
     })
     .then(setup)
-    .catch(() => { status.textContent = 'The route data could not be loaded. Reload the page to try again.'; });
+    .catch(() => {
+        status.textContent = 'The route data could not be loaded. Reload the page to try again.';
+    });
 
 const national = document.querySelector('#national-fmrs');
 const serviceFilter = document.querySelector('#service-filter');
 let nationalData;
+let connectivityRequest;
+function readConnectivityData() {
+    if (!connectivityRequest) {
+        connectivityRequest = fetchCritiqueData('connectivity-data.json').catch(error => {
+            connectivityRequest = undefined;
+            throw error;
+        });
+    }
+    return connectivityRequest;
+}
 function renderNational() {
     const selected = nationalData.projects.filter(row => !serviceFilter.value || row.nearbyPublicServices[serviceFilter.value]);
     document.querySelector('#national-count').textContent = number.format(selected.length) + ' matching proposals';
@@ -231,9 +243,7 @@ async function loadNational() {
     const message = document.querySelector('#national-count');
     message.textContent = 'Loading project records…';
     try {
-        const response = await fetch('connectivity-data.json');
-        if (!response.ok) throw new Error(String(response.status));
-        nationalData = await response.json();
+        nationalData = await readConnectivityData();
         renderNational();
     } catch {
         message.textContent = 'Could not load the proposals. Reopen this section to retry.';
@@ -303,7 +313,7 @@ function renderProjectSummary(scenario) {
 }
 
 
-function drawDetour(canvas, trip, span, mode, paving) {
+function drawDetour(canvas, trip, span, mode, paving, destinationLabel = 'Hospital') {
     const width = canvas.clientWidth;
     const height = canvas.clientHeight;
     const density = window.devicePixelRatio || 1;
@@ -335,7 +345,7 @@ function drawDetour(canvas, trip, span, mode, paving) {
     }
     if (trip[mode]) paint(trip[mode].points, '#075394', 3);
     for (const points of span) paint(points, mode === 'closed' && !paving ? '#a13721' : '#08746c', 5, mode === 'closed' && !paving ? [4, 3] : []);
-    for (const [point, label] of [[trip.point, 'Start'], [trip.hospital, 'Hospital']]) {
+    for (const [point, label] of [[trip.point, 'Start'], [trip.hospital, destinationLabel]]) {
         const [x, y] = project(point);
         ctx.beginPath();
         ctx.arc(x, y, 5, 0, Math.PI * 2);
@@ -480,5 +490,258 @@ async function loadRouteScenarios(kind, label) {
     }
 }
 
-Promise.all([loadRouteScenarios('bridge', 'Existing bridges'), loadRouteScenarios('road', 'Farm-to-market roads')])
+const hospitalRoutes = Promise.all([loadRouteScenarios('bridge', 'Existing bridges'), loadRouteScenarios('road', 'Farm-to-market roads')])
     .then(results => { bridgeCoverage.textContent = results.join(' · '); });
+
+const critiqueSignals = {
+    faster: 'Existing drive beats the road benchmark',
+    detour: 'Hospital detour adds at most 5 minutes',
+    inconsistency: 'Hospital detour models a faster trip',
+    paving: 'Modeled paving saves at most 1 minute',
+    endpoints: 'Printed coordinates need review',
+    uses: 'Shoreline, venue or land-use review',
+    connectivity: 'Far from mapped cropland and national road',
+};
+const critiqueManualFlags = {
+    'section2-coordinate-quality': 'Reviewer flagged the printed coordinates for checking.',
+    'baywalk-shoreline-review': 'The title identifies a baywalk. Check which farms it serves and review the shoreline design.',
+    'section2-visitor-venue': 'The review found a mapped visitor venue nearby. Check whether the route also serves farms and where it connects to the road network.',
+    'section2-private-property-cue': 'The map review found a possible private-site connection. Check public access and the farms served.',
+};
+const critiqueProjects = [];
+const fmrHouseSchedule = 'https://budget-assets.bettergov.ph/hgab/2027/pdf/hb10858-3r-vol-ib.pdf';
+const fmrBudgetEntry = row => ({
+    id: row.id, title: row.title, region: row.region, amount: row.amountPesos,
+    url: fmrHouseSchedule + '#page=' + row.sourcePage,
+});
+let facilityProjects = [];
+const critiqueFilter = document.querySelector('#critique-filter');
+const critiqueSearch = document.querySelector('#critique-search');
+const critiqueDirection = document.querySelector('#critique-direction');
+const critiqueFacility = document.querySelector('#critique-facility');
+const facilityLabels = {school: 'Schools', hospital: 'Hospitals', evacuation: 'Possible evacuation sites'};
+let assessedFacilities;
+let facilitiesByProject;
+let critiqueExample;
+
+function recordCritique(raw, status, note) {
+    let entry = critiqueProjects.find(item => item.id === raw.id);
+    if (!entry) {
+        entry = {...raw, notes: new Map()};
+        critiqueProjects.push(entry);
+    }
+    if (raw.scenario) entry.scenario = raw.scenario;
+    const notes = entry.notes.get(status) || [];
+    entry.notes.set(status, [...notes, note]);
+    return entry;
+}
+
+function readCritiqueRoads(rows, alternatives) {
+    for (const row of rows) {
+        const project = fmrBudgetEntry(row);
+        const alternative = alternatives[row.id];
+        if (alternative) {
+            const best = alternative.routes.reduce((a, b) => a.existingMinutes < b.existingMinutes ? a : b);
+            const entry = recordCritique(project, 'faster',
+                `${best.direction} takes ${detourMinutes(best.existingMinutes)} on mapped roads. The straight-line benchmark at 30 km/h is ${detourMinutes(alternative.benchmarkMinutes)}. ${alternative.routes.length === 2 ? 'Both directions beat the benchmark.' : 'Only this direction passed the faster-route screen.'}`);
+            entry.alternative = alternative;
+            entry.endpoints = [[row.startLatitude, row.startLongitude], [row.endLatitude, row.endLongitude]];
+        }
+        if (row.coordinateQualityFlag) {
+            recordCritique(project, 'endpoints',
+                `The printed endpoints are ${distance(row.coordinateGapMeters / 1000)} apart. Verify the coordinates before assessing the corridor.`);
+        } else if (row.coordinateBasis === 'Single coordinate; no route line') {
+            recordCritique(project, 'endpoints', 'Only one distinct coordinate is available. The route cannot be located from the budget entry.');
+        }
+        for (const flag of row.manualRedReasons || []) {
+            if (flag === 'section2-coordinate-quality' && (row.coordinateQualityFlag || row.coordinateBasis === 'Single coordinate; no route line')) continue;
+            const note = critiqueManualFlags[flag];
+            if (note) recordCritique(project, flag === 'section2-coordinate-quality' ? 'endpoints' : 'uses', note);
+        }
+        if (row.coordinateBasis === 'Printed start/end pair' && row.connectivityClass.startsWith('Double Flag FMR') &&
+            !row.exemptionReasons.length && !row.manualGreenReasons.length) {
+            const cropland = row.farmDistanceMeters === null
+                ? 'the cropland screen found no nearby annual cropland' : `the nearer endpoint is ${number.format(row.farmDistanceMeters)} m from mapped annual cropland`;
+            recordCritique(project, 'connectivity',
+                `The nearer endpoint is ${number.format(row.nearestDistanceMeters)} m from the national road layer. In the cropland layer, ${cropland}. Verify farm and local-road connections on the ground.`);
+        }
+    }
+}
+
+function readCritiqueHospitalRoutes(data) {
+    for (const project of data.projects) {
+        const scenario = data.scenarios[project.scenario];
+        if (!scenario?.origins.length) continue;
+        const paving = scenario.mode === 'paving';
+        const changes = scenario.origins.map(routeDelta);
+        const faster = paving ? [] : scenario.origins.filter(fasterDetour);
+        if (faster.length) {
+            const trips = faster.map(trip => `${trip.name} (${detourMinutes(trip.open.minutes)} open, ${detourMinutes(trip.closed.minutes)} via detour)`);
+            recordCritique(project, 'inconsistency', `${trips.join(', ')}. Check routing inputs and access restrictions.`);
+        }
+        if (changes.some(change => change === null)) continue;
+        const note = paving ? 'paving' : 'detour';
+        const inRange = paving
+            ? changes.every(change => change < 0 && change >= -1)
+            : changes.every(change => change >= 0 && change <= 5);
+        if (!inRange) continue;
+        const upper = detourMinutes(Math.max(...changes.map(Math.abs)));
+        const tripCount = number.format(changes.length);
+        recordCritique(project, note, paving
+            ? `At most ${upper} saved across ${tripCount} modeled hospital trips, even with the paving speed assumption.`
+            : `All ${tripCount} sampled hospital trips have a mapped detour. The largest added time is ${upper}.`);
+    }
+}
+
+function drawCritiqueExample() {
+    if (!critiqueExample) return;
+    const {alternative, endpoints} = critiqueExample;
+    const route = alternative.routes[Number(critiqueDirection.value)];
+    const points = route.direction === 'End to start' ? [...endpoints].reverse() : endpoints;
+    const example = {open: {points: [points[0], ...route.points, points[1]]}, closed: null,
+        point: points[0], hospital: points[1]};
+    drawDetour(document.querySelector('#critique-map'), example, [points], 'open', true, 'End');
+    drawQuestionBars('critique-example-chart', [
+        ['Existing mapped road', route.existingMinutes], ['Straight line at 30 km/h', alternative.benchmarkMinutes],
+    ], ' min');
+    document.querySelector('#critique-example-detail').textContent =
+        `${route.direction} · ${distance(route.existingKm)} on the mapped route. ${detourMinutes(alternative.benchmarkMinutes - route.existingMinutes)} faster than the straight-line benchmark.`;
+}
+
+function selectCritiqueExample(project) {
+    critiqueExample = project;
+    document.querySelector('#critique-example').hidden = false;
+    document.querySelector('#critique-example-title').textContent = project.title;
+    document.querySelector('#critique-example-source').href = project.url;
+    critiqueDirection.replaceChildren(...project.alternative.routes.map((route, i) => new Option(route.direction, i)));
+    drawCritiqueExample();
+}
+
+function critiqueFacilities(project) {
+    const cell = document.createElement('td');
+    if (!assessedFacilities) {
+        cell.textContent = 'Facility data unavailable';
+        return cell;
+    }
+    if (!assessedFacilities.has(project.id)) {
+        cell.textContent = 'No usable alignment for the facility check';
+        return cell;
+    }
+    const facilities = facilitiesByProject[project.id];
+    if (!facilities) {
+        cell.textContent = 'No mapped match within 500 m';
+        return cell;
+    }
+    for (const [kind, {count, nearest}] of Object.entries(facilities)) {
+        cell.append(element('strong', `${facilityLabels[kind]} (${number.format(count)})`));
+        const list = document.createElement('ul');
+        for (const {name, meters, point: [lat, lon]} of nearest) {
+            const item = document.createElement('li');
+            const link = element('a', name);
+            link.href = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=17/${lat}/${lon}`;
+            item.append(link, ` · ${number.format(meters)} m`);
+            list.append(item);
+        }
+        cell.append(list);
+    }
+    return cell;
+}
+
+function renderCritiqueProjects() {
+    const filter = critiqueFilter.value;
+    const term = critiqueSearch.value.trim().toLowerCase();
+    const facility = critiqueFacility.value;
+    const candidates = facility && !filter ? facilityProjects : critiqueProjects;
+    const items = candidates.filter(row => (!filter || row.notes.has(filter)) &&
+        (!facility || facilitiesByProject?.[row.id]?.[facility]) &&
+        (!term || [row.title, row.region, row.bridgeId].join(' ').toLowerCase().includes(term)));
+    const scope = facility && !filter ? 'matching projects, including rows without a review signal' : 'projects in view';
+    document.querySelector('#critique-count').textContent = `${number.format(items.length)} ${scope}`;
+    document.querySelector('#critique-rows').replaceChildren(...items.map(project => {
+        const row = document.createElement('tr');
+        const reason = element('td', '');
+        if (!project.notes.size) reason.textContent = 'No signal from these checks';
+        for (const [key, notes] of project.notes) {
+            const label = element('strong', critiqueSignals[key]);
+            reason.append(label, element('p', notes.join(' ')));
+        }
+        if (project.alternative) {
+            const button = element('button', 'View existing route');
+            button.type = 'button';
+            button.addEventListener('click', () => {
+                selectCritiqueExample(project);
+                critiqueDirection.focus();
+            });
+            reason.append(button);
+        }
+        if (routeScenarios.has(project.scenario)) {
+            const button = element('button', 'Compare hospital trips');
+            button.type = 'button';
+            button.addEventListener('click', () => {
+                bridgeSelect.value = project.scenario;
+                showBridgeSelection();
+                bridgeSelect.focus();
+            });
+            reason.append(button);
+        }
+        row.append(budgetCell(project.title, project.url), element('td', pesos(project.amount)), reason, critiqueFacilities(project));
+        return row;
+    }));
+}
+
+critiqueFilter.addEventListener('change', renderCritiqueProjects);
+critiqueSearch.addEventListener('input', renderCritiqueProjects);
+critiqueFacility.addEventListener('change', renderCritiqueProjects);
+critiqueDirection.addEventListener('change', drawCritiqueExample);
+window.addEventListener('resize', drawCritiqueExample);
+
+async function fetchCritiqueData(path) {
+    const response = await fetch(path);
+    if (!response.ok) throw new Error(String(response.status));
+    return response.json();
+}
+
+Promise.allSettled([
+    readConnectivityData(), fetchCritiqueData('fmr-route-alternatives.json'), hospitalRoutes,
+    fetchCritiqueData('amendment-access-facilities.json'),
+]).then(([roads, alternatives, , facilities]) => {
+    if (facilities.status === 'fulfilled') {
+        assessedFacilities = new Set(facilities.value.assessed);
+        facilitiesByProject = facilities.value.results;
+        critiqueFacility.disabled = false;
+    }
+    if (roads.status === 'fulfilled') {
+        readCritiqueRoads(roads.value.projects, alternatives.value?.results || {});
+    }
+    for (const data of Object.values(routeData)) readCritiqueHospitalRoutes(data);
+    critiqueProjects.sort((a, b) => Number(Boolean(b.alternative)) - Number(Boolean(a.alternative)) ||
+        Number(b.notes.has('detour')) - Number(a.notes.has('detour')) || b.amount - a.amount);
+    if (facilitiesByProject) {
+        const flagged = new Set(critiqueProjects.map(project => project.id));
+        const allProjects = [
+            ...(roads.value?.projects || []).map(fmrBudgetEntry), ...(routeData.bridge?.projects || []),
+        ];
+        facilityProjects = [
+            ...critiqueProjects,
+            ...allProjects.filter(project => !flagged.has(project.id) && facilitiesByProject[project.id])
+                .map(project => ({...project, notes: new Map()})),
+        ];
+    }
+    const insights = Object.entries(critiqueSignals).map(([key, label]) => {
+        critiqueFilter.add(new Option(label, key));
+        return [label, critiqueProjects.filter(row => row.notes.has(key)).length];
+    });
+    drawQuestionBars('critique-chart', insights);
+    document.querySelector('#critique-figure').hidden = false;
+    const message = alternatives.status === 'fulfilled'
+        ? `${number.format(alternatives.value.screened)} farm-to-market road endpoint pairs screened. `
+        : 'The existing-drive comparisons could not be loaded. ';
+    document.querySelector('#critique-status').textContent =
+        message + `${number.format(critiqueProjects.length)} bridge or road projects with a review signal.` +
+        (roads.status === 'rejected' ? ' The FMR location flags could not be loaded.' : '') +
+        (!routeData.bridge || !routeData.road ? ' Some hospital-route results could not be loaded.' : '') +
+        (facilities.status === 'rejected' ? ' The MPB facility data could not be loaded.' : '');
+    const example = critiqueProjects.find(project => project.alternative);
+    if (example) selectCritiqueExample(example);
+    renderCritiqueProjects();
+});
